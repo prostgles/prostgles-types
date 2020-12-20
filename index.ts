@@ -9,6 +9,7 @@ export type ColumnInfo = {
   /* values starting with underscore means it's an array of that data type */
   udt_name: string;
 
+  /* Element data type */
   element_type: string;
 
   /* PRIMARY KEY constraint on column. A table can have more then one PK */
@@ -24,8 +25,25 @@ export type ValidatedColumnInfo = ColumnInfo & {
 
 export type AscOrDesc = 1 | -1 | boolean;
 
+/**
+ * @example
+ * { product_name: -1 } -> SORT BY product_name DESC
+ * [{ field_name: (1 | -1 | boolean) }]
+ * true | 1 -> ascending
+ * false | -1 -> descending
+ * Array order is maintained
+ */
 export type OrderBy = { key: string, asc: AscOrDesc }[] | { [key: string]: AscOrDesc }[] | { [key: string]: AscOrDesc } | string | string[];
 
+
+/**
+ * @example
+ * { field_name: (true | false) }
+ * 
+ * ["field_name1", "field_name2"]
+ * 
+ * field_name: false -> means all fields except this
+ */
 export type FieldFilter = object | string[] | "*" | "" | { [key: string]: (1 | 0 | boolean) };
 
 export const FIELD_FILTER_TYPES = ["$ilike", "$gte"];
@@ -48,6 +66,8 @@ export type UpdateParams = {
   returning?: FieldFilter;
   onConflictDoNothing?: boolean;
   fixIssues?: boolean;
+
+  /* true by default. If false the update will fail if affecting more than one row */
   multi?: boolean;
 }
 export type InsertParams = {
@@ -64,7 +84,7 @@ export type Filter = {
 } | object | undefined;
 
 export type ViewHandler = {
-  getColumns: () => Promise<any[]>;
+  getColumns: () => Promise<ValidatedColumnInfo[]>;
   find: (filter?: Filter, selectParams?: SelectParams) => Promise<any[] | any[]>;
   findOne: (filter?: Filter, selectParams?: SelectParams) => Promise<any | any>;
   subscribe: (filter: Filter, params: SelectParams, onData: (items: any[]) => any) => Promise<{ unsubscribe: () => any }>;
@@ -79,6 +99,18 @@ export type TableHandler = ViewHandler & {
   delete: (filter: Filter, params?: DeleteParams) => Promise<void | any>;
 }
 
+export type JoinMaker = (filter?: Filter, select?: FieldFilter, options?: SelectParams) => any;
+
+export type TableJoin = {
+  [key: string]: JoinMaker;
+}
+export type DbJoinMaker = {
+  innerJoin: TableJoin;
+  leftJoin: TableJoin;
+  innerJoinOne: TableJoin;
+  leftJoinOne: TableJoin;
+}
+
 export type DBHandler = {
   [key: string]: Partial<TableHandler>;
-}
+} & DbJoinMaker;

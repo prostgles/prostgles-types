@@ -54,7 +54,7 @@ export declare type DeleteParams = {
 };
 export declare type Filter = {} | object | undefined;
 export declare type ViewHandler = {
-    getColumns: () => Promise<any[]>;
+    getColumns: () => Promise<ValidatedColumnInfo[]>;
     find: (filter?: Filter, selectParams?: SelectParams) => Promise<any[] | any[]>;
     findOne: (filter?: Filter, selectParams?: SelectParams) => Promise<any | any>;
     subscribe: (filter: Filter, params: SelectParams, onData: (items: any[]) => any) => Promise<{
@@ -71,7 +71,17 @@ export declare type TableHandler = ViewHandler & {
     insert: (data: (any | any[]), params?: InsertParams) => Promise<void | any>;
     delete: (filter: Filter, params?: DeleteParams) => Promise<void | any>;
 };
+export declare type JoinMaker = (filter?: Filter, select?: FieldFilter, options?: SelectParams) => any;
+export declare type TableJoin = {
+    [key: string]: JoinMaker;
+};
+export declare type DbJoinMaker = {
+    innerJoin: TableJoin;
+    leftJoin: TableJoin;
+    innerJoinOne: TableJoin;
+    leftJoinOne: TableJoin;
+};
 export declare type DBHandler = {
     [key: string]: Partial<TableHandler>;
-};
+} & DbJoinMaker;
 //# sourceMappingURL=index.d.ts.map

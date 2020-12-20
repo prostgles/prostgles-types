@@ -1,0 +1,27 @@
+{
+  "name": "prostgles-types",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.ts",
+  "types": "index.d.ts",
+  "directories": {
+  },
+  "scripts": {
+    "start": "tsc --watch",
+    "build": "tsc"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/prostgles/prostgles-types.git"
+  },
+  "author": "Stefan L",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/prostgles/prostgles-types/issues"
+  },
+  "homepage": "https://github.com/prostgles/prostgles-types#readme",
+  "dependencies": {},
+  "devDependencies": {
+    "typescript": "^3.9.7"
+  }
+}

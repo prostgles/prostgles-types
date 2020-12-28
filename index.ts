@@ -121,7 +121,7 @@ export type TableHandler = ViewHandler & {
   update: (filter: Filter, newData: any, params?: UpdateParams) => Promise<void | any>;
   upsert: (filter: Filter, newData: any, params?: UpdateParams) => Promise<void | any>;
   insert: (data: (any | any[]), params?: InsertParams) => Promise<void | any>;
-  delete: (filter: Filter, params?: DeleteParams) => Promise<void | any>;
+  delete: (filter?: Filter, params?: DeleteParams) => Promise<void | any>;
 }
 
 export type JoinMaker = (filter?: Filter, select?: FieldFilter, options?: SelectParams) => any;

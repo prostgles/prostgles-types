@@ -1,11 +1,10 @@
 {
   "name": "prostgles-types",
-  "version": "1.5.30",
+  "version": "1.5.31",
   "description": "",
   "main": "index.ts",
   "types": "index.d.ts",
-  "directories": {
-  },
+  "directories": {},
   "scripts": {
     "start": "tsc --watch",
     "build": "tsc"

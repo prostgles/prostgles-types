@@ -6,7 +6,9 @@ export declare type ColumnInfo = {
     is_pkey: boolean;
 };
 export declare type ValidatedColumnInfo = ColumnInfo & {
+    tsDataType: string;
     select: boolean;
+    filter: boolean;
     insert: boolean;
     update: boolean;
     delete: boolean;

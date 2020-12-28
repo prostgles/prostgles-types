@@ -1,5 +1,4 @@
 
-
 export type ColumnInfo = {
   name: string;
 
@@ -17,9 +16,35 @@ export type ColumnInfo = {
 }
 
 export type ValidatedColumnInfo = ColumnInfo & {
-  select: boolean;  
-  insert: boolean;  
+
+  /**
+   * TypeScript data type
+   */
+  tsDataType: string;
+
+  /**
+   * Fields that can be viewed
+   */
+  select: boolean;
+
+  /**
+   * Fields that can be filtered by
+   */
+  filter: boolean;
+
+  /**
+   * Fields that can be inserted
+   */
+  insert: boolean;
+
+  /**
+   * Fields that can be updated
+   */
   update: boolean;
+
+  /**
+   * Fields that can be used in the delete filter
+   */
   delete: boolean;
 }
 

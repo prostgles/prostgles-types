@@ -103,6 +103,6 @@ export function getTextPatch(oldStr: string, newStr: string): TextPatch | string
 export function unpatchText(original: string, from: number, to: number, text: string, md5Hash?: string): string {
     if(text === null || original === null) return text;
     let res = original.slice(0, from) + text + original.slice(to);
-    if(md5(res) !== md5Hash) throw "Patch text error: Could not match md5 hash";
+    if(md5Hash && md5(res) !== md5Hash) throw "Patch text error: Could not match md5 hash";
     return res;
 }

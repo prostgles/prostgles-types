@@ -1,3 +1,5 @@
+import { md5 } from "./md5";
+
 export function stableStringify (data, opts) {
   if (!opts) opts = {};
   if (typeof opts === 'function') opts = { cmp: opts };
@@ -55,3 +57,52 @@ export function stableStringify (data, opts) {
       return '{' + out + '}';
   })(data);
 };
+
+
+export type TextPatch = {
+    from: number;
+    to: number;
+    text: string;
+    md5: string;
+}
+
+export function getTextPatch(oldStr: string, newStr: string): TextPatch | string {
+
+    /* Big change, no point getting diff */
+    if(!oldStr || !newStr || !oldStr.trim().length || !newStr.trim().length) return newStr;
+
+
+    function findLastIdx(direction = 1){
+
+        let idx = direction < 1? -1 : 0, found = false;
+        while(!found && Math.abs(idx) <= newStr.length){
+            const args = direction < 1? [idx] : [0, idx];
+
+            let os = oldStr.slice(...args),
+                ns = newStr.slice(...args);
+
+            if(os !== ns) found = true;
+            else idx += Math.sign(direction) * 1;
+        }
+
+        return idx;
+    }
+
+    let from = findLastIdx() - 1,
+        to = oldStr.length + findLastIdx(-1) + 1,
+        toNew = newStr.length + findLastIdx(-1) + 1;
+    return {
+        from,
+        to,
+        text: newStr.slice(from, toNew),
+        md5: md5(newStr)
+    }
+}
+
+
+export function unpatchText(original: string, from: number, to: number, text: string, md5Hash?: string): string {
+    if(text === null || original === null) return text;
+    let res = original.slice(0, from) + text + original.slice(to);
+    if(md5(res) !== md5Hash) throw "Patch text error: Could not match md5 hash";
+    return res;
+}

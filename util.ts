@@ -6,9 +6,9 @@ export function stableStringify (data, opts) {
   var cmp = opts.cmp && (function (f) {
       return function (node) {
           return function (a, b) {
-              var aobj = { key: a, value: node[a] };
-              var bobj = { key: b, value: node[b] };
-              return f(aobj, bobj);
+            var aobj = { key: a, value: node[a] };
+            var bobj = { key: b, value: node[b] };
+            return f(aobj, bobj);
           };
       };
   })(opts.cmp);

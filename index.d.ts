@@ -54,7 +54,7 @@ export declare type InsertParams = {
 export declare type DeleteParams = {
     returning?: FieldFilter;
 };
-export declare type Filter = {} | object | undefined;
+export declare type Filter = any;
 export declare type ViewHandler = {
     getColumns: () => Promise<ValidatedColumnInfo[]>;
     find: (filter?: Filter, selectParams?: SelectParams) => Promise<any[] | any[]>;
@@ -86,4 +86,5 @@ export declare type DbJoinMaker = {
 export declare type DBHandler = {
     [key: string]: Partial<TableHandler>;
 } & DbJoinMaker;
+export { md5 } from "./md5";
 //# sourceMappingURL=index.d.ts.map

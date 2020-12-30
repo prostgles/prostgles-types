@@ -104,9 +104,7 @@ export type DeleteParams = {
   returning?: FieldFilter;
 }
 
-export type Filter = {
-
-} | object | undefined;
+export type Filter = any;// | object | undefined;
 
 export type ViewHandler = {
   getColumns: () => Promise<ValidatedColumnInfo[]>;
@@ -139,3 +137,6 @@ export type DbJoinMaker = {
 export type DBHandler = {
   [key: string]: Partial<TableHandler>;
 } & DbJoinMaker;
+
+
+export { md5 } from "./md5";

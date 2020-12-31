@@ -71,6 +71,13 @@ export function getTextPatch(oldStr: string, newStr: string): TextPatch | string
     /* Big change, no point getting diff */
     if(!oldStr || !newStr || !oldStr.trim().length || !newStr.trim().length) return newStr;
 
+    /* Return no change if matching */
+    if(oldStr === newStr) return {
+        from: 0,
+        to: 0,
+        text: "",
+        md5: md5(newStr)
+    }
 
     function findLastIdx(direction = 1){
 
@@ -105,7 +112,7 @@ export function unpatchText(original: string, patch: TextPatch): string {
     const { from, to, text, md5: md5Hash } = patch;
     if(text === null || original === null) return text;
     let res = original.slice(0, from) + text + original.slice(to);
-    if(md5Hash && md5(res) !== md5Hash) throw "Patch text error: Could not match md5 hash";
+    if(md5Hash && md5(res) !== md5Hash) throw "Patch text error: Could not match md5 hash: (original/result) \n" + original + "\n" + res;
     return res;
 }
 

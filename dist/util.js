@@ -75,6 +75,13 @@ exports.stableStringify = stableStringify;
 function getTextPatch(oldStr, newStr) {
     if (!oldStr || !newStr || !oldStr.trim().length || !newStr.trim().length)
         return newStr;
+    if (oldStr === newStr)
+        return {
+            from: 0,
+            to: 0,
+            text: "",
+            md5: md5_1.md5(newStr)
+        };
     function findLastIdx(direction = 1) {
         let idx = direction < 1 ? -1 : 0, found = false;
         while (!found && Math.abs(idx) <= newStr.length) {
@@ -104,7 +111,7 @@ function unpatchText(original, patch) {
         return text;
     let res = original.slice(0, from) + text + original.slice(to);
     if (md5Hash && md5_1.md5(res) !== md5Hash)
-        throw "Patch text error: Could not match md5 hash";
+        throw "Patch text error: Could not match md5 hash: (original/result) \n" + original + "\n" + res;
     return res;
 }
 exports.unpatchText = unpatchText;

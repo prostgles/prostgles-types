@@ -139,4 +139,11 @@ export type DBHandler = {
 } & DbJoinMaker;
 
 
-export { md5 } from "./md5";
+
+
+// import { md5 } from "./md5";
+export { getTextPatch, unpatchText, isEmpty, WAL, WALConfig } from "./util";
+
+// const util = { getTextPatch, unpatchText, md5 };
+// export { util };
+// export { getTextPatch, unpatchText, md5 };

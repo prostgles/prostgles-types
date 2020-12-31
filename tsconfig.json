@@ -1,6 +1,7 @@
 {
-  "files": ["index.ts"],
+  "files": ["lib/index.ts"],
   "compilerOptions": {
+    "baseUrl": ".",
     "target": "es6",
     "lib": [
       "es2019"
@@ -9,8 +10,8 @@
     "module": "commonjs",
     "removeComments": true,
     "sourceMap": true,
-    "rootDir": ".",
-    "outDir": ".",
+    "rootDir": "./lib",
+    "outDir": "./dist",
     "moduleResolution": "node",
     "allowSyntheticDefaultImports": true,
     "resolveJsonModule": true,
@@ -20,5 +21,5 @@
     "declarationMap": true
   },
   "exclude": [
-  ]
+  ],
 }

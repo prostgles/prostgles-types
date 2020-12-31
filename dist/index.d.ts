@@ -86,5 +86,5 @@ export declare type DbJoinMaker = {
 export declare type DBHandler = {
     [key: string]: Partial<TableHandler>;
 } & DbJoinMaker;
-export { md5 } from "./md5";
+export { getTextPatch, unpatchText, isEmpty, WAL, WALConfig } from "./util";
 //# sourceMappingURL=index.d.ts.map

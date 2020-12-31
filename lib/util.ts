@@ -100,7 +100,9 @@ export function getTextPatch(oldStr: string, newStr: string): TextPatch | string
 }
 
 
-export function unpatchText(original: string, from: number, to: number, text: string, md5Hash?: string): string {
+export function unpatchText(original: string, patch: TextPatch): string {
+    if(!patch || typeof patch === "string") return (patch as unknown as string);
+    const { from, to, text, md5: md5Hash } = patch;
     if(text === null || original === null) return text;
     let res = original.slice(0, from) + text + original.slice(to);
     if(md5Hash && md5(res) !== md5Hash) throw "Patch text error: Could not match md5 hash";
@@ -115,18 +117,27 @@ export type SyncTableInfo = {
     throttle: number;
     batch_size: number;
 };
-export type WALItem = {
-    idObj: any;
-    delta: any;
-    deleted?: boolean;
-};
+// export type WALItem = {
+//     idObj: any;
+//     delta: any;
+//     deleted?: boolean;
+// };
 
 
 
 export type WALConfig = SyncTableInfo & {
+    /**
+     * Fired when new data is added and there is no sending in progress
+     */
     onSendStart?: () => any; 
-    onSend: (items: WALItem[]) => Promise<any>;
-    onSendEnd?: () => any;
+    /**
+     * Fired on each data send batch
+     */
+    onSend: (items: any[]) => Promise<any>;
+    /**
+     * Fired after all data was sent or when a batch error is thrown
+     */
+    onSendEnd?: (batch?: any[], error?: any) => any;
 };
 export class WAL {
     private changed: { [key: string]: any  } = {};
@@ -137,11 +148,15 @@ export class WAL {
         this.options = { ...args };
     }
 
-    getIdStr(d){
+    isSending(): boolean {
+        return !(isEmpty(this.sending) && isEmpty(this.changed))
+    }
+
+    getIdStr(d: any){
         return this.options.id_fields.sort().map(key => `${d[key] || ""}`).join(".");
     }
-    getIdObj(d){
-        let res = {};
+    getIdObj(d: any){
+        let res: any = {};
         this.options.id_fields.sort().map(key => {
             res[key] = d[key];
         });
@@ -149,6 +164,7 @@ export class WAL {
     }
 
     addData = (data: any[]) => {
+        if(isEmpty(this.changed) && this.options.onSendStart) this.options.onSendStart();
         data.map(d => {
             const idStr = this.getIdStr(d);
             this.changed = this.changed || {};
@@ -157,9 +173,9 @@ export class WAL {
         this.sendItems();
     }
     
-    isSendingTimeout = null;
-    isSending: boolean = false;
+    isSendingTimeout?: any = null;
     private sendItems = async () => {
+        const { synced_field, onSend, onSendEnd, batch_size, throttle } = this.options;
         
         // Sending data. stop here
         if(this.isSendingTimeout || this.sending && !isEmpty(this.sending)) return;
@@ -168,40 +184,44 @@ export class WAL {
         if(!this.changed || isEmpty(this.changed)) return;
         
         // Prepare batch to send
-        let batch = [];
+        let batch: any[] = [];
         Object.keys(this.changed)
-            .slice(0, this.options.batch_size)
+            /* Sort by last_updated ascending */
+            .sort((a, b) => +this.changed[a][synced_field] - +this.changed[b][synced_field])
+            .slice(0, batch_size)
             .map(key => {
                 let item = { ...this.changed[key] };
                 this.sending[key] = item;
-                batch.push({ ...item.delta, ...item.idObj })
+                batch.push({ ...item })
                 delete this.changed[key];
             });
 
         // Throttle next data send
         this.isSendingTimeout = setTimeout(() => {
-            this.isSendingTimeout = null;
+            this.isSendingTimeout = undefined;
             if(!isEmpty(this.changed)){
                 this.sendItems();
             }
-        }, this.options.throttle);
+        }, throttle);
 
-        if(this.options.onSendStart) this.options.onSendStart();
-        
+        let error: any;
         try {
-            await this.options.onSend(batch);//, deletedData);
-            this.sending = {};
-            if(!isEmpty(this.changed)){
-                this.sendItems();
-            } else {
-                if(this.options.onSendEnd) this.options.onSendEnd();
-            }
-        } catch(err) {
+            /* Deleted data should be sent normally through await db.table.delete(...) */
+            await onSend(batch);//, deletedData);
             
-            console.error(err)
+        } catch(err) {
+            error = err;
+            console.error(err, batch)
+        }
+
+        this.sending = {};
+        if(!isEmpty(this.changed)){
+            this.sendItems();
+        } else {
+            if(onSendEnd) onSendEnd(batch, error);
         }
     };
-}
+};
 
 export function isEmpty(obj?: object): boolean {
     for(var v in obj) return false;

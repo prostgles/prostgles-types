@@ -29,6 +29,7 @@ module.exports = {
     path: path.resolve(__dirname, 'dist'),
     filename: '[name].js',
     libraryTarget: 'umd',
-    globalObject: 'this || window'
+    globalObject: 'this || window',
+    umdNamedDefine: true
   },
 };

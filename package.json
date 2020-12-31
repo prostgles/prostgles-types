@@ -1,12 +1,13 @@
 {
   "name": "prostgles-types",
-  "version": "1.5.41",
+  "version": "1.5.45",
   "description": "",
   "main": "dist/index_umd.js",
-  "types": "dist/index_umd.d.ts",
+  "types": "dist/index.d.ts",
   "directories": {},
   "scripts": {
     "start": "tsc --watch",
+    "test": "npm run build && cd tests && tsc && node index.js",
     "build": "rm -rf ./dist/* && tsc && webpack --config webpack.prod.js"
   },
   "repository": {

@@ -96,7 +96,10 @@ function getTextPatch(oldStr, newStr) {
     };
 }
 exports.getTextPatch = getTextPatch;
-function unpatchText(original, from, to, text, md5Hash) {
+function unpatchText(original, patch) {
+    if (!patch || typeof patch === "string")
+        return patch;
+    const { from, to, text, md5: md5Hash } = patch;
     if (text === null || original === null)
         return text;
     let res = original.slice(0, from) + text + original.slice(to);
@@ -110,6 +113,8 @@ class WAL {
         this.changed = {};
         this.sending = {};
         this.addData = (data) => {
+            if (isEmpty(this.changed) && this.options.onSendStart)
+                this.options.onSendStart();
             data.map(d => {
                 const idStr = this.getIdStr(d);
                 this.changed = this.changed || {};
@@ -118,45 +123,49 @@ class WAL {
             this.sendItems();
         };
         this.isSendingTimeout = null;
-        this.isSending = false;
         this.sendItems = () => __awaiter(this, void 0, void 0, function* () {
+            const { synced_field, onSend, onSendEnd, batch_size, throttle } = this.options;
             if (this.isSendingTimeout || this.sending && !isEmpty(this.sending))
                 return;
             if (!this.changed || isEmpty(this.changed))
                 return;
             let batch = [];
             Object.keys(this.changed)
-                .slice(0, this.options.batch_size)
+                .sort((a, b) => +this.changed[a][synced_field] - +this.changed[b][synced_field])
+                .slice(0, batch_size)
                 .map(key => {
                 let item = Object.assign({}, this.changed[key]);
                 this.sending[key] = item;
-                batch.push(Object.assign(Object.assign({}, item.delta), item.idObj));
+                batch.push(Object.assign({}, item));
                 delete this.changed[key];
             });
             this.isSendingTimeout = setTimeout(() => {
-                this.isSendingTimeout = null;
+                this.isSendingTimeout = undefined;
                 if (!isEmpty(this.changed)) {
                     this.sendItems();
                 }
-            }, this.options.throttle);
-            if (this.options.onSendStart)
-                this.options.onSendStart();
+            }, throttle);
+            let error;
             try {
-                yield this.options.onSend(batch);
-                this.sending = {};
-                if (!isEmpty(this.changed)) {
-                    this.sendItems();
-                }
-                else {
-                    if (this.options.onSendEnd)
-                        this.options.onSendEnd();
-                }
+                yield onSend(batch);
             }
             catch (err) {
-                console.error(err);
+                error = err;
+                console.error(err, batch);
+            }
+            this.sending = {};
+            if (!isEmpty(this.changed)) {
+                this.sendItems();
+            }
+            else {
+                if (onSendEnd)
+                    onSendEnd(batch, error);
             }
         });
         this.options = Object.assign({}, args);
+    }
+    isSending() {
+        return !(isEmpty(this.sending) && isEmpty(this.changed));
     }
     getIdStr(d) {
         return this.options.id_fields.sort().map(key => `${d[key] || ""}`).join(".");
@@ -170,6 +179,7 @@ class WAL {
     }
 }
 exports.WAL = WAL;
+;
 function isEmpty(obj) {
     for (var v in obj)
         return false;

@@ -6,33 +6,28 @@ export declare type TextPatch = {
     md5: string;
 };
 export declare function getTextPatch(oldStr: string, newStr: string): TextPatch | string;
-export declare function unpatchText(original: string, from: number, to: number, text: string, md5Hash?: string): string;
+export declare function unpatchText(original: string, patch: TextPatch): string;
 export declare type SyncTableInfo = {
     id_fields: string[];
     synced_field: string;
     throttle: number;
     batch_size: number;
 };
-export declare type WALItem = {
-    idObj: any;
-    delta: any;
-    deleted?: boolean;
-};
 export declare type WALConfig = SyncTableInfo & {
     onSendStart?: () => any;
-    onSend: (items: WALItem[]) => Promise<any>;
-    onSendEnd?: () => any;
+    onSend: (items: any[]) => Promise<any>;
+    onSendEnd?: (batch?: any[], error?: any) => any;
 };
 export declare class WAL {
     private changed;
     private sending;
     private options;
     constructor(args: WALConfig);
+    isSending(): boolean;
     getIdStr(d: any): string;
-    getIdObj(d: any): {};
+    getIdObj(d: any): any;
     addData: (data: any[]) => void;
-    isSendingTimeout: any;
-    isSending: boolean;
+    isSendingTimeout?: any;
     private sendItems;
 }
 export declare function isEmpty(obj?: object): boolean;

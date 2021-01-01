@@ -1,6 +1,16 @@
 "use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const util_1 = require("../dist/util");
+let error;
 let failed = -1;
 const vals = [
     { o: "ad awd awd awb", n: "a12b" },
@@ -15,19 +25,37 @@ const vals = [
 ];
 vals.map(({ o, n }, i) => {
     const patch = util_1.getTextPatch(o, n);
-    console.log(o, patch);
     const unpatched = util_1.unpatchText(o, patch);
-    console.log(o, unpatched, n);
     if (unpatched !== n) {
         failed = i;
     }
 });
 if (failed > -1) {
-    console.error("unpatchText failed for:", vals[failed]);
-    process.exit(1);
+    error = { msg: "unpatchText failed for:", data: vals[failed] };
 }
-else {
-    console.log("test successful");
-    process.exit(0);
-}
+const w = new util_1.WAL({
+    id_fields: ["a", "b"],
+    synced_field: "c",
+    onSend: (d) => __awaiter(void 0, void 0, void 0, function* () {
+        if (d[0].a !== "a" || d[3].a !== "z" || d[2].b !== "zbb") {
+            error = error || { msg: "WAL sorting failed", data: d };
+        }
+        if (error) {
+            console.error(error);
+            process.exit(1);
+        }
+        else {
+            console.log("Testing successful");
+            process.exit(0);
+        }
+    }),
+    throttle: 100,
+    batch_size: 50
+});
+w.addData([
+    { a: "a", b: "bbb", c: "1" },
+    { a: "e", b: "zbb", c: "1" },
+    { a: "e", b: "ebb", c: "1" },
+    { a: "z", b: "bbb", c: "1" }
+]);
 //# sourceMappingURL=index.js.map

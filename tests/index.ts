@@ -1,4 +1,6 @@
-import { getTextPatch, TextPatch, unpatchText } from "../dist/util";
+import { getTextPatch, TextPatch, unpatchText, WAL } from "../dist/util";
+
+let error;
 
 let failed = -1;
 const vals = [
@@ -24,9 +26,42 @@ vals.map(({ o, n }, i) => {
 });
 
 if(failed > -1) {
-  console.error("unpatchText failed for:", vals[failed])
-  process.exit(1);
-} else {
-  console.log("test successful")
-  process.exit(0);
+  error = { msg: "unpatchText failed for:", data: vals[failed] }
 }
+
+const w = new WAL({
+  id_fields: ["a", "b"],
+  synced_field: "c",
+  onSend: async (d) => {
+
+    if(d[0].a !== "a" || d[3].a !== "z" || d[2].b !== "zbb"){
+      error = error || { msg: "WAL sorting failed", data: d }
+    }
+
+    /* END */
+    if(error){
+      console.error(error);
+      process.exit(1);
+    } else {
+      console.log("Testing successful")
+      process.exit(0);
+    }
+  },
+  throttle: 100,
+  batch_size: 50
+});
+
+w.addData(
+  [
+    { a: "a", b: "bbb", c: "1"},
+    { a: "e", b: "zbb", c: "1"},
+    { a: "e", b: "ebb", c: "1"},
+    { a: "z", b: "bbb", c: "1"}
+  ]
+);
+
+
+
+
+
+

@@ -119,11 +119,27 @@ class WAL {
     constructor(args) {
         this.changed = {};
         this.sending = {};
-        this.addData = (data) => {
+        this.callbacks = [];
+        this.sort = (a, b) => {
+            const { orderBy } = this.options;
+            return orderBy.map(ob => {
+                if (!(ob.fieldName in a) || !(ob.fieldName in b)) {
+                    throw `Replication error: \n   some orderBy fields missing from data`;
+                }
+                let v1 = ob.asc ? a[ob.fieldName] : b[ob.fieldName], v2 = ob.asc ? b[ob.fieldName] : a[ob.fieldName];
+                let vNum = v1 - v2, vStr = v1 < v2 ? -1 : v1 == v2 ? 0 : 1;
+                return isNaN(vNum) ? vStr : vNum;
+            }).find(v => v);
+        };
+        this.addData = (data, cb) => {
             if (isEmpty(this.changed) && this.options.onSendStart)
                 this.options.onSendStart();
+            let callback = cb ? { cb, idStrs: [] } : null;
             data.map(d => {
                 const idStr = this.getIdStr(d);
+                if (callback) {
+                    callback.idStrs.push(idStr);
+                }
                 this.changed = this.changed || {};
                 this.changed[idStr] = Object.assign(Object.assign({}, this.changed[idStr]), d);
             });
@@ -138,7 +154,7 @@ class WAL {
                 return;
             let batch = [];
             Object.keys(this.changed)
-                .sort((a, b) => +this.changed[a][synced_field] - +this.changed[b][synced_field])
+                .sort((a, b) => this.sort(this.changed[a], this.changed[b]))
                 .slice(0, batch_size)
                 .map(key => {
                 let item = Object.assign({}, this.changed[key]);
@@ -160,6 +176,16 @@ class WAL {
                 error = err;
                 console.error(err, batch);
             }
+            if (this.callbacks.length) {
+                const ids = Object.keys(this.sending);
+                this.callbacks.forEach((c, i) => {
+                    c.idStrs = c.idStrs.filter(id => ids.includes(id));
+                    if (!c.idStrs.length) {
+                        c.cb(error);
+                    }
+                });
+                this.callbacks = this.callbacks.filter(cb => cb.idStrs.length);
+            }
             this.sending = {};
             if (!isEmpty(this.changed)) {
                 this.sendItems();
@@ -170,6 +196,14 @@ class WAL {
             }
         });
         this.options = Object.assign({}, args);
+        if (!this.options.orderBy) {
+            const { synced_field, id_fields } = args;
+            this.options.orderBy = [synced_field, ...id_fields.sort()]
+                .map(fieldName => ({
+                fieldName,
+                asc: true
+            }));
+        }
     }
     isSending() {
         return !(isEmpty(this.sending) && isEmpty(this.changed));

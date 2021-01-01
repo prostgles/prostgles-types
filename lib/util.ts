@@ -130,7 +130,10 @@ export type SyncTableInfo = {
 //     deleted?: boolean;
 // };
 
-
+export type BasicOrderBy = {
+    fieldName: string;
+    asc: boolean;
+}[];
 
 export type WALConfig = SyncTableInfo & {
     /**
@@ -145,14 +148,44 @@ export type WALConfig = SyncTableInfo & {
      * Fired after all data was sent or when a batch error is thrown
      */
     onSendEnd?: (batch?: any[], error?: any) => any;
+
+    /**
+     * Order by which the items will be synced. Defaults to [synced_field, ...id_fields.sort()]
+     */
+    orderBy?: BasicOrderBy
 };
 export class WAL {
     private changed: { [key: string]: any  } = {};
     private sending: { [key: string]: any  } = {};
     private options: WALConfig;
+    private callbacks: { cb: Function, idStrs: string[] }[] = [];
     
     constructor(args: WALConfig){
         this.options = { ...args };
+        if(!this.options.orderBy){
+            const { synced_field, id_fields } = args;
+            this.options.orderBy = [synced_field, ...id_fields.sort()]
+                .map(fieldName => ({
+                    fieldName,
+                    asc: true 
+                }));
+        }
+    }
+
+    sort = (a, b) => {
+        const { orderBy } = this.options;
+        return orderBy.map(ob => {
+            /* TODO: add fullData to changed items + ensure orderBy is in select */
+            if(!(ob.fieldName in a) || !(ob.fieldName in b)) {
+                throw `Replication error: \n   some orderBy fields missing from data`;
+            }
+            let v1 = ob.asc? a[ob.fieldName] : b[ob.fieldName],
+                v2 = ob.asc? b[ob.fieldName] : a[ob.fieldName];
+
+            let vNum = v1 - v2,
+                vStr = v1 < v2? -1 : v1 == v2? 0 : 1;
+            return isNaN(vNum)? vStr : vNum
+        }).find(v => v);
     }
 
     isSending(): boolean {
@@ -170,10 +203,14 @@ export class WAL {
         return res;
     }
 
-    addData = (data: any[]) => {
+    addData = (data: any[], cb?: (err: any) => any) => {
         if(isEmpty(this.changed) && this.options.onSendStart) this.options.onSendStart();
+        let callback = cb? { cb, idStrs: [] } : null;
         data.map(d => {
             const idStr = this.getIdStr(d);
+            if(callback){
+                callback.idStrs.push(idStr);
+            }
             this.changed = this.changed || {};
             this.changed[idStr] = { ...this.changed[idStr], ...d };
         });
@@ -193,8 +230,7 @@ export class WAL {
         // Prepare batch to send
         let batch: any[] = [];
         Object.keys(this.changed)
-            /* Sort by last_updated ascending */
-            .sort((a, b) => +this.changed[a][synced_field] - +this.changed[b][synced_field])
+            .sort((a, b) => this.sort(this.changed[a], this.changed[b]))
             .slice(0, batch_size)
             .map(key => {
                 let item = { ...this.changed[key] };
@@ -219,6 +255,18 @@ export class WAL {
         } catch(err) {
             error = err;
             console.error(err, batch)
+        }
+
+        /* Fire any callbacks */
+        if(this.callbacks.length){
+            const ids = Object.keys(this.sending);
+            this.callbacks.forEach((c, i)=> {
+                c.idStrs = c.idStrs.filter(id => ids.includes(id));
+                if(!c.idStrs.length){
+                    c.cb(error);
+                }
+            });
+            this.callbacks = this.callbacks.filter(cb => cb.idStrs.length)
         }
 
         this.sending = {};

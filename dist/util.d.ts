@@ -13,20 +13,27 @@ export declare type SyncTableInfo = {
     throttle: number;
     batch_size: number;
 };
+export declare type BasicOrderBy = {
+    fieldName: string;
+    asc: boolean;
+}[];
 export declare type WALConfig = SyncTableInfo & {
     onSendStart?: () => any;
     onSend: (items: any[]) => Promise<any>;
     onSendEnd?: (batch?: any[], error?: any) => any;
+    orderBy?: BasicOrderBy;
 };
 export declare class WAL {
     private changed;
     private sending;
     private options;
+    private callbacks;
     constructor(args: WALConfig);
+    sort: (a: any, b: any) => number;
     isSending(): boolean;
     getIdStr(d: any): string;
     getIdObj(d: any): any;
-    addData: (data: any[]) => void;
+    addData: (data: any[], cb?: (err: any) => any) => void;
     isSendingTimeout?: any;
     private sendItems;
 }

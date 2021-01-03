@@ -68,10 +68,10 @@ export declare type ViewHandler = {
     count: (filter?: Filter) => Promise<number>;
 };
 export declare type TableHandler = ViewHandler & {
-    update: <T = any>(filter: Filter, newData: any, params?: UpdateParams) => Promise<void | T>;
-    upsert: <T = any>(filter: Filter, newData: any, params?: UpdateParams) => Promise<void | T>;
-    insert: <T = any>(data: (T | T[]), params?: InsertParams) => Promise<void | T>;
-    delete: <T = any>(filter?: Filter, params?: DeleteParams) => Promise<void | T>;
+    update: <T = any>(filter: Filter, newData: any, params?: UpdateParams) => Promise<T | void>;
+    upsert: <T = any>(filter: Filter, newData: any, params?: UpdateParams) => Promise<T | void>;
+    insert: <T = any>(data: (T | T[]), params?: InsertParams) => Promise<T | void>;
+    delete: <T = any>(filter?: Filter, params?: DeleteParams) => Promise<T | void>;
 };
 export declare type JoinMaker = (filter?: Filter, select?: FieldFilter, options?: SelectParams) => any;
 export declare type TableJoin = {
@@ -87,8 +87,7 @@ export declare type DBHandler = {
     [key: string]: Partial<TableHandler>;
 } & DbJoinMaker;
 export declare type SQLOptions = {
-    justRows?: boolean;
-    statement?: boolean;
+    returnType?: "rows" | "statement";
 };
 export declare type SQLRequest = {
     query: string;

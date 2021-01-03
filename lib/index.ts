@@ -116,10 +116,10 @@ export type ViewHandler = {
 }
 
 export type TableHandler = ViewHandler & {
-  update: <T = any>(filter: Filter, newData: any, params?: UpdateParams) => Promise<void | T>;
-  upsert: <T = any>(filter: Filter, newData: any, params?: UpdateParams) => Promise<void | T>;
-  insert: <T = any>(data: (T | T[]), params?: InsertParams) => Promise<void | T>;
-  delete: <T = any>(filter?: Filter, params?: DeleteParams) => Promise<void | T>;
+  update: <T = any>(filter: Filter, newData: any, params?: UpdateParams) => Promise<T | void>;
+  upsert: <T = any>(filter: Filter, newData: any, params?: UpdateParams) => Promise<T | void>;
+  insert: <T = any>(data: (T | T[]), params?: InsertParams) => Promise<T | void>;
+  delete: <T = any>(filter?: Filter, params?: DeleteParams) => Promise<T | void>;
 }
 
 export type JoinMaker = (filter?: Filter, select?: FieldFilter, options?: SelectParams) => any;
@@ -141,14 +141,9 @@ export type DBHandler = {
 
 export type SQLOptions = {
   /**
-   * Return only the resulting rows. By default column informations is sent as well
+   * Change the return type
    */
-  justRows?: boolean;
-
-  /**
-   * Will return only the resulting SQL statement
-   */
-  statement?: boolean;
+  returnType?: "rows" | "statement";
 }
 
 

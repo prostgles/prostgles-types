@@ -57,21 +57,21 @@ export declare type DeleteParams = {
 export declare type Filter = any;
 export declare type ViewHandler = {
     getColumns: () => Promise<ValidatedColumnInfo[]>;
-    find: (filter?: Filter, selectParams?: SelectParams) => Promise<any[] | any[]>;
-    findOne: (filter?: Filter, selectParams?: SelectParams) => Promise<any | any>;
-    subscribe: (filter: Filter, params: SelectParams, onData: (items: any[]) => any) => Promise<{
+    find: <T = any>(filter?: Filter, selectParams?: SelectParams) => Promise<T[]>;
+    findOne: <T = any>(filter?: Filter, selectParams?: SelectParams) => Promise<T>;
+    subscribe: <T = any>(filter: Filter, params: SelectParams, onData: (items: T[]) => any) => Promise<{
         unsubscribe: () => any;
     }>;
-    subscribeOne: (filter: Filter, params: SelectParams, onData: (item: any) => any) => Promise<{
+    subscribeOne: <T = any>(filter: Filter, params: SelectParams, onData: (item: T) => any) => Promise<{
         unsubscribe: () => any;
     }>;
     count: (filter?: Filter) => Promise<number>;
 };
 export declare type TableHandler = ViewHandler & {
-    update: (filter: Filter, newData: any, params?: UpdateParams) => Promise<void | any>;
-    upsert: (filter: Filter, newData: any, params?: UpdateParams) => Promise<void | any>;
-    insert: (data: (any | any[]), params?: InsertParams) => Promise<void | any>;
-    delete: (filter?: Filter, params?: DeleteParams) => Promise<void | any>;
+    update: <T = any>(filter: Filter, newData: any, params?: UpdateParams) => Promise<void | T>;
+    upsert: <T = any>(filter: Filter, newData: any, params?: UpdateParams) => Promise<void | T>;
+    insert: <T = any>(data: (T | T[]), params?: InsertParams) => Promise<void | T>;
+    delete: <T = any>(filter?: Filter, params?: DeleteParams) => Promise<void | T>;
 };
 export declare type JoinMaker = (filter?: Filter, select?: FieldFilter, options?: SelectParams) => any;
 export declare type TableJoin = {

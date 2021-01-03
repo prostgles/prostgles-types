@@ -139,6 +139,24 @@ export type DBHandler = {
 } & DbJoinMaker;
 
 
+export type SQLOptions = {
+  /**
+   * Return only the resulting rows. By default column informations is sent as well
+   */
+  justRows?: boolean;
+
+  /**
+   * Will return only the resulting SQL statement
+   */
+  statement?: boolean;
+}
+
+
+export type SQLRequest = {
+  query: string;
+  params?: any | any[];
+  options?:  SQLOptions
+}
 
 
 // import { md5 } from "./md5";

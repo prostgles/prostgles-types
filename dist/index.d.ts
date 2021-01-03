@@ -86,5 +86,14 @@ export declare type DbJoinMaker = {
 export declare type DBHandler = {
     [key: string]: Partial<TableHandler>;
 } & DbJoinMaker;
+export declare type SQLOptions = {
+    justRows?: boolean;
+    statement?: boolean;
+};
+export declare type SQLRequest = {
+    query: string;
+    params?: any | any[];
+    options?: SQLOptions;
+};
 export { getTextPatch, unpatchText, isEmpty, WAL, WALConfig } from "./util";
 //# sourceMappingURL=index.d.ts.map

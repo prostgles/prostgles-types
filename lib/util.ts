@@ -278,7 +278,7 @@ export class WAL {
     };
 };
 
-export function isEmpty(obj?: object): boolean {
+export function isEmpty(obj?: any): boolean {
     for(var v in obj) return false;
     return true;
 }

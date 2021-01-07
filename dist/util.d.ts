@@ -37,5 +37,5 @@ export declare class WAL {
     isSendingTimeout?: any;
     private sendItems;
 }
-export declare function isEmpty(obj?: object): boolean;
+export declare function isEmpty(obj?: any): boolean;
 //# sourceMappingURL=util.d.ts.map

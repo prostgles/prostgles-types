@@ -69,6 +69,7 @@ export declare type ViewHandler = {
 };
 export declare type TableHandler = ViewHandler & {
     update: <T = any>(filter: Filter, newData: any, params?: UpdateParams) => Promise<T | void>;
+    updateBatch: <T = any>(data: [Filter, object][], params?: UpdateParams) => Promise<T | void>;
     upsert: <T = any>(filter: Filter, newData: any, params?: UpdateParams) => Promise<T | void>;
     insert: <T = any>(data: (T | T[]), params?: InsertParams) => Promise<T | void>;
     delete: <T = any>(filter?: Filter, params?: DeleteParams) => Promise<T | void>;

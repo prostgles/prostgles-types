@@ -140,8 +140,10 @@ class WAL {
                 if (callback) {
                     callback.idStrs.push(idStr);
                 }
+                let current = Object.assign({}, d);
                 this.changed = this.changed || {};
-                this.changed[idStr] = Object.assign(Object.assign({}, this.changed[idStr]), d);
+                this.changed[idStr] = this.changed[idStr] || { initial: current, current };
+                this.changed[idStr].current = current;
             });
             this.sendItems();
         };
@@ -152,16 +154,17 @@ class WAL {
                 return;
             if (!this.changed || isEmpty(this.changed))
                 return;
-            let batch = [];
+            let batchItems = [], walBatch = [];
             Object.keys(this.changed)
-                .sort((a, b) => this.sort(this.changed[a], this.changed[b]))
+                .sort((a, b) => this.sort(this.changed[a].initial, this.changed[b].initial))
                 .slice(0, batch_size)
                 .map(key => {
                 let item = Object.assign({}, this.changed[key]);
                 this.sending[key] = item;
-                batch.push(Object.assign({}, item));
+                walBatch.push(Object.assign({}, item));
                 delete this.changed[key];
             });
+            batchItems = walBatch.map(d => d.current);
             this.isSendingTimeout = setTimeout(() => {
                 this.isSendingTimeout = undefined;
                 if (!isEmpty(this.changed)) {
@@ -170,11 +173,11 @@ class WAL {
             }, throttle);
             let error;
             try {
-                yield onSend(batch);
+                yield onSend(batchItems, walBatch);
             }
             catch (err) {
                 error = err;
-                console.error(err, batch);
+                console.error(err, batchItems, walBatch);
             }
             if (this.callbacks.length) {
                 const ids = Object.keys(this.sending);
@@ -192,7 +195,7 @@ class WAL {
             }
             else {
                 if (onSendEnd)
-                    onSendEnd(batch, error);
+                    onSendEnd(batchItems, walBatch, error);
             }
         });
         this.options = Object.assign({}, args);

@@ -19,9 +19,16 @@ export declare type BasicOrderBy = {
 }[];
 export declare type WALConfig = SyncTableInfo & {
     onSendStart?: () => any;
-    onSend: (items: any[]) => Promise<any>;
-    onSendEnd?: (batch?: any[], error?: any) => any;
+    onSend: (items: any[], fullItems: WALItem[]) => Promise<any>;
+    onSendEnd?: (batch: any[], fullItems: WALItem[], error?: any) => any;
     orderBy?: BasicOrderBy;
+};
+export declare type WALItem = {
+    initial: any;
+    current: any;
+};
+export declare type WALItemsObj = {
+    [key: string]: WALItem;
 };
 export declare class WAL {
     private changed;

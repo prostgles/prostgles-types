@@ -222,10 +222,13 @@ export class WAL {
                 callback.idStrs.push(idStr);
             }
 
-            let current = { ...d };
+            const current = { ...d };
             this.changed = this.changed || {};
             this.changed[idStr] = this.changed[idStr] || { initial: current, current };
-            this.changed[idStr].current = current;
+            this.changed[idStr].current = {
+                ...this.changed[idStr].current,
+                ...current
+            };
         });
         this.sendItems();
     }

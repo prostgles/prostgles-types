@@ -140,10 +140,10 @@ class WAL {
                 if (callback) {
                     callback.idStrs.push(idStr);
                 }
-                let current = Object.assign({}, d);
+                const current = Object.assign({}, d);
                 this.changed = this.changed || {};
                 this.changed[idStr] = this.changed[idStr] || { initial: current, current };
-                this.changed[idStr].current = current;
+                this.changed[idStr].current = Object.assign(Object.assign({}, this.changed[idStr].current), current);
             });
             this.sendItems();
         };

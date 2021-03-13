@@ -1,6 +1,6 @@
 {
   "name": "prostgles-types",
-  "version": "1.5.55",
+  "version": "1.5.56",
   "description": "",
   "main": "dist/index_umd.js",
   "types": "dist/index.d.ts",
@@ -20,7 +20,6 @@
     "url": "https://github.com/prostgles/prostgles-types/issues"
   },
   "homepage": "https://github.com/prostgles/prostgles-types#readme",
-  "dependencies": {},
   "devDependencies": {
     "tsconfig-paths-webpack-plugin": "^3.3.0",
     "typescript": "^3.9.7",

@@ -53,9 +53,9 @@ const w = new util_1.WAL({
     batch_size: 50
 });
 w.addData([
-    { a: "a", b: "bbb", c: "1" },
-    { a: "e", b: "zbb", c: "1" },
-    { a: "e", b: "ebb", c: "1" },
-    { a: "z", b: "bbb", c: "1" }
+    { current: { a: "a", b: "bbb", c: "1" } },
+    { current: { a: "e", b: "zbb", c: "1" } },
+    { current: { a: "e", b: "ebb", c: "1" } },
+    { current: { a: "z", b: "bbb", c: "1" } }
 ]);
 //# sourceMappingURL=index.js.map

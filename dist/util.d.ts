@@ -24,7 +24,7 @@ export declare type WALConfig = SyncTableInfo & {
     orderBy?: BasicOrderBy;
 };
 export declare type WALItem = {
-    initial: any;
+    initial?: any;
     current: any;
 };
 export declare type WALItemsObj = {
@@ -40,7 +40,7 @@ export declare class WAL {
     isSending(): boolean;
     getIdStr(d: any): string;
     getIdObj(d: any): any;
-    addData: (data: any[], cb?: (err: any) => any) => void;
+    addData: (data: WALItem[], cb?: (err: any) => any) => void;
     isSendingTimeout?: any;
     private sendItems;
 }

@@ -124,11 +124,6 @@ export type SyncTableInfo = {
     throttle: number;
     batch_size: number;
 };
-// export type WALItem = {
-//     idObj: any;
-//     delta: any;
-//     deleted?: boolean;
-// };
 
 export type BasicOrderBy = {
     fieldName: string;
@@ -155,7 +150,7 @@ export type WALConfig = SyncTableInfo & {
     orderBy?: BasicOrderBy
 };
 export type WALItem = {
-    initial: any;
+    initial?: any;
     current: any;
 };
 export type WALItemsObj = { [key: string]: WALItem  };
@@ -213,18 +208,19 @@ export class WAL {
         return res;
     }
 
-    addData = (data: any[], cb?: (err: any) => any) => {
+    addData = (data: WALItem[], cb?: (err: any) => any) => {
         if(isEmpty(this.changed) && this.options.onSendStart) this.options.onSendStart();
         let callback = cb? { cb, idStrs: [] } : null;
         data.map(d => {
-            const idStr = this.getIdStr(d);
+            const { initial, current } = { ...d };
+            if(!current) throw "Expecting { current: object, initial?: object }";
+            const idStr = this.getIdStr(current);
             if(callback){
                 callback.idStrs.push(idStr);
             }
 
-            const current = { ...d };
             this.changed = this.changed || {};
-            this.changed[idStr] = this.changed[idStr] || { initial: current, current };
+            this.changed[idStr] = this.changed[idStr] || { initial, current };
             this.changed[idStr].current = {
                 ...this.changed[idStr].current,
                 ...current
@@ -246,7 +242,7 @@ export class WAL {
         // Prepare batch to send
         let batchItems: any[] = [], walBatch: WALItem[] = [];
         Object.keys(this.changed)
-            .sort((a, b) => this.sort(this.changed[a].initial, this.changed[b].initial))
+            .sort((a, b) => this.sort(this.changed[a].current, this.changed[b].current))
             .slice(0, batch_size)
             .map(key => {
                 let item = { ...this.changed[key] };

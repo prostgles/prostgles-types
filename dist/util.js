@@ -136,13 +136,15 @@ class WAL {
                 this.options.onSendStart();
             let callback = cb ? { cb, idStrs: [] } : null;
             data.map(d => {
-                const idStr = this.getIdStr(d);
+                const { initial, current } = Object.assign({}, d);
+                if (!current)
+                    throw "Expecting { current: object, initial?: object }";
+                const idStr = this.getIdStr(current);
                 if (callback) {
                     callback.idStrs.push(idStr);
                 }
-                const current = Object.assign({}, d);
                 this.changed = this.changed || {};
-                this.changed[idStr] = this.changed[idStr] || { initial: current, current };
+                this.changed[idStr] = this.changed[idStr] || { initial, current };
                 this.changed[idStr].current = Object.assign(Object.assign({}, this.changed[idStr].current), current);
             });
             this.sendItems();
@@ -156,7 +158,7 @@ class WAL {
                 return;
             let batchItems = [], walBatch = [];
             Object.keys(this.changed)
-                .sort((a, b) => this.sort(this.changed[a].initial, this.changed[b].initial))
+                .sort((a, b) => this.sort(this.changed[a].current, this.changed[b].current))
                 .slice(0, batch_size)
                 .map(key => {
                 let item = Object.assign({}, this.changed[key]);

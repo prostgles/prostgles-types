@@ -223,6 +223,15 @@ class WAL {
         });
         return res;
     }
+    getDeltaObj(d) {
+        let res = {};
+        Object.keys(d).map(key => {
+            if (!this.options.id_fields.includes(key)) {
+                res[key] = d[key];
+            }
+        });
+        return res;
+    }
 }
 exports.WAL = WAL;
 ;

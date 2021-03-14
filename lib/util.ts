@@ -207,6 +207,15 @@ export class WAL {
         });
         return res;
     }
+    getDeltaObj(d: any){
+        let res: any = {};
+        Object.keys(d).map(key => {
+            if(!this.options.id_fields.includes(key)){
+                res[key] = d[key];
+            }
+        });
+        return res;
+    }
 
     addData = (data: WALItem[], cb?: (err: any) => any) => {
         if(isEmpty(this.changed) && this.options.onSendStart) this.options.onSendStart();

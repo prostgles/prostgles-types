@@ -40,6 +40,7 @@ export declare class WAL {
     isSending(): boolean;
     getIdStr(d: any): string;
     getIdObj(d: any): any;
+    getDeltaObj(d: any): any;
     addData: (data: WALItem[], cb?: (err: any) => any) => void;
     isSendingTimeout?: any;
     private sendItems;

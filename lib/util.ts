@@ -1,5 +1,11 @@
 import { md5 } from "./md5";
 
+export function asName(str: string){
+    if(str === null || str === undefined || !str.toString || !str.toString()) throw "Expecting a non empty string";
+
+    return `"${str.toString().replace(/"/g, `""`)}"`;
+}
+
 export function stableStringify (data, opts) {
   if (!opts) opts = {};
   if (typeof opts === 'function') opts = { cmp: opts };

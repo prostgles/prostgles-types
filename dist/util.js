@@ -9,8 +9,14 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.isEmpty = exports.WAL = exports.unpatchText = exports.getTextPatch = exports.stableStringify = void 0;
+exports.isEmpty = exports.WAL = exports.unpatchText = exports.getTextPatch = exports.stableStringify = exports.asName = void 0;
 const md5_1 = require("./md5");
+function asName(str) {
+    if (str === null || str === undefined || !str.toString || !str.toString())
+        throw "Expecting a non empty string";
+    return `"${str.toString().replace(/"/g, `""`)}"`;
+}
+exports.asName = asName;
 function stableStringify(data, opts) {
     if (!opts)
         opts = {};

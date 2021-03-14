@@ -1,3 +1,4 @@
+export declare function asName(str: string): string;
 export declare function stableStringify(data: any, opts: any): string;
 export declare type TextPatch = {
     from: number;

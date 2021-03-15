@@ -95,5 +95,5 @@ export declare type SQLRequest = {
     params?: any | any[];
     options?: SQLOptions;
 };
-export { getTextPatch, unpatchText, isEmpty, WAL, WALConfig } from "./util";
+export { getTextPatch, unpatchText, isEmpty, WAL, WALConfig, asName } from "./util";
 //# sourceMappingURL=index.d.ts.map

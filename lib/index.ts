@@ -156,7 +156,7 @@ export type SQLRequest = {
 
 
 // import { md5 } from "./md5";
-export { getTextPatch, unpatchText, isEmpty, WAL, WALConfig } from "./util";
+export { getTextPatch, unpatchText, isEmpty, WAL, WALConfig, asName } from "./util";
 
 // const util = { getTextPatch, unpatchText, md5 };
 // export { util };

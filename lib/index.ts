@@ -154,6 +154,12 @@ export type SQLRequest = {
   options?:  SQLOptions
 }
 
+const preffix = "_psqlWS_.";
+export const CHANNELS = {
+  SCHEMA_CHANGED: preffix + "schema-changed",
+  SCHEMA: preffix + "schema",
+  _preffix: preffix,
+}
 
 // import { md5 } from "./md5";
 export { getTextPatch, unpatchText, isEmpty, WAL, WALConfig, asName } from "./util";

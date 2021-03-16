@@ -95,5 +95,10 @@ export declare type SQLRequest = {
     params?: any | any[];
     options?: SQLOptions;
 };
+export declare const CHANNELS: {
+    SCHEMA_CHANGED: string;
+    SCHEMA: string;
+    _preffix: string;
+};
 export { getTextPatch, unpatchText, isEmpty, WAL, WALConfig, asName } from "./util";
 //# sourceMappingURL=index.d.ts.map

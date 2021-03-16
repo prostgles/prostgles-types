@@ -98,6 +98,12 @@ export declare type SQLRequest = {
 export declare const CHANNELS: {
     SCHEMA_CHANGED: string;
     SCHEMA: string;
+    DEFAULT: string;
+    SQL: string;
+    METHOD: string;
+    REGISTER: string;
+    LOGIN: string;
+    LOGOUT: string;
     _preffix: string;
 };
 export { getTextPatch, unpatchText, isEmpty, WAL, WALConfig, asName } from "./util";

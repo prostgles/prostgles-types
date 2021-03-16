@@ -7,6 +7,12 @@ const preffix = "_psqlWS_.";
 exports.CHANNELS = {
     SCHEMA_CHANGED: preffix + "schema-changed",
     SCHEMA: preffix + "schema",
+    DEFAULT: preffix,
+    SQL: `${preffix}sql`,
+    METHOD: `${preffix}method`,
+    REGISTER: `${preffix}register`,
+    LOGIN: `${preffix}login`,
+    LOGOUT: `${preffix}logout`,
     _preffix: preffix,
 };
 var util_1 = require("./util");

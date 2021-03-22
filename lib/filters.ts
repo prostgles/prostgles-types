@@ -1,21 +1,10 @@
 
-// type TSDataType = keyof typeof TS_PG_Types;
-// export type FilterSpec = {
-//   operands: string[];
-//   tsDataTypes: TSDataType[];
-//   tsDefinition: string;
-//   // data_types: string[];
-//   getQuery: (leftQuery: string, rightVal: any) => string;
-// }
-
-
-
 
 /**
  * Example: col_name: { $gt: 2 }
  * @alias CompareFilter
  */
- export type CompareFilter<T = (Date | number | string | boolean)> =
+ export type CompareFilter<T = Date | number | string | boolean> =
  /**
   * column value equals provided value
   */
@@ -79,33 +68,35 @@ export type GeomFilter =
   * A's 2D bounding box intersects B's 2D bounding box.
   */
  | { "&&": GeoBBox }
- | { "&&&": GeoBBox }
- | { "&<": GeoBBox }
- | { "&<|": GeoBBox }
- | { "&>": GeoBBox }
- | { "<<": GeoBBox }
- | { "<<|": GeoBBox }
- | { "=": GeoBBox }
- | { ">>": GeoBBox }
+//  | { "&&&": GeoBBox }
+//  | { "&<": GeoBBox }
+//  | { "&<|": GeoBBox }
+//  | { "&>": GeoBBox }
+//  | { "<<": GeoBBox }
+//  | { "<<|": GeoBBox }
+//  | { ">>": GeoBBox }
+
+//  | { "=": GeoBBox }
 
  /**
   * A's bounding box is contained by B's
   */
  | { "@": GeoBBox }
- | { "|&>": GeoBBox }
- | { "|>>": GeoBBox }
+//  | { "|&>": GeoBBox }
+//  | { "|>>": GeoBBox }
 
  /**
   * A's bounding box contains B's.
   */
- | { "~": GeoBBox }
- | { "~=": GeoBBox }
+//  | { "~": GeoBBox }
+//  | { "~=": GeoBBox }
 ;
 export const GeomFilterKeys = ["~","~=","@","|&>","|>>", ">>", "=", "<<|", "<<", "&>", "&<|", "&<", "&&&", "&&"]
 export const GeomFilter_Funcs = ["ST_MakeEnvelope", "ST_MakeEnvelope".toLowerCase()]
 
 export type AllowedTSTypes = string | number | boolean | Date | any[];
-export type AnyObject = { [key: string]: AllowedTSTypes };
+// export type AnyObject = { [key: string]: AllowedTSTypes };
+export type AnyObject = { [key: string]: any };
 
 export type FilterDataType<T = any> = 
  T extends string ? TextFilter
@@ -127,11 +118,8 @@ export type FilterForObject<T = AnyObject> = {
  * Filters with shorthand notation
  * @example: { "name.$ilike": 'abc' }
  */
-{ [K in keyof Omit<{ [key: string]: any }, keyof T>]: (Date | string | number | (Date | string | number)[]) };
+{ [K in keyof Omit<{ [key: string]: any }, keyof T>]: (FilterDataType | Date | string | number | (Date | string | number)[]) };
 
-// export type FilterWithShorthand<T = AnyObject>  = 
-//   | FilterForObject<T> 
-//   | { [K in keyof Omit<AnyObject, keyof T>]: (Date | string | number | (Date | string | number)[]) }
 
 /**
  * Filter that relates to a single column { col: 2 } or
@@ -153,11 +141,22 @@ export type FullFilter<T = AnyObject> =
  | { $not: FilterItem<T>  }
 ;
 
+/**
+ * Simpler FullFilter to reduce load on compilation
+ */
+export type FullFilterBasic<T = { [key: string]: any }> = {
+  [key in keyof Partial<T & { [key: string]: any }>]: any
+}
 
+// const d: FullFilterBasic<{ a: number, ab: number  }> = {
+//   adw: 2
+// }
+// export type FullFilterSimple = any;
 // const f: FullFilter<{ a: Date, s: string }> = {
 //   // hehe: { "@>": ['', 2] }
 //   $exists: { dadwa: { $and: [{ a: 2 }] }},
-//   $and: [],
-//   a: { $eq: new Date() }
+//   $and: [ { a: { $gt: 23 } }],
+//   a: { $eqq: new Date() },
+//   // s: { $between: [2, '3']},
 // }
 

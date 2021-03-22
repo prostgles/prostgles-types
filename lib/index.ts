@@ -73,14 +73,13 @@ export type _OrderBy<T = AnyObject> =
 | { key: keyof T, asc: AscOrDesc }[] 
 | Array<keyof T>
 | keyof T
+;
 
 export type OrderBy<T = AnyObject> = 
 | _OrderBy<T>
 | _OrderBy<AnyObject>
 ;
 
-// export const AGGREGATION_FUNCTIONS = ["$max", "$min", "$count"];
-// export type AggFunc = typeof AGGREGATION_FUNCTIONS[number] | { [key in typeof AGGREGATION_FUNCTIONS[number]]: FieldFilter  };
 export type Select<T = AnyObject> = 
  | { [K in keyof Partial<T>]: any } 
  | {} 
@@ -139,6 +138,14 @@ export type TableHandler<TT = AnyObject> = ViewHandler<TT> & {
   delete: <TD = TT>(filter?: FullFilter<TD>, params?: DeleteParams<TD>) => Promise<DExtended<TD> | void>;
 }
 
+
+
+// const c: TableHandler<{ h: number }>;
+
+// c.findOne({ }, { select: { h: 2 }}).then(r => {
+  
+// })
+
 export type JoinMaker<TT = AnyObject> = (filter?: FullFilter<TT>, select?: Select<TT>, options?: SelectParams<TT>) => any;
 
 export type TableJoin = {
@@ -155,6 +162,17 @@ export type DBHandler = {
   [key: string]: Partial<TableHandler>;
 } & DbJoinMaker;
 
+
+
+/**
+ * Simpler DBHandler types to reduce load on TS
+ */
+
+
+
+/**
+ * Other
+ */
 
 export type SQLOptions = {
   /**

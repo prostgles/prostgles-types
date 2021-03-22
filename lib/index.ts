@@ -172,21 +172,22 @@ export type TableHandler<TT = AnyObject> = ViewHandler<TT> & {
 }
 
 
+export type PartialLax<T = AnyObject> = Partial<T & AnyObject>;
 export type ViewHandlerBasic = {
   getColumns: () => Promise<ValidatedColumnInfo[]>;
-  find: <TD = AnyObject>(filter?: FullFilterBasic, selectParams?: SelectParamsBasic) => Promise<TD[]>;
-  findOne: <TD = AnyObject>(filter?: FullFilterBasic, selectParams?: SelectParamsBasic) => Promise<TD>;
-  subscribe: <TD = AnyObject>(filter: FullFilterBasic, params: SelectParamsBasic, onData: (items: TD[]) => any) => Promise<{ unsubscribe: () => any }>;
-  subscribeOne: <TD = AnyObject>(filter: FullFilterBasic, params: SelectParamsBasic, onData: (item: TD) => any) => Promise<{ unsubscribe: () => any }>;
+  find: <TD = AnyObject>(filter?: FullFilterBasic, selectParams?: SelectParamsBasic) => Promise<PartialLax<TD>[]>;
+  findOne: <TD = AnyObject>(filter?: FullFilterBasic, selectParams?: SelectParamsBasic) => Promise<PartialLax<TD>>;
+  subscribe: <TD = AnyObject>(filter: FullFilterBasic, params: SelectParamsBasic, onData: (items: PartialLax<TD>[]) => any) => Promise<{ unsubscribe: () => any }>;
+  subscribeOne: <TD = AnyObject>(filter: FullFilterBasic, params: SelectParamsBasic, onData: (item: PartialLax<TD>) => any) => Promise<{ unsubscribe: () => any }>;
   count: (filter?: FullFilterBasic) => Promise<number>;
 }
 
 export type TableHandlerBasic = ViewHandlerBasic & {
-  update: <TD = AnyObject>(filter: FullFilterBasic, newData: Partial<TD>, params?: UpdateParams<TD>) => Promise<TD | void>;
-  updateBatch: <TD = AnyObject>(data: [FullFilterBasic, Partial<TD>][], params?: UpdateParams<TD>) => Promise<TD | void>;
-  upsert: <TD = AnyObject>(filter: FullFilterBasic, newData: Partial<TD>, params?: UpdateParams<TD>) => Promise<TD | void>;
-  insert: <TD = AnyObject>(data: (Partial<TD> | Partial<TD>[]), params?: InsertParams<TD>) => Promise<TD | void>;
-  delete: <TD = AnyObject>(filter?: FullFilterBasic, params?: DeleteParamsBasic) => Promise<TD | void>;
+  update: <TD = AnyObject>(filter: FullFilterBasic, newData: PartialLax<TD>, params?: UpdateParamsBasic) => Promise<PartialLax<TD> | void>;
+  updateBatch: <TD = AnyObject>(data: [FullFilterBasic, PartialLax<TD>][], params?: UpdateParamsBasic) => Promise<PartialLax<TD> | void>;
+  upsert: <TD = AnyObject>(filter: FullFilterBasic, newData: PartialLax<TD>, params?: UpdateParamsBasic) => Promise<PartialLax<TD> | void>;
+  insert: <TD = AnyObject>(data: (PartialLax<TD> | PartialLax<TD>[]), params?: InsertParamsBasic) => Promise<PartialLax<TD> | void>;
+  delete: <TD = AnyObject>(filter?: FullFilterBasic, params?: DeleteParamsBasic) => Promise<PartialLax<TD> | void>;
 }
 
 // const c: TableHandler<{ h: number }>;

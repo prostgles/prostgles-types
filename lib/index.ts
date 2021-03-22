@@ -1,4 +1,6 @@
 
+import { FullFilter, AnyObject } from "./filters";
+
 export type ColumnInfo = {
   name: string;
 
@@ -58,72 +60,79 @@ export type AscOrDesc = 1 | -1 | boolean;
  * false | -1 -> descending
  * Array order is maintained
  */
-export type OrderBy = { key: string, asc: AscOrDesc }[] | { [key: string]: AscOrDesc }[] | { [key: string]: AscOrDesc } | string | string[];
+export type _OrderBy<T = AnyObject> = 
+| { [K in keyof Partial<T>]: AscOrDesc }
+| { [K in keyof Partial<T>]: AscOrDesc }[]
+| { key: keyof T, asc: AscOrDesc }[] 
+| Array<keyof T>
+| keyof T
 
+export type OrderBy<T = AnyObject> = 
+| _OrderBy<T>
+| _OrderBy<AnyObject>
+;
 
-/**
- * @example
- * { field_name: (true | false) }
- * 
- * ["field_name1", "field_name2"]
- * 
- * field_name: false -> means all fields except this
- */
-export type FieldFilter = object | string[] | "*" | "" | { [key: string]: (1 | 0 | boolean) };
+// export const AGGREGATION_FUNCTIONS = ["$max", "$min", "$count"];
+// export type AggFunc = typeof AGGREGATION_FUNCTIONS[number] | { [key in typeof AGGREGATION_FUNCTIONS[number]]: FieldFilter  };
+export type Select<T = AnyObject> = 
+ | { [K in keyof Partial<T>]: any } 
+ | {} 
+ | undefined 
+ | "" 
+ | "*" 
+ | AnyObject 
+ | Array<keyof T>
+;
 
-export const FIELD_FILTER_TYPES = ["$ilike", "$gte"];
-
-export const AGGREGATION_FUNCTIONS = ["$max", "$min", "$count"];
-export type AggFunc = typeof AGGREGATION_FUNCTIONS[number] | { [key in typeof AGGREGATION_FUNCTIONS[number]]: FieldFilter  };
-export type Select = FieldFilter | 
-  { 
-    [key: string]: FieldFilter | AggFunc;
-  };
-
-export type SelectParams = {
-  select?: FieldFilter;
+export type SelectParams<T = AnyObject> = {
+  select?: Select<T>;
   limit?: number;
   offset?: number;
-  orderBy?: OrderBy;
+  orderBy?: OrderBy<T>;
   expectOne?: boolean;
 }
-export type UpdateParams = {
-  returning?: FieldFilter;
+export type UpdateParams<T = AnyObject> = {
+  returning?: Select<T>;
   onConflictDoNothing?: boolean;
   fixIssues?: boolean;
 
   /* true by default. If false the update will fail if affecting more than one row */
   multi?: boolean;
 }
-export type InsertParams = {
-  returning?: FieldFilter;
+export type InsertParams<T = AnyObject> = {
+  returning?: Select<T>;
   onConflictDoNothing?: boolean;
   fixIssues?: boolean;
 }
-export type DeleteParams = {
-  returning?: FieldFilter;
+export type DeleteParams<T = AnyObject> = {
+  returning?: Select<T>;
 }
 
-export type Filter = any;// | object | undefined;
+/**
+ * Adds unknown props to object
+ * Used in represent data returned from a query that can have arbitrary computed fields
+ */
+export type DExtended<T = AnyObject> = Partial<T & { [x: string]: any }>;
 
-export type ViewHandler = {
+
+export type ViewHandler<TT = AnyObject> = {
   getColumns: () => Promise<ValidatedColumnInfo[]>;
-  find: <T = any>(filter?: Filter, selectParams?: SelectParams) => Promise<T[]>;
-  findOne: <T = any>(filter?: Filter, selectParams?: SelectParams) => Promise<T>;
-  subscribe: <T = any>(filter: Filter, params: SelectParams, onData: (items: T[]) => any) => Promise<{ unsubscribe: () => any }>;
-  subscribeOne: <T = any>(filter: Filter, params: SelectParams, onData: (item: T) => any) => Promise<{ unsubscribe: () => any }>;
-  count: (filter?: Filter) => Promise<number>;
+  find: <TD = TT>(filter?: FullFilter<TD>, selectParams?: SelectParams<TD>) => Promise<DExtended<TD>[]>;
+  findOne: <TD = TT>(filter?: FullFilter<TD>, selectParams?: SelectParams<TD>) => Promise<DExtended<TD>>;
+  subscribe: <TD = TT>(filter: FullFilter<TD>, params: SelectParams<TD>, onData: (items: DExtended<TD>[]) => any) => Promise<{ unsubscribe: () => any }>;
+  subscribeOne: <TD = TT>(filter: FullFilter<TD>, params: SelectParams<TD>, onData: (item: DExtended<TD>) => any) => Promise<{ unsubscribe: () => any }>;
+  count: <TD = TT>(filter?: FullFilter<TD>) => Promise<number>;
 }
 
-export type TableHandler = ViewHandler & {
-  update: <T = any>(filter: Filter, newData: any, params?: UpdateParams) => Promise<T | void>;
-  updateBatch: <T = any>(data: [Filter, object][], params?: UpdateParams) => Promise<T | void>;
-  upsert: <T = any>(filter: Filter, newData: any, params?: UpdateParams) => Promise<T | void>;
-  insert: <T = any>(data: (T | T[]), params?: InsertParams) => Promise<T | void>;
-  delete: <T = any>(filter?: Filter, params?: DeleteParams) => Promise<T | void>;
+export type TableHandler<TT = AnyObject> = ViewHandler<TT> & {
+  update: <TD = TT>(filter: FullFilter<TD>, newData: Partial<TD>, params?: UpdateParams<TD>) => Promise<DExtended<TD> | void>;
+  updateBatch: <TD = TT>(data: [FullFilter<TD>, Partial<TD>][], params?: UpdateParams<TD>) => Promise<DExtended<TD> | void>;
+  upsert: <TD = TT>(filter: FullFilter<TD>, newData: Partial<TD>, params?: UpdateParams<TD>) => Promise<DExtended<TD> | void>;
+  insert: <TD = TT>(data: (Partial<TD> | Partial<TD>[]), params?: InsertParams<TD>) => Promise<DExtended<TD> | void>;
+  delete: <TD = TT>(filter?: FullFilter<TD>, params?: DeleteParams<TD>) => Promise<DExtended<TD> | void>;
 }
 
-export type JoinMaker = (filter?: Filter, select?: FieldFilter, options?: SelectParams) => any;
+export type JoinMaker<TT = AnyObject> = (filter?: FullFilter<TT>, select?: Select<TT>, options?: SelectParams<TT>) => any;
 
 export type TableJoin = {
   [key: string]: JoinMaker;
@@ -174,6 +183,7 @@ export const CHANNELS = {
 
 // import { md5 } from "./md5";
 export { getTextPatch, unpatchText, isEmpty, WAL, WALConfig, asName } from "./util";
+export { EXISTS_KEYS, FilterDataType, FullFilter, GeomFilterKeys, GeomFilter_Funcs, TextFilter_FullTextSearchFilterKeys } from "./filters";
 
 // const util = { getTextPatch, unpatchText, md5 };
 // export { util };

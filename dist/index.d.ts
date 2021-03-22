@@ -1,3 +1,4 @@
+import { FullFilter, AnyObject } from "./filters";
 export declare type ColumnInfo = {
     name: string;
     data_type: string;
@@ -14,67 +15,62 @@ export declare type ValidatedColumnInfo = ColumnInfo & {
     delete: boolean;
 };
 export declare type AscOrDesc = 1 | -1 | boolean;
-export declare type OrderBy = {
-    key: string;
+export declare type _OrderBy<T = AnyObject> = {
+    [K in keyof Partial<T>]: AscOrDesc;
+} | {
+    [K in keyof Partial<T>]: AscOrDesc;
+}[] | {
+    key: keyof T;
     asc: AscOrDesc;
-}[] | {
-    [key: string]: AscOrDesc;
-}[] | {
-    [key: string]: AscOrDesc;
-} | string | string[];
-export declare type FieldFilter = object | string[] | "*" | "" | {
-    [key: string]: (1 | 0 | boolean);
-};
-export declare const FIELD_FILTER_TYPES: string[];
-export declare const AGGREGATION_FUNCTIONS: string[];
-export declare type AggFunc = typeof AGGREGATION_FUNCTIONS[number] | {
-    [key in typeof AGGREGATION_FUNCTIONS[number]]: FieldFilter;
-};
-export declare type Select = FieldFilter | {
-    [key: string]: FieldFilter | AggFunc;
-};
-export declare type SelectParams = {
-    select?: FieldFilter;
+}[] | Array<keyof T> | keyof T;
+export declare type OrderBy<T = AnyObject> = _OrderBy<T> | _OrderBy<AnyObject>;
+export declare type Select<T = AnyObject> = {
+    [K in keyof Partial<T>]: any;
+} | {} | undefined | "" | "*" | AnyObject | Array<keyof T>;
+export declare type SelectParams<T = AnyObject> = {
+    select?: Select<T>;
     limit?: number;
     offset?: number;
-    orderBy?: OrderBy;
+    orderBy?: OrderBy<T>;
     expectOne?: boolean;
 };
-export declare type UpdateParams = {
-    returning?: FieldFilter;
+export declare type UpdateParams<T = AnyObject> = {
+    returning?: Select<T>;
     onConflictDoNothing?: boolean;
     fixIssues?: boolean;
     multi?: boolean;
 };
-export declare type InsertParams = {
-    returning?: FieldFilter;
+export declare type InsertParams<T = AnyObject> = {
+    returning?: Select<T>;
     onConflictDoNothing?: boolean;
     fixIssues?: boolean;
 };
-export declare type DeleteParams = {
-    returning?: FieldFilter;
+export declare type DeleteParams<T = AnyObject> = {
+    returning?: Select<T>;
 };
-export declare type Filter = any;
-export declare type ViewHandler = {
+export declare type DExtended<T = AnyObject> = Partial<T & {
+    [x: string]: any;
+}>;
+export declare type ViewHandler<TT = AnyObject> = {
     getColumns: () => Promise<ValidatedColumnInfo[]>;
-    find: <T = any>(filter?: Filter, selectParams?: SelectParams) => Promise<T[]>;
-    findOne: <T = any>(filter?: Filter, selectParams?: SelectParams) => Promise<T>;
-    subscribe: <T = any>(filter: Filter, params: SelectParams, onData: (items: T[]) => any) => Promise<{
+    find: <TD = TT>(filter?: FullFilter<TD>, selectParams?: SelectParams<TD>) => Promise<DExtended<TD>[]>;
+    findOne: <TD = TT>(filter?: FullFilter<TD>, selectParams?: SelectParams<TD>) => Promise<DExtended<TD>>;
+    subscribe: <TD = TT>(filter: FullFilter<TD>, params: SelectParams<TD>, onData: (items: DExtended<TD>[]) => any) => Promise<{
         unsubscribe: () => any;
     }>;
-    subscribeOne: <T = any>(filter: Filter, params: SelectParams, onData: (item: T) => any) => Promise<{
+    subscribeOne: <TD = TT>(filter: FullFilter<TD>, params: SelectParams<TD>, onData: (item: DExtended<TD>) => any) => Promise<{
         unsubscribe: () => any;
     }>;
-    count: (filter?: Filter) => Promise<number>;
+    count: <TD = TT>(filter?: FullFilter<TD>) => Promise<number>;
 };
-export declare type TableHandler = ViewHandler & {
-    update: <T = any>(filter: Filter, newData: any, params?: UpdateParams) => Promise<T | void>;
-    updateBatch: <T = any>(data: [Filter, object][], params?: UpdateParams) => Promise<T | void>;
-    upsert: <T = any>(filter: Filter, newData: any, params?: UpdateParams) => Promise<T | void>;
-    insert: <T = any>(data: (T | T[]), params?: InsertParams) => Promise<T | void>;
-    delete: <T = any>(filter?: Filter, params?: DeleteParams) => Promise<T | void>;
+export declare type TableHandler<TT = AnyObject> = ViewHandler<TT> & {
+    update: <TD = TT>(filter: FullFilter<TD>, newData: Partial<TD>, params?: UpdateParams<TD>) => Promise<DExtended<TD> | void>;
+    updateBatch: <TD = TT>(data: [FullFilter<TD>, Partial<TD>][], params?: UpdateParams<TD>) => Promise<DExtended<TD> | void>;
+    upsert: <TD = TT>(filter: FullFilter<TD>, newData: Partial<TD>, params?: UpdateParams<TD>) => Promise<DExtended<TD> | void>;
+    insert: <TD = TT>(data: (Partial<TD> | Partial<TD>[]), params?: InsertParams<TD>) => Promise<DExtended<TD> | void>;
+    delete: <TD = TT>(filter?: FullFilter<TD>, params?: DeleteParams<TD>) => Promise<DExtended<TD> | void>;
 };
-export declare type JoinMaker = (filter?: Filter, select?: FieldFilter, options?: SelectParams) => any;
+export declare type JoinMaker<TT = AnyObject> = (filter?: FullFilter<TT>, select?: Select<TT>, options?: SelectParams<TT>) => any;
 export declare type TableJoin = {
     [key: string]: JoinMaker;
 };
@@ -107,4 +103,5 @@ export declare const CHANNELS: {
     _preffix: string;
 };
 export { getTextPatch, unpatchText, isEmpty, WAL, WALConfig, asName } from "./util";
+export { EXISTS_KEYS, FilterDataType, FullFilter, GeomFilterKeys, GeomFilter_Funcs, TextFilter_FullTextSearchFilterKeys } from "./filters";
 //# sourceMappingURL=index.d.ts.map

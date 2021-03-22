@@ -1,8 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.asName = exports.WAL = exports.isEmpty = exports.unpatchText = exports.getTextPatch = exports.CHANNELS = exports.AGGREGATION_FUNCTIONS = exports.FIELD_FILTER_TYPES = void 0;
-exports.FIELD_FILTER_TYPES = ["$ilike", "$gte"];
-exports.AGGREGATION_FUNCTIONS = ["$max", "$min", "$count"];
+exports.TextFilter_FullTextSearchFilterKeys = exports.GeomFilter_Funcs = exports.GeomFilterKeys = exports.EXISTS_KEYS = exports.asName = exports.WAL = exports.isEmpty = exports.unpatchText = exports.getTextPatch = exports.CHANNELS = void 0;
 const preffix = "_psqlWS_.";
 exports.CHANNELS = {
     SCHEMA_CHANGED: preffix + "schema-changed",
@@ -21,4 +19,9 @@ Object.defineProperty(exports, "unpatchText", { enumerable: true, get: function 
 Object.defineProperty(exports, "isEmpty", { enumerable: true, get: function () { return util_1.isEmpty; } });
 Object.defineProperty(exports, "WAL", { enumerable: true, get: function () { return util_1.WAL; } });
 Object.defineProperty(exports, "asName", { enumerable: true, get: function () { return util_1.asName; } });
+var filters_1 = require("./filters");
+Object.defineProperty(exports, "EXISTS_KEYS", { enumerable: true, get: function () { return filters_1.EXISTS_KEYS; } });
+Object.defineProperty(exports, "GeomFilterKeys", { enumerable: true, get: function () { return filters_1.GeomFilterKeys; } });
+Object.defineProperty(exports, "GeomFilter_Funcs", { enumerable: true, get: function () { return filters_1.GeomFilter_Funcs; } });
+Object.defineProperty(exports, "TextFilter_FullTextSearchFilterKeys", { enumerable: true, get: function () { return filters_1.TextFilter_FullTextSearchFilterKeys; } });
 //# sourceMappingURL=index.js.map

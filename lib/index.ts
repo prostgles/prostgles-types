@@ -50,6 +50,13 @@ export type ValidatedColumnInfo = ColumnInfo & {
   delete: boolean;
 }
 
+/**
+ * List of fields to include or exclude
+ */
+export declare type FieldFilter = {} | string[] | "*" | "" | {
+  [key: string]: (1 | 0 | boolean);
+};
+
 export type AscOrDesc = 1 | -1 | boolean;
 
 /**

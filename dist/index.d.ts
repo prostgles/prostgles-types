@@ -14,6 +14,9 @@ export declare type ValidatedColumnInfo = ColumnInfo & {
     update: boolean;
     delete: boolean;
 };
+export declare type FieldFilter = {} | string[] | "*" | "" | {
+    [key: string]: (1 | 0 | boolean);
+};
 export declare type AscOrDesc = 1 | -1 | boolean;
 export declare type _OrderBy<T = AnyObject> = {
     [K in keyof Partial<T>]: AscOrDesc;

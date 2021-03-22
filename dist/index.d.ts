@@ -1,4 +1,4 @@
-import { FullFilter, AnyObject } from "./filters";
+import { FullFilter, AnyObject, FullFilterBasic } from "./filters";
 export declare type ColumnInfo = {
     name: string;
     data_type: string;
@@ -30,6 +30,9 @@ export declare type OrderBy<T = AnyObject> = _OrderBy<T> | _OrderBy<AnyObject>;
 export declare type Select<T = AnyObject> = {
     [K in keyof Partial<T>]: any;
 } | {} | undefined | "" | "*" | AnyObject | Array<keyof T>;
+export declare type SelectBasic = {
+    [key: string]: any;
+} | {} | undefined | "" | "*";
 export declare type SelectParams<T = AnyObject> = {
     select?: Select<T>;
     limit?: number;
@@ -50,6 +53,27 @@ export declare type InsertParams<T = AnyObject> = {
 };
 export declare type DeleteParams<T = AnyObject> = {
     returning?: Select<T>;
+};
+export declare type SelectParamsBasic = {
+    select?: SelectBasic;
+    limit?: number;
+    offset?: number;
+    orderBy?: OrderBy;
+    expectOne?: boolean;
+};
+export declare type UpdateParamsBasic = {
+    returning?: SelectBasic;
+    onConflictDoNothing?: boolean;
+    fixIssues?: boolean;
+    multi?: boolean;
+};
+export declare type InsertParamsBasic = {
+    returning?: SelectBasic;
+    onConflictDoNothing?: boolean;
+    fixIssues?: boolean;
+};
+export declare type DeleteParamsBasic = {
+    returning?: SelectBasic;
 };
 export declare type DExtended<T = AnyObject> = Partial<T & {
     [x: string]: any;
@@ -73,9 +97,32 @@ export declare type TableHandler<TT = AnyObject> = ViewHandler<TT> & {
     insert: <TD = TT>(data: (Partial<TD> | Partial<TD>[]), params?: InsertParams<TD>) => Promise<DExtended<TD> | void>;
     delete: <TD = TT>(filter?: FullFilter<TD>, params?: DeleteParams<TD>) => Promise<DExtended<TD> | void>;
 };
+export declare type ViewHandlerBasic = {
+    getColumns: () => Promise<ValidatedColumnInfo[]>;
+    find: <TD = AnyObject>(filter?: FullFilterBasic, selectParams?: SelectParamsBasic) => Promise<TD[]>;
+    findOne: <TD = AnyObject>(filter?: FullFilterBasic, selectParams?: SelectParamsBasic) => Promise<TD>;
+    subscribe: <TD = AnyObject>(filter: FullFilterBasic, params: SelectParamsBasic, onData: (items: TD[]) => any) => Promise<{
+        unsubscribe: () => any;
+    }>;
+    subscribeOne: <TD = AnyObject>(filter: FullFilterBasic, params: SelectParamsBasic, onData: (item: TD) => any) => Promise<{
+        unsubscribe: () => any;
+    }>;
+    count: (filter?: FullFilterBasic) => Promise<number>;
+};
+export declare type TableHandlerBasic = ViewHandlerBasic & {
+    update: <TD = AnyObject>(filter: FullFilterBasic, newData: Partial<TD>, params?: UpdateParams<TD>) => Promise<TD | void>;
+    updateBatch: <TD = AnyObject>(data: [FullFilterBasic, Partial<TD>][], params?: UpdateParams<TD>) => Promise<TD | void>;
+    upsert: <TD = AnyObject>(filter: FullFilterBasic, newData: Partial<TD>, params?: UpdateParams<TD>) => Promise<TD | void>;
+    insert: <TD = AnyObject>(data: (Partial<TD> | Partial<TD>[]), params?: InsertParams<TD>) => Promise<TD | void>;
+    delete: <TD = AnyObject>(filter?: FullFilterBasic, params?: DeleteParamsBasic) => Promise<TD | void>;
+};
 export declare type JoinMaker<TT = AnyObject> = (filter?: FullFilter<TT>, select?: Select<TT>, options?: SelectParams<TT>) => any;
+export declare type JoinMakerBasic = (filter?: FullFilterBasic, select?: SelectBasic, options?: SelectParamsBasic) => any;
 export declare type TableJoin = {
     [key: string]: JoinMaker;
+};
+export declare type TableJoinBasic = {
+    [key: string]: JoinMakerBasic;
 };
 export declare type DbJoinMaker = {
     innerJoin: TableJoin;
@@ -86,6 +133,14 @@ export declare type DbJoinMaker = {
 export declare type DBHandler = {
     [key: string]: Partial<TableHandler>;
 } & DbJoinMaker;
+export declare type DBHandlerBasic = {
+    [key: string]: Partial<TableHandlerBasic>;
+} & {
+    innerJoin: TableJoinBasic;
+    leftJoin: TableJoinBasic;
+    innerJoinOne: TableJoinBasic;
+    leftJoinOne: TableJoinBasic;
+};
 export declare type SQLOptions = {
     returnType?: "rows" | "statement";
 };
@@ -106,5 +161,5 @@ export declare const CHANNELS: {
     _preffix: string;
 };
 export { getTextPatch, unpatchText, isEmpty, WAL, WALConfig, asName } from "./util";
-export { EXISTS_KEYS, FilterDataType, FullFilter, GeomFilterKeys, GeomFilter_Funcs, TextFilter_FullTextSearchFilterKeys } from "./filters";
+export { EXISTS_KEYS, FilterDataType, FullFilter, FullFilterBasic, GeomFilterKeys, GeomFilter_Funcs, TextFilter_FullTextSearchFilterKeys } from "./filters";
 //# sourceMappingURL=index.d.ts.map

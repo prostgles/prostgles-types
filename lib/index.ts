@@ -1,5 +1,5 @@
 
-import { FullFilter, AnyObject } from "./filters";
+import { FullFilter, AnyObject, FullFilterBasic } from "./filters";
 
 export type ColumnInfo = {
   name: string;
@@ -89,6 +89,13 @@ export type Select<T = AnyObject> =
  | AnyObject 
  | Array<keyof T>
 ;
+export type SelectBasic = 
+ | { [key: string]: any } 
+ | {} 
+ | undefined 
+ | "" 
+ | "*" 
+;
 
 export type SelectParams<T = AnyObject> = {
   select?: Select<T>;
@@ -115,6 +122,32 @@ export type DeleteParams<T = AnyObject> = {
 }
 
 /**
+ * Simpler types
+ */
+export type SelectParamsBasic = {
+  select?: SelectBasic;
+  limit?: number;
+  offset?: number;
+  orderBy?: OrderBy;
+  expectOne?: boolean;
+}
+export type UpdateParamsBasic = {
+  returning?: SelectBasic;
+  onConflictDoNothing?: boolean;
+  fixIssues?: boolean;
+
+  /* true by default. If false the update will fail if affecting more than one row */
+  multi?: boolean;
+}
+export type InsertParamsBasic = {
+  returning?: SelectBasic;
+  onConflictDoNothing?: boolean;
+  fixIssues?: boolean;
+}
+export type DeleteParamsBasic = {
+  returning?: SelectBasic;
+}
+/**
  * Adds unknown props to object
  * Used in represent data returned from a query that can have arbitrary computed fields
  */
@@ -139,6 +172,22 @@ export type TableHandler<TT = AnyObject> = ViewHandler<TT> & {
 }
 
 
+export type ViewHandlerBasic = {
+  getColumns: () => Promise<ValidatedColumnInfo[]>;
+  find: <TD = AnyObject>(filter?: FullFilterBasic, selectParams?: SelectParamsBasic) => Promise<TD[]>;
+  findOne: <TD = AnyObject>(filter?: FullFilterBasic, selectParams?: SelectParamsBasic) => Promise<TD>;
+  subscribe: <TD = AnyObject>(filter: FullFilterBasic, params: SelectParamsBasic, onData: (items: TD[]) => any) => Promise<{ unsubscribe: () => any }>;
+  subscribeOne: <TD = AnyObject>(filter: FullFilterBasic, params: SelectParamsBasic, onData: (item: TD) => any) => Promise<{ unsubscribe: () => any }>;
+  count: (filter?: FullFilterBasic) => Promise<number>;
+}
+
+export type TableHandlerBasic = ViewHandlerBasic & {
+  update: <TD = AnyObject>(filter: FullFilterBasic, newData: Partial<TD>, params?: UpdateParams<TD>) => Promise<TD | void>;
+  updateBatch: <TD = AnyObject>(data: [FullFilterBasic, Partial<TD>][], params?: UpdateParams<TD>) => Promise<TD | void>;
+  upsert: <TD = AnyObject>(filter: FullFilterBasic, newData: Partial<TD>, params?: UpdateParams<TD>) => Promise<TD | void>;
+  insert: <TD = AnyObject>(data: (Partial<TD> | Partial<TD>[]), params?: InsertParams<TD>) => Promise<TD | void>;
+  delete: <TD = AnyObject>(filter?: FullFilterBasic, params?: DeleteParamsBasic) => Promise<TD | void>;
+}
 
 // const c: TableHandler<{ h: number }>;
 
@@ -147,10 +196,15 @@ export type TableHandler<TT = AnyObject> = ViewHandler<TT> & {
 // })
 
 export type JoinMaker<TT = AnyObject> = (filter?: FullFilter<TT>, select?: Select<TT>, options?: SelectParams<TT>) => any;
+export type JoinMakerBasic = (filter?: FullFilterBasic, select?: SelectBasic, options?: SelectParamsBasic) => any;
 
 export type TableJoin = {
   [key: string]: JoinMaker;
 }
+export type TableJoinBasic = {
+  [key: string]: JoinMakerBasic;
+}
+
 export type DbJoinMaker = {
   innerJoin: TableJoin;
   leftJoin: TableJoin;
@@ -163,6 +217,14 @@ export type DBHandler = {
 } & DbJoinMaker;
 
 
+export type DBHandlerBasic = {
+  [key: string]: Partial<TableHandlerBasic>;
+} & {
+  innerJoin: TableJoinBasic;
+  leftJoin: TableJoinBasic;
+  innerJoinOne: TableJoinBasic;
+  leftJoinOne: TableJoinBasic;
+}
 
 /**
  * Simpler DBHandler types to reduce load on TS
@@ -208,7 +270,7 @@ export const CHANNELS = {
 
 // import { md5 } from "./md5";
 export { getTextPatch, unpatchText, isEmpty, WAL, WALConfig, asName } from "./util";
-export { EXISTS_KEYS, FilterDataType, FullFilter, GeomFilterKeys, GeomFilter_Funcs, TextFilter_FullTextSearchFilterKeys } from "./filters";
+export { EXISTS_KEYS, FilterDataType, FullFilter, FullFilterBasic, GeomFilterKeys, GeomFilter_Funcs, TextFilter_FullTextSearchFilterKeys } from "./filters";
 
 // const util = { getTextPatch, unpatchText, md5 };
 // export { util };

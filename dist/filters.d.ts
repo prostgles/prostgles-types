@@ -84,7 +84,7 @@ export declare type FilterDataType<T = any> = T extends string ? TextFilter : T 
 export declare const EXISTS_KEYS: readonly ["$exists", "$notExists", "$existsJoined", "$notExistsJoined"];
 export declare type EXISTS_KEY = typeof EXISTS_KEYS[number];
 export declare type FilterForObject<T = AnyObject> = {
-    [K in keyof Partial<T>]: FilterDataType<T[K]>;
+    [K in keyof Partial<T> & AnyObject]: FilterDataType<T[K]>;
 } | {
     [K in keyof Omit<{
         [key: string]: any;

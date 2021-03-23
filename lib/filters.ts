@@ -112,7 +112,7 @@ export type EXISTS_KEY = typeof EXISTS_KEYS[number];
 
 /* Traverses object keys to make filter */
 export type FilterForObject<T = AnyObject> = {
-  [K in keyof Partial<T>]: FilterDataType<T[K]>
+  [K in keyof Partial<T> & AnyObject]: FilterDataType<T[K]>
 } | 
 /**
  * Filters with shorthand notation

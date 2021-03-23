@@ -151,28 +151,36 @@ export type DeleteParamsBasic = {
  * Adds unknown props to object
  * Used in represent data returned from a query that can have arbitrary computed fields
  */
-export type DExtended<T = AnyObject> = Partial<T & { [x: string]: any }>;
 
+export type PartialLax<T = AnyObject> = Partial<T>  & AnyObject;
 
 export type ViewHandler<TT = AnyObject> = {
   getColumns: () => Promise<ValidatedColumnInfo[]>;
-  find: <TD = TT>(filter?: FullFilter<TD>, selectParams?: SelectParams<TD>) => Promise<DExtended<TD>[]>;
-  findOne: <TD = TT>(filter?: FullFilter<TD>, selectParams?: SelectParams<TD>) => Promise<DExtended<TD>>;
-  subscribe: <TD = TT>(filter: FullFilter<TD>, params: SelectParams<TD>, onData: (items: DExtended<TD>[]) => any) => Promise<{ unsubscribe: () => any }>;
-  subscribeOne: <TD = TT>(filter: FullFilter<TD>, params: SelectParams<TD>, onData: (item: DExtended<TD>) => any) => Promise<{ unsubscribe: () => any }>;
+  find: <TD = TT>(filter?: FullFilter<TD>, selectParams?: SelectParams<TD>) => Promise<PartialLax<TD>[]>;
+  findOne: <TD = TT>(filter?: FullFilter<TD>, selectParams?: SelectParams<TD>) => Promise<PartialLax<TD>>;
+  subscribe: <TD = TT>(filter: FullFilter<TD>, params: SelectParams<TD>, onData: (items: PartialLax<TD>[]) => any) => Promise<{ unsubscribe: () => any }>;
+  subscribeOne: <TD = TT>(filter: FullFilter<TD>, params: SelectParams<TD>, onData: (item: PartialLax<TD>) => any) => Promise<{ unsubscribe: () => any }>;
   count: <TD = TT>(filter?: FullFilter<TD>) => Promise<number>;
 }
 
 export type TableHandler<TT = AnyObject> = ViewHandler<TT> & {
-  update: <TD = TT>(filter: FullFilter<TD>, newData: Partial<TD>, params?: UpdateParams<TD>) => Promise<DExtended<TD> | void>;
-  updateBatch: <TD = TT>(data: [FullFilter<TD>, Partial<TD>][], params?: UpdateParams<TD>) => Promise<DExtended<TD> | void>;
-  upsert: <TD = TT>(filter: FullFilter<TD>, newData: Partial<TD>, params?: UpdateParams<TD>) => Promise<DExtended<TD> | void>;
-  insert: <TD = TT>(data: (Partial<TD> | Partial<TD>[]), params?: InsertParams<TD>) => Promise<DExtended<TD> | void>;
-  delete: <TD = TT>(filter?: FullFilter<TD>, params?: DeleteParams<TD>) => Promise<DExtended<TD> | void>;
+  update: <TD = TT>(filter: FullFilter<TD>, newData: PartialLax<TD>, params?: UpdateParams<TD>) => Promise<PartialLax<TD> | void>;
+  updateBatch: <TD = TT>(data: [FullFilter<TD>, PartialLax<TD>][], params?: UpdateParams<TD>) => Promise<PartialLax<TD> | void>;
+  upsert: <TD = TT>(filter: FullFilter<TD>, newData: PartialLax<TD>, params?: UpdateParams<TD>) => Promise<PartialLax<TD> | void>;
+  insert: <TD = TT>(data: (PartialLax<TD> | PartialLax<TD>[]), params?: InsertParams<TD>) => Promise<PartialLax<TD> | void>;
+  delete: <TD = TT>(filter?: FullFilter<TD>, params?: DeleteParams<TD>) => Promise<PartialLax<TD> | void>;
 }
 
+// const c: TableHandler<{ h: number }> = {} as any;
+// c.findOne({ }, { select: { h: 2 }}).then(r => {
+//   r.hd
+// });
+// c.update({ a: 2 }, { z: '2' });
+// c.subscribe({ x: 10}, {}, d => {
+//   d.filter(dd => dd.x === 20);
+// })
 
-export type PartialLax<T = AnyObject> = Partial<T & AnyObject>;
+
 export type ViewHandlerBasic = {
   getColumns: () => Promise<ValidatedColumnInfo[]>;
   find: <TD = AnyObject>(filter?: FullFilterBasic, selectParams?: SelectParamsBasic) => Promise<PartialLax<TD>[]>;
@@ -189,12 +197,6 @@ export type TableHandlerBasic = ViewHandlerBasic & {
   insert: <TD = AnyObject>(data: (PartialLax<TD> | PartialLax<TD>[]), params?: InsertParamsBasic) => Promise<PartialLax<TD> | void>;
   delete: <TD = AnyObject>(filter?: FullFilterBasic, params?: DeleteParamsBasic) => Promise<PartialLax<TD> | void>;
 }
-
-// const c: TableHandler<{ h: number }>;
-
-// c.findOne({ }, { select: { h: 2 }}).then(r => {
-  
-// })
 
 export type JoinMaker<TT = AnyObject> = (filter?: FullFilter<TT>, select?: Select<TT>, options?: SelectParams<TT>) => any;
 export type JoinMakerBasic = (filter?: FullFilterBasic, select?: SelectBasic, options?: SelectParamsBasic) => any;

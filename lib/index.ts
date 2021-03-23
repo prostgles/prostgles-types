@@ -218,6 +218,9 @@ export type DBHandler = {
 } & DbJoinMaker;
 
 
+/**
+ * Simpler DBHandler types to reduce load on TS
+ */
 export type DBHandlerBasic = {
   [key: string]: Partial<TableHandlerBasic>;
 } & {
@@ -226,10 +229,6 @@ export type DBHandlerBasic = {
   innerJoinOne: TableJoinBasic;
   leftJoinOne: TableJoinBasic;
 }
-
-/**
- * Simpler DBHandler types to reduce load on TS
- */
 
 
 

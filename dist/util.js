@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.isEmpty = exports.WAL = exports.unpatchText = exports.getTextPatch = exports.stableStringify = exports.asName = void 0;
+exports.get = exports.isEmpty = exports.WAL = exports.unpatchText = exports.getTextPatch = exports.stableStringify = exports.asName = void 0;
 const md5_1 = require("./md5");
 function asName(str) {
     if (str === null || str === undefined || !str.toString || !str.toString())
@@ -247,4 +247,20 @@ function isEmpty(obj) {
     return true;
 }
 exports.isEmpty = isEmpty;
+function get(obj, propertyPath) {
+    let p = propertyPath, o = obj;
+    if (!obj)
+        return obj;
+    if (typeof p === "string")
+        p = p.split(".");
+    return p.reduce((xs, x) => {
+        if (xs && xs[x]) {
+            return xs[x];
+        }
+        else {
+            return undefined;
+        }
+    }, o);
+}
+exports.get = get;
 //# sourceMappingURL=util.js.map

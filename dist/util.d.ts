@@ -47,4 +47,5 @@ export declare class WAL {
     private sendItems;
 }
 export declare function isEmpty(obj?: any): boolean;
+export declare function get(obj: any, propertyPath: string | string[]): any;
 //# sourceMappingURL=util.d.ts.map

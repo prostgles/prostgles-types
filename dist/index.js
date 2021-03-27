@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.TextFilter_FullTextSearchFilterKeys = exports.GeomFilter_Funcs = exports.GeomFilterKeys = exports.EXISTS_KEYS = exports.asName = exports.WAL = exports.isEmpty = exports.unpatchText = exports.getTextPatch = exports.CHANNELS = void 0;
+exports.TextFilter_FullTextSearchFilterKeys = exports.GeomFilter_Funcs = exports.GeomFilterKeys = exports.EXISTS_KEYS = exports.asName = exports.WAL = exports.isEmpty = exports.unpatchText = exports.getTextPatch = exports.get = exports.CHANNELS = void 0;
 const preffix = "_psqlWS_.";
 exports.CHANNELS = {
     SCHEMA_CHANGED: preffix + "schema-changed",
@@ -14,6 +14,7 @@ exports.CHANNELS = {
     _preffix: preffix,
 };
 var util_1 = require("./util");
+Object.defineProperty(exports, "get", { enumerable: true, get: function () { return util_1.get; } });
 Object.defineProperty(exports, "getTextPatch", { enumerable: true, get: function () { return util_1.getTextPatch; } });
 Object.defineProperty(exports, "unpatchText", { enumerable: true, get: function () { return util_1.unpatchText; } });
 Object.defineProperty(exports, "isEmpty", { enumerable: true, get: function () { return util_1.isEmpty; } });

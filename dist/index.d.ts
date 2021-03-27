@@ -158,6 +158,6 @@ export declare const CHANNELS: {
     LOGOUT: string;
     _preffix: string;
 };
-export { getTextPatch, unpatchText, isEmpty, WAL, WALConfig, asName } from "./util";
+export { get, getTextPatch, unpatchText, isEmpty, WAL, WALConfig, asName } from "./util";
 export { EXISTS_KEYS, FilterDataType, FullFilter, FullFilterBasic, GeomFilterKeys, GeomFilter_Funcs, TextFilter_FullTextSearchFilterKeys } from "./filters";
 //# sourceMappingURL=index.d.ts.map

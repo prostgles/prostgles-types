@@ -4,6 +4,21 @@ import { FullFilter, AnyObject, FullFilterBasic } from "./filters";
 export type ColumnInfo = {
   name: string;
 
+  /**
+   * Column description (if provided)
+   */
+  comment: string;
+
+  /**
+   * Ordinal position of the column within the table (count starts at 1)
+   */
+  ordinal_position: number;
+
+  /**
+   * True if column is nullable. A not-null constraint is one way a column can be known not nullable, but there may be others.
+   */
+  is_nullable: boolean;
+
   /* Simplified data type */
   data_type: string;
 

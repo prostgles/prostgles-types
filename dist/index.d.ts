@@ -1,6 +1,9 @@
 import { FullFilter, AnyObject, FullFilterBasic } from "./filters";
 export declare type ColumnInfo = {
     name: string;
+    comment: string;
+    ordinal_position: number;
+    is_nullable: boolean;
     data_type: string;
     udt_name: string;
     element_type: string;

@@ -1,6 +1,14 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.TextFilter_FullTextSearchFilterKeys = exports.GeomFilter_Funcs = exports.GeomFilterKeys = exports.EXISTS_KEYS = exports.asName = exports.WAL = exports.isEmpty = exports.unpatchText = exports.getTextPatch = exports.get = exports.CHANNELS = void 0;
+const c = {};
+c.findOne({}, { select: { h: 2 } }).then(r => {
+    r.hd;
+});
+c.update({ da: 2 }, { zd: '2' });
+c.subscribe({ x: 10 }, {}, d => {
+    d.filter(dd => dd.x === 20);
+});
 const preffix = "_psqlWS_.";
 exports.CHANNELS = {
     SCHEMA_CHANGED: preffix + "schema-changed",

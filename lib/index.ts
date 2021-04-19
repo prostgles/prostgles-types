@@ -194,14 +194,14 @@ export type TableHandler<TT = AnyObject> = ViewHandler<TT> & {
   delete: <TD = TT>(filter?: FullFilter<TD>, params?: DeleteParams<TD>) => Promise<PartialLax<TD> | void>;
 }
 
-const c: TableHandler<{ h: number }> = {} as any;
-c.findOne({ }, { select: { h: 2 }}).then(r => {
-  r.hd;
-});
-c.update({ da: 2 }, { zd: '2' });
-c.subscribe({ x: 10}, {}, d => {
-  d.filter(dd => dd.x === 20);
-})
+// const c: TableHandler<{ h: number }> = {} as any;
+// c.findOne({ }, { select: { h: 2 }}).then(r => {
+//   r.hd;
+// });
+// c.update({ da: 2 }, { zd: '2' });
+// c.subscribe({ x: 10}, {}, d => {
+//   d.filter(dd => dd.x === 20);
+// })
 
 
 export type ViewHandlerBasic = {

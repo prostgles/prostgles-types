@@ -285,6 +285,8 @@ export const CHANNELS = {
   DEFAULT: preffix,
   SQL: `${preffix}sql`,
   METHOD: `${preffix}method`,
+  NOTICE_EV: `${preffix}notice`,
+  LISTEN_EV: `${preffix}listen`,
 
   /* Auth channels */
   REGISTER: `${preffix}register`,

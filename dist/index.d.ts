@@ -163,6 +163,8 @@ export declare const CHANNELS: {
     DEFAULT: string;
     SQL: string;
     METHOD: string;
+    NOTICE_EV: string;
+    LISTEN_EV: string;
     REGISTER: string;
     LOGIN: string;
     LOGOUT: string;

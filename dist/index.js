@@ -8,6 +8,8 @@ exports.CHANNELS = {
     DEFAULT: preffix,
     SQL: `${preffix}sql`,
     METHOD: `${preffix}method`,
+    NOTICE_EV: `${preffix}notice`,
+    LISTEN_EV: `${preffix}listen`,
     REGISTER: `${preffix}register`,
     LOGIN: `${preffix}login`,
     LOGOUT: `${preffix}logout`,

@@ -151,11 +151,21 @@ export declare type DBHandlerBasic = {
 };
 export declare type SQLOptions = {
     returnType?: "rows" | "statement";
+    getNotices?: boolean;
 };
 export declare type SQLRequest = {
     query: string;
     params?: any | any[];
     options?: SQLOptions;
+};
+export declare type NotifSubscription = {
+    socketChannel: string;
+    socketUnsubChannel: string;
+    notifChannel: string;
+};
+export declare type NoticeSubscription = {
+    socketChannel: string;
+    socketUnsubChannel: string;
 };
 export declare const CHANNELS: {
     SCHEMA_CHANGED: string;

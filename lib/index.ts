@@ -267,6 +267,11 @@ export type SQLOptions = {
    * Change the return type
    */
   returnType?: "rows" | "statement";
+
+  /**
+   * If true then the server will return a subscription to postgres notices
+   */
+  getNotices?: boolean;
 }
 
 
@@ -274,6 +279,17 @@ export type SQLRequest = {
   query: string;
   params?: any | any[];
   options?:  SQLOptions
+}
+
+export type NotifSubscription = {
+  socketChannel: string;
+  socketUnsubChannel: string;
+  notifChannel: string;
+}
+
+export type NoticeSubscription = {
+  socketChannel: string;
+  socketUnsubChannel: string;
 }
 
 const preffix = "_psqlWS_.";

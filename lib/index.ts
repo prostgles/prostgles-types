@@ -262,6 +262,15 @@ export type DBHandlerBasic = {
  * Other
  */
 
+export type DBNoticeConfig = {
+  socketChannel: string;
+  socketUnsubChannel: string;
+}
+
+export type DBNotifConfig = DBNoticeConfig & {
+  notifChannel: string;
+}
+
 export type SQLOptions = {
   /**
    * Change the return type

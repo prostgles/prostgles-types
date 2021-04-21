@@ -149,6 +149,13 @@ export declare type DBHandlerBasic = {
     innerJoinOne: TableJoinBasic;
     leftJoinOne: TableJoinBasic;
 };
+export declare type DBNoticeConfig = {
+    socketChannel: string;
+    socketUnsubChannel: string;
+};
+export declare type DBNotifConfig = DBNoticeConfig & {
+    notifChannel: string;
+};
 export declare type SQLOptions = {
     returnType?: "rows" | "statement";
     getNotices?: boolean;

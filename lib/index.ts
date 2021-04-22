@@ -271,18 +271,13 @@ export type DBNotifConfig = DBNoticeConfig & {
   notifChannel: string;
 }
 
+
 export type SQLOptions = {
   /**
-   * Change the return type
+   * Return type
    */
-  returnType?: "rows" | "statement";
-
-  /**
-   * If true then the server will return a subscription to postgres notices
-   */
-  getNotices?: boolean;
-}
-
+  returnType: "statement" | "rows" | "noticeSubscription";
+} ;
 
 export type SQLRequest = {
   query: string;

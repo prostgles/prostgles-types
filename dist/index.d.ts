@@ -157,8 +157,7 @@ export declare type DBNotifConfig = DBNoticeConfig & {
     notifChannel: string;
 };
 export declare type SQLOptions = {
-    returnType?: "rows" | "statement";
-    getNotices?: boolean;
+    returnType: "statement" | "rows" | "noticeSubscription";
 };
 export declare type SQLRequest = {
     query: string;

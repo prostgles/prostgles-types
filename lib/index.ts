@@ -119,7 +119,7 @@ export type SelectParams<T = AnyObject> = {
   orderBy?: OrderBy<T>;
   expectOne?: boolean;
 }
-export type SubscribeParams<T> = SelectParams<T> & {
+export type SubscribeParams<T = AnyObject> = SelectParams<T> & {
   throttle?: number;
 };
 

@@ -43,7 +43,7 @@ export declare type SelectParams<T = AnyObject> = {
     orderBy?: OrderBy<T>;
     expectOne?: boolean;
 };
-export declare type SubscribeParams<T> = SelectParams<T> & {
+export declare type SubscribeParams<T = AnyObject> = SelectParams<T> & {
     throttle?: number;
 };
 export declare type UpdateParams<T = AnyObject> = {

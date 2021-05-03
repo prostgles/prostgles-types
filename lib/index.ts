@@ -119,6 +119,10 @@ export type SelectParams<T = AnyObject> = {
   orderBy?: OrderBy<T>;
   expectOne?: boolean;
 }
+export type SubscribeParams<T> = SelectParams<T> & {
+  throttle?: number;
+};
+
 export type UpdateParams<T = AnyObject> = {
   returning?: Select<T>;
   onConflictDoNothing?: boolean;
@@ -146,6 +150,10 @@ export type SelectParamsBasic = {
   orderBy?: OrderBy;
   expectOne?: boolean;
 }
+export type SubscribeParamsBasic = SelectParamsBasic & {
+  throttle?: number;
+};
+
 export type UpdateParamsBasic = {
   returning?: SelectBasic;
   onConflictDoNothing?: boolean;
@@ -181,8 +189,8 @@ export type ViewHandler<TT = AnyObject> = {
   getColumns?: () => Promise<ValidatedColumnInfo[]>;
   find: <TD = TT>(filter?: FullFilter<TD>, selectParams?: SelectParams<TD>) => Promise<PartialLax<TD>[]>;
   findOne: <TD = TT>(filter?: FullFilter<TD>, selectParams?: SelectParams<TD>) => Promise<PartialLax<TD>>;
-  subscribe: <TD = TT>(filter: FullFilter<TD>, params: SelectParams<TD>, onData: (items: PartialLax<TD>[], onError?: OnError) => any) => Promise<{ unsubscribe: () => any }>;
-  subscribeOne: <TD = TT>(filter: FullFilter<TD>, params: SelectParams<TD>, onData: (item: PartialLax<TD>) => any, onError?: OnError) => Promise<{ unsubscribe: () => any }>;
+  subscribe: <TD = TT>(filter: FullFilter<TD>, params: SubscribeParams<TD>, onData: (items: PartialLax<TD>[], onError?: OnError) => any) => Promise<{ unsubscribe: () => any }>;
+  subscribeOne: <TD = TT>(filter: FullFilter<TD>, params: SubscribeParams<TD>, onData: (item: PartialLax<TD>) => any, onError?: OnError) => Promise<{ unsubscribe: () => any }>;
   count: <TD = TT>(filter?: FullFilter<TD>) => Promise<number>;
 }
 
@@ -209,8 +217,8 @@ export type ViewHandlerBasic = {
   getColumns?: () => Promise<ValidatedColumnInfo[]>;
   find: <TD = AnyObject>(filter?: FullFilterBasic, selectParams?: SelectParamsBasic) => Promise<PartialLax<TD>[]>;
   findOne: <TD = AnyObject>(filter?: FullFilterBasic, selectParams?: SelectParamsBasic) => Promise<PartialLax<TD>>;
-  subscribe: <TD = AnyObject>(filter: FullFilterBasic, params: SelectParamsBasic, onData: (items: PartialLax<TD>[], onError?: OnError) => any) => Promise<{ unsubscribe: () => any }>;
-  subscribeOne: <TD = AnyObject>(filter: FullFilterBasic, params: SelectParamsBasic, onData: (item: PartialLax<TD>, onError?: OnError) => any) => Promise<{ unsubscribe: () => any }>;
+  subscribe: <TD = AnyObject>(filter: FullFilterBasic, params: SubscribeParamsBasic, onData: (items: PartialLax<TD>[], onError?: OnError) => any) => Promise<{ unsubscribe: () => any }>;
+  subscribeOne: <TD = AnyObject>(filter: FullFilterBasic, params: SubscribeParamsBasic, onData: (item: PartialLax<TD>, onError?: OnError) => any) => Promise<{ unsubscribe: () => any }>;
   count: (filter?: FullFilterBasic) => Promise<number>;
 }
 

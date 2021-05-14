@@ -32,12 +32,14 @@ export type ColumnInfo = {
   is_pkey: boolean;
 }
 
+export type TS_DATA_TYPE = "string" | "number" | "boolean" | "Object" | "Date" | "Array<number>" | "Array<boolean>" | "Array<string>" | "Array<Object>" | "Array<Date>" | "any";
+
 export type ValidatedColumnInfo = ColumnInfo & {
 
   /**
    * TypeScript data type
    */
-  tsDataType: string;
+  tsDataType: TS_DATA_TYPE;
 
   /**
    * Fields that can be viewed

@@ -9,8 +9,9 @@ export declare type ColumnInfo = {
     element_type: string;
     is_pkey: boolean;
 };
+export declare type TS_DATA_TYPE = "string" | "number" | "boolean" | "Object" | "Date" | "Array<number>" | "Array<boolean>" | "Array<string>" | "Array<Object>" | "Array<Date>" | "any";
 export declare type ValidatedColumnInfo = ColumnInfo & {
-    tsDataType: string;
+    tsDataType: TS_DATA_TYPE;
     select: boolean;
     filter: boolean;
     insert: boolean;

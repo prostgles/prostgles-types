@@ -8,6 +8,11 @@ export declare type ColumnInfo = {
     udt_name: string;
     element_type: string;
     is_pkey: boolean;
+    references?: {
+        ftable: string;
+        fcol: string[];
+        col: string[];
+    };
 };
 export declare type TS_DATA_TYPE = "string" | "number" | "boolean" | "Object" | "Date" | "Array<number>" | "Array<boolean>" | "Array<string>" | "Array<Object>" | "Array<Date>" | "any";
 export declare type ValidatedColumnInfo = ColumnInfo & {

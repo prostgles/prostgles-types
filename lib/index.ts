@@ -30,6 +30,13 @@ export type ColumnInfo = {
 
   /* PRIMARY KEY constraint on column. A table can have more then one PK */
   is_pkey: boolean;
+
+  /* Foreign key constraint */
+  references?: {
+    ftable: string;
+    fcol: string[];
+    col: string[];
+  }
 }
 
 export type TS_DATA_TYPE = "string" | "number" | "boolean" | "Object" | "Date" | "Array<number>" | "Array<boolean>" | "Array<string>" | "Array<Object>" | "Array<Date>" | "any";

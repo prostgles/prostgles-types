@@ -327,8 +327,9 @@ export const CHANNELS = {
 }
 
 // import { md5 } from "./md5";
-export { get, getTextPatch, unpatchText, isEmpty, WAL, WALConfig, asName } from "./util";
-export { EXISTS_KEYS, FilterDataType, FullFilter, FullFilterBasic, GeomFilterKeys, GeomFilter_Funcs, TextFilter_FullTextSearchFilterKeys } from "./filters";
+// export { get, getTextPatch, unpatchText, isEmpty, WAL, WALConfig, asName } from "./util";
+export * from "./util";
+export * from "./filters";
 
 // const util = { getTextPatch, unpatchText, md5 };
 // export { util };

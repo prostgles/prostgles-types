@@ -34,8 +34,8 @@ export type ColumnInfo = {
   /* Foreign key constraint */
   references?: {
     ftable: string;
-    fcol: string[];
-    col: string[];
+    fcols: string[];
+    cols: string[];
   }
 }
 

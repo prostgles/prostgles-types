@@ -10,8 +10,8 @@ export declare type ColumnInfo = {
     is_pkey: boolean;
     references?: {
         ftable: string;
-        fcol: string[];
-        col: string[];
+        fcols: string[];
+        cols: string[];
     };
 };
 export declare type TS_DATA_TYPE = "string" | "number" | "boolean" | "Object" | "Date" | "Array<number>" | "Array<boolean>" | "Array<string>" | "Array<Object>" | "Array<Date>" | "any";

@@ -193,13 +193,20 @@ export type TableInfo = {
 
 export type OnError = (err: any) => void;
 
+export type SubscriptionHandler<T = AnyObject> = Promise<{
+    unsubscribe: () => Promise<any>;
+    update?: (newData: T, updateParams: UpdateParams<T>) => Promise<any>;
+    delete?: (deleteParams: DeleteParams<T>) => Promise<any>;
+    filter: FullFilter<T> | {};
+}>
+
 export type ViewHandler<TT = AnyObject> = {
   getInfo?: () => Promise<TableInfo>;
   getColumns?: () => Promise<ValidatedColumnInfo[]>;
   find: <TD = TT>(filter?: FullFilter<TD>, selectParams?: SelectParams<TD>) => Promise<PartialLax<TD>[]>;
   findOne: <TD = TT>(filter?: FullFilter<TD>, selectParams?: SelectParams<TD>) => Promise<PartialLax<TD>>;
-  subscribe: <TD = TT>(filter: FullFilter<TD>, params: SubscribeParams<TD>, onData: (items: PartialLax<TD>[], onError?: OnError) => any) => Promise<{ unsubscribe: () => any }>;
-  subscribeOne: <TD = TT>(filter: FullFilter<TD>, params: SubscribeParams<TD>, onData: (item: PartialLax<TD>) => any, onError?: OnError) => Promise<{ unsubscribe: () => any }>;
+  subscribe: <TD = TT>(filter: FullFilter<TD>, params: SubscribeParams<TD>, onData: (items: PartialLax<TD>[], onError?: OnError) => any) => SubscriptionHandler;
+  subscribeOne: <TD = TT>(filter: FullFilter<TD>, params: SubscribeParams<TD>, onData: (item: PartialLax<TD>) => any, onError?: OnError) => SubscriptionHandler;
   count: <TD = TT>(filter?: FullFilter<TD>) => Promise<number>;
 }
 

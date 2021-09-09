@@ -121,13 +121,33 @@ export type SelectBasic =
  | "*" 
 ;
 
-export type SelectParams<T = AnyObject> = {
-  select?: Select<T>;
+/**
+ * Simpler types
+ */
+ export type SelectParamsBasic = {
+  select?: SelectBasic;
   limit?: number;
   offset?: number;
-  orderBy?: OrderBy<T>;
-  expectOne?: boolean;
+  orderBy?: OrderBy;
+  /**
+   * Will group by all non aggregated fields specified in select (or all fields by default)
+   */
   groupBy?: boolean;
+
+  /**
+   * Will return the first row as an object. Will throw an error if more than a row is returned
+   */
+  returnOne?: boolean;
+
+  /**
+   * Will return an array of values corresponding to the first and only selected field row values
+   */
+  returnOneArray?: boolean;
+}
+
+export type SelectParams<T = AnyObject> = SelectParamsBasic & {
+  select?: Select<T>;
+  orderBy?: OrderBy<T>;
 }
 export type SubscribeParams<T = AnyObject> = SelectParams<T> & {
   throttle?: number;
@@ -150,17 +170,6 @@ export type DeleteParams<T = AnyObject> = {
   returning?: Select<T>;
 }
 
-/**
- * Simpler types
- */
-export type SelectParamsBasic = {
-  select?: SelectBasic;
-  limit?: number;
-  offset?: number;
-  orderBy?: OrderBy;
-  expectOne?: boolean;
-  groupBy?: boolean;
-}
 export type SubscribeParamsBasic = SelectParamsBasic & {
   throttle?: number;
 };

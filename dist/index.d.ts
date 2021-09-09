@@ -43,13 +43,18 @@ export declare type Select<T = AnyObject> = {
 export declare type SelectBasic = {
     [key: string]: any;
 } | {} | undefined | "" | "*";
-export declare type SelectParams<T = AnyObject> = {
-    select?: Select<T>;
+export declare type SelectParamsBasic = {
+    select?: SelectBasic;
     limit?: number;
     offset?: number;
-    orderBy?: OrderBy<T>;
-    expectOne?: boolean;
+    orderBy?: OrderBy;
     groupBy?: boolean;
+    returnOne?: boolean;
+    returnOneArray?: boolean;
+};
+export declare type SelectParams<T = AnyObject> = SelectParamsBasic & {
+    select?: Select<T>;
+    orderBy?: OrderBy<T>;
 };
 export declare type SubscribeParams<T = AnyObject> = SelectParams<T> & {
     throttle?: number;
@@ -67,14 +72,6 @@ export declare type InsertParams<T = AnyObject> = {
 };
 export declare type DeleteParams<T = AnyObject> = {
     returning?: Select<T>;
-};
-export declare type SelectParamsBasic = {
-    select?: SelectBasic;
-    limit?: number;
-    offset?: number;
-    orderBy?: OrderBy;
-    expectOne?: boolean;
-    groupBy?: boolean;
 };
 export declare type SubscribeParamsBasic = SelectParamsBasic & {
     throttle?: number;

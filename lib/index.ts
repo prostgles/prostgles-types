@@ -92,34 +92,34 @@ export type AscOrDesc = 1 | -1 | boolean;
  * Array order is maintained
  */
 export type _OrderBy<T = AnyObject> = 
-| { [K in keyof Partial<T>]: AscOrDesc }
-| { [K in keyof Partial<T>]: AscOrDesc }[]
-| { key: keyof T, asc: AscOrDesc, nulls?: "last" | "first" }[] 
-| Array<keyof T>
-| keyof T
-;
+  | { [K in keyof Partial<T>]: AscOrDesc }
+  | { [K in keyof Partial<T>]: AscOrDesc }[]
+  | { key: keyof T, asc: AscOrDesc, nulls?: "last" | "first" }[] 
+  | Array<keyof T>
+  | keyof T
+  ;
 
 export type OrderBy<T = AnyObject> = 
-| _OrderBy<T>
-| _OrderBy<AnyObject>
-;
+  | _OrderBy<T>
+  | _OrderBy<AnyObject>
+  ;
 
 export type Select<T = AnyObject> = 
- | { [K in keyof Partial<T>]: any } 
- | {} 
- | undefined 
- | "" 
- | "*" 
- | AnyObject 
- | Array<keyof T>
-;
+  | { [K in keyof Partial<T>]: any } 
+  | {} 
+  | undefined 
+  | "" 
+  | "*" 
+  | AnyObject 
+  | Array<keyof T>
+  ;
 export type SelectBasic = 
- | { [key: string]: any } 
- | {} 
- | undefined 
- | "" 
- | "*" 
-;
+  | { [key: string]: any } 
+  | {} 
+  | undefined 
+  | "" 
+  | "*" 
+  ;
 
 /* Simpler types */
 
@@ -128,12 +128,13 @@ export type SelectBasic =
   limit?: number;
   offset?: number;
   orderBy?: OrderBy;
+
   /**
    * Will group by all non aggregated fields specified in select (or all fields by default)
    */
   groupBy?: boolean;
 
-  return?: 
+  returnType?: 
 
   /**
    * Will return the first row as an object. Will throw an error if more than a row is returned. Use limit: 1 to avoid error.

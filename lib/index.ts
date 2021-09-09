@@ -121,9 +121,8 @@ export type SelectBasic =
  | "*" 
 ;
 
-/**
- * Simpler types
- */
+/* Simpler types */
+
  export type SelectParamsBasic = {
   select?: SelectBasic;
   limit?: number;
@@ -134,15 +133,18 @@ export type SelectBasic =
    */
   groupBy?: boolean;
 
-  /**
-   * Will return the first row as an object. Will throw an error if more than a row is returned
-   */
-  returnOne?: boolean;
+  return?: 
 
   /**
-   * Will return an array of values corresponding to the first and only selected field row values
+   * Will return the first row as an object. Will throw an error if more than a row is returned. Use limit: 1 to avoid error.
    */
-  returnOneArray?: boolean;
+  | "row"
+
+  /**
+    * Will return an array of values from the selected field. Similar to array_agg(field).
+    */
+  | "values"
+ ;
 }
 
 export type SelectParams<T = AnyObject> = SelectParamsBasic & {

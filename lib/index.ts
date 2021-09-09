@@ -94,7 +94,7 @@ export type AscOrDesc = 1 | -1 | boolean;
 export type _OrderBy<T = AnyObject> = 
 | { [K in keyof Partial<T>]: AscOrDesc }
 | { [K in keyof Partial<T>]: AscOrDesc }[]
-| { key: keyof T, asc: AscOrDesc }[] 
+| { key: keyof T, asc: AscOrDesc, nulls?: "last" | "first" }[] 
 | Array<keyof T>
 | keyof T
 ;
@@ -127,6 +127,7 @@ export type SelectParams<T = AnyObject> = {
   offset?: number;
   orderBy?: OrderBy<T>;
   expectOne?: boolean;
+  groupBy?: boolean;
 }
 export type SubscribeParams<T = AnyObject> = SelectParams<T> & {
   throttle?: number;
@@ -158,6 +159,7 @@ export type SelectParamsBasic = {
   offset?: number;
   orderBy?: OrderBy;
   expectOne?: boolean;
+  groupBy?: boolean;
 }
 export type SubscribeParamsBasic = SelectParamsBasic & {
   throttle?: number;

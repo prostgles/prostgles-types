@@ -34,6 +34,7 @@ export declare type _OrderBy<T = AnyObject> = {
 }[] | {
     key: keyof T;
     asc: AscOrDesc;
+    nulls?: "last" | "first";
 }[] | Array<keyof T> | keyof T;
 export declare type OrderBy<T = AnyObject> = _OrderBy<T> | _OrderBy<AnyObject>;
 export declare type Select<T = AnyObject> = {
@@ -48,6 +49,7 @@ export declare type SelectParams<T = AnyObject> = {
     offset?: number;
     orderBy?: OrderBy<T>;
     expectOne?: boolean;
+    groupBy?: boolean;
 };
 export declare type SubscribeParams<T = AnyObject> = SelectParams<T> & {
     throttle?: number;
@@ -72,6 +74,7 @@ export declare type SelectParamsBasic = {
     offset?: number;
     orderBy?: OrderBy;
     expectOne?: boolean;
+    groupBy?: boolean;
 };
 export declare type SubscribeParamsBasic = SelectParamsBasic & {
     throttle?: number;

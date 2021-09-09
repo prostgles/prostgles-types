@@ -142,6 +142,11 @@ export type SelectBasic =
   | "row"
 
   /**
+    * Will return the first value from the selected field
+    */
+  | "value"
+
+  /**
     * Will return an array of values from the selected field. Similar to array_agg(field).
     */
   | "values"

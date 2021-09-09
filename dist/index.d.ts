@@ -49,7 +49,7 @@ export declare type SelectParamsBasic = {
     offset?: number;
     orderBy?: OrderBy;
     groupBy?: boolean;
-    returnType?: "row" | "values";
+    returnType?: "row" | "value" | "values";
 };
 export declare type SelectParams<T = AnyObject> = SelectParamsBasic & {
     select?: Select<T>;

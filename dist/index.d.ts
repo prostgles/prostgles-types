@@ -33,7 +33,7 @@ export declare type _OrderBy<T = AnyObject> = {
     [K in keyof Partial<T>]: AscOrDesc;
 }[] | {
     key: keyof T;
-    asc: AscOrDesc;
+    asc?: AscOrDesc;
     nulls?: "last" | "first";
 }[] | Array<keyof T> | keyof T;
 export declare type OrderBy<T = AnyObject> = _OrderBy<T> | _OrderBy<AnyObject>;

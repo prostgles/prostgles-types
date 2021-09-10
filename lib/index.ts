@@ -94,7 +94,7 @@ export type AscOrDesc = 1 | -1 | boolean;
 export type _OrderBy<T = AnyObject> = 
   | { [K in keyof Partial<T>]: AscOrDesc }
   | { [K in keyof Partial<T>]: AscOrDesc }[]
-  | { key: keyof T, asc: AscOrDesc, nulls?: "last" | "first" }[] 
+  | { key: keyof T, asc?: AscOrDesc, nulls?: "last" | "first" }[] 
   | Array<keyof T>
   | keyof T
   ;
@@ -363,7 +363,3 @@ export const CHANNELS = {
 // export { get, getTextPatch, unpatchText, isEmpty, WAL, WALConfig, asName } from "./util";
 export * from "./util";
 export * from "./filters";
-
-// const util = { getTextPatch, unpatchText, md5 };
-// export { util };
-// export { getTextPatch, unpatchText, md5 };

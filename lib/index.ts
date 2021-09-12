@@ -1,6 +1,35 @@
 
 import { FullFilter, AnyObject, FullFilterBasic } from "./filters";
 
+export const _PG_strings = ['bpchar','char','varchar','text','citext','uuid','bytea','inet','time','timetz','interval','name'] as const;
+export const _PG_numbers = ['int2','int4','int8','float4','float8','numeric','money','oid'] as const;
+export const _PG_json = ['json', 'jsonb'] as const;
+export const _PG_bool = ['bool'] as const;
+export const _PG_date = ['date', 'timestamp', 'timestamptz'] as const;
+export const _PG_postgis = ['geometry'] as const;
+export type PG_COLUMN_UDT_DATA_TYPE = 
+    | typeof _PG_strings[number] 
+    | typeof _PG_numbers[number] 
+    | typeof _PG_json[number] 
+    | typeof _PG_bool[number] 
+    | typeof _PG_date[number] 
+    | typeof _PG_postgis[number];
+    
+export const TS_PG_Types: { [key: string]: readonly string[]; } = {
+    "string": _PG_strings,
+    "number": _PG_numbers,
+    "boolean": _PG_bool,
+    "Object": _PG_json,
+    "Date": _PG_date,
+    "Array<number>": _PG_numbers.map(s => `_${s}`),
+    "Array<boolean>": _PG_bool.map(s => `_${s}`),
+    "Array<string>": _PG_strings.map(s => `_${s}`),
+    "Array<Object>": _PG_json.map(s => `_${s}`),
+    "Array<Date>": _PG_date.map(s => `_${s}`),
+    "any": [],
+} as const;
+export type TS_COLUMN_DATA_TYPES = keyof typeof TS_PG_Types;
+
 export type ColumnInfo = {
   name: string;
 
@@ -19,34 +48,53 @@ export type ColumnInfo = {
    */
   is_nullable: boolean;
 
-  /* Simplified data type */
+  /**
+   * Simplified data type
+   */
   data_type: string;
 
-  /* values starting with underscore means it's an array of that data type */
-  udt_name: string;
+  /**
+   * Postgres raw data types. values starting with underscore means it's an array of that data type
+   */
+  udt_name: PG_COLUMN_UDT_DATA_TYPE;
 
-  /* Element data type */
+  /**
+   * Element data type
+   */
   element_type: string;
 
-  /* PRIMARY KEY constraint on column. A table can have more then one PK */
+  /**
+   * Element raw data type
+   */
+  element_udt_name: string;
+
+  /**
+   * PRIMARY KEY constraint on column. A table can have more then one PK
+   */
   is_pkey: boolean;
 
-  /* Foreign key constraint */
+  /**
+   * Foreign key constraint 
+   */
   references?: {
     ftable: string;
     fcols: string[];
     cols: string[];
   }
-}
 
-export type TS_DATA_TYPE = "string" | "number" | "boolean" | "Object" | "Date" | "Array<number>" | "Array<boolean>" | "Array<string>" | "Array<Object>" | "Array<Date>" | "any";
+  /**
+   * true if column has a default value
+   * Used for excluding pkey from insert
+   */
+  has_default: boolean;
+}
 
 export type ValidatedColumnInfo = ColumnInfo & {
 
   /**
    * TypeScript data type
    */
-  tsDataType: TS_DATA_TYPE;
+  tsDataType: TS_COLUMN_DATA_TYPES;
 
   /**
    * Fields that can be viewed

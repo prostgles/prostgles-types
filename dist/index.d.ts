@@ -1,22 +1,34 @@
 import { FullFilter, AnyObject, FullFilterBasic } from "./filters";
+export declare const _PG_strings: readonly ["bpchar", "char", "varchar", "text", "citext", "uuid", "bytea", "inet", "time", "timetz", "interval", "name"];
+export declare const _PG_numbers: readonly ["int2", "int4", "int8", "float4", "float8", "numeric", "money", "oid"];
+export declare const _PG_json: readonly ["json", "jsonb"];
+export declare const _PG_bool: readonly ["bool"];
+export declare const _PG_date: readonly ["date", "timestamp", "timestamptz"];
+export declare const _PG_postgis: readonly ["geometry"];
+export declare type PG_COLUMN_UDT_DATA_TYPE = typeof _PG_strings[number] | typeof _PG_numbers[number] | typeof _PG_json[number] | typeof _PG_bool[number] | typeof _PG_date[number] | typeof _PG_postgis[number];
+export declare const TS_PG_Types: {
+    [key: string]: readonly string[];
+};
+export declare type TS_COLUMN_DATA_TYPES = keyof typeof TS_PG_Types;
 export declare type ColumnInfo = {
     name: string;
     comment: string;
     ordinal_position: number;
     is_nullable: boolean;
     data_type: string;
-    udt_name: string;
+    udt_name: PG_COLUMN_UDT_DATA_TYPE;
     element_type: string;
+    element_udt_name: string;
     is_pkey: boolean;
     references?: {
         ftable: string;
         fcols: string[];
         cols: string[];
     };
+    has_default: boolean;
 };
-export declare type TS_DATA_TYPE = "string" | "number" | "boolean" | "Object" | "Date" | "Array<number>" | "Array<boolean>" | "Array<string>" | "Array<Object>" | "Array<Date>" | "any";
 export declare type ValidatedColumnInfo = ColumnInfo & {
-    tsDataType: TS_DATA_TYPE;
+    tsDataType: TS_COLUMN_DATA_TYPES;
     select: boolean;
     filter: boolean;
     insert: boolean;

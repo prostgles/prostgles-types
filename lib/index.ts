@@ -15,7 +15,7 @@ export type PG_COLUMN_UDT_DATA_TYPE =
     | typeof _PG_date[number] 
     | typeof _PG_postgis[number];
     
-export const TS_PG_Types: { [key: string]: readonly string[]; } = {
+export const TS_PG_Types = {
     "string": _PG_strings,
     "number": _PG_numbers,
     "boolean": _PG_bool,
@@ -32,6 +32,11 @@ export type TS_COLUMN_DATA_TYPES = keyof typeof TS_PG_Types;
 
 export type ColumnInfo = {
   name: string;
+
+  /**
+   * Column display name. Will be first non empty value from i18n data, comment, name 
+   */
+  label: string;
 
   /**
    * Column description (if provided)

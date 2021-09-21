@@ -7,11 +7,22 @@ export declare const _PG_date: readonly ["date", "timestamp", "timestamptz"];
 export declare const _PG_postgis: readonly ["geometry"];
 export declare type PG_COLUMN_UDT_DATA_TYPE = typeof _PG_strings[number] | typeof _PG_numbers[number] | typeof _PG_json[number] | typeof _PG_bool[number] | typeof _PG_date[number] | typeof _PG_postgis[number];
 export declare const TS_PG_Types: {
-    [key: string]: readonly string[];
+    readonly string: readonly ["bpchar", "char", "varchar", "text", "citext", "uuid", "bytea", "inet", "time", "timetz", "interval", "name"];
+    readonly number: readonly ["int2", "int4", "int8", "float4", "float8", "numeric", "money", "oid"];
+    readonly boolean: readonly ["bool"];
+    readonly Object: readonly ["json", "jsonb"];
+    readonly Date: readonly ["date", "timestamp", "timestamptz"];
+    readonly "Array<number>": string[];
+    readonly "Array<boolean>": string[];
+    readonly "Array<string>": string[];
+    readonly "Array<Object>": string[];
+    readonly "Array<Date>": string[];
+    readonly any: readonly [];
 };
 export declare type TS_COLUMN_DATA_TYPES = keyof typeof TS_PG_Types;
 export declare type ColumnInfo = {
     name: string;
+    label: string;
     comment: string;
     ordinal_position: number;
     is_nullable: boolean;

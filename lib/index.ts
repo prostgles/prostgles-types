@@ -273,8 +273,8 @@ export type SubscriptionHandler<T = AnyObject> = Promise<{
 }>
 
 export type ViewHandler<TT = AnyObject> = {
-  getInfo?: () => Promise<TableInfo>;
-  getColumns?: () => Promise<ValidatedColumnInfo[]>;
+  getInfo?: (lang?: string) => Promise<TableInfo>;
+  getColumns?: (lang?: string) => Promise<ValidatedColumnInfo[]>;
   find: <TD = TT>(filter?: FullFilter<TD>, selectParams?: SelectParams<TD>) => Promise<PartialLax<TD>[]>;
   findOne: <TD = TT>(filter?: FullFilter<TD>, selectParams?: SelectParams<TD>) => Promise<PartialLax<TD>>;
   subscribe: <TD = TT>(filter: FullFilter<TD>, params: SubscribeParams<TD>, onData: (items: PartialLax<TD>[], onError?: OnError) => any) => SubscriptionHandler;
@@ -301,8 +301,8 @@ export type TableHandler<TT = AnyObject> = ViewHandler<TT> & {
 
 
 export type ViewHandlerBasic = {
-  getInfo?: () => Promise<TableInfo>;
-  getColumns?: () => Promise<ValidatedColumnInfo[]>;
+  getInfo?: (lang?: string) => Promise<TableInfo>;
+  getColumns?: (lang?: string) => Promise<ValidatedColumnInfo[]>;
   find: <TD = AnyObject>(filter?: FullFilterBasic, selectParams?: SelectParamsBasic) => Promise<PartialLax<TD>[]>;
   findOne: <TD = AnyObject>(filter?: FullFilterBasic, selectParams?: SelectParamsBasic) => Promise<PartialLax<TD>>;
   subscribe: <TD = AnyObject>(filter: FullFilterBasic, params: SubscribeParamsBasic, onData: (items: PartialLax<TD>[], onError?: OnError) => any) => Promise<{ unsubscribe: () => any }>;

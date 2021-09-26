@@ -260,7 +260,11 @@ export type PartialLax<T = AnyObject> = Partial<T>  & AnyObject;
 
 export type TableInfo = {
   oid: number;
-  comment: string;
+  comment?: string;
+  /**
+   * Created by prostgles for managing files
+   */
+  is_media?: boolean;
 }
 
 export type OnError = (err: any) => void;
@@ -335,6 +339,47 @@ export type DbJoinMaker = {
   leftJoinOne: TableJoin;
 }
 
+export type SQLResult = {
+  command: "SELECT" | "UPDATE" | "DELETE" | "CREATE" | "ALTER" | "LISTEN" | "UNLISTEN" | "INSERT" | string;
+  rowCount: number;
+  rows: AnyObject[];
+  fields: {
+      name: string;
+      dataType: string;
+      tableName?: string;
+  }[];
+  duration: number;
+}
+/**
+ * 
+ * @param query <string> query. e.g.: SELECT * FROM users;
+ * @param params <any[] | object> query arguments to be escaped. e.g.: { name: 'dwadaw' }
+ * @param options <object> { returnType: "statement" | "rows" | "noticeSubscription" }
+ */
+// export type SQLHandler<ReturnType extends "row" | "statement" | undefined = undefined> = (query: string, args?: any | any[], options?: { returnType?: ReturnType }) => Promise<any>;
+// export type SQLHandler<ReturnType extends SQLOptions["returnType"]> = (query: string, args?: any | any[], returnType: ReturnType) => Promise<
+//   ReturnType extends "row"? AnyObject :
+//   ReturnType extends "rows"? AnyObject[] :
+//   ReturnType extends "value"? any :
+//   ReturnType extends "values"? any[] :
+//   ReturnType extends "statement"? string :
+//   ReturnType extends "noticeSubscription"? NoticeSubscription :
+//   SQLResult[]
+// >;
+function sql<ReturnType extends SQLOptions["returnType"] = undefined>(query: string, args?: any | any[], options?: { returnType?: ReturnType }): Promise<
+  ReturnType extends "row"? AnyObject :
+  ReturnType extends "rows"? AnyObject[] :
+  ReturnType extends "value"? any :
+  ReturnType extends "values"? any[] :
+  ReturnType extends "statement"? string :
+  ReturnType extends "noticeSubscription"? NoticeSubscription :
+  ReturnType extends undefined? SQLResult :
+  SQLResult
+> {
+  return "" as unknown as any;
+}
+export type SQLHandler = typeof sql;
+
 export type DBHandler = {
   [key: string]: Partial<TableHandler>;
 } & DbJoinMaker;
@@ -350,6 +395,8 @@ export type DBHandlerBasic = {
   leftJoin: TableJoinBasic;
   innerJoinOne: TableJoinBasic;
   leftJoinOne: TableJoinBasic;
+} & {
+  sql?: SQLHandler
 }
 
 
@@ -372,7 +419,7 @@ export type SQLOptions = {
   /**
    * Return type
    */
-  returnType: "statement" | "rows" | "noticeSubscription";
+  returnType: SelectParamsBasic["returnType"] | "statement" | "rows" | "noticeSubscription";
 } ;
 
 export type SQLRequest = {

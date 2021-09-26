@@ -115,7 +115,8 @@ export declare type DeleteParamsBasic = {
 export declare type PartialLax<T = AnyObject> = Partial<T> & AnyObject;
 export declare type TableInfo = {
     oid: number;
-    comment: string;
+    comment?: string;
+    is_media?: boolean;
 };
 export declare type OnError = (err: any) => void;
 export declare type SubscriptionHandler<T = AnyObject> = Promise<{
@@ -174,6 +175,21 @@ export declare type DbJoinMaker = {
     innerJoinOne: TableJoin;
     leftJoinOne: TableJoin;
 };
+export declare type SQLResult = {
+    command: "SELECT" | "UPDATE" | "DELETE" | "CREATE" | "ALTER" | "LISTEN" | "UNLISTEN" | "INSERT" | string;
+    rowCount: number;
+    rows: AnyObject[];
+    fields: {
+        name: string;
+        dataType: string;
+        tableName?: string;
+    }[];
+    duration: number;
+};
+declare function sql<ReturnType extends SQLOptions["returnType"] = undefined>(query: string, args?: any | any[], options?: {
+    returnType?: ReturnType;
+}): Promise<ReturnType extends "row" ? AnyObject : ReturnType extends "rows" ? AnyObject[] : ReturnType extends "value" ? any : ReturnType extends "values" ? any[] : ReturnType extends "statement" ? string : ReturnType extends "noticeSubscription" ? NoticeSubscription : ReturnType extends undefined ? SQLResult : SQLResult>;
+export declare type SQLHandler = typeof sql;
 export declare type DBHandler = {
     [key: string]: Partial<TableHandler>;
 } & DbJoinMaker;
@@ -184,6 +200,8 @@ export declare type DBHandlerBasic = {
     leftJoin: TableJoinBasic;
     innerJoinOne: TableJoinBasic;
     leftJoinOne: TableJoinBasic;
+} & {
+    sql?: SQLHandler;
 };
 export declare type DBNoticeConfig = {
     socketChannel: string;
@@ -193,7 +211,7 @@ export declare type DBNotifConfig = DBNoticeConfig & {
     notifChannel: string;
 };
 export declare type SQLOptions = {
-    returnType: "statement" | "rows" | "noticeSubscription";
+    returnType: SelectParamsBasic["returnType"] | "statement" | "rows" | "noticeSubscription";
 };
 export declare type SQLRequest = {
     query: string;

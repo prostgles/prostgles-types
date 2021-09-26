@@ -350,7 +350,11 @@ export type SQLResult = {
   }[];
   duration: number;
 }
-export type DBEventHandles = { addListener: (listener: (event: any) => void) => { removeListener: () => void; } };
+export type DBEventHandles = {
+  socketChannel: string;
+  socketUnsubChannel: string;
+  addListener: (listener: (event: any) => void) => { removeListener: () => void; } 
+};
 
 /**
  * 
@@ -358,7 +362,7 @@ export type DBEventHandles = { addListener: (listener: (event: any) => void) => 
  * @param params <any[] | object> query arguments to be escaped. e.g.: { name: 'dwadaw' }
  * @param options <object> { returnType: "statement" | "rows" | "noticeSubscription" }
  */
-function sql<ReturnType extends SQLOptions["returnType"] = undefined>(query: string, args?: any | any[], options?: { returnType?: ReturnType }): Promise<
+function sql<ReturnType extends SQLOptions["returnType"] = undefined>(query: string, args?: any | any[], options?: { returnType?: ReturnType }): Promise<(
   ReturnType extends "row"? AnyObject :
   ReturnType extends "rows"? AnyObject[] :
   ReturnType extends "value"? any :
@@ -367,7 +371,7 @@ function sql<ReturnType extends SQLOptions["returnType"] = undefined>(query: str
   ReturnType extends "noticeSubscription"? DBEventHandles :
   ReturnType extends undefined? SQLResult :
   SQLResult
-> {
+)> {
   return "" as unknown as any;
 }
 export type SQLHandler = typeof sql;

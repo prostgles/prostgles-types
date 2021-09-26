@@ -186,9 +186,14 @@ export declare type SQLResult = {
     }[];
     duration: number;
 };
+export declare type DBEventHandles = {
+    addListener: (listener: (event: any) => void) => {
+        removeListener: () => void;
+    };
+};
 declare function sql<ReturnType extends SQLOptions["returnType"] = undefined>(query: string, args?: any | any[], options?: {
     returnType?: ReturnType;
-}): Promise<ReturnType extends "row" ? AnyObject : ReturnType extends "rows" ? AnyObject[] : ReturnType extends "value" ? any : ReturnType extends "values" ? any[] : ReturnType extends "statement" ? string : ReturnType extends "noticeSubscription" ? NoticeSubscription : ReturnType extends undefined ? SQLResult : SQLResult>;
+}): Promise<ReturnType extends "row" ? AnyObject : ReturnType extends "rows" ? AnyObject[] : ReturnType extends "value" ? any : ReturnType extends "values" ? any[] : ReturnType extends "statement" ? string : ReturnType extends "noticeSubscription" ? DBEventHandles : ReturnType extends undefined ? SQLResult : SQLResult>;
 export declare type SQLHandler = typeof sql;
 export declare type DBHandler = {
     [key: string]: Partial<TableHandler>;

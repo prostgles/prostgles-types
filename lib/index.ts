@@ -350,29 +350,21 @@ export type SQLResult = {
   }[];
   duration: number;
 }
+export type DBEventHandles = { addListener: (listener: (event: any) => void) => { removeListener: () => void; } };
+
 /**
  * 
  * @param query <string> query. e.g.: SELECT * FROM users;
  * @param params <any[] | object> query arguments to be escaped. e.g.: { name: 'dwadaw' }
  * @param options <object> { returnType: "statement" | "rows" | "noticeSubscription" }
  */
-// export type SQLHandler<ReturnType extends "row" | "statement" | undefined = undefined> = (query: string, args?: any | any[], options?: { returnType?: ReturnType }) => Promise<any>;
-// export type SQLHandler<ReturnType extends SQLOptions["returnType"]> = (query: string, args?: any | any[], returnType: ReturnType) => Promise<
-//   ReturnType extends "row"? AnyObject :
-//   ReturnType extends "rows"? AnyObject[] :
-//   ReturnType extends "value"? any :
-//   ReturnType extends "values"? any[] :
-//   ReturnType extends "statement"? string :
-//   ReturnType extends "noticeSubscription"? NoticeSubscription :
-//   SQLResult[]
-// >;
 function sql<ReturnType extends SQLOptions["returnType"] = undefined>(query: string, args?: any | any[], options?: { returnType?: ReturnType }): Promise<
   ReturnType extends "row"? AnyObject :
   ReturnType extends "rows"? AnyObject[] :
   ReturnType extends "value"? any :
   ReturnType extends "values"? any[] :
   ReturnType extends "statement"? string :
-  ReturnType extends "noticeSubscription"? NoticeSubscription :
+  ReturnType extends "noticeSubscription"? DBEventHandles :
   ReturnType extends undefined? SQLResult :
   SQLResult
 > {

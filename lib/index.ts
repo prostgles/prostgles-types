@@ -362,7 +362,12 @@ export type DBEventHandles = {
  * @param params <any[] | object> query arguments to be escaped. e.g.: { name: 'dwadaw' }
  * @param options <object> { returnType: "statement" | "rows" | "noticeSubscription" }
  */
-function sql<ReturnType extends SQLOptions["returnType"] = undefined>(query: string, args?: any | any[], options?: { returnType?: ReturnType }): Promise<(
+function sql<ReturnType extends SQLOptions["returnType"] = undefined, OtherOptions = undefined>(
+  query: string, 
+  args?: any | any[], 
+  options?: { returnType?: ReturnType },
+  otherOptions?: OtherOptions
+): Promise<(
   ReturnType extends "row"? AnyObject :
   ReturnType extends "rows"? AnyObject[] :
   ReturnType extends "value"? any :

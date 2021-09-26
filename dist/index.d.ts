@@ -193,9 +193,7 @@ export declare type DBEventHandles = {
         removeListener: () => void;
     };
 };
-declare function sql<ReturnType extends SQLOptions["returnType"] = undefined, OtherOptions = undefined>(query: string, args?: any | any[], options?: {
-    returnType?: ReturnType;
-}, otherOptions?: OtherOptions): Promise<(ReturnType extends "row" ? AnyObject : ReturnType extends "rows" ? AnyObject[] : ReturnType extends "value" ? any : ReturnType extends "values" ? any[] : ReturnType extends "statement" ? string : ReturnType extends "noticeSubscription" ? DBEventHandles : ReturnType extends undefined ? SQLResult : SQLResult)>;
+declare function sql<ReturnType extends SQLOptions["returnType"] = undefined, OtherOptions = undefined>(query: string, args?: any | any[], options?: SQLOptions, otherOptions?: OtherOptions): Promise<(ReturnType extends "row" ? AnyObject : ReturnType extends "rows" ? AnyObject[] : ReturnType extends "value" ? any : ReturnType extends "values" ? any[] : ReturnType extends "statement" ? string : ReturnType extends "noticeSubscription" ? DBEventHandles : ReturnType extends undefined ? SQLResult : SQLResult)>;
 export declare type SQLHandler = typeof sql;
 export declare type DBHandler = {
     [key: string]: Partial<TableHandler>;

@@ -365,7 +365,7 @@ export type DBEventHandles = {
 function sql<ReturnType extends SQLOptions["returnType"] = undefined, OtherOptions = undefined>(
   query: string, 
   args?: any | any[], 
-  options?: { returnType?: ReturnType },
+  options?: SQLOptions,
   otherOptions?: OtherOptions
 ): Promise<(
   ReturnType extends "row"? AnyObject :

@@ -265,6 +265,16 @@ export type TableInfo = {
    * Created by prostgles for managing files
    */
   is_media?: boolean;
+
+  /**
+   * How many files are expected at most for each row from this table
+   */
+  has_media?: "one" | "many";
+
+  /**
+   * Name of the table that contains the files
+   */
+  media_table_name?: string;
 }
 
 export type OnError = (err: any) => void;
@@ -356,29 +366,30 @@ export type DBEventHandles = {
   addListener: (listener: (event: any) => void) => { removeListener: () => void; } 
 };
 
-/**
- * 
- * @param query <string> query. e.g.: SELECT * FROM users;
- * @param params <any[] | object> query arguments to be escaped. e.g.: { name: 'dwadaw' }
- * @param options <object> { returnType: "statement" | "rows" | "noticeSubscription" }
- */
-function sql<ReturnType extends SQLOptions["returnType"] = undefined, OtherOptions = undefined>(
-  query: string, 
-  args?: any | any[], 
-  options?: SQLOptions,
-  otherOptions?: OtherOptions
-): Promise<(
+export type GetReturnType<ReturnType extends SQLOptions["returnType"] = ""> = 
   ReturnType extends "row"? AnyObject :
   ReturnType extends "rows"? AnyObject[] :
   ReturnType extends "value"? any :
   ReturnType extends "values"? any[] :
   ReturnType extends "statement"? string :
   ReturnType extends "noticeSubscription"? DBEventHandles :
-  ReturnType extends undefined? SQLResult :
-  SQLResult
-)> {
+  SQLResult;
+
+/**
+ * 
+ * @param query <string> query. e.g.: SELECT * FROM users;
+ * @param params <any[] | object> query arguments to be escaped. e.g.: { name: 'dwadaw' }
+ * @param options <object> { returnType: "statement" | "rows" | "noticeSubscription" }
+ */
+function sql<ReturnType extends SQLOptions["returnType"], OtherOptions = undefined>(
+  query: string, 
+  args?: any | any[], 
+  options?: SQLOptions,
+  otherOptions?: OtherOptions
+): Promise<GetReturnType<ReturnType>> {
   return "" as unknown as any;
 }
+
 export type SQLHandler = typeof sql;
 
 export type DBHandler = {
@@ -420,7 +431,7 @@ export type SQLOptions = {
   /**
    * Return type
    */
-  returnType: SelectParamsBasic["returnType"] | "statement" | "rows" | "noticeSubscription";
+  returnType: SelectParamsBasic["returnType"] | "statement" | "rows" | "noticeSubscription" | "";
 } ;
 
 export type SQLRequest = {

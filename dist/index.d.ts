@@ -117,6 +117,8 @@ export declare type TableInfo = {
     oid: number;
     comment?: string;
     is_media?: boolean;
+    has_media?: "one" | "many";
+    media_table_name?: string;
 };
 export declare type OnError = (err: any) => void;
 export declare type SubscriptionHandler<T = AnyObject> = Promise<{
@@ -193,7 +195,8 @@ export declare type DBEventHandles = {
         removeListener: () => void;
     };
 };
-declare function sql<ReturnType extends SQLOptions["returnType"] = undefined, OtherOptions = undefined>(query: string, args?: any | any[], options?: SQLOptions, otherOptions?: OtherOptions): Promise<(ReturnType extends "row" ? AnyObject : ReturnType extends "rows" ? AnyObject[] : ReturnType extends "value" ? any : ReturnType extends "values" ? any[] : ReturnType extends "statement" ? string : ReturnType extends "noticeSubscription" ? DBEventHandles : ReturnType extends undefined ? SQLResult : SQLResult)>;
+export declare type GetReturnType<ReturnType extends SQLOptions["returnType"] = ""> = ReturnType extends "row" ? AnyObject : ReturnType extends "rows" ? AnyObject[] : ReturnType extends "value" ? any : ReturnType extends "values" ? any[] : ReturnType extends "statement" ? string : ReturnType extends "noticeSubscription" ? DBEventHandles : SQLResult;
+declare function sql<ReturnType extends SQLOptions["returnType"], OtherOptions = undefined>(query: string, args?: any | any[], options?: SQLOptions, otherOptions?: OtherOptions): Promise<GetReturnType<ReturnType>>;
 export declare type SQLHandler = typeof sql;
 export declare type DBHandler = {
     [key: string]: Partial<TableHandler>;
@@ -216,7 +219,7 @@ export declare type DBNotifConfig = DBNoticeConfig & {
     notifChannel: string;
 };
 export declare type SQLOptions = {
-    returnType: SelectParamsBasic["returnType"] | "statement" | "rows" | "noticeSubscription";
+    returnType: SelectParamsBasic["returnType"] | "statement" | "rows" | "noticeSubscription" | "";
 };
 export declare type SQLRequest = {
     query: string;

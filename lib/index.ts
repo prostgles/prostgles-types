@@ -92,6 +92,10 @@ export type ColumnInfo = {
    * Used for excluding pkey from insert
    */
   has_default: boolean;
+
+  min?: string | number;
+  max?: string | number;
+  hint?: string;
 }
 
 export type ValidatedColumnInfo = ColumnInfo & {

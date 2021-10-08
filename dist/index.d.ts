@@ -37,6 +37,9 @@ export declare type ColumnInfo = {
         cols: string[];
     };
     has_default: boolean;
+    min?: string | number;
+    max?: string | number;
+    hint?: string;
 };
 export declare type ValidatedColumnInfo = ColumnInfo & {
     tsDataType: TS_COLUMN_DATA_TYPES;

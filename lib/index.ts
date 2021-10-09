@@ -93,6 +93,11 @@ export type ColumnInfo = {
    */
   has_default: boolean;
 
+  /**
+   * Column default value
+   */
+  column_default?: any;
+
   min?: string | number;
   max?: string | number;
   hint?: string;

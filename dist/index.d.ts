@@ -37,6 +37,7 @@ export declare type ColumnInfo = {
         cols: string[];
     };
     has_default: boolean;
+    column_default?: any;
     min?: string | number;
     max?: string | number;
     hint?: string;

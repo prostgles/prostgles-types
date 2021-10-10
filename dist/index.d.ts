@@ -253,6 +253,20 @@ export declare const CHANNELS: {
     AUTHGUARD: string;
     _preffix: string;
 };
+export declare type AuthGuardLocation = {
+    href: string;
+    origin: string;
+    protocol: string;
+    host: string;
+    hostname: string;
+    port: string;
+    pathname: string;
+    search: string;
+    hash: string;
+};
+export declare type AuthGuardLocationResponse = {
+    shouldReload: boolean;
+};
 export * from "./util";
 export * from "./filters";
 //# sourceMappingURL=index.d.ts.map

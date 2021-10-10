@@ -481,6 +481,21 @@ export const CHANNELS = {
   _preffix: preffix,
 }
 
+export type AuthGuardLocation = {
+  href:     string;
+  origin:   string;
+  protocol: string;
+  host:     string;
+  hostname: string;
+  port:     string;
+  pathname: string;
+  search:   string;
+  hash:     string;
+}
+export type AuthGuardLocationResponse = {
+  shouldReload: boolean;
+}
+
 // import { md5 } from "./md5";
 // export { get, getTextPatch, unpatchText, isEmpty, WAL, WALConfig, asName } from "./util";
 export * from "./util";

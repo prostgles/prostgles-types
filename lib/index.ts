@@ -476,6 +476,7 @@ export const CHANNELS = {
   REGISTER: `${preffix}register`,
   LOGIN: `${preffix}login`,
   LOGOUT: `${preffix}logout`,
+  AUTHGUARD: `${preffix}authguard`,
 
   _preffix: preffix,
 }

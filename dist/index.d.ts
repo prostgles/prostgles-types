@@ -250,6 +250,7 @@ export declare const CHANNELS: {
     REGISTER: string;
     LOGIN: string;
     LOGOUT: string;
+    AUTHGUARD: string;
     _preffix: string;
 };
 export * from "./util";

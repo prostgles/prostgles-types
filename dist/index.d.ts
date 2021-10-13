@@ -122,6 +122,7 @@ export declare type TableInfo = {
     comment?: string;
     is_media?: boolean;
     has_media?: "one" | "many";
+    has_direct_media?: boolean;
     media_table_name?: string;
 };
 export declare type OnError = (err: any) => void;

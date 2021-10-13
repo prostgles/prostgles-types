@@ -281,6 +281,11 @@ export type TableInfo = {
   has_media?: "one" | "many";
 
   /**
+   * True if the media relates to this table only (does not relate to some joined table)
+   */
+  has_direct_media?: boolean;
+
+  /**
    * Name of the table that contains the files
    */
   media_table_name?: string;

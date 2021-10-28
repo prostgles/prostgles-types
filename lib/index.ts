@@ -6,7 +6,7 @@ export const _PG_numbers = ['int2','int4','int8','float4','float8','numeric','mo
 export const _PG_json = ['json', 'jsonb'] as const;
 export const _PG_bool = ['bool'] as const;
 export const _PG_date = ['date', 'timestamp', 'timestamptz'] as const;
-export const _PG_postgis = ['geometry'] as const;
+export const _PG_postgis = ['geometry', 'geography'] as const;
 export type PG_COLUMN_UDT_DATA_TYPE = 
     | typeof _PG_strings[number] 
     | typeof _PG_numbers[number] 
@@ -300,25 +300,47 @@ export type SubscriptionHandler<T = AnyObject> = Promise<{
     filter: FullFilter<T> | {};
 }>
 
-export type ViewHandler<TT = AnyObject> = {
+export type ViewHandler<TD = AnyObject> = {
   getInfo?: (lang?: string) => Promise<TableInfo>;
   getColumns?: (lang?: string) => Promise<ValidatedColumnInfo[]>;
-  find: <TD = TT>(filter?: FullFilter<TD>, selectParams?: SelectParams<TD>) => Promise<PartialLax<TD>[]>;
-  findOne: <TD = TT>(filter?: FullFilter<TD>, selectParams?: SelectParams<TD>) => Promise<PartialLax<TD>>;
-  subscribe: <TD = TT>(filter: FullFilter<TD>, params: SubscribeParams<TD>, onData: (items: PartialLax<TD>[], onError?: OnError) => any) => SubscriptionHandler;
-  subscribeOne: <TD = TT>(filter: FullFilter<TD>, params: SubscribeParams<TD>, onData: (item: PartialLax<TD>) => any, onError?: OnError) => SubscriptionHandler;
-  count: <TD = TT>(filter?: FullFilter<TD>) => Promise<number>;
+  find: (filter?: FullFilter<TD>, selectParams?: SelectParams<TD>) => Promise<PartialLax<TD>[]>;
+  findOne: (filter?: FullFilter<TD>, selectParams?: SelectParams<TD>) => Promise<PartialLax<TD>>;
+  subscribe: (filter: FullFilter<TD>, params: SubscribeParams<TD>, onData: (items: PartialLax<TD>[], onError?: OnError) => any) => SubscriptionHandler;
+  subscribeOne: (filter: FullFilter<TD>, params: SubscribeParams<TD>, onData: (item: PartialLax<TD>) => any, onError?: OnError) => SubscriptionHandler;
+  count: (filter?: FullFilter<TD>) => Promise<number>;
 }
 
-export type TableHandler<TT = AnyObject> = ViewHandler<TT> & {
-  update: <TD = TT>(filter: FullFilter<TD>, newData: PartialLax<TD>, params?: UpdateParams<TD>) => Promise<PartialLax<TD> | void>;
-  updateBatch: <TD = TT>(data: [FullFilter<TD>, PartialLax<TD>][], params?: UpdateParams<TD>) => Promise<PartialLax<TD> | void>;
-  upsert: <TD = TT>(filter: FullFilter<TD>, newData: PartialLax<TD>, params?: UpdateParams<TD>) => Promise<PartialLax<TD> | void>;
-  insert: <TD = TT>(data: (PartialLax<TD> | PartialLax<TD>[]), params?: InsertParams<TD>) => Promise<PartialLax<TD> | void>;
-  delete: <TD = TT>(filter?: FullFilter<TD>, params?: DeleteParams<TD>) => Promise<PartialLax<TD> | void>;
+export type NoReturn = Omit<InsertParams, "returning">;
+
+// function insert<TD>(
+//   data: (PartialLax<TD> | PartialLax<TD>[]), 
+//   params?: Omit<InsertParams<TD>, "returning">
+// ): Promise<void>;
+// function insert<TD>(
+//   data: (PartialLax<TD> | PartialLax<TD>[]), 
+//   params?: InsertParams<TD>
+// ): Promise<Partial<TD>> {
+//   return {};
+// }
+
+// PartialLax<TD> : R extends object?  PartialLax<TD> : Promise<void>;
+  
+
+export type TableHandler<TD = AnyObject> = ViewHandler<TD> & {
+  update: (filter: FullFilter<TD>, newData: PartialLax<TD>, params?: UpdateParams<TD>) => Promise<PartialLax<TD> | void>;
+  updateBatch: (data: [FullFilter<TD>, PartialLax<TD>][], params?: UpdateParams<TD>) => Promise<PartialLax<TD> | void>;
+  upsert: (filter: FullFilter<TD>, newData: PartialLax<TD>, params?: UpdateParams<TD>) => Promise<PartialLax<TD> | void>;
+  insert: (data: (PartialLax<TD> | PartialLax<TD>[]), params?: UpdateParams<TD>) => Promise<void | PartialLax<TD>>;
+  delete: (filter?: FullFilter<TD>, params?: DeleteParams<TD>) => Promise<PartialLax<TD> | void>;
 }
 
-// const c: TableHandler<{ h: number }> = {} as any;
+// (async () => {
+//   const c: TableHandler<{ h: number; b: number; c: number; }> = {} as any;
+//   const d = await c.insert({ h: 2});
+//   if(d){
+//     d.
+//   }
+// })
 // c.findOne({ }, { select: { h: 2 }}).then(r => {
 //   r.hd;
 // });

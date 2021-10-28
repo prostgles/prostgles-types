@@ -16,7 +16,7 @@ exports._PG_numbers = ['int2', 'int4', 'int8', 'float4', 'float8', 'numeric', 'm
 exports._PG_json = ['json', 'jsonb'];
 exports._PG_bool = ['bool'];
 exports._PG_date = ['date', 'timestamp', 'timestamptz'];
-exports._PG_postgis = ['geometry'];
+exports._PG_postgis = ['geometry', 'geography'];
 exports.TS_PG_Types = {
     "string": exports._PG_strings,
     "number": exports._PG_numbers,

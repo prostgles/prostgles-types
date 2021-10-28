@@ -4,7 +4,7 @@ export declare const _PG_numbers: readonly ["int2", "int4", "int8", "float4", "f
 export declare const _PG_json: readonly ["json", "jsonb"];
 export declare const _PG_bool: readonly ["bool"];
 export declare const _PG_date: readonly ["date", "timestamp", "timestamptz"];
-export declare const _PG_postgis: readonly ["geometry"];
+export declare const _PG_postgis: readonly ["geometry", "geography"];
 export declare type PG_COLUMN_UDT_DATA_TYPE = typeof _PG_strings[number] | typeof _PG_numbers[number] | typeof _PG_json[number] | typeof _PG_bool[number] | typeof _PG_date[number] | typeof _PG_postgis[number];
 export declare const TS_PG_Types: {
     readonly string: readonly ["bpchar", "char", "varchar", "text", "citext", "uuid", "bytea", "inet", "time", "timetz", "interval", "name"];
@@ -132,21 +132,22 @@ export declare type SubscriptionHandler<T = AnyObject> = Promise<{
     delete?: (deleteParams: DeleteParams<T>) => Promise<any>;
     filter: FullFilter<T> | {};
 }>;
-export declare type ViewHandler<TT = AnyObject> = {
+export declare type ViewHandler<TD = AnyObject> = {
     getInfo?: (lang?: string) => Promise<TableInfo>;
     getColumns?: (lang?: string) => Promise<ValidatedColumnInfo[]>;
-    find: <TD = TT>(filter?: FullFilter<TD>, selectParams?: SelectParams<TD>) => Promise<PartialLax<TD>[]>;
-    findOne: <TD = TT>(filter?: FullFilter<TD>, selectParams?: SelectParams<TD>) => Promise<PartialLax<TD>>;
-    subscribe: <TD = TT>(filter: FullFilter<TD>, params: SubscribeParams<TD>, onData: (items: PartialLax<TD>[], onError?: OnError) => any) => SubscriptionHandler;
-    subscribeOne: <TD = TT>(filter: FullFilter<TD>, params: SubscribeParams<TD>, onData: (item: PartialLax<TD>) => any, onError?: OnError) => SubscriptionHandler;
-    count: <TD = TT>(filter?: FullFilter<TD>) => Promise<number>;
+    find: (filter?: FullFilter<TD>, selectParams?: SelectParams<TD>) => Promise<PartialLax<TD>[]>;
+    findOne: (filter?: FullFilter<TD>, selectParams?: SelectParams<TD>) => Promise<PartialLax<TD>>;
+    subscribe: (filter: FullFilter<TD>, params: SubscribeParams<TD>, onData: (items: PartialLax<TD>[], onError?: OnError) => any) => SubscriptionHandler;
+    subscribeOne: (filter: FullFilter<TD>, params: SubscribeParams<TD>, onData: (item: PartialLax<TD>) => any, onError?: OnError) => SubscriptionHandler;
+    count: (filter?: FullFilter<TD>) => Promise<number>;
 };
-export declare type TableHandler<TT = AnyObject> = ViewHandler<TT> & {
-    update: <TD = TT>(filter: FullFilter<TD>, newData: PartialLax<TD>, params?: UpdateParams<TD>) => Promise<PartialLax<TD> | void>;
-    updateBatch: <TD = TT>(data: [FullFilter<TD>, PartialLax<TD>][], params?: UpdateParams<TD>) => Promise<PartialLax<TD> | void>;
-    upsert: <TD = TT>(filter: FullFilter<TD>, newData: PartialLax<TD>, params?: UpdateParams<TD>) => Promise<PartialLax<TD> | void>;
-    insert: <TD = TT>(data: (PartialLax<TD> | PartialLax<TD>[]), params?: InsertParams<TD>) => Promise<PartialLax<TD> | void>;
-    delete: <TD = TT>(filter?: FullFilter<TD>, params?: DeleteParams<TD>) => Promise<PartialLax<TD> | void>;
+export declare type NoReturn = Omit<InsertParams, "returning">;
+export declare type TableHandler<TD = AnyObject> = ViewHandler<TD> & {
+    update: (filter: FullFilter<TD>, newData: PartialLax<TD>, params?: UpdateParams<TD>) => Promise<PartialLax<TD> | void>;
+    updateBatch: (data: [FullFilter<TD>, PartialLax<TD>][], params?: UpdateParams<TD>) => Promise<PartialLax<TD> | void>;
+    upsert: (filter: FullFilter<TD>, newData: PartialLax<TD>, params?: UpdateParams<TD>) => Promise<PartialLax<TD> | void>;
+    insert: (data: (PartialLax<TD> | PartialLax<TD>[]), params?: UpdateParams<TD>) => Promise<void | PartialLax<TD>>;
+    delete: (filter?: FullFilter<TD>, params?: DeleteParams<TD>) => Promise<PartialLax<TD> | void>;
 };
 export declare type ViewHandlerBasic = {
     getInfo?: (lang?: string) => Promise<TableInfo>;

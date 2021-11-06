@@ -555,6 +555,7 @@ export type AuthSocketSchema = {
 
 // import { md5 } from "./md5";
 // export { get, getTextPatch, unpatchText, isEmpty, WAL, WALConfig, asName } from "./util";
-export * from "./util";
+export type { WALItem, BasicOrderBy, WALItemsObj, WALConfig, TextPatch, SyncTableInfo } from "./util";
+export { asName, getTextPatch, isEmpty, stableStringify, unpatchText } from "./util";
 export * from "./filters";
-export * from "./replication";
+export type { ClientExpressData, ClientSyncHandles, ClientSyncInfo, SyncConfig, ClientSyncPullResponse, SyncBatchParams, onUpdatesParams } from "./replication";

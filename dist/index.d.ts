@@ -283,4 +283,5 @@ export declare type AuthSocketSchema = {
 };
 export * from "./util";
 export * from "./filters";
+export * from "./replication";
 //# sourceMappingURL=index.d.ts.map

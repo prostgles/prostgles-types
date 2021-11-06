@@ -50,4 +50,5 @@ exports.CHANNELS = {
 };
 __exportStar(require("./util"), exports);
 __exportStar(require("./filters"), exports);
+__exportStar(require("./replication"), exports);
 //# sourceMappingURL=index.js.map

@@ -557,3 +557,4 @@ export type AuthSocketSchema = {
 // export { get, getTextPatch, unpatchText, isEmpty, WAL, WALConfig, asName } from "./util";
 export * from "./util";
 export * from "./filters";
+export * from "./replication";

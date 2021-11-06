@@ -427,6 +427,9 @@ function sql<ReturnType extends SQLOptions["returnType"] = undefined>(
   args?: any | any[], 
   options?: {
     returnType: ReturnType
+  },
+  serverSideOptions?: {
+    socket: any
   }
 ): Promise<GetReturnType<ReturnType>> {
   return "" as unknown as any;

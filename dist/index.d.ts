@@ -207,6 +207,8 @@ export declare type DBEventHandles = {
 export declare type GetReturnType<ReturnType extends SQLOptions["returnType"] = ""> = ReturnType extends "row" ? AnyObject : ReturnType extends "rows" ? AnyObject[] : ReturnType extends "value" ? any : ReturnType extends "values" ? any[] : ReturnType extends "statement" ? string : ReturnType extends "noticeSubscription" ? DBEventHandles : SQLResult;
 declare function sql<ReturnType extends SQLOptions["returnType"] = undefined>(query: string, args?: any | any[], options?: {
     returnType: ReturnType;
+}, serverSideOptions?: {
+    socket: any;
 }): Promise<GetReturnType<ReturnType>>;
 export declare type SQLHandler = typeof sql;
 export declare type DBHandler = {

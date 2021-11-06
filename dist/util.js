@@ -125,44 +125,61 @@ class WAL {
     constructor(args) {
         this.changed = {};
         this.sending = {};
+        this.sentHistory = {};
         this.callbacks = [];
         this.sort = (a, b) => {
             const { orderBy } = this.options;
+            if (!orderBy || !a || !b)
+                return 0;
             return orderBy.map(ob => {
                 if (!(ob.fieldName in a) || !(ob.fieldName in b)) {
                     throw `Replication error: \n   some orderBy fields missing from data`;
                 }
                 let v1 = ob.asc ? a[ob.fieldName] : b[ob.fieldName], v2 = ob.asc ? b[ob.fieldName] : a[ob.fieldName];
-                let vNum = v1 - v2, vStr = v1 < v2 ? -1 : v1 == v2 ? 0 : 1;
-                return isNaN(vNum) ? vStr : vNum;
-            }).find(v => v);
+                let vNum = +v1 - +v2, vStr = v1 < v2 ? -1 : v1 == v2 ? 0 : 1;
+                return (ob.tsDataType === "number" && Number.isFinite(vNum)) ? vNum : vStr;
+            }).find(v => v) || 0;
         };
-        this.addData = (data, cb) => {
+        this.isInHistory = (item) => {
+            if (!item)
+                throw "Provide item";
+            const itemSyncVal = item[this.options.synced_field];
+            if (!Number.isFinite(+itemSyncVal))
+                throw "Provided item Synced field value is missing/invalid ";
+            const existing = this.sentHistory[this.getIdStr(item)];
+            const existingSyncVal = existing === null || existing === void 0 ? void 0 : existing[this.options.synced_field];
+            if (existing) {
+                if (!Number.isFinite(+existingSyncVal))
+                    throw "Provided historic item Synced field value is missing/invalid";
+                if (+existingSyncVal === +itemSyncVal) {
+                    return true;
+                }
+            }
+            return false;
+        };
+        this.addData = (data) => {
             if (isEmpty(this.changed) && this.options.onSendStart)
                 this.options.onSendStart();
-            let callback = cb ? { cb, idStrs: [] } : null;
             data.map(d => {
                 const { initial, current } = Object.assign({}, d);
                 if (!current)
                     throw "Expecting { current: object, initial?: object }";
                 const idStr = this.getIdStr(current);
-                if (callback) {
-                    callback.idStrs.push(idStr);
-                }
                 this.changed = this.changed || {};
                 this.changed[idStr] = this.changed[idStr] || { initial, current };
                 this.changed[idStr].current = Object.assign(Object.assign({}, this.changed[idStr].current), current);
             });
             this.sendItems();
         };
-        this.isSendingTimeout = null;
+        this.isSendingTimeout = undefined;
+        this.willDeleteHistory = undefined;
         this.sendItems = () => __awaiter(this, void 0, void 0, function* () {
-            const { synced_field, onSend, onSendEnd, batch_size, throttle } = this.options;
+            const { synced_field, onSend, onSendEnd, batch_size, throttle, historyAgeSeconds = 2 } = this.options;
             if (this.isSendingTimeout || this.sending && !isEmpty(this.sending))
                 return;
             if (!this.changed || isEmpty(this.changed))
                 return;
-            let batchItems = [], walBatch = [];
+            let batchItems = [], walBatch = [], batchObj = {};
             Object.keys(this.changed)
                 .sort((a, b) => this.sort(this.changed[a].current, this.changed[b].current))
                 .slice(0, batch_size)
@@ -170,22 +187,34 @@ class WAL {
                 let item = Object.assign({}, this.changed[key]);
                 this.sending[key] = item;
                 walBatch.push(Object.assign({}, item));
+                batchObj[key] = Object.assign({}, item.current);
                 delete this.changed[key];
             });
             batchItems = walBatch.map(d => d.current);
-            this.isSendingTimeout = setTimeout(() => {
-                this.isSendingTimeout = undefined;
-                if (!isEmpty(this.changed)) {
-                    this.sendItems();
-                }
-            }, throttle);
+            if (!this.isSendingTimeout) {
+                this.isSendingTimeout = setTimeout(() => {
+                    this.isSendingTimeout = undefined;
+                    if (!isEmpty(this.changed)) {
+                        this.sendItems();
+                    }
+                }, throttle);
+            }
             let error;
             try {
                 yield onSend(batchItems, walBatch);
+                if (historyAgeSeconds) {
+                    this.sentHistory = Object.assign(Object.assign({}, this.sentHistory), batchObj);
+                    if (!this.willDeleteHistory) {
+                        this.willDeleteHistory = setTimeout(() => {
+                            this.willDeleteHistory = undefined;
+                            this.sentHistory = {};
+                        }, historyAgeSeconds * 1000);
+                    }
+                }
             }
             catch (err) {
                 error = err;
-                console.error(err, batchItems, walBatch);
+                console.error("WAL onSend failed:", err, batchItems, walBatch);
             }
             if (this.callbacks.length) {
                 const ids = Object.keys(this.sending);
@@ -212,6 +241,7 @@ class WAL {
             this.options.orderBy = [synced_field, ...id_fields.sort()]
                 .map(fieldName => ({
                 fieldName,
+                tsDataType: fieldName === synced_field ? "number" : "string",
                 asc: true
             }));
         }

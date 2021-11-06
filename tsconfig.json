@@ -6,7 +6,7 @@
     "lib": [
       "es2019"
     ],
-    // "strict": true,
+    "strict": true,
     "module": "commonjs",
     "removeComments": true,
     "sourceMap": true,

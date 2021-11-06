@@ -1,5 +1,7 @@
+/// <reference types="node" />
+import { AnyObject, TS_COLUMN_DATA_TYPES } from ".";
 export declare function asName(str: string): string;
-export declare function stableStringify(data: any, opts: any): string;
+export declare function stableStringify(data: AnyObject, opts: any): string | undefined;
 export declare type TextPatch = {
     from: number;
     to: number;
@@ -16,6 +18,7 @@ export declare type SyncTableInfo = {
 };
 export declare type BasicOrderBy = {
     fieldName: string;
+    tsDataType: TS_COLUMN_DATA_TYPES;
     asc: boolean;
 }[];
 export declare type WALConfig = SyncTableInfo & {
@@ -23,6 +26,7 @@ export declare type WALConfig = SyncTableInfo & {
     onSend: (items: any[], fullItems: WALItem[]) => Promise<any>;
     onSendEnd?: (batch: any[], fullItems: WALItem[], error?: any) => any;
     orderBy?: BasicOrderBy;
+    historyAgeSeconds?: number;
 };
 export declare type WALItem = {
     initial?: any;
@@ -34,16 +38,19 @@ export declare type WALItemsObj = {
 export declare class WAL {
     private changed;
     private sending;
+    private sentHistory;
     private options;
     private callbacks;
     constructor(args: WALConfig);
-    sort: (a: any, b: any) => number;
+    sort: (a?: AnyObject | undefined, b?: AnyObject | undefined) => number;
     isSending(): boolean;
-    getIdStr(d: any): string;
-    getIdObj(d: any): any;
-    getDeltaObj(d: any): any;
-    addData: (data: WALItem[], cb?: (err: any) => any) => void;
-    isSendingTimeout?: any;
+    isInHistory: (item: AnyObject) => boolean;
+    getIdStr(d: AnyObject): string;
+    getIdObj(d: AnyObject): AnyObject;
+    getDeltaObj(d: AnyObject): AnyObject;
+    addData: (data: WALItem[]) => void;
+    isSendingTimeout?: ReturnType<typeof setTimeout>;
+    willDeleteHistory?: ReturnType<typeof setTimeout>;
     private sendItems;
 }
 export declare function isEmpty(obj?: any): boolean;

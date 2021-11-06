@@ -1,3 +1,4 @@
+import { AnyObject, TS_COLUMN_DATA_TYPES } from ".";
 import { md5 } from "./md5";
 
 export function asName(str: string){
@@ -6,14 +7,14 @@ export function asName(str: string){
     return `"${str.toString().replace(/"/g, `""`)}"`;
 }
 
-export function stableStringify (data, opts) {
+export function stableStringify (data: AnyObject, opts: any) {
   if (!opts) opts = {};
   if (typeof opts === 'function') opts = { cmp: opts };
   var cycles = (typeof opts.cycles === 'boolean') ? opts.cycles : false;
 
   var cmp = opts.cmp && (function (f) {
-      return function (node) {
-          return function (a, b) {
+      return function (node: any) {
+          return function (a: any, b: any) {
             var aobj = { key: a, value: node[a] };
             var bobj = { key: b, value: node[b] };
             return f(aobj, bobj);
@@ -21,7 +22,7 @@ export function stableStringify (data, opts) {
       };
   })(opts.cmp);
 
-  var seen = [];
+  var seen: any[] = [];
   return (function stringify (node) {
       if (node && node.toJSON && typeof node.toJSON === 'function') {
           node = node.toJSON();
@@ -133,6 +134,10 @@ export type SyncTableInfo = {
 
 export type BasicOrderBy = {
     fieldName: string;
+    /**
+     * Used to ensure numbers are not left as strings in some cases
+     */
+    tsDataType: TS_COLUMN_DATA_TYPES;
     asc: boolean;
 }[];
 
@@ -153,7 +158,12 @@ export type WALConfig = SyncTableInfo & {
     /**
      * Order by which the items will be synced. Defaults to [synced_field, ...id_fields.sort()]
      */
-    orderBy?: BasicOrderBy
+    orderBy?: BasicOrderBy;
+
+    /**
+     * Defaults to 2 seconds
+     */
+    historyAgeSeconds?: number;
 };
 export type WALItem = {
     initial?: any;
@@ -168,6 +178,11 @@ export type WALItemsObj = { [key: string]: WALItem  };
 export class WAL {
     private changed: WALItemsObj = {};
     private sending: WALItemsObj = {};
+    /**
+     * Historic data used to reduce data pushes from server to client
+     */
+    private sentHistory: Record<string, AnyObject> = {};
+
     private options: WALConfig;
     private callbacks: { cb: Function, idStrs: string[] }[] = [];
     
@@ -178,13 +193,16 @@ export class WAL {
             this.options.orderBy = [synced_field, ...id_fields.sort()]
                 .map(fieldName => ({
                     fieldName,
+                    tsDataType: fieldName === synced_field? "number" : "string",
                     asc: true 
                 }));
         }
     }
 
-    sort = (a, b) => {
+    sort = (a?: AnyObject, b?: AnyObject): number => {
         const { orderBy } = this.options;
+        if(!orderBy || !a || !b) return 0;
+
         return orderBy.map(ob => {
             /* TODO: add fullData to changed items + ensure orderBy is in select */
             if(!(ob.fieldName in a) || !(ob.fieldName in b)) {
@@ -193,28 +211,50 @@ export class WAL {
             let v1 = ob.asc? a[ob.fieldName] : b[ob.fieldName],
                 v2 = ob.asc? b[ob.fieldName] : a[ob.fieldName];
 
-            let vNum = v1 - v2,
+            let vNum = +v1 - +v2,
                 vStr = v1 < v2? -1 : v1 == v2? 0 : 1;
-            return isNaN(vNum)? vStr : vNum
-        }).find(v => v);
+            return (ob.tsDataType === "number" && Number.isFinite(vNum))? vNum : vStr
+        }).find(v => v) || 0;
     }
 
     isSending(): boolean {
         return !(isEmpty(this.sending) && isEmpty(this.changed))
     }
 
-    getIdStr(d: any){
+    /**
+     * Used by server to avoid unnecessary data push to client.
+     * This can happen due to the same data item having been previously pushed by the client
+     * @param item data item
+     * @returns boolean
+     */
+    isInHistory = (item: AnyObject): boolean => {
+        if(!item) throw "Provide item";
+        const itemSyncVal = item[this.options.synced_field]
+        if(!Number.isFinite(+itemSyncVal)) throw "Provided item Synced field value is missing/invalid ";
+
+        const existing = this.sentHistory[this.getIdStr(item)];
+        const existingSyncVal = existing?.[this.options.synced_field];
+        if(existing){
+            if(!Number.isFinite(+existingSyncVal)) throw "Provided historic item Synced field value is missing/invalid";
+            if(+existingSyncVal === +itemSyncVal){
+                return true
+            }
+        }
+        return false;
+    }
+
+    getIdStr(d: AnyObject): string {
         return this.options.id_fields.sort().map(key => `${d[key] || ""}`).join(".");
     }
-    getIdObj(d: any){
-        let res: any = {};
+    getIdObj(d: AnyObject): AnyObject {
+        let res: AnyObject = {};
         this.options.id_fields.sort().map(key => {
             res[key] = d[key];
         });
         return res;
     }
-    getDeltaObj(d: any){
-        let res: any = {};
+    getDeltaObj(d: AnyObject): AnyObject {
+        let res: AnyObject = {};
         Object.keys(d).map(key => {
             if(!this.options.id_fields.includes(key)){
                 res[key] = d[key];
@@ -223,16 +263,17 @@ export class WAL {
         return res;
     }
 
-    addData = (data: WALItem[], cb?: (err: any) => any) => {
+    addData = (data: WALItem[]) => {
         if(isEmpty(this.changed) && this.options.onSendStart) this.options.onSendStart();
-        let callback = cb? { cb, idStrs: [] } : null;
+        // type callback
+        // let callback = cb? { cb, idStrs: [] } : null;
         data.map(d => {
             const { initial, current } = { ...d };
             if(!current) throw "Expecting { current: object, initial?: object }";
             const idStr = this.getIdStr(current);
-            if(callback){
-                callback.idStrs.push(idStr);
-            }
+            // if(callback){
+            //     callback.idStrs.push(idStr);
+            // }
 
             this.changed = this.changed || {};
             this.changed[idStr] = this.changed[idStr] || { initial, current };
@@ -244,9 +285,10 @@ export class WAL {
         this.sendItems();
     }
     
-    isSendingTimeout?: any = null;
+    isSendingTimeout?: ReturnType<typeof setTimeout> = undefined;
+    willDeleteHistory?: ReturnType<typeof setTimeout> = undefined;
     private sendItems = async () => {
-        const { synced_field, onSend, onSendEnd, batch_size, throttle } = this.options;
+        const { synced_field, onSend, onSendEnd, batch_size, throttle, historyAgeSeconds = 2 } = this.options;
         
         // Sending data. stop here
         if(this.isSendingTimeout || this.sending && !isEmpty(this.sending)) return;
@@ -255,34 +297,62 @@ export class WAL {
         if(!this.changed || isEmpty(this.changed)) return;
         
         // Prepare batch to send
-        let batchItems: any[] = [], walBatch: WALItem[] = [];
+        let batchItems: AnyObject[] = [], 
+            walBatch: WALItem[] = [],
+            batchObj: Record<string, AnyObject> = {};
+
         Object.keys(this.changed)
             .sort((a, b) => this.sort(this.changed[a].current, this.changed[b].current))
             .slice(0, batch_size)
             .map(key => {
                 let item = { ...this.changed[key] };
                 this.sending[key] = item;
-                walBatch.push({ ...item })
+                walBatch.push({ ...item });
+
+                /* Used for history */
+                batchObj[key] = { ...item.current };
+
                 delete this.changed[key];
             });
-            batchItems = walBatch.map(d => d.current)
+        batchItems = walBatch.map(d => d.current)
 
         // Throttle next data send
-        this.isSendingTimeout = setTimeout(() => {
-            this.isSendingTimeout = undefined;
-            if(!isEmpty(this.changed)){
-                this.sendItems();
-            }
-        }, throttle);
+        if(!this.isSendingTimeout){
+            this.isSendingTimeout = setTimeout(() => {
+                this.isSendingTimeout = undefined;
+                if(!isEmpty(this.changed)){
+                    this.sendItems();
+                }
+            }, throttle);
+        }
+
 
         let error: any;
         try {
             /* Deleted data should be sent normally through await db.table.delete(...) */
             await onSend(batchItems, walBatch);//, deletedData);
-            
+
+            /**
+             * Keep history if required
+             */
+            if(historyAgeSeconds){
+                this.sentHistory = {
+                    ...this.sentHistory,
+                    ...batchObj,
+                }
+                /**
+                 * Delete history after some time
+                 */
+                if(!this.willDeleteHistory){
+                    this.willDeleteHistory = setTimeout(() => {
+                        this.willDeleteHistory = undefined;
+                        this.sentHistory = {};
+                    }, historyAgeSeconds * 1000);
+                }
+            }
         } catch(err) {
             error = err;
-            console.error(err, batchItems, walBatch)
+            console.error("WAL onSend failed:", err, batchItems, walBatch)
         }
 
         /* Fire any callbacks */

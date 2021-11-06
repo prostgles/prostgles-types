@@ -369,7 +369,7 @@ export type TableHandlerBasic = ViewHandlerBasic & {
 }
 
 export type MethodHandler = {
-  [method_name: string]: (...args) => Promise<AnyObject>
+  [method_name: string]: (...args: any[]) => Promise<AnyObject>
 }
 
 export type JoinMaker<TT = AnyObject> = (filter?: FullFilter<TT>, select?: Select<TT>, options?: SelectParams<TT>) => any;
@@ -413,6 +413,7 @@ export type GetReturnType<ReturnType extends SQLOptions["returnType"] = ""> =
   ReturnType extends "values"? any[] :
   ReturnType extends "statement"? string :
   ReturnType extends "noticeSubscription"? DBEventHandles :
+  // ReturnType extends undefined? SQLResult :
   SQLResult;
 
 /**
@@ -421,14 +422,19 @@ export type GetReturnType<ReturnType extends SQLOptions["returnType"] = ""> =
  * @param params <any[] | object> query arguments to be escaped. e.g.: { name: 'dwadaw' }
  * @param options <object> { returnType: "statement" | "rows" | "noticeSubscription" }
  */
-function sql<ReturnType extends SQLOptions["returnType"], OtherOptions = undefined>(
+function sql<ReturnType extends SQLOptions["returnType"] = undefined>(
   query: string, 
   args?: any | any[], 
-  options?: SQLOptions,
-  otherOptions?: OtherOptions
+  options?: {
+    returnType: ReturnType
+  }
 ): Promise<GetReturnType<ReturnType>> {
   return "" as unknown as any;
 }
+
+// sql("",{}, { returnType: "statement"}).then(res => {
+//   res
+// })
 
 export type SQLHandler = typeof sql;
 
@@ -526,6 +532,26 @@ export type AuthGuardLocation = {
 export type AuthGuardLocationResponse = {
   shouldReload: boolean;
 }
+
+/**
+ * Auth object sent from server to client
+ */
+export type AuthSocketSchema = {
+  /**
+   * User data as returned from server auth.getClientUser
+   */
+  user?: AnyObject;
+
+  register?: boolean;
+  login?: boolean;
+  logout?: boolean;
+
+  /**
+   * If server auth publicRoutes is set up and AuthGuard is not explicitly disabled ( disableSocketAuthGuard: true ):
+   *  on each connect/reconnect the client pathname is checked and page reloaded if it's not a public page and the client is not logged in
+   */
+  pathGuard?: boolean;
+};
 
 // import { md5 } from "./md5";
 // export { get, getTextPatch, unpatchText, isEmpty, WAL, WALConfig, asName } from "./util";

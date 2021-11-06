@@ -205,7 +205,9 @@ export declare type DBEventHandles = {
     };
 };
 export declare type GetReturnType<ReturnType extends SQLOptions["returnType"] = ""> = ReturnType extends "row" ? AnyObject : ReturnType extends "rows" ? AnyObject[] : ReturnType extends "value" ? any : ReturnType extends "values" ? any[] : ReturnType extends "statement" ? string : ReturnType extends "noticeSubscription" ? DBEventHandles : SQLResult;
-declare function sql<ReturnType extends SQLOptions["returnType"], OtherOptions = undefined>(query: string, args?: any | any[], options?: SQLOptions, otherOptions?: OtherOptions): Promise<GetReturnType<ReturnType>>;
+declare function sql<ReturnType extends SQLOptions["returnType"] = undefined>(query: string, args?: any | any[], options?: {
+    returnType: ReturnType;
+}): Promise<GetReturnType<ReturnType>>;
 export declare type SQLHandler = typeof sql;
 export declare type DBHandler = {
     [key: string]: Partial<TableHandler>;
@@ -271,6 +273,13 @@ export declare type AuthGuardLocation = {
 };
 export declare type AuthGuardLocationResponse = {
     shouldReload: boolean;
+};
+export declare type AuthSocketSchema = {
+    user?: AnyObject;
+    register?: boolean;
+    login?: boolean;
+    logout?: boolean;
+    pathGuard?: boolean;
 };
 export * from "./util";
 export * from "./filters";

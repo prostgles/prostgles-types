@@ -30,7 +30,7 @@ exports.TS_PG_Types = {
     "Array<Date>": exports._PG_date.map(s => `_${s}`),
     "any": [],
 };
-function sql(query, args, options, otherOptions) {
+function sql(query, args, options) {
     return "";
 }
 const preffix = "_psqlWS_.";

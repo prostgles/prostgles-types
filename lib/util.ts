@@ -176,8 +176,17 @@ export type WALItemsObj = { [key: string]: WALItem  };
  * This allows a high rate of optimistic updates on the client
  */
 export class WAL {
+
+    /**
+     * Instantly merged records for prepared for update
+     */
     private changed: WALItemsObj = {};
+    
+    /**
+     * Batch of records (removed from this.changed) that are currently being sent 
+     */
     private sending: WALItemsObj = {};
+    
     /**
      * Historic data used to reduce data pushes from server to client
      */
@@ -218,7 +227,7 @@ export class WAL {
     }
 
     isSending(): boolean {
-        return !(isEmpty(this.sending) && isEmpty(this.changed))
+        return this.isOnSending || !(isEmpty(this.sending) && isEmpty(this.changed))
     }
 
     /**
@@ -265,15 +274,11 @@ export class WAL {
 
     addData = (data: WALItem[]) => {
         if(isEmpty(this.changed) && this.options.onSendStart) this.options.onSendStart();
-        // type callback
-        // let callback = cb? { cb, idStrs: [] } : null;
+        
         data.map(d => {
             const { initial, current } = { ...d };
             if(!current) throw "Expecting { current: object, initial?: object }";
             const idStr = this.getIdStr(current);
-            // if(callback){
-            //     callback.idStrs.push(idStr);
-            // }
 
             this.changed = this.changed || {};
             this.changed[idStr] = this.changed[idStr] || { initial, current };
@@ -285,6 +290,7 @@ export class WAL {
         this.sendItems();
     }
     
+    isOnSending = false;
     isSendingTimeout?: ReturnType<typeof setTimeout> = undefined;
     willDeleteHistory?: ReturnType<typeof setTimeout> = undefined;
     private sendItems = async () => {
@@ -301,12 +307,15 @@ export class WAL {
             walBatch: WALItem[] = [],
             batchObj: Record<string, AnyObject> = {};
 
+        /**
+         * Prepare and remove a batch from this.changed
+         */
         Object.keys(this.changed)
             .sort((a, b) => this.sort(this.changed[a].current, this.changed[b].current))
             .slice(0, batch_size)
             .map(key => {
                 let item = { ...this.changed[key] };
-                this.sending[key] = item;
+                this.sending[key] = { ...item };
                 walBatch.push({ ...item });
 
                 /* Used for history */
@@ -328,6 +337,7 @@ export class WAL {
 
 
         let error: any;
+        this.isOnSending = true;
         try {
             /* Deleted data should be sent normally through await db.table.delete(...) */
             await onSend(batchItems, walBatch);//, deletedData);
@@ -354,6 +364,7 @@ export class WAL {
             error = err;
             console.error("WAL onSend failed:", err, batchItems, walBatch)
         }
+        this.isOnSending = false;
 
         /* Fire any callbacks */
         if(this.callbacks.length){

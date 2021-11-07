@@ -9,6 +9,15 @@ var __createBinding = (this && this.__createBinding) || (Object.create ? (functi
 var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.get = exports.WAL = exports.unpatchText = exports.stableStringify = exports.isEmpty = exports.getTextPatch = exports.asName = exports.CHANNELS = exports.TS_PG_Types = exports._PG_postgis = exports._PG_date = exports._PG_bool = exports._PG_json = exports._PG_numbers = exports._PG_strings = void 0;
 exports._PG_strings = ['bpchar', 'char', 'varchar', 'text', 'citext', 'uuid', 'bytea', 'inet', 'time', 'timetz', 'interval', 'name'];
@@ -30,6 +39,9 @@ exports.TS_PG_Types = {
     "Array<Date>": exports._PG_date.map(s => `_${s}`),
     "any": [],
 };
+(() => __awaiter(void 0, void 0, void 0, function* () {
+    const c = {};
+}));
 function sql(query, args, options, serverSideOptions) {
     return "";
 }

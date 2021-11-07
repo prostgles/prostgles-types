@@ -171,6 +171,7 @@ class WAL {
             });
             this.sendItems();
         };
+        this.isOnSending = false;
         this.isSendingTimeout = undefined;
         this.willDeleteHistory = undefined;
         this.sendItems = () => __awaiter(this, void 0, void 0, function* () {
@@ -185,7 +186,7 @@ class WAL {
                 .slice(0, batch_size)
                 .map(key => {
                 let item = Object.assign({}, this.changed[key]);
-                this.sending[key] = item;
+                this.sending[key] = Object.assign({}, item);
                 walBatch.push(Object.assign({}, item));
                 batchObj[key] = Object.assign({}, item.current);
                 delete this.changed[key];
@@ -200,6 +201,7 @@ class WAL {
                 }, throttle);
             }
             let error;
+            this.isOnSending = true;
             try {
                 yield onSend(batchItems, walBatch);
                 if (historyAgeSeconds) {
@@ -216,6 +218,7 @@ class WAL {
                 error = err;
                 console.error("WAL onSend failed:", err, batchItems, walBatch);
             }
+            this.isOnSending = false;
             if (this.callbacks.length) {
                 const ids = Object.keys(this.sending);
                 this.callbacks.forEach((c, i) => {
@@ -247,7 +250,7 @@ class WAL {
         }
     }
     isSending() {
-        return !(isEmpty(this.sending) && isEmpty(this.changed));
+        return this.isOnSending || !(isEmpty(this.sending) && isEmpty(this.changed));
     }
     getIdStr(d) {
         return this.options.id_fields.sort().map(key => `${d[key] || ""}`).join(".");

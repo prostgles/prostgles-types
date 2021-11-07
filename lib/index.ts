@@ -334,13 +334,18 @@ export type TableHandler<TD = AnyObject> = ViewHandler<TD> & {
   delete: (filter?: FullFilter<TD>, params?: DeleteParams<TD>) => Promise<PartialLax<TD> | void>;
 }
 
-// (async () => {
-//   const c: TableHandler<{ h: number; b: number; c: number; }> = {} as any;
-//   const d = await c.insert({ h: 2});
-//   if(d){
-//     d.
-//   }
-// })
+(async () => {
+  const c: TableHandler = {} as any;
+  // const c: TableHandler<{ h: number; b: number; c: number; }> = {} as any;
+  // const d = await c.insert({ h: 2});
+  // if(d){
+  //   d.
+  // }
+
+  // c.subscribe({ h: 2 }, {}, async items => {
+  //   items[0].ddd
+  // });
+})
 // c.findOne({ }, { select: { h: 2 }}).then(r => {
 //   r.hd;
 // });

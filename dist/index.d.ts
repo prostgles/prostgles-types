@@ -126,19 +126,19 @@ export declare type TableInfo = {
     media_table_name?: string;
 };
 export declare type OnError = (err: any) => void;
-export declare type SubscriptionHandler<T = AnyObject> = Promise<{
+export declare type SubscriptionHandler<T = AnyObject> = {
     unsubscribe: () => Promise<any>;
     update?: (newData: T, updateParams: UpdateParams<T>) => Promise<any>;
     delete?: (deleteParams: DeleteParams<T>) => Promise<any>;
     filter: FullFilter<T> | {};
-}>;
+};
 export declare type ViewHandler<TD = AnyObject> = {
     getInfo?: (lang?: string) => Promise<TableInfo>;
     getColumns?: (lang?: string) => Promise<ValidatedColumnInfo[]>;
     find: (filter?: FullFilter<TD>, selectParams?: SelectParams<TD>) => Promise<PartialLax<TD>[]>;
     findOne: (filter?: FullFilter<TD>, selectParams?: SelectParams<TD>) => Promise<PartialLax<TD>>;
-    subscribe: (filter: FullFilter<TD>, params: SubscribeParams<TD>, onData: (items: PartialLax<TD>[], onError?: OnError) => any) => SubscriptionHandler;
-    subscribeOne: (filter: FullFilter<TD>, params: SubscribeParams<TD>, onData: (item: PartialLax<TD>) => any, onError?: OnError) => SubscriptionHandler;
+    subscribe: (filter: FullFilter<TD>, params: SubscribeParams<TD>, onData: (items: PartialLax<TD>[], onError?: OnError) => any) => Promise<SubscriptionHandler>;
+    subscribeOne: (filter: FullFilter<TD>, params: SubscribeParams<TD>, onData: (item: PartialLax<TD>) => any, onError?: OnError) => Promise<SubscriptionHandler>;
     count: (filter?: FullFilter<TD>) => Promise<number>;
 };
 export declare type NoReturn = Omit<InsertParams, "returning">;

@@ -305,26 +305,10 @@ export type ViewHandler<TD = AnyObject> = {
   getColumns?: (lang?: string) => Promise<ValidatedColumnInfo[]>;
   find: (filter?: FullFilter<TD>, selectParams?: SelectParams<TD>) => Promise<PartialLax<TD>[]>;
   findOne: (filter?: FullFilter<TD>, selectParams?: SelectParams<TD>) => Promise<PartialLax<TD>>;
-  subscribe: (filter: FullFilter<TD>, params: SubscribeParams<TD>, onData: (items: PartialLax<TD>[], onError?: OnError) => any) => Promise<SubscriptionHandler>;
-  subscribeOne: (filter: FullFilter<TD>, params: SubscribeParams<TD>, onData: (item: PartialLax<TD>) => any, onError?: OnError) => Promise<SubscriptionHandler>;
+  subscribe: (filter: FullFilter<TD>, params: SubscribeParams<TD>, onData: (items: PartialLax<TD>[], onError?: OnError) => any) => Promise<SubscriptionHandler<TD>>;
+  subscribeOne: (filter: FullFilter<TD>, params: SubscribeParams<TD>, onData: (item: PartialLax<TD>) => any, onError?: OnError) => Promise<SubscriptionHandler<TD>>;
   count: (filter?: FullFilter<TD>) => Promise<number>;
 }
-
-export type NoReturn = Omit<InsertParams, "returning">;
-
-// function insert<TD>(
-//   data: (PartialLax<TD> | PartialLax<TD>[]), 
-//   params?: Omit<InsertParams<TD>, "returning">
-// ): Promise<void>;
-// function insert<TD>(
-//   data: (PartialLax<TD> | PartialLax<TD>[]), 
-//   params?: InsertParams<TD>
-// ): Promise<Partial<TD>> {
-//   return {};
-// }
-
-// PartialLax<TD> : R extends object?  PartialLax<TD> : Promise<void>;
-  
 
 export type TableHandler<TD = AnyObject> = ViewHandler<TD> & {
   update: (filter: FullFilter<TD>, newData: PartialLax<TD>, params?: UpdateParams<TD>) => Promise<PartialLax<TD> | void>;

@@ -164,6 +164,10 @@ export type WALConfig = SyncTableInfo & {
      * Defaults to 2 seconds
      */
     historyAgeSeconds?: number;
+
+    DEBUG_MODE?: boolean;
+
+    id?: string;
 };
 export type WALItem = {
     initial?: any;
@@ -227,7 +231,12 @@ export class WAL {
     }
 
     isSending(): boolean {
-        return this.isOnSending || !(isEmpty(this.sending) && isEmpty(this.changed))
+
+        const result = this.isOnSending || !(isEmpty(this.sending) && isEmpty(this.changed));
+        if(this.options.DEBUG_MODE){
+            console.log(this.options.id, " CHECKING isSending ->", result)
+        }
+        return result
     }
 
     /**
@@ -294,7 +303,7 @@ export class WAL {
     isSendingTimeout?: ReturnType<typeof setTimeout> = undefined;
     willDeleteHistory?: ReturnType<typeof setTimeout> = undefined;
     private sendItems = async () => {
-        const { synced_field, onSend, onSendEnd, batch_size, throttle, historyAgeSeconds = 2 } = this.options;
+        const { DEBUG_MODE, onSend, onSendEnd, batch_size, throttle, historyAgeSeconds = 2 } = this.options;
         
         // Sending data. stop here
         if(this.isSendingTimeout || this.sending && !isEmpty(this.sending)) return;
@@ -323,7 +332,11 @@ export class WAL {
 
                 delete this.changed[key];
             });
-        batchItems = walBatch.map(d => d.current)
+        batchItems = walBatch.map(d => d.current);
+
+        if(DEBUG_MODE){
+            console.log(this.options.id, " SENDING lr->", batchItems[batchItems.length - 1])
+        }
 
         // Throttle next data send
         if(!this.isSendingTimeout){
@@ -379,6 +392,9 @@ export class WAL {
         }
 
         this.sending = {};
+        if(DEBUG_MODE){
+            console.log(this.options.id, " SENT lr->", batchItems[batchItems.length - 1])
+        }
         if(!isEmpty(this.changed)){
             this.sendItems();
         } else {

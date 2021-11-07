@@ -27,6 +27,8 @@ export declare type WALConfig = SyncTableInfo & {
     onSendEnd?: (batch: any[], fullItems: WALItem[], error?: any) => any;
     orderBy?: BasicOrderBy;
     historyAgeSeconds?: number;
+    DEBUG_MODE?: boolean;
+    id?: string;
 };
 export declare type WALItem = {
     initial?: any;

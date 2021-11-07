@@ -175,7 +175,7 @@ class WAL {
         this.isSendingTimeout = undefined;
         this.willDeleteHistory = undefined;
         this.sendItems = () => __awaiter(this, void 0, void 0, function* () {
-            const { synced_field, onSend, onSendEnd, batch_size, throttle, historyAgeSeconds = 2 } = this.options;
+            const { DEBUG_MODE, onSend, onSendEnd, batch_size, throttle, historyAgeSeconds = 2 } = this.options;
             if (this.isSendingTimeout || this.sending && !isEmpty(this.sending))
                 return;
             if (!this.changed || isEmpty(this.changed))
@@ -192,6 +192,9 @@ class WAL {
                 delete this.changed[key];
             });
             batchItems = walBatch.map(d => d.current);
+            if (DEBUG_MODE) {
+                console.log(this.options.id, " SENDING lr->", batchItems[batchItems.length - 1]);
+            }
             if (!this.isSendingTimeout) {
                 this.isSendingTimeout = setTimeout(() => {
                     this.isSendingTimeout = undefined;
@@ -230,6 +233,9 @@ class WAL {
                 this.callbacks = this.callbacks.filter(cb => cb.idStrs.length);
             }
             this.sending = {};
+            if (DEBUG_MODE) {
+                console.log(this.options.id, " SENT lr->", batchItems[batchItems.length - 1]);
+            }
             if (!isEmpty(this.changed)) {
                 this.sendItems();
             }
@@ -250,7 +256,11 @@ class WAL {
         }
     }
     isSending() {
-        return this.isOnSending || !(isEmpty(this.sending) && isEmpty(this.changed));
+        const result = this.isOnSending || !(isEmpty(this.sending) && isEmpty(this.changed));
+        if (this.options.DEBUG_MODE) {
+            console.log(this.options.id, " CHECKING isSending ->", result);
+        }
+        return result;
     }
     getIdStr(d) {
         return this.options.id_fields.sort().map(key => `${d[key] || ""}`).join(".");

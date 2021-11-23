@@ -6,6 +6,7 @@ exports.CompareInFilterKeys = ["$in", "$nin"];
 exports.TextFilter_FullTextSearchFilterKeys = ["to_tsquery", "plainto_tsquery", "phraseto_tsquery", "websearch_to_tsquery"];
 exports.TextFilterFTSKeys = ["@@", "@>", "<@", "$contains", "$containedBy"];
 exports.GeomFilterKeys = ["~", "~=", "@", "|&>", "|>>", ">>", "=", "<<|", "<<", "&>", "&<|", "&<", "&&&", "&&"];
-exports.GeomFilter_Funcs = ["ST_MakeEnvelope", "ST_MakeEnvelope".toLowerCase()];
+const _GeomFilter_Funcs = ["ST_MakeEnvelope", "ST_MakePolygon"];
+exports.GeomFilter_Funcs = _GeomFilter_Funcs.concat(_GeomFilter_Funcs.map(v => v.toLowerCase()));
 exports.EXISTS_KEYS = ["$exists", "$notExists", "$existsJoined", "$notExistsJoined"];
 //# sourceMappingURL=filters.js.map

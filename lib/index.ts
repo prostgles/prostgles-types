@@ -310,26 +310,28 @@ export type ViewHandler<TD = AnyObject> = {
   count: (filter?: FullFilter<TD>) => Promise<number>;
 }
 
+type GetUpdateReturnType<O extends UpdateParams ,TD> = O extends { returning: string }? Promise<PartialLax<TD>> : O extends { returning: object }? Promise<PartialLax<TD>> : Promise<void>;
+
 export type TableHandler<TD = AnyObject> = ViewHandler<TD> & {
-  update: (filter: FullFilter<TD>, newData: PartialLax<TD>, params?: UpdateParams<TD>) => Promise<PartialLax<TD> | void>;
+  update: <P extends UpdateParams<TD>>(filter: FullFilter<TD>, newData: PartialLax<TD>, params?: UpdateParams<TD>) => GetUpdateReturnType<P ,TD>;
   updateBatch: (data: [FullFilter<TD>, PartialLax<TD>][], params?: UpdateParams<TD>) => Promise<PartialLax<TD> | void>;
   upsert: (filter: FullFilter<TD>, newData: PartialLax<TD>, params?: UpdateParams<TD>) => Promise<PartialLax<TD> | void>;
-  insert: (data: (PartialLax<TD> | PartialLax<TD>[]), params?: UpdateParams<TD>) => Promise<void | PartialLax<TD>>;
-  delete: (filter?: FullFilter<TD>, params?: DeleteParams<TD>) => Promise<PartialLax<TD> | void>;
+  insert: <P extends UpdateParams<TD>>(data: (PartialLax<TD> | PartialLax<TD>[]), params?: P ) => GetUpdateReturnType<P ,TD>;
+  delete: <P extends UpdateParams<TD>>(filter?: FullFilter<TD>, params?: DeleteParams<TD>) => GetUpdateReturnType<P ,TD>;
 }
 
-(async () => {
-  const c: TableHandler = {} as any;
-  // const c: TableHandler<{ h: number; b: number; c: number; }> = {} as any;
-  // const d = await c.insert({ h: 2});
-  // if(d){
-  //   d.
-  // }
+// (async () => {
+//   const c: TableHandler = {} as any;
+//   // const c: TableHandler<{ h: number; b: number; c: number; }> = {} as any;
+//   // const d = await c.insert({ h: 2});
+//   // if(d){
+//   //   d.
+//   // }
 
-  // c.subscribe({ h: 2 }, {}, async items => {
-  //   items[0].ddd
-  // });
-})
+//   // c.subscribe({ h: 2 }, {}, async items => {
+//   //   items[0].ddd
+//   // });
+// })
 // c.findOne({ }, { select: { h: 2 }}).then(r => {
 //   r.hd;
 // });

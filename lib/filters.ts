@@ -92,7 +92,8 @@ export type GeomFilter =
 //  | { "~=": GeoBBox }
 ;
 export const GeomFilterKeys = ["~","~=","@","|&>","|>>", ">>", "=", "<<|", "<<", "&>", "&<|", "&<", "&&&", "&&"]
-export const GeomFilter_Funcs = ["ST_MakeEnvelope", "ST_MakeEnvelope".toLowerCase()]
+const _GeomFilter_Funcs = ["ST_MakeEnvelope", "ST_MakePolygon"]
+export const GeomFilter_Funcs =  _GeomFilter_Funcs.concat(_GeomFilter_Funcs.map(v => v.toLowerCase()));
 
 export type AllowedTSTypes = string | number | boolean | Date | any[];
 // export type AnyObject = { [key: string]: AllowedTSTypes };

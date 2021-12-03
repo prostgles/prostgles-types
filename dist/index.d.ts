@@ -62,6 +62,7 @@ export declare type _OrderBy<T = AnyObject> = {
     key: keyof T;
     asc?: AscOrDesc;
     nulls?: "last" | "first";
+    nullEmpty?: boolean;
 }[] | Array<keyof T> | keyof T;
 export declare type OrderBy<T = AnyObject> = _OrderBy<T> | _OrderBy<AnyObject>;
 export declare type Select<T = AnyObject> = {

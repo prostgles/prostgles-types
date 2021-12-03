@@ -152,11 +152,12 @@ export type AscOrDesc = 1 | -1 | boolean;
  * true | 1 -> ascending
  * false | -1 -> descending
  * Array order is maintained
+ * if nullEmpty is true then empty text will be replaced to null (so nulls sorting takes effect on it)
  */
 export type _OrderBy<T = AnyObject> = 
   | { [K in keyof Partial<T>]: AscOrDesc }
   | { [K in keyof Partial<T>]: AscOrDesc }[]
-  | { key: keyof T, asc?: AscOrDesc, nulls?: "last" | "first" }[] 
+  | { key: keyof T, asc?: AscOrDesc, nulls?: "last" | "first", nullEmpty?: boolean }[] 
   | Array<keyof T>
   | keyof T
   ;

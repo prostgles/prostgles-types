@@ -191,10 +191,10 @@ export declare type DbJoinMaker = {
     innerJoinOne: TableJoin;
     leftJoinOne: TableJoin;
 };
-export declare type SQLResult = {
+export declare type SQLResult<T = "object"> = {
     command: "SELECT" | "UPDATE" | "DELETE" | "CREATE" | "ALTER" | "LISTEN" | "UNLISTEN" | "INSERT" | string;
     rowCount: number;
-    rows: AnyObject[];
+    rows: (T extends "arrayMode" ? any[] : AnyObject)[];
     fields: {
         name: string;
         dataType: string;
@@ -209,7 +209,7 @@ export declare type DBEventHandles = {
         removeListener: () => void;
     };
 };
-export declare type GetReturnType<ReturnType extends SQLOptions["returnType"] = ""> = ReturnType extends "row" ? AnyObject : ReturnType extends "rows" ? AnyObject[] : ReturnType extends "value" ? any : ReturnType extends "values" ? any[] : ReturnType extends "statement" ? string : ReturnType extends "noticeSubscription" ? DBEventHandles : SQLResult;
+export declare type GetReturnType<ReturnType extends SQLOptions["returnType"] = ""> = ReturnType extends "row" ? AnyObject : ReturnType extends "rows" ? AnyObject[] : ReturnType extends "value" ? any : ReturnType extends "values" ? any[] : ReturnType extends "statement" ? string : ReturnType extends "noticeSubscription" ? DBEventHandles : SQLResult<ReturnType>;
 declare function sql<ReturnType extends SQLOptions["returnType"] = undefined>(query: string, args?: any | any[], options?: {
     returnType: ReturnType;
 }, serverSideOptions?: {
@@ -237,7 +237,7 @@ export declare type DBNotifConfig = DBNoticeConfig & {
     notifChannel: string;
 };
 export declare type SQLOptions = {
-    returnType: SelectParamsBasic["returnType"] | "statement" | "rows" | "noticeSubscription" | "";
+    returnType: SelectParamsBasic["returnType"] | "statement" | "rows" | "noticeSubscription" | "arrayMode" | "";
 };
 export declare type SQLRequest = {
     query: string;

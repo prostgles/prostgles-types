@@ -381,10 +381,10 @@ export type DbJoinMaker = {
   leftJoinOne: TableJoin;
 }
 
-export type SQLResult = {
+export type SQLResult<T = "object"> = {
   command: "SELECT" | "UPDATE" | "DELETE" | "CREATE" | "ALTER" | "LISTEN" | "UNLISTEN" | "INSERT" | string;
   rowCount: number;
-  rows: AnyObject[];
+  rows: (T extends "arrayMode"? any[] : AnyObject)[];
   fields: {
       name: string;
       dataType: string;
@@ -406,7 +406,7 @@ export type GetReturnType<ReturnType extends SQLOptions["returnType"] = ""> =
   ReturnType extends "statement"? string :
   ReturnType extends "noticeSubscription"? DBEventHandles :
   // ReturnType extends undefined? SQLResult :
-  SQLResult;
+  SQLResult<ReturnType>;
 
 /**
  * 
@@ -427,8 +427,8 @@ function sql<ReturnType extends SQLOptions["returnType"] = undefined>(
   return "" as unknown as any;
 }
 
-// sql("",{}, { returnType: "statement"}).then(res => {
-//   res
+// sql("",{}, { returnType: ""}).then(res => {
+//   res.rows
 // })
 
 export type SQLHandler = typeof sql;
@@ -472,7 +472,7 @@ export type SQLOptions = {
   /**
    * Return type
    */
-  returnType: SelectParamsBasic["returnType"] | "statement" | "rows" | "noticeSubscription" | "";
+  returnType: SelectParamsBasic["returnType"] | "statement" | "rows" | "noticeSubscription" | "arrayMode" | "";
 } ;
 
 export type SQLRequest = {

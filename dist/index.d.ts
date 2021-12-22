@@ -141,6 +141,7 @@ export declare type ViewHandler<TD = AnyObject> = {
     subscribe: (filter: FullFilter<TD>, params: SubscribeParams<TD>, onData: (items: PartialLax<TD>[], onError?: OnError) => any) => Promise<SubscriptionHandler<TD>>;
     subscribeOne: (filter: FullFilter<TD>, params: SubscribeParams<TD>, onData: (item: PartialLax<TD>) => any, onError?: OnError) => Promise<SubscriptionHandler<TD>>;
     count: (filter?: FullFilter<TD>) => Promise<number>;
+    size: (filter?: FullFilter<TD>, selectParams?: SelectParams<TD>) => Promise<string>;
 };
 declare type GetUpdateReturnType<O extends UpdateParams, TD> = O extends {
     returning: string;
@@ -166,6 +167,7 @@ export declare type ViewHandlerBasic = {
         unsubscribe: () => any;
     }>;
     count: (filter?: FullFilterBasic) => Promise<number>;
+    size: (filter?: FullFilterBasic, selectParams?: SelectParamsBasic) => Promise<string>;
 };
 export declare type TableHandlerBasic = ViewHandlerBasic & {
     update: <TD = AnyObject>(filter: FullFilterBasic, newData: PartialLax<TD>, params?: UpdateParamsBasic) => Promise<PartialLax<TD> | void>;
@@ -199,6 +201,7 @@ export declare type SQLResult<T = "object"> = {
         name: string;
         dataType: string;
         tableName?: string;
+        format: string;
     }[];
     duration: number;
 };

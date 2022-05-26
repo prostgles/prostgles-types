@@ -396,6 +396,8 @@ export type SQLResult<T = "object"> = {
   fields: {
       name: string;
       dataType: string;
+      udt_name: PG_COLUMN_UDT_DATA_TYPE;
+      tsDataType: TS_COLUMN_DATA_TYPES;
       tableName?: string;
       format: string;
   }[];

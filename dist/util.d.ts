@@ -44,7 +44,7 @@ export declare class WAL {
     private options;
     private callbacks;
     constructor(args: WALConfig);
-    sort: (a?: AnyObject | undefined, b?: AnyObject | undefined) => number;
+    sort: (a?: AnyObject, b?: AnyObject) => number;
     isSending(): boolean;
     isInHistory: (item: AnyObject) => boolean;
     getIdStr(d: AnyObject): string;

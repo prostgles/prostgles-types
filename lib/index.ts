@@ -550,8 +550,8 @@ export const RULE_METHODS = {
   "subscribe": ["unsubscribe", "subscribe", "subscribeOne"],  
 } as const
 
-type methodKey = typeof RULE_METHODS[keyof typeof RULE_METHODS][number]
-export type TableSchemaForClient = Record<string, Partial<Record<methodKey, {} | { err: any }>>>;
+export type MethodKey = typeof RULE_METHODS[keyof typeof RULE_METHODS][number]
+export type TableSchemaForClient = Record<string, Partial<Record<MethodKey, {} | { err: any }>>>;
 
 /* Schema */
 export type TableSchema = {

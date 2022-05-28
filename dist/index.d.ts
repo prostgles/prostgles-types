@@ -296,8 +296,8 @@ export declare const RULE_METHODS: {
     readonly sync: readonly ["sync", "unsync"];
     readonly subscribe: readonly ["unsubscribe", "subscribe", "subscribeOne"];
 };
-declare type methodKey = typeof RULE_METHODS[keyof typeof RULE_METHODS][number];
-declare type TableSchemaForClient = Record<string, Partial<Record<methodKey, {} | {
+export declare type MethodKey = typeof RULE_METHODS[keyof typeof RULE_METHODS][number];
+export declare type TableSchemaForClient = Record<string, Partial<Record<MethodKey, {} | {
     err: any;
 }>>>;
 export declare type TableSchema = {
@@ -338,7 +338,7 @@ export declare type AuthSocketSchema = {
     pathGuard?: boolean;
 };
 export type { WALItem, BasicOrderBy, WALItemsObj, WALConfig, TextPatch, SyncTableInfo } from "./util";
-export { asName, getTextPatch, isEmpty, stableStringify, unpatchText, WAL, get } from "./util";
+export { asName, getTextPatch, isEmpty, stableStringify, unpatchText, WAL, get, isDefined, isObject } from "./util";
 export * from "./filters";
 export type { ClientExpressData, ClientSyncHandles, ClientSyncInfo, SyncConfig, ClientSyncPullResponse, SyncBatchParams, onUpdatesParams } from "./replication";
 //# sourceMappingURL=index.d.ts.map

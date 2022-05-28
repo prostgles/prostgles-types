@@ -14,7 +14,7 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.get = exports.WAL = exports.unpatchText = exports.stableStringify = exports.isEmpty = exports.getTextPatch = exports.asName = exports.RULE_METHODS = exports.CHANNELS = exports.TS_PG_Types = exports._PG_postgis = exports._PG_date = exports._PG_bool = exports._PG_json = exports._PG_numbers = exports._PG_strings = void 0;
+exports.isObject = exports.isDefined = exports.get = exports.WAL = exports.unpatchText = exports.stableStringify = exports.isEmpty = exports.getTextPatch = exports.asName = exports.RULE_METHODS = exports.CHANNELS = exports.TS_PG_Types = exports._PG_postgis = exports._PG_date = exports._PG_bool = exports._PG_json = exports._PG_numbers = exports._PG_strings = void 0;
 exports._PG_strings = ['bpchar', 'char', 'varchar', 'text', 'citext', 'uuid', 'bytea', 'inet', 'time', 'timetz', 'interval', 'name'];
 exports._PG_numbers = ['int2', 'int4', 'int8', 'float4', 'float8', 'numeric', 'money', 'oid'];
 exports._PG_json = ['json', 'jsonb'];
@@ -70,5 +70,7 @@ Object.defineProperty(exports, "stableStringify", { enumerable: true, get: funct
 Object.defineProperty(exports, "unpatchText", { enumerable: true, get: function () { return util_1.unpatchText; } });
 Object.defineProperty(exports, "WAL", { enumerable: true, get: function () { return util_1.WAL; } });
 Object.defineProperty(exports, "get", { enumerable: true, get: function () { return util_1.get; } });
+Object.defineProperty(exports, "isDefined", { enumerable: true, get: function () { return util_1.isDefined; } });
+Object.defineProperty(exports, "isObject", { enumerable: true, get: function () { return util_1.isObject; } });
 __exportStar(require("./filters"), exports);
 //# sourceMappingURL=index.js.map

@@ -286,6 +286,50 @@ export declare type AuthGuardLocation = {
 export declare type AuthGuardLocationResponse = {
     shouldReload: boolean;
 };
+export declare const RULE_METHODS: {
+    readonly getColumns: readonly ["getColumns"];
+    readonly getInfo: readonly ["getInfo"];
+    readonly insert: readonly ["insert", "upsert"];
+    readonly update: readonly ["update", "upsert", "updateBatch"];
+    readonly select: readonly ["findOne", "find", "count", "size"];
+    readonly delete: readonly ["delete", "remove"];
+    readonly sync: readonly ["sync", "unsync"];
+    readonly subscribe: readonly ["unsubscribe", "subscribe", "subscribeOne"];
+};
+declare type methodKey = typeof RULE_METHODS[keyof typeof RULE_METHODS][number];
+declare type TableSchemaForClient = Record<string, Partial<Record<methodKey, {} | {
+    err: any;
+}>>>;
+export declare type TableSchema = {
+    schema: string;
+    name: string;
+    oid: number;
+    comment: string;
+    columns: (ColumnInfo & {
+        privileges: {
+            privilege_type: "INSERT" | "REFERENCES" | "SELECT" | "UPDATE";
+            is_grantable: "YES" | "NO";
+        }[];
+    })[];
+    is_view: boolean;
+    parent_tables: string[];
+    privileges: {
+        insert: boolean;
+        select: boolean;
+        update: boolean;
+        delete: boolean;
+    };
+};
+export declare type ClientSchema = {
+    rawSQL: boolean;
+    joinTables: string[][];
+    auth: AnyObject;
+    version: any;
+    err?: string;
+    fullSchema?: TableSchema[];
+    schema: TableSchemaForClient;
+    methods: string[];
+};
 export declare type AuthSocketSchema = {
     user?: AnyObject;
     register?: boolean;

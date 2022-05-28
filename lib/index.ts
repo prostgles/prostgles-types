@@ -539,6 +539,53 @@ export type AuthGuardLocationResponse = {
   shouldReload: boolean;
 }
 
+export const RULE_METHODS = {
+  "getColumns": ["getColumns"], 
+  "getInfo": ["getInfo"], 
+  "insert": ["insert", "upsert"], 
+  "update": ["update", "upsert", "updateBatch"], 
+  "select": ["findOne", "find", "count", "size"], 
+  "delete": ["delete", "remove"],
+  "sync": ["sync", "unsync"], 
+  "subscribe": ["unsubscribe", "subscribe", "subscribeOne"],  
+} as const
+
+type methodKey = typeof RULE_METHODS[keyof typeof RULE_METHODS][number]
+type TableSchemaForClient = Record<string, Partial<Record<methodKey, {} | { err: any }>>>;
+
+/* Schema */
+export type TableSchema = {
+  schema: string;
+  name: string;
+  oid: number;
+  comment: string;
+  columns: (ColumnInfo & {
+    privileges: {
+      privilege_type: "INSERT" | "REFERENCES" | "SELECT" | "UPDATE";// | "DELETE";
+      is_grantable: "YES" | "NO"
+    }[];
+  })[];
+  is_view: boolean;
+  parent_tables: string[];
+  privileges: {
+    insert: boolean;
+    select: boolean;
+    update: boolean;
+    delete: boolean;
+  }
+}
+
+export type ClientSchema = { 
+  rawSQL: boolean;
+  joinTables: string[][];
+  auth: AnyObject;
+  version: any;
+  err?: string;
+  fullSchema?: TableSchema[];
+  schema: TableSchemaForClient;
+  methods: string[];
+}
+
 /**
  * Auth object sent from server to client
  */

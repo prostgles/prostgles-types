@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.get = exports.isEmpty = exports.WAL = exports.unpatchText = exports.getTextPatch = exports.stableStringify = exports.asName = void 0;
+exports.isDefined = exports.isObject = exports.get = exports.isEmpty = exports.WAL = exports.unpatchText = exports.getTextPatch = exports.stableStringify = exports.asName = void 0;
 const md5_1 = require("./md5");
 function asName(str) {
     if (str === null || str === undefined || !str.toString || !str.toString())
@@ -303,4 +303,10 @@ function get(obj, propertyPath) {
     }, o);
 }
 exports.get = get;
+function isObject(obj) {
+    return Boolean(obj && typeof obj === "object" && !Array.isArray(obj));
+}
+exports.isObject = isObject;
+function isDefined(v) { return v !== undefined && v !== null; }
+exports.isDefined = isDefined;
 //# sourceMappingURL=util.js.map

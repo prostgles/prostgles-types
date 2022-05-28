@@ -551,7 +551,7 @@ export const RULE_METHODS = {
 } as const
 
 type methodKey = typeof RULE_METHODS[keyof typeof RULE_METHODS][number]
-type TableSchemaForClient = Record<string, Partial<Record<methodKey, {} | { err: any }>>>;
+export type TableSchemaForClient = Record<string, Partial<Record<methodKey, {} | { err: any }>>>;
 
 /* Schema */
 export type TableSchema = {

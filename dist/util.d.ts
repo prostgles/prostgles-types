@@ -60,4 +60,5 @@ export declare function isEmpty(obj?: any): boolean;
 export declare function get(obj: any, propertyPath: string | string[]): any;
 export declare function isObject(obj: any): obj is Record<string, any>;
 export declare function isDefined<T>(v: T | undefined | void): v is T;
+export declare function getKeys<T>(o: T): Array<keyof T>;
 //# sourceMappingURL=util.d.ts.map

@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.isDefined = exports.isObject = exports.get = exports.isEmpty = exports.WAL = exports.unpatchText = exports.getTextPatch = exports.stableStringify = exports.asName = void 0;
+exports.getKeys = exports.isDefined = exports.isObject = exports.get = exports.isEmpty = exports.WAL = exports.unpatchText = exports.getTextPatch = exports.stableStringify = exports.asName = void 0;
 const md5_1 = require("./md5");
 function asName(str) {
     if (str === null || str === undefined || !str.toString || !str.toString())
@@ -152,12 +152,13 @@ class WAL {
             if (isEmpty(this.changed) && this.options.onSendStart)
                 this.options.onSendStart();
             data.map(d => {
+                var _a;
                 const { initial, current } = { ...d };
                 if (!current)
                     throw "Expecting { current: object, initial?: object }";
                 const idStr = this.getIdStr(current);
-                this.changed = this.changed || {};
-                this.changed[idStr] = this.changed[idStr] || { initial, current };
+                this.changed ?? (this.changed = {});
+                (_a = this.changed)[idStr] ?? (_a[idStr] = { initial, current });
                 this.changed[idStr].current = {
                     ...this.changed[idStr].current,
                     ...current
@@ -309,4 +310,8 @@ function isObject(obj) {
 exports.isObject = isObject;
 function isDefined(v) { return v !== undefined && v !== null; }
 exports.isDefined = isDefined;
+function getKeys(o) {
+    return Object.keys(o);
+}
+exports.getKeys = getKeys;
 //# sourceMappingURL=util.js.map

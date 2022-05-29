@@ -167,9 +167,10 @@ export type OrderBy<T = AnyObject> =
   | _OrderBy<AnyObject>
   ;
 
-export type Select<T = AnyObject> = 
-  | { [K in keyof Partial<T>]: any } 
-  | {} 
+export type Select<T extends AnyObject> = 
+  | { [K in keyof Partial<T>]: 1 } 
+  | { [K in keyof Partial<T>]: 0 } 
+  // | {} 
   | undefined 
   | "" 
   | "*" 
@@ -294,20 +295,35 @@ export type TableInfo = {
 
 export type OnError = (err: any) => void;
 
+
+type GetSelectReturnType<O extends SelectParams<TD>, TD extends AnyObject> = 
+  O extends { select: "*" }? TD : 
+  O extends { select: "" }? Record<string, never> : 
+  O extends { select: Record<string, 1> }? Pick<TD, keyof O["select"]> : 
+  O extends { select: Record<string, 0> }? Omit<TD, keyof O["select"]> : 
+  TD;
+
+type GetUpdateReturnType<O extends UpdateParams<TD>, TD extends AnyObject> = 
+  O extends { returning: "*" }? TD : 
+  O extends { returning: "" }? Record<string, never> : 
+  O extends { returning: Record<string, 1> }? Pick<TD, keyof O["returning"]> : 
+  O extends { returning: Record<string, 0> }? Omit<TD, keyof O["returning"]> : 
+  void;
+
 export type SubscriptionHandler<T = AnyObject> = {
-    unsubscribe: () => Promise<any>;
-    update?: (newData: T, updateParams: UpdateParams<T>) => Promise<any>;
-    delete?: (deleteParams: DeleteParams<T>) => Promise<any>;
-    filter: FullFilter<T> | {};
+  unsubscribe: () => Promise<any>;
+  update?: (newData: T, updateParams: UpdateParams<T>) => Promise<any>;
+  delete?: (deleteParams: DeleteParams<T>) => Promise<any>;
+  filter: FullFilter<T> | {};
 }
 
 export type ViewHandler<TD = AnyObject> = {
   getInfo?: (lang?: string) => Promise<TableInfo>;
   getColumns?: (lang?: string) => Promise<ValidatedColumnInfo[]>;
-  find: (filter?: FullFilter<TD>, selectParams?: SelectParams<TD>) => Promise<PartialLax<TD>[]>;
-  findOne: (filter?: FullFilter<TD>, selectParams?: SelectParams<TD>) => Promise<PartialLax<TD>>;
-  subscribe: (filter: FullFilter<TD>, params: SubscribeParams<TD>, onData: (items: PartialLax<TD>[], onError?: OnError) => any) => Promise<SubscriptionHandler<TD>>;
-  subscribeOne: (filter: FullFilter<TD>, params: SubscribeParams<TD>, onData: (item: PartialLax<TD>) => any, onError?: OnError) => Promise<SubscriptionHandler<TD>>;
+  find: <P extends SelectParams<TD>>(filter?: FullFilter<TD>, selectParams?: P) => Promise<GetSelectReturnType<P, TD>[]>;
+  findOne: <P extends SelectParams<TD>>(filter?: FullFilter<TD>, selectParams?: P) => Promise<GetSelectReturnType<P, TD>>;
+  subscribe: <P extends SubscribeParams<TD>>(filter: FullFilter<TD>, params: P, onData: (items: GetSelectReturnType<P, TD>[], onError?: OnError) => any) => Promise<SubscriptionHandler<TD>>;
+  subscribeOne: <P extends SubscribeParams<TD>>(filter: FullFilter<TD>, params: P, onData: (item: GetSelectReturnType<P, TD>) => any, onError?: OnError) => Promise<SubscriptionHandler<TD>>;
   count: (filter?: FullFilter<TD>) => Promise<number>;
   /**
    * Returns result size in bits
@@ -315,36 +331,13 @@ export type ViewHandler<TD = AnyObject> = {
   size: (filter?: FullFilter<TD>, selectParams?: SelectParams<TD>) => Promise<string>;
 }
 
-type GetUpdateReturnType<O extends UpdateParams ,TD> = O extends { returning: string }? Promise<PartialLax<TD>> : O extends { returning: object }? Promise<PartialLax<TD>> : Promise<void>;
-
 export type TableHandler<TD = AnyObject> = ViewHandler<TD> & {
-  update: <P extends UpdateParams<TD>>(filter: FullFilter<TD>, newData: PartialLax<TD>, params?: UpdateParams<TD>) => GetUpdateReturnType<P ,TD>;
+  update: <P extends UpdateParams<TD>>(filter: FullFilter<TD>, newData: PartialLax<TD>, params?: UpdateParams<TD>) => Promise<GetUpdateReturnType<P ,TD>>;
   updateBatch: (data: [FullFilter<TD>, PartialLax<TD>][], params?: UpdateParams<TD>) => Promise<PartialLax<TD> | void>;
   upsert: (filter: FullFilter<TD>, newData: PartialLax<TD>, params?: UpdateParams<TD>) => Promise<PartialLax<TD> | void>;
-  insert: <P extends UpdateParams<TD>>(data: (PartialLax<TD> | PartialLax<TD>[]), params?: P ) => GetUpdateReturnType<P ,TD>;
-  delete: <P extends UpdateParams<TD>>(filter?: FullFilter<TD>, params?: DeleteParams<TD>) => GetUpdateReturnType<P ,TD>;
+  insert: <P extends UpdateParams<TD>>(data: (PartialLax<TD> | PartialLax<TD>[]), params?: P ) => Promise<GetUpdateReturnType<P ,TD>>;
+  delete: <P extends UpdateParams<TD>>(filter?: FullFilter<TD>, params?: DeleteParams<TD>) => Promise<GetUpdateReturnType<P ,TD>>;
 }
-
-// (async () => {
-//   const c: TableHandler = {} as any;
-//   // const c: TableHandler<{ h: number; b: number; c: number; }> = {} as any;
-//   // const d = await c.insert({ h: 2});
-//   // if(d){
-//   //   d.
-//   // }
-
-//   // c.subscribe({ h: 2 }, {}, async items => {
-//   //   items[0].ddd
-//   // });
-// })
-// c.findOne({ }, { select: { h: 2 }}).then(r => {
-//   r.hd;
-// });
-// c.update({ da: 2 }, { zd: '2' });
-// c.subscribe({ x: 10}, {}, d => {
-//   d.filter(dd => dd.x === 20);
-// })
-
 
 export type ViewHandlerBasic = {
   getInfo?: (lang?: string) => Promise<TableInfo>;
@@ -389,10 +382,10 @@ export type DbJoinMaker = {
   leftJoinOne: TableJoin;
 }
 
-export type SQLResult<T = "object"> = {
+export type SQLResult<T extends SQLOptions["returnType"]> = {
   command: "SELECT" | "UPDATE" | "DELETE" | "CREATE" | "ALTER" | "LISTEN" | "UNLISTEN" | "INSERT" | string;
   rowCount: number;
-  rows: (T extends "arrayMode"? any[] : AnyObject)[];
+  rows: (T extends "arrayMode"? any : AnyObject)[];
   fields: {
       name: string;
       dataType: string;
@@ -409,40 +402,31 @@ export type DBEventHandles = {
   addListener: (listener: (event: any) => void) => { removeListener: () => void; } 
 };
 
-export type GetReturnType<ReturnType extends SQLOptions["returnType"] = ""> = 
-  ReturnType extends "row"? AnyObject :
-  ReturnType extends "rows"? AnyObject[] :
-  ReturnType extends "value"? any :
-  ReturnType extends "values"? any[] :
-  ReturnType extends "statement"? string :
-  ReturnType extends "noticeSubscription"? DBEventHandles :
-  // ReturnType extends undefined? SQLResult :
-  SQLResult<ReturnType>;
+export type GetSQLReturnType<O extends SQLOptions> = 
+  O["returnType"] extends "row"? AnyObject | null :
+  O["returnType"] extends "rows"? AnyObject[] :
+  O["returnType"] extends "value"? any | null :
+  O["returnType"] extends "values"? any[] :
+  O["returnType"] extends "statement"? string :
+  O["returnType"] extends "noticeSubscription"? DBEventHandles :
+  SQLResult<O["returnType"]>;
 
+export type SQLHandler = 
 /**
  * 
  * @param query <string> query. e.g.: SELECT * FROM users;
  * @param params <any[] | object> query arguments to be escaped. e.g.: { name: 'dwadaw' }
  * @param options <object> { returnType: "statement" | "rows" | "noticeSubscription" }
  */
-function sql<ReturnType extends SQLOptions["returnType"] = undefined>(
+<Opts extends SQLOptions>(
   query: string, 
-  args?: any | any[], 
-  options?: {
-    returnType: ReturnType
-  },
+  args?: AnyObject | any[], 
+  options?: Opts,
   serverSideOptions?: {
     socket: any
   }
-): Promise<GetReturnType<ReturnType>> {
-  return "" as unknown as any;
-}
+) => Promise<GetSQLReturnType<Opts>>
 
-// sql("",{}, { returnType: ""}).then(res => {
-//   res.rows
-// })
-
-export type SQLHandler = typeof sql;
 
 export type DBHandler = {
   [key: string]: Partial<TableHandler>;
@@ -483,7 +467,7 @@ export type SQLOptions = {
   /**
    * Return type
    */
-  returnType: SelectParamsBasic["returnType"] | "statement" | "rows" | "noticeSubscription" | "arrayMode" | "";
+  returnType: Required<SelectParamsBasic>["returnType"] | "statement" | "rows" | "noticeSubscription" | "arrayMode";
 } ;
 
 export type SQLRequest = {

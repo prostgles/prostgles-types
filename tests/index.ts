@@ -1,4 +1,7 @@
 import { getTextPatch, TextPatch, unpatchText, WAL } from "../dist/util";
+import { typeTestsOK } from "./typeTests";
+
+typeTestsOK();
 
 let error;
 

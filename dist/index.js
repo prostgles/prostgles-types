@@ -34,9 +34,6 @@ exports.TS_PG_Types = {
     "Array<Date>": exports._PG_date.map(s => `_${s}`),
     "any": [],
 };
-function sql(query, args, options, serverSideOptions) {
-    return "";
-}
 const preffix = "_psqlWS_.";
 exports.CHANNELS = {
     SCHEMA_CHANGED: preffix + "schema-changed",

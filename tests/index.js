@@ -10,6 +10,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const util_1 = require("../dist/util");
+const typeTests_1 = require("./typeTests");
+(0, typeTests_1.typeTestsOK)();
 let error;
 let failed = -1;
 const vals = [

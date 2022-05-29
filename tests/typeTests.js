@@ -49,7 +49,7 @@ exports.typeTestsOK = void 0;
         handles.addListener;
         handles.socketChannel;
         handles.socketUnsubChannel;
-        const listenHandlesOrData = yield sqlHandler("SELECT 1", {}, { returnType: "allowListen" });
+        const listenHandlesOrData = yield sqlHandler("SELECT 1", {}, { allowListen: true });
         if ("command" in listenHandlesOrData) {
             listenHandlesOrData.command;
             listenHandlesOrData.duration;

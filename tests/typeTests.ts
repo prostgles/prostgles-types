@@ -67,7 +67,7 @@ import type { TableHandler, SQLHandler } from "../dist/index";
     <string>handles.socketChannel;
     <string>handles.socketUnsubChannel;
 
-    const listenHandlesOrData = await sqlHandler("SELECT 1", {}, { returnType: "allowListen" });
+    const listenHandlesOrData = await sqlHandler("SELECT 1", {}, { allowListen: true });
     
     if("command" in listenHandlesOrData){
       <string>listenHandlesOrData.command;

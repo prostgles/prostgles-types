@@ -402,15 +402,19 @@ export type DBEventHandles = {
   addListener: (listener: (event: any) => void) => { removeListener: () => void; } 
 };
 
-export type GetSQLReturnType<O extends SQLOptions> = 
-  O["returnType"] extends "row"? AnyObject | null :
-  O["returnType"] extends "rows"? AnyObject[] :
-  O["returnType"] extends "value"? any | null :
-  O["returnType"] extends "values"? any[] :
-  O["returnType"] extends "statement"? string :
-  O["returnType"] extends "noticeSubscription"? DBEventHandles :
-  O["returnType"] extends "allowListen"? DBEventHandles | SQLResult<"allowListen"> :
-  SQLResult<O["returnType"]>;
+export type CheckForListen<T, O extends SQLOptions> = O["allowListen"] extends true? (DBEventHandles | T) : T;
+
+export type GetSQLReturnType<O extends SQLOptions> = CheckForListen<
+  (
+    O["returnType"] extends "row"? AnyObject | null :
+    O["returnType"] extends "rows"? AnyObject[] :
+    O["returnType"] extends "value"? any | null :
+    O["returnType"] extends "values"? any[] :
+    O["returnType"] extends "statement"? string :
+    O["returnType"] extends "noticeSubscription"? DBEventHandles :
+    SQLResult<O["returnType"]>
+  )
+, O>;
 
 export type SQLHandler = 
 /**
@@ -468,7 +472,8 @@ export type SQLOptions = {
   /**
    * if allowListen not specified and a LISTEN query is issued then expect error
    */
-  returnType: Required<SelectParams>["returnType"] | "statement" | "rows" | "noticeSubscription" | "arrayMode" | "allowListen";
+  returnType?: Required<SelectParams>["returnType"] | "statement" | "rows" | "noticeSubscription" | "arrayMode";
+  allowListen?: boolean;
 };
 
 export type SQLRequest = {

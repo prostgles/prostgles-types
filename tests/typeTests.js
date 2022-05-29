@@ -45,6 +45,21 @@ exports.typeTestsOK = void 0;
         row.dhawjpeojfgrdfhoeisj;
         const rows = yield sqlHandler("SELECT 1", {}, { returnType: "rows" });
         rows.flatMap;
+        const handles = yield sqlHandler("SELECT 1", {}, { returnType: "noticeSubscription" });
+        handles.addListener;
+        handles.socketChannel;
+        handles.socketUnsubChannel;
+        const listenHandlesOrData = yield sqlHandler("SELECT 1", {}, { returnType: "allowListen" });
+        if ("command" in listenHandlesOrData) {
+            listenHandlesOrData.command;
+            listenHandlesOrData.duration;
+        }
+        else {
+            listenHandlesOrData.command;
+            handles.addListener;
+            handles.socketChannel;
+            handles.socketUnsubChannel;
+        }
     }
 }));
 const typeTestsOK = () => { };

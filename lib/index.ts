@@ -409,6 +409,7 @@ export type GetSQLReturnType<O extends SQLOptions> =
   O["returnType"] extends "values"? any[] :
   O["returnType"] extends "statement"? string :
   O["returnType"] extends "noticeSubscription"? DBEventHandles :
+  O["returnType"] extends "allowListen"? DBEventHandles | SQLResult<"allowListen"> :
   SQLResult<O["returnType"]>;
 
 export type SQLHandler = 
@@ -465,10 +466,10 @@ export type DBNotifConfig = DBNoticeConfig & {
 
 export type SQLOptions = {
   /**
-   * Return type
+   * if allowListen not specified and a LISTEN query is issued then expect error
    */
-  returnType: Required<SelectParamsBasic>["returnType"] | "statement" | "rows" | "noticeSubscription" | "arrayMode";
-} ;
+  returnType: Required<SelectParams>["returnType"] | "statement" | "rows" | "noticeSubscription" | "arrayMode" | "allowListen";
+};
 
 export type SQLRequest = {
   query: string;

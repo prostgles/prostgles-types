@@ -229,7 +229,7 @@ export declare type DBEventHandles = {
         removeListener: () => void;
     };
 };
-export declare type GetSQLReturnType<O extends SQLOptions> = O["returnType"] extends "row" ? AnyObject | null : O["returnType"] extends "rows" ? AnyObject[] : O["returnType"] extends "value" ? any | null : O["returnType"] extends "values" ? any[] : O["returnType"] extends "statement" ? string : O["returnType"] extends "noticeSubscription" ? DBEventHandles : SQLResult<O["returnType"]>;
+export declare type GetSQLReturnType<O extends SQLOptions> = O["returnType"] extends "row" ? AnyObject | null : O["returnType"] extends "rows" ? AnyObject[] : O["returnType"] extends "value" ? any | null : O["returnType"] extends "values" ? any[] : O["returnType"] extends "statement" ? string : O["returnType"] extends "noticeSubscription" ? DBEventHandles : O["returnType"] extends "allowListen" ? DBEventHandles | SQLResult<"allowListen"> : SQLResult<O["returnType"]>;
 export declare type SQLHandler = <Opts extends SQLOptions>(query: string, args?: AnyObject | any[], options?: Opts, serverSideOptions?: {
     socket: any;
 }) => Promise<GetSQLReturnType<Opts>>;
@@ -254,7 +254,7 @@ export declare type DBNotifConfig = DBNoticeConfig & {
     notifChannel: string;
 };
 export declare type SQLOptions = {
-    returnType: Required<SelectParamsBasic>["returnType"] | "statement" | "rows" | "noticeSubscription" | "arrayMode";
+    returnType: Required<SelectParams>["returnType"] | "statement" | "rows" | "noticeSubscription" | "arrayMode" | "allowListen";
 };
 export declare type SQLRequest = {
     query: string;

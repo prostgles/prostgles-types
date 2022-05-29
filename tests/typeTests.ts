@@ -60,6 +60,28 @@ import type { TableHandler, SQLHandler } from "../dist/index";
 
     const rows = await sqlHandler("SELECT 1", {}, { returnType: "rows" });
     rows.flatMap
+
+
+    const handles = await sqlHandler("SELECT 1", {}, { returnType: "noticeSubscription" });
+    <Function>handles.addListener;
+    <string>handles.socketChannel;
+    <string>handles.socketUnsubChannel;
+
+    const listenHandlesOrData = await sqlHandler("SELECT 1", {}, { returnType: "allowListen" });
+    
+    if("command" in listenHandlesOrData){
+      <string>listenHandlesOrData.command;
+      <number>listenHandlesOrData.duration;
+
+    } else {
+
+      // @ts-expect-error
+      <string>listenHandlesOrData.command;
+
+      <Function>handles.addListener;
+      <string>handles.socketChannel;
+      <string>handles.socketUnsubChannel;
+    }
   }
 
 });

@@ -127,6 +127,9 @@ export declare type TableInfo = {
     has_media?: "one" | "many";
     has_direct_media?: boolean;
     media_table_name?: string;
+    dynamicRules?: {
+        update?: boolean;
+    };
 };
 export declare type OnError = (err: any) => void;
 declare type GetSelectReturnType<O extends SelectParams<TD>, TD extends AnyObject> = O extends {

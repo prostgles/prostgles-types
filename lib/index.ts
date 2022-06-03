@@ -291,6 +291,14 @@ export type TableInfo = {
    * Name of the table that contains the files
    */
   media_table_name?: string;
+
+  /**
+   * Used for getColumns in cases where the columns are dynamic based on the request.
+   * See dynamicFields from Update rules
+   */
+  dynamicRules?: {
+    update?: boolean;
+  }
 }
 
 export type OnError = (err: any) => void;

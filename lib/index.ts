@@ -19,7 +19,7 @@ export const TS_PG_Types = {
     "string": _PG_strings,
     "number": _PG_numbers,
     "boolean": _PG_bool,
-    "Object": _PG_json,
+    // "any": _PG_json, // consider as any
     "Date": _PG_date,
     "Array<number>": _PG_numbers.map(s => `_${s}`),
     "Array<boolean>": _PG_bool.map(s => `_${s}`),

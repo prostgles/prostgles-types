@@ -25,7 +25,6 @@ exports.TS_PG_Types = {
     "string": exports._PG_strings,
     "number": exports._PG_numbers,
     "boolean": exports._PG_bool,
-    "Object": exports._PG_json,
     "Date": exports._PG_date,
     "Array<number>": exports._PG_numbers.map(s => `_${s}`),
     "Array<boolean>": exports._PG_bool.map(s => `_${s}`),

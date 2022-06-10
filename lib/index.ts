@@ -141,17 +141,11 @@ export type ValidatedColumnInfo = ColumnInfo & {
 }
 
 
-export type DBSchemaTables = {
+export type DBSchemaTable = {
   name: string;
   info: TableInfo;
-  count: number | string;
   columns: ValidatedColumnInfo[];
-  joins: {
-    tableName: string;
-    hasFkeys?: boolean;
-    on: [string, string][];
-  }[];
-}[];
+};
 
 /**
  * List of fields to include or exclude
@@ -598,7 +592,7 @@ export type ClientSchema = {
   auth: AnyObject;
   version: any;
   err?: string;
-  tableSchema?: DBSchemaTables;
+  tableSchema?: DBSchemaTable[];
   schema: TableSchemaForClient;
   methods: string[];
 }

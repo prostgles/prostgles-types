@@ -358,7 +358,7 @@ export declare type ClientSchema = {
     auth: AnyObject;
     version: any;
     err?: string;
-    tableSchema?: DBSchemaTables[];
+    tableSchema?: DBSchemaTables;
     schema: TableSchemaForClient;
     methods: string[];
 };

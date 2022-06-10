@@ -9,14 +9,15 @@ import type { TableHandler, SQLHandler } from "../dist/index";
   const tableHandler: TableHandler<{ h: number; b: number; c: number; }> = undefined as any;
   
   if(tableHandler){
-    const newRow = await tableHandler.insert?.({ h: 2}, { returning: {b: 1, c: 1} });
+    const newRow = await tableHandler.insert?.({ h: 2 }, { returning: {b: 1, c: 1} });
     newRow.b;
     newRow.c;
   
     //@ts-expect-error
     newRow.h;
   
-    const row = await tableHandler.findOne?.({ }, { select: {b: 0} });
+    // const f: FullFilter<Partial<{ a: number; s: string}>> = {  }
+    const row = await tableHandler.findOne?.({  }, { select: {b: 0} });
     row.c;
     row.h;
   

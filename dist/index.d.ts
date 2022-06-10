@@ -49,6 +49,17 @@ export declare type ValidatedColumnInfo = ColumnInfo & {
     update: boolean;
     delete: boolean;
 };
+export declare type DBSchemaTables = {
+    name: string;
+    info: TableInfo;
+    count: number | string;
+    columns: ValidatedColumnInfo[];
+    joins: {
+        tableName: string;
+        hasFkeys?: boolean;
+        on: [string, string][];
+    }[];
+}[];
 export declare type FieldFilter = {} | string[] | "*" | "" | {
     [key: string]: (1 | 0 | boolean);
 };

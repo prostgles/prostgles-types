@@ -98,6 +98,10 @@ export type ColumnInfo = {
    */
   column_default?: any;
 
+  /**
+   * Extracted from tableConfig
+   * Used in SmartForm
+   */
   min?: string | number;
   max?: string | number;
   hint?: string;
@@ -135,6 +139,19 @@ export type ValidatedColumnInfo = ColumnInfo & {
    */
   delete: boolean;
 }
+
+
+export type DBSchemaTables = {
+  name: string;
+  info: TableInfo;
+  count: number | string;
+  columns: ValidatedColumnInfo[];
+  joins: {
+    tableName: string;
+    hasFkeys?: boolean;
+    on: [string, string][];
+  }[];
+}[];
 
 /**
  * List of fields to include or exclude

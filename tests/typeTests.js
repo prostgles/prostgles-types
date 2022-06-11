@@ -73,6 +73,9 @@ exports.typeTestsOK = void 0;
     db.table1.insert({ c1: "2" });
     db.table1.update;
     db.table1.find;
+    const sel = {
+        dwa: 1
+    };
 }));
 const typeTestsOK = () => { };
 exports.typeTestsOK = typeTestsOK;

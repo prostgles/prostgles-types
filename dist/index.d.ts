@@ -104,7 +104,7 @@ export declare type SelectTyped<T extends AnyObject> = {
 } | {
     [K in keyof Partial<T>]: true;
 } | (keyof T)[] | CommonSelect;
-export declare type Select<T extends AnyObject = never> = T extends AnyObject ? SelectTyped<T> : (AnyObject | CommonSelect);
+export declare type Select<T extends AnyObject = any> = T extends AnyObject ? SelectTyped<T> : (AnyObject | CommonSelect);
 export declare type SelectBasic = {
     [key: string]: any;
 } | {} | undefined | "" | "*";

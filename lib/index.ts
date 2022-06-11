@@ -243,7 +243,7 @@ export type SelectTyped<T extends AnyObject> =
   | CommonSelect
   ;
 
-export type Select<T extends AnyObject = never> = T extends AnyObject? SelectTyped<T> : (
+export type Select<T extends AnyObject = any> = T extends AnyObject? SelectTyped<T> : (
   | AnyObject 
   | CommonSelect
 )

@@ -122,6 +122,9 @@ import type { TableHandler, SQLHandler, FullFilter, DBHandler, Select, SelectTyp
 
   db.table1.find
 
+  const sel: Select = {
+    dwa: 1
+  }
 });
 
 export const typeTestsOK = () => {};

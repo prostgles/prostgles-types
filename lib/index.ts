@@ -523,7 +523,7 @@ type InsertMethods<T extends DBTableSchema> = T["insert"] extends true? keyof Pi
 type UpsertMethods<T extends DBTableSchema> = T["insert"] extends true? T["update"] extends true? keyof Pick<TableHandler, "upsert"> : never : never;
 type DeleteMethods<T extends DBTableSchema> = T["delete"] extends true? keyof Pick<TableHandler, "delete"> : never;
 // type SyncMethods<T extends DBTableSchema> = T["select"] extends true? T["is_view"] extends true?  keyof Pick<TableHandler, "sync"> : never : never;
-type ValidatedMethods<T extends DBTableSchema> = 
+export type ValidatedMethods<T extends DBTableSchema> = 
 | SelectMethods<T> 
 | UpdateMethods<T>
 | InsertMethods<T>

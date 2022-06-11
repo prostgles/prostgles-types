@@ -280,7 +280,7 @@ declare type UpdateMethods<T extends DBTableSchema> = T["update"] extends true ?
 declare type InsertMethods<T extends DBTableSchema> = T["insert"] extends true ? keyof Pick<TableHandler, "insert"> : never;
 declare type UpsertMethods<T extends DBTableSchema> = T["insert"] extends true ? T["update"] extends true ? keyof Pick<TableHandler, "upsert"> : never : never;
 declare type DeleteMethods<T extends DBTableSchema> = T["delete"] extends true ? keyof Pick<TableHandler, "delete"> : never;
-declare type ValidatedMethods<T extends DBTableSchema> = SelectMethods<T> | UpdateMethods<T> | InsertMethods<T> | UpsertMethods<T> | DeleteMethods<T>;
+export declare type ValidatedMethods<T extends DBTableSchema> = SelectMethods<T> | UpdateMethods<T> | InsertMethods<T> | UpsertMethods<T> | DeleteMethods<T>;
 declare type ValidatedTableHandler<T extends DBTableSchema> = Pick<TableHandler<DBSchemaColumns<T["columns"]>, DBSchemaInsertColumns<T["columns"]>>, ValidatedMethods<T>>;
 export declare type DBHandler<S extends DBSchema = never> = (S extends DBSchema ? {
     [k in keyof S]: S[k]["is_view"] extends true ? ViewHandler<DBSchemaColumns<S[k]["columns"]>> : ValidatedTableHandler<S[k]>;

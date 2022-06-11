@@ -54,7 +54,7 @@ export declare type DBSchemaTable = {
     info: TableInfo;
     columns: ValidatedColumnInfo[];
 };
-export declare type FieldFilter<T extends AnyObject> = SelectTyped<T>;
+export declare type FieldFilter<T extends AnyObject = AnyObject> = SelectTyped<T>;
 export declare type AscOrDesc = 1 | -1 | boolean;
 export declare type _OrderBy<T = AnyObject> = {
     [K in keyof Partial<T>]: AscOrDesc;
@@ -76,7 +76,7 @@ export declare type SelectTyped<T extends AnyObject> = {
 } | {
     [K in keyof Partial<T>]: true;
 } | "*" | (keyof T)[];
-export declare type Select<T extends AnyObject> = SelectTyped<T> | "" | AnyObject;
+export declare type Select<T extends AnyObject = AnyObject> = SelectTyped<T> | "" | AnyObject;
 export declare type SelectBasic = {
     [key: string]: any;
 } | {} | undefined | "" | "*";

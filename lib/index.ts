@@ -355,11 +355,11 @@ export type ViewHandler<TD = AnyObject> = {
   size: (filter?: FullFilter<TD>, selectParams?: SelectParams<TD>) => Promise<string>;
 }
 
-export type TableHandler<TD = AnyObject> = ViewHandler<TD> & {
+export type TableHandler<TD = AnyObject, InsertType = TD> = ViewHandler<TD> & {
   update: <P extends UpdateParams<TD>>(filter: FullFilter<TD>, newData: PartialLax<TD>, params?: UpdateParams<TD>) => Promise<GetUpdateReturnType<P ,TD>>;
   updateBatch: (data: [FullFilter<TD>, PartialLax<TD>][], params?: UpdateParams<TD>) => Promise<PartialLax<TD> | void>;
   upsert: (filter: FullFilter<TD>, newData: PartialLax<TD>, params?: UpdateParams<TD>) => Promise<PartialLax<TD> | void>;
-  insert: <P extends UpdateParams<TD>>(data: (PartialLax<TD> | PartialLax<TD>[]), params?: P ) => Promise<GetUpdateReturnType<P ,TD>>;
+  insert: <P extends UpdateParams<InsertType>>(data: (InsertType | InsertType[]), params?: P ) => Promise<GetUpdateReturnType<P ,TD>>;
   delete: <P extends UpdateParams<TD>>(filter?: FullFilter<TD>, params?: DeleteParams<TD>) => Promise<GetUpdateReturnType<P ,TD>>;
 }
 

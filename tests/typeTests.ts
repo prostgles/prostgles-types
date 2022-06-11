@@ -6,7 +6,7 @@ import type { TableHandler, SQLHandler } from "../dist/index";
  */
  (async () => {
   
-  const tableHandler: TableHandler<{ h: number; b: number; c: number; }> = undefined as any;
+  const tableHandler: TableHandler<{ h: number; b: number; c: number; }, { h: number; b?: number; c?: number; }> = undefined as any;
   
   if(tableHandler){
     const newRow = await tableHandler.insert?.({ h: 2 }, { returning: {b: 1, c: 1} });

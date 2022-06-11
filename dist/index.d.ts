@@ -19,6 +19,30 @@ export declare const TS_PG_Types: {
     readonly any: readonly [];
 };
 export declare type TS_COLUMN_DATA_TYPES = keyof typeof TS_PG_Types;
+export declare type DBColumnSchema = {
+    [col_name: string]: {
+        is_nullable?: boolean;
+        is_nullable_or_has_default?: boolean;
+        type: any;
+    };
+};
+export declare type DBTableSchema = {
+    is_view?: boolean;
+    select?: boolean;
+    insert?: boolean;
+    update?: boolean;
+    delete?: boolean;
+    dataTypes: Record<string, any>;
+    columns: DBColumnSchema;
+};
+export declare type DBSchemaColumns<Cols extends DBColumnSchema> = {
+    [key in keyof Cols]: Cols[key]["is_nullable"] extends true ? (null | Cols[key]["type"]) : Cols[key]["type"];
+};
+export declare type DBSchemaInsertColumns<Cols extends DBColumnSchema> = {
+    [key in keyof Cols as Cols[key]["is_nullable_or_has_default"] extends true ? key : never]?: Cols[key]["type"] | null;
+} & {
+    [key in keyof Cols as Cols[key]["is_nullable_or_has_default"] extends true ? never : key]: Cols[key]["type"];
+};
 export declare type ColumnInfo = {
     name: string;
     label: string;

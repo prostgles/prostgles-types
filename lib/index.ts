@@ -30,6 +30,57 @@ export const TS_PG_Types = {
 } as const;
 export type TS_COLUMN_DATA_TYPES = keyof typeof TS_PG_Types;
 
+
+/**
+ * Generated Typescript schema for the tables and views in the database
+ * Example:
+ * 
+ * 
+ * type DBSchema = {
+ *    ..view_name: {
+ *      is_view: boolean;
+ *      select: boolean;
+ *      insert: boolean;
+ *      update: boolean;
+ *      delete: boolean;
+ *      dataTypes: { col1: number | null; col2: string; }
+ *      columns: {
+ *        ..col_Name: {
+ *          is_nullable?: boolean;
+ *          is_nullable_or_has_default?: boolean;
+ *          type: any;
+ *        }
+ *      }
+ *    }
+ * }
+ */
+
+ export type DBColumnSchema = {
+  [col_name: string]: {
+    is_nullable?: boolean;
+    is_nullable_or_has_default?: boolean;
+    type: any;
+  }
+}
+export type DBTableSchema = {
+  is_view?: boolean;
+  select?: boolean;
+  insert?: boolean;
+  update?: boolean;
+  delete?: boolean;
+  dataTypes: Record<string, any>;
+  columns: DBColumnSchema;
+}
+
+export type DBSchemaColumns<Cols extends DBColumnSchema> = {
+  [key in keyof Cols]: Cols[key]["is_nullable"] extends true? (null | Cols[key]["type"]) : Cols[key]["type"];
+}
+export type DBSchemaInsertColumns<Cols extends DBColumnSchema> = {
+  [key in keyof Cols as Cols[key]["is_nullable_or_has_default"] extends true? key : never]?: Cols[key]["type"] | null
+} & {
+  [key in keyof Cols as Cols[key]["is_nullable_or_has_default"] extends true? never : key]: Cols[key]["type"]
+}
+
 export type ColumnInfo = {
   name: string;
 

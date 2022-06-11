@@ -150,9 +150,7 @@ export type DBSchemaTable = {
 /**
  * List of fields to include or exclude
  */
-export declare type FieldFilter = {} | string[] | "*" | "" | {
-  [key: string]: (1 | 0 | boolean);
-};
+export type FieldFilter<T extends AnyObject> = SelectTyped<T>
 
 export type AscOrDesc = 1 | -1 | boolean;
 
@@ -178,16 +176,21 @@ export type OrderBy<T = AnyObject> =
   | _OrderBy<AnyObject>
   ;
 
-export type Select<T extends AnyObject> = 
+  export type SelectTyped<T extends AnyObject> = 
   | { [K in keyof Partial<T>]: 1 } 
   | { [K in keyof Partial<T>]: 0 } 
-  // | {} 
-  | undefined 
-  | "" 
-  | "*" 
-  | AnyObject 
-  | Array<keyof T>
+  | { [K in keyof Partial<T>]: false } 
+  | { [K in keyof Partial<T>]: true } 
+  | "*"
+  | (keyof T)[]
   ;
+
+export type Select<T extends AnyObject> = 
+  | SelectTyped<T>
+  | "" 
+  | AnyObject 
+  ;
+
 export type SelectBasic = 
   | { [key: string]: any } 
   | {} 

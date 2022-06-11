@@ -68,8 +68,11 @@ export type DBTableSchema = {
   insert?: boolean;
   update?: boolean;
   delete?: boolean;
-  dataTypes: Record<string, any>;
+  dataTypes?: Record<string, any>;
   columns: DBColumnSchema;
+}
+export type DBSchema = { 
+  [tov_name: string]: DBTableSchema
 }
 
 export type DBSchemaColumns<Cols extends DBColumnSchema> = {
@@ -227,19 +230,23 @@ export type OrderBy<T = AnyObject> =
   | _OrderBy<AnyObject>
   ;
 
-  export type SelectTyped<T extends AnyObject> = 
+type CommonSelect =  
+| "*"
+| "" 
+
+export type SelectTyped<T extends AnyObject> = 
   | { [K in keyof Partial<T>]: 1 } 
   | { [K in keyof Partial<T>]: 0 } 
   | { [K in keyof Partial<T>]: false } 
-  | { [K in keyof Partial<T>]: true } 
-  | "*"
+  | { [K in keyof Partial<T>]: true }
   | (keyof T)[]
+  | CommonSelect
   ;
 
-export type Select<T extends AnyObject = AnyObject> = 
-  | SelectTyped<T>
-  | "" 
+export type Select<T extends AnyObject = never> = T extends AnyObject? SelectTyped<T> : (
   | AnyObject 
+  | CommonSelect
+)
   ;
 
 export type SelectBasic = 
@@ -251,12 +258,10 @@ export type SelectBasic =
   ;
 
 /* Simpler types */
+type CommonSelectParams = {
 
- export type SelectParamsBasic = {
-  select?: SelectBasic;
   limit?: number;
   offset?: number;
-  orderBy?: OrderBy;
 
   /**
    * Will group by all non aggregated fields specified in select (or all fields by default)
@@ -279,10 +284,15 @@ export type SelectBasic =
     * Will return an array of values from the selected field. Similar to array_agg(field).
     */
   | "values"
- ;
-}
 
-export type SelectParams<T = AnyObject> = SelectParamsBasic & {
+}
+// export type SelectParamsBasic = {
+//   select?: SelectBasic;
+//   orderBy?: OrderBy;
+//  ;
+// }
+
+export type SelectParams<T extends AnyObject = never> = CommonSelectParams & {
   select?: Select<T>;
   orderBy?: OrderBy<T>;
 }
@@ -307,7 +317,7 @@ export type DeleteParams<T = AnyObject> = {
   returning?: Select<T>;
 }
 
-export type SubscribeParamsBasic = SelectParamsBasic & {
+export type SubscribeParamsBasic = CommonSelectParams & {
   throttle?: number;
 };
 
@@ -376,7 +386,7 @@ type GetSelectReturnType<O extends SelectParams<TD>, TD extends AnyObject> =
   O extends { select: Record<string, 0> }? Omit<TD, keyof O["select"]> : 
   TD;
 
-type GetUpdateReturnType<O extends UpdateParams<TD>, TD extends AnyObject> = 
+type GetUpdateReturnType<O extends UpdateParams, TD extends AnyObject> = 
   O extends { returning: "*" }? TD : 
   O extends { returning: "" }? Record<string, never> : 
   O extends { returning: Record<string, 1> }? Pick<TD, keyof O["returning"]> : 
@@ -417,15 +427,15 @@ export type TableHandler<TD = AnyObject, InsertType = TD> = ViewHandler<TD> & {
 export type ViewHandlerBasic = {
   getInfo?: (lang?: string) => Promise<TableInfo>;
   getColumns?: GetColumns
-  find: <TD = AnyObject>(filter?: FullFilterBasic, selectParams?: SelectParamsBasic) => Promise<PartialLax<TD>[]>;
-  findOne: <TD = AnyObject>(filter?: FullFilterBasic, selectParams?: SelectParamsBasic) => Promise<PartialLax<TD>>;
+  find: <TD = AnyObject>(filter?: FullFilterBasic, selectParams?: SelectParams) => Promise<PartialLax<TD>[]>;
+  findOne: <TD = AnyObject>(filter?: FullFilterBasic, selectParams?: SelectParams) => Promise<PartialLax<TD>>;
   subscribe: <TD = AnyObject>(filter: FullFilterBasic, params: SubscribeParamsBasic, onData: (items: PartialLax<TD>[], onError?: OnError) => any) => Promise<{ unsubscribe: () => any }>;
   subscribeOne: <TD = AnyObject>(filter: FullFilterBasic, params: SubscribeParamsBasic, onData: (item: PartialLax<TD>, onError?: OnError) => any) => Promise<{ unsubscribe: () => any }>;
   count: (filter?: FullFilterBasic) => Promise<number>;
   /**
    * Returns result size in bits
    */
-  size: (filter?: FullFilterBasic, selectParams?: SelectParamsBasic) => Promise<string>;
+  size: (filter?: FullFilterBasic, selectParams?: SelectParams) => Promise<string>;
 }
 
 export type TableHandlerBasic = ViewHandlerBasic & {
@@ -441,7 +451,7 @@ export type MethodHandler = {
 }
 
 export type JoinMaker<TT = AnyObject> = (filter?: FullFilter<TT>, select?: Select<TT>, options?: SelectParams<TT>) => any;
-export type JoinMakerBasic = (filter?: FullFilterBasic, select?: SelectBasic, options?: SelectParamsBasic) => any;
+export type JoinMakerBasic = (filter?: FullFilterBasic, select?: SelectBasic, options?: SelectParams) => any;
 
 export type TableJoin = {
   [key: string]: JoinMaker;
@@ -507,10 +517,29 @@ export type SQLHandler =
   }
 ) => Promise<GetSQLReturnType<Opts>>
 
+type SelectMethods<T extends DBTableSchema> = T["select"] extends true? keyof Pick<TableHandler, "count" | "find" | "findOne" | "getColumns" | "getInfo" | "size" | "subscribe" | "subscribeOne"> : never;
+type UpdateMethods<T extends DBTableSchema> = T["update"] extends true? keyof Pick<TableHandler, "update" | "updateBatch"> : never;
+type InsertMethods<T extends DBTableSchema> = T["insert"] extends true? keyof Pick<TableHandler, "insert"> : never;
+type UpsertMethods<T extends DBTableSchema> = T["insert"] extends true? T["update"] extends true? keyof Pick<TableHandler, "upsert"> : never : never;
+type DeleteMethods<T extends DBTableSchema> = T["delete"] extends true? keyof Pick<TableHandler, "delete"> : never;
+// type SyncMethods<T extends DBTableSchema> = T["select"] extends true? T["is_view"] extends true?  keyof Pick<TableHandler, "sync"> : never : never;
+type ValidatedMethods<T extends DBTableSchema> = 
+| SelectMethods<T> 
+| UpdateMethods<T>
+| InsertMethods<T>
+| UpsertMethods<T>
+| DeleteMethods<T>
+// | SyncMethods<T>
 
-export type DBHandler = {
+type ValidatedTableHandler<T extends DBTableSchema> = Pick<
+  TableHandler<DBSchemaColumns<T["columns"]>, DBSchemaInsertColumns<T["columns"]>>,
+  ValidatedMethods<T>
+>;
+export type DBHandler<S extends DBSchema = never> = (S extends DBSchema? {
+  [k in keyof S]: S[k]["is_view"] extends true ? ViewHandler<DBSchemaColumns<S[k]["columns"]>> : ValidatedTableHandler<S[k]>
+} : {
   [key: string]: Partial<TableHandler>;
-} & DbJoinMaker;
+}) & DbJoinMaker;
 
 
 /**

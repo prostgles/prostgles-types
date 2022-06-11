@@ -1,12 +1,14 @@
 
-import type { TableHandler, SQLHandler, FullFilter } from "../dist/index";
+import type { TableHandler, SQLHandler, FullFilter, DBHandler, Select, SelectTyped } from "../dist/index";
 
 /**
  * Test select/return type inference
  */
  (async () => {
+
+  type TableData = { h: number; b: number; c: number; }
   
-  const tableHandler: TableHandler<{ h: number; b: number; c: number; }, { h: number; b?: number; c?: number; }> = undefined as any;
+  const tableHandler: TableHandler<TableData, { h: number; b?: number; c?: number; }> = undefined as any;
   
   const f: FullFilter<{ a: string | null; num: number }> = {
     $and: [
@@ -91,6 +93,34 @@ import type { TableHandler, SQLHandler, FullFilter } from "../dist/index";
       <string>handles.socketUnsubChannel;
     }
   }
+
+  const db: DBHandler<{ 
+    table1: { 
+      select: true;
+      insert: true;
+      update: false;
+      columns: {
+        c1: { type: string; is_nullable: true };
+        c2: { type: number; is_nullable_or_has_default: true };
+      } 
+    };
+    view1: { 
+      is_view: true
+      columns: {
+        c1: { type: string; is_nullable: true };
+        c2: { type: number; };
+      } 
+    } 
+  }> = 1 as any;
+
+  const s: SelectTyped<{ a: number; c: string }> = { a: 1 }
+  db.view1.find({ "c1.$in": ["2", null] }, { select: { c1: 1, c2: 1 }  });
+  db.table1.insert({ c1: "2" });
+
+  // @ts-expect-error
+  db.table1.update 
+
+  db.table1.find
 
 });
 

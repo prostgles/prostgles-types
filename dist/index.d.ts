@@ -32,8 +32,11 @@ export declare type DBTableSchema = {
     insert?: boolean;
     update?: boolean;
     delete?: boolean;
-    dataTypes: Record<string, any>;
+    dataTypes?: Record<string, any>;
     columns: DBColumnSchema;
+};
+export declare type DBSchema = {
+    [tov_name: string]: DBTableSchema;
 };
 export declare type DBSchemaColumns<Cols extends DBColumnSchema> = {
     [key in keyof Cols]: Cols[key]["is_nullable"] extends true ? (null | Cols[key]["type"]) : Cols[key]["type"];
@@ -91,6 +94,7 @@ export declare type _OrderBy<T = AnyObject> = {
     nullEmpty?: boolean;
 }[] | Array<keyof T> | keyof T;
 export declare type OrderBy<T = AnyObject> = _OrderBy<T> | _OrderBy<AnyObject>;
+declare type CommonSelect = "*" | "";
 export declare type SelectTyped<T extends AnyObject> = {
     [K in keyof Partial<T>]: 1;
 } | {
@@ -99,20 +103,18 @@ export declare type SelectTyped<T extends AnyObject> = {
     [K in keyof Partial<T>]: false;
 } | {
     [K in keyof Partial<T>]: true;
-} | "*" | (keyof T)[];
-export declare type Select<T extends AnyObject = AnyObject> = SelectTyped<T> | "" | AnyObject;
+} | (keyof T)[] | CommonSelect;
+export declare type Select<T extends AnyObject = never> = T extends AnyObject ? SelectTyped<T> : (AnyObject | CommonSelect);
 export declare type SelectBasic = {
     [key: string]: any;
 } | {} | undefined | "" | "*";
-export declare type SelectParamsBasic = {
-    select?: SelectBasic;
+declare type CommonSelectParams = {
     limit?: number;
     offset?: number;
-    orderBy?: OrderBy;
     groupBy?: boolean;
     returnType?: "row" | "value" | "values";
 };
-export declare type SelectParams<T = AnyObject> = SelectParamsBasic & {
+export declare type SelectParams<T extends AnyObject = never> = CommonSelectParams & {
     select?: Select<T>;
     orderBy?: OrderBy<T>;
 };
@@ -133,7 +135,7 @@ export declare type InsertParams<T = AnyObject> = {
 export declare type DeleteParams<T = AnyObject> = {
     returning?: Select<T>;
 };
-export declare type SubscribeParamsBasic = SelectParamsBasic & {
+export declare type SubscribeParamsBasic = CommonSelectParams & {
     throttle?: number;
 };
 export declare type UpdateParamsBasic = {
@@ -172,7 +174,7 @@ declare type GetSelectReturnType<O extends SelectParams<TD>, TD extends AnyObjec
 } ? Pick<TD, keyof O["select"]> : O extends {
     select: Record<string, 0>;
 } ? Omit<TD, keyof O["select"]> : TD;
-declare type GetUpdateReturnType<O extends UpdateParams<TD>, TD extends AnyObject> = O extends {
+declare type GetUpdateReturnType<O extends UpdateParams, TD extends AnyObject> = O extends {
     returning: "*";
 } ? TD : O extends {
     returning: "";
@@ -212,8 +214,8 @@ export declare type TableHandler<TD = AnyObject, InsertType = TD> = ViewHandler<
 export declare type ViewHandlerBasic = {
     getInfo?: (lang?: string) => Promise<TableInfo>;
     getColumns?: GetColumns;
-    find: <TD = AnyObject>(filter?: FullFilterBasic, selectParams?: SelectParamsBasic) => Promise<PartialLax<TD>[]>;
-    findOne: <TD = AnyObject>(filter?: FullFilterBasic, selectParams?: SelectParamsBasic) => Promise<PartialLax<TD>>;
+    find: <TD = AnyObject>(filter?: FullFilterBasic, selectParams?: SelectParams) => Promise<PartialLax<TD>[]>;
+    findOne: <TD = AnyObject>(filter?: FullFilterBasic, selectParams?: SelectParams) => Promise<PartialLax<TD>>;
     subscribe: <TD = AnyObject>(filter: FullFilterBasic, params: SubscribeParamsBasic, onData: (items: PartialLax<TD>[], onError?: OnError) => any) => Promise<{
         unsubscribe: () => any;
     }>;
@@ -221,7 +223,7 @@ export declare type ViewHandlerBasic = {
         unsubscribe: () => any;
     }>;
     count: (filter?: FullFilterBasic) => Promise<number>;
-    size: (filter?: FullFilterBasic, selectParams?: SelectParamsBasic) => Promise<string>;
+    size: (filter?: FullFilterBasic, selectParams?: SelectParams) => Promise<string>;
 };
 export declare type TableHandlerBasic = ViewHandlerBasic & {
     update: <TD = AnyObject>(filter: FullFilterBasic, newData: PartialLax<TD>, params?: UpdateParamsBasic) => Promise<PartialLax<TD> | void>;
@@ -234,7 +236,7 @@ export declare type MethodHandler = {
     [method_name: string]: (...args: any[]) => Promise<AnyObject>;
 };
 export declare type JoinMaker<TT = AnyObject> = (filter?: FullFilter<TT>, select?: Select<TT>, options?: SelectParams<TT>) => any;
-export declare type JoinMakerBasic = (filter?: FullFilterBasic, select?: SelectBasic, options?: SelectParamsBasic) => any;
+export declare type JoinMakerBasic = (filter?: FullFilterBasic, select?: SelectBasic, options?: SelectParams) => any;
 export declare type TableJoin = {
     [key: string]: JoinMaker;
 };
@@ -273,9 +275,18 @@ export declare type GetSQLReturnType<O extends SQLOptions> = CheckForListen<(O["
 export declare type SQLHandler = <Opts extends SQLOptions>(query: string, args?: AnyObject | any[], options?: Opts, serverSideOptions?: {
     socket: any;
 }) => Promise<GetSQLReturnType<Opts>>;
-export declare type DBHandler = {
+declare type SelectMethods<T extends DBTableSchema> = T["select"] extends true ? keyof Pick<TableHandler, "count" | "find" | "findOne" | "getColumns" | "getInfo" | "size" | "subscribe" | "subscribeOne"> : never;
+declare type UpdateMethods<T extends DBTableSchema> = T["update"] extends true ? keyof Pick<TableHandler, "update" | "updateBatch"> : never;
+declare type InsertMethods<T extends DBTableSchema> = T["insert"] extends true ? keyof Pick<TableHandler, "insert"> : never;
+declare type UpsertMethods<T extends DBTableSchema> = T["insert"] extends true ? T["update"] extends true ? keyof Pick<TableHandler, "upsert"> : never : never;
+declare type DeleteMethods<T extends DBTableSchema> = T["delete"] extends true ? keyof Pick<TableHandler, "delete"> : never;
+declare type ValidatedMethods<T extends DBTableSchema> = SelectMethods<T> | UpdateMethods<T> | InsertMethods<T> | UpsertMethods<T> | DeleteMethods<T>;
+declare type ValidatedTableHandler<T extends DBTableSchema> = Pick<TableHandler<DBSchemaColumns<T["columns"]>, DBSchemaInsertColumns<T["columns"]>>, ValidatedMethods<T>>;
+export declare type DBHandler<S extends DBSchema = never> = (S extends DBSchema ? {
+    [k in keyof S]: S[k]["is_view"] extends true ? ViewHandler<DBSchemaColumns<S[k]["columns"]>> : ValidatedTableHandler<S[k]>;
+} : {
     [key: string]: Partial<TableHandler>;
-} & DbJoinMaker;
+}) & DbJoinMaker;
 export declare type DBHandlerBasic = {
     [key: string]: Partial<TableHandlerBasic>;
 } & {

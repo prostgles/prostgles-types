@@ -67,6 +67,12 @@ exports.typeTestsOK = void 0;
             handles.socketUnsubChannel;
         }
     }
+    const db = 1;
+    const s = { a: 1 };
+    db.view1.find({ "c1.$in": ["2", null] }, { select: { c1: 1, c2: 1 } });
+    db.table1.insert({ c1: "2" });
+    db.table1.update;
+    db.table1.find;
 }));
 const typeTestsOK = () => { };
 exports.typeTestsOK = typeTestsOK;

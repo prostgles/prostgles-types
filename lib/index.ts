@@ -292,7 +292,7 @@ type CommonSelectParams = {
 //  ;
 // }
 
-export type SelectParams<T extends AnyObject = never> = CommonSelectParams & {
+export type SelectParams<T extends AnyObject = any> = CommonSelectParams & {
   select?: Select<T>;
   orderBy?: OrderBy<T>;
 }

@@ -114,7 +114,7 @@ declare type CommonSelectParams = {
     groupBy?: boolean;
     returnType?: "row" | "value" | "values";
 };
-export declare type SelectParams<T extends AnyObject = never> = CommonSelectParams & {
+export declare type SelectParams<T extends AnyObject = any> = CommonSelectParams & {
     select?: Select<T>;
     orderBy?: OrderBy<T>;
 };

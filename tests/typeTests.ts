@@ -1,5 +1,5 @@
 
-import type { TableHandler, SQLHandler } from "../dist/index";
+import type { TableHandler, SQLHandler, FullFilter } from "../dist/index";
 
 /**
  * Test select/return type inference
@@ -8,6 +8,13 @@ import type { TableHandler, SQLHandler } from "../dist/index";
   
   const tableHandler: TableHandler<{ h: number; b: number; c: number; }, { h: number; b?: number; c?: number; }> = undefined as any;
   
+  const f: FullFilter<{ a: string | null; num: number }> = {
+    $and: [
+      { a: "d", num: { ">": 232 } }, 
+      { "num.$eq": 2,  }
+    ]
+  };
+
   if(tableHandler){
     const newRow = await tableHandler.insert?.({ h: 2 }, { returning: {b: 1, c: 1} });
     newRow.b;
@@ -17,7 +24,7 @@ import type { TableHandler, SQLHandler } from "../dist/index";
     newRow.h;
   
     // const f: FullFilter<Partial<{ a: number; s: string}>> = {  }
-    const row = await tableHandler.findOne?.({  }, { select: {b: 0} });
+    const row = await tableHandler.findOne?.({ "c.$nin": [2] }, { select: {b: 0} });
     row.c;
     row.h;
   

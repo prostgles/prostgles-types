@@ -18,7 +18,8 @@
     // "outFile": "bundle.js",
     // "moduleResolution": "node"
     "declaration": true,
-    "declarationMap": true
+    "declarationMap": true,
+    "keyofStringsOnly": true
   },
   "exclude": [
   ],

@@ -19,8 +19,9 @@
  | { "$nin": T[] }
  | { "$between": [T, T] }
 ;
-export const CompareFilterKeys = ["=", "$eq","<>",">",">=","<=","$eq","$ne","$gt","$gte","$lte"];
-export const CompareInFilterKeys = ["$in", "$nin"]
+export const CompareFilterKeys = ["=", "$eq","<>",">",">=","<=","$eq","$ne","$gt","$gte","$lte"] as const;
+export const CompareInFilterKeys = ["$in", "$nin"] as const;
+export const TextFilterKeys = ["$ilike", "$like"] as const;
 
 export type FullTextSearchFilter = 
  | { "to_tsquery": string[] }
@@ -28,7 +29,7 @@ export type FullTextSearchFilter =
  | { "phraseto_tsquery": string[] }
  | { "websearch_to_tsquery": string[] }
 ;
-export const TextFilter_FullTextSearchFilterKeys = ["to_tsquery","plainto_tsquery","phraseto_tsquery","websearch_to_tsquery"];
+export const TextFilter_FullTextSearchFilterKeys = ["to_tsquery","plainto_tsquery","phraseto_tsquery","websearch_to_tsquery"] as const;
 
 export type TextFilter = 
  | CompareFilter<string>
@@ -39,7 +40,7 @@ export type TextFilter =
  | { "@>": FullTextSearchFilter } |  { "$contains": FullTextSearchFilter } 
  | { "<@": FullTextSearchFilter } |  { "$containedBy": FullTextSearchFilter } 
 ;
-export const TextFilterFTSKeys = ["@@", "@>", "<@", "$contains", "$containedBy"];
+export const TextFilterFTSKeys = ["@@", "@>", "<@", "$contains", "$containedBy"] as const;
 
 export type ArrayFilter<T = (number | boolean | string)[]> = 
  | CompareFilter<T>
@@ -91,7 +92,7 @@ export type GeomFilter =
 //  | { "~": GeoBBox }
 //  | { "~=": GeoBBox }
 ;
-export const GeomFilterKeys = ["~","~=","@","|&>","|>>", ">>", "=", "<<|", "<<", "&>", "&<|", "&<", "&&&", "&&"]
+export const GeomFilterKeys = ["~","~=","@","|&>","|>>", ">>", "=", "<<|", "<<", "&>", "&<|", "&<", "&&&", "&&"] as const;
 const _GeomFilter_Funcs = ["ST_MakeEnvelope", "ST_MakePolygon"]
 export const GeomFilter_Funcs =  _GeomFilter_Funcs.concat(_GeomFilter_Funcs.map(v => v.toLowerCase()));
 
@@ -105,11 +106,31 @@ export type FilterDataType<T = any> =
 : T extends boolean ? CompareFilter<T>
 : T extends Date ? CompareFilter<T>
 : T extends any[] ? ArrayFilter<T>
-: (CompareFilter<T> & ArrayFilter<T> & TextFilter & GeomFilter)
+: (CompareFilter<T> | ArrayFilter<T> | TextFilter | GeomFilter)
 ;
 
 export const EXISTS_KEYS = ["$exists", "$notExists", "$existsJoined", "$notExistsJoined"] as const;
 export type EXISTS_KEY = typeof EXISTS_KEYS[number];
+
+
+/**
+ * Shortened filter operands
+ */
+ type BasicFilter<Field extends string, DataType extends any> = Partial<{
+  [K in Extract<typeof CompareFilterKeys[number], string> as `${Field}.${K}`]: DataType
+}> | Partial<{
+  [K in Extract<typeof CompareInFilterKeys[number], string> as `${Field}.${K}`]: DataType[]
+}>;
+type StringFilter<Field extends string, DataType extends any> = BasicFilter<Field, DataType> & (Partial<{
+  [K in Extract<typeof TextFilterKeys[number], string> as `${Field}.${K}`]: DataType
+}> | Partial<{
+  [K in Extract<typeof TextFilterFTSKeys[number], string> as `${Field}.${K}`]: any
+}>);
+type ValueOf<T> = T[keyof T];
+
+type ShorthandFilter<Obj extends Record<string, any>> = ValueOf<{
+  [K in keyof Obj]: Obj[K] extends string? StringFilter<K, Obj[K]> : BasicFilter<K, Obj[K]>;
+}>
 
 /* Traverses object keys to make filter */
 export type FilterForObject<T = AnyObject> = {
@@ -119,7 +140,8 @@ export type FilterForObject<T = AnyObject> = {
  * Filters with shorthand notation
  * @example: { "name.$ilike": 'abc' }
  */
-{ [K in keyof Omit<{ [key: string]: any }, keyof T>]: (FilterDataType | Date | string | number | (Date | string | number)[]) };
+ ShorthandFilter<T>
+
 
 
 /**
@@ -136,11 +158,12 @@ export type FilterItem<T = AnyObject> =
  * @example { $or: [ { id: 1 }, { status: 'live' } ] }
  */
 export type FullFilter<T = AnyObject> = 
- | FilterItem<T> 
- | { $and: (FilterItem<T>  | FullFilter)[] } 
- | { $or: (FilterItem<T>  | FullFilter)[] } 
+ | { $and: (FilterItem<T>  | FullFilter<T>)[] } 
+ | { $or: (FilterItem<T>  | FullFilter<T>)[] } 
  | { $not: FilterItem<T>  }
+ | FilterItem<T> 
 ;
+
 
 /**
  * Simpler FullFilter to reduce load on compilation

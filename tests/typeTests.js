@@ -13,12 +13,18 @@ exports.typeTestsOK = void 0;
 (() => __awaiter(void 0, void 0, void 0, function* () {
     var _a, _b;
     const tableHandler = undefined;
+    const f = {
+        $and: [
+            { a: "d", num: { ">": 232 } },
+            { "num.$eq": 2, }
+        ]
+    };
     if (tableHandler) {
         const newRow = yield ((_a = tableHandler.insert) === null || _a === void 0 ? void 0 : _a.call(tableHandler, { h: 2 }, { returning: { b: 1, c: 1 } }));
         newRow.b;
         newRow.c;
         newRow.h;
-        const row = yield ((_b = tableHandler.findOne) === null || _b === void 0 ? void 0 : _b.call(tableHandler, {}, { select: { b: 0 } }));
+        const row = yield ((_b = tableHandler.findOne) === null || _b === void 0 ? void 0 : _b.call(tableHandler, { "c.$nin": [2] }, { select: { b: 0 } }));
         row.c;
         row.h;
         row.b;

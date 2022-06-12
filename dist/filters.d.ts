@@ -96,22 +96,20 @@ declare type StringFilter<Field extends string, DataType extends any> = BasicFil
 }>);
 declare type ValueOf<T> = T[keyof T];
 declare type ShorthandFilter<Obj extends Record<string, any>> = ValueOf<{
-    [K in keyof Obj]: Obj[K] extends string ? StringFilter<K, Obj[K]> : BasicFilter<K, Obj[K]>;
+    [K in keyof Obj]: Obj[K] extends string ? StringFilter<K, Required<Obj>[K]> : BasicFilter<K, Required<Obj>[K]>;
 }>;
-export declare type FilterForObject<T = AnyObject> = {
+export declare type FilterForObject<T extends AnyObject = AnyObject> = {
     [K in keyof Partial<T>]: FilterDataType<T[K]>;
 } | ShorthandFilter<T>;
-export declare type FilterItem<T = AnyObject> = FilterForObject<T> | Partial<{
+export declare type FilterItem<T extends AnyObject = AnyObject> = FilterForObject<T> | Partial<{
     [key in EXISTS_KEY]: {
         [key: string]: FilterForObject;
     };
 }>;
-export declare type FullFilter<T = AnyObject> = {
-    $and: (FilterItem<T> | FullFilter<T>)[];
+export declare type FullFilter<T extends AnyObject = AnyObject> = {
+    $and: FullFilter<T>[];
 } | {
-    $or: (FilterItem<T> | FullFilter<T>)[];
-} | {
-    $not: FilterItem<T>;
+    $or: FullFilter<T>[];
 } | FilterItem<T>;
 export declare type FullFilterBasic<T = {
     [key: string]: any;

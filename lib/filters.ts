@@ -129,18 +129,20 @@ type StringFilter<Field extends string, DataType extends any> = BasicFilter<Fiel
 type ValueOf<T> = T[keyof T];
 
 type ShorthandFilter<Obj extends Record<string, any>> = ValueOf<{
-  [K in keyof Obj]: Obj[K] extends string? StringFilter<K, Obj[K]> : BasicFilter<K, Obj[K]>;
+  [K in keyof Obj]: Obj[K] extends string? StringFilter<K, Required<Obj>[K]> : BasicFilter<K, Required<Obj>[K]>;
 }>
 
 /* Traverses object keys to make filter */
-export type FilterForObject<T = AnyObject> = {
+export type FilterForObject<T extends AnyObject = AnyObject> = 
+/* { col: { $func: ["value"] } } */
+| {
   [K in keyof Partial<T>]: FilterDataType<T[K]>
-} | 
+} 
 /**
  * Filters with shorthand notation
  * @example: { "name.$ilike": 'abc' }
  */
- ShorthandFilter<T>
+| ShorthandFilter<T>;
 
 
 
@@ -148,7 +150,7 @@ export type FilterForObject<T = AnyObject> = {
  * Filter that relates to a single column { col: 2 } or
  * an exists filter: { $exists: {  } }
  */
-export type FilterItem<T = AnyObject> = 
+export type FilterItem<T extends AnyObject = AnyObject> = 
   | FilterForObject<T> 
   | Partial<{ [key in EXISTS_KEY]: { [key: string]: FilterForObject } }>
 
@@ -157,13 +159,31 @@ export type FilterItem<T = AnyObject> =
  * Full filter
  * @example { $or: [ { id: 1 }, { status: 'live' } ] }
  */
-export type FullFilter<T = AnyObject> = 
- | { $and: (FilterItem<T>  | FullFilter<T>)[] } 
- | { $or: (FilterItem<T>  | FullFilter<T>)[] } 
- | { $not: FilterItem<T>  }
+export type FullFilter<T extends AnyObject = AnyObject> = 
+ | { $and: FullFilter<T>[] } 
+ | { $or: FullFilter<T>[] } 
  | FilterItem<T> 
+
+ /** Not implemented yet */
+//  | { $not: FilterItem<T>  }
 ;
 
+type RR = {
+  h?: string[];
+  id?: number;
+  name?: string | null;
+}
+
+const f: FilterItem<RR> = {
+   "h.$eq": ["2"] 
+}
+const forcedFilter: FullFilter<RR> = {
+// "h.$eq": ["2"]
+  $and: [
+    { "h.$eq": [] },
+    { h: { "$gt": undefined } }
+  ]
+}
 
 /**
  * Simpler FullFilter to reduce load on compilation
@@ -171,16 +191,3 @@ export type FullFilter<T = AnyObject> =
 export type FullFilterBasic<T = { [key: string]: any }> = {
   [key in keyof Partial<T & { [key: string]: any }>]: any
 }
-
-// const d: FullFilterBasic<{ a: number, ab: number  }> = {
-//   adw: 2
-// }
-// export type FullFilterSimple = any;
-// const f: FullFilter<{ a: Date, s: string }> = {
-//   // hehe: { "@>": ['', 2] }
-//   $exists: { dadwa: { $and: [{ a: 2 }] }},
-//   $and: [ { a: { $gt: 23 } }],
-//   a: { $eqq: new Date() },
-//   // s: { $between: [2, '3']},
-// }
-

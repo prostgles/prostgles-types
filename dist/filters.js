@@ -10,4 +10,13 @@ exports.GeomFilterKeys = ["~", "~=", "@", "|&>", "|>>", ">>", "=", "<<|", "<<", 
 const _GeomFilter_Funcs = ["ST_MakeEnvelope", "ST_MakePolygon"];
 exports.GeomFilter_Funcs = _GeomFilter_Funcs.concat(_GeomFilter_Funcs.map(v => v.toLowerCase()));
 exports.EXISTS_KEYS = ["$exists", "$notExists", "$existsJoined", "$notExistsJoined"];
+const f = {
+    "h.$eq": ["2"]
+};
+const forcedFilter = {
+    $and: [
+        { "h.$eq": [] },
+        { h: { "$gt": undefined } }
+    ]
+};
 //# sourceMappingURL=filters.js.map

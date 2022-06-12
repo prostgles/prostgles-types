@@ -94,7 +94,7 @@ declare type StringFilter<Field extends string, DataType extends any> = BasicFil
 }> | Partial<{
     [K in Extract<typeof TextFilterFTSKeys[number], string> as `${Field}.${K}`]: any;
 }>);
-declare type ValueOf<T> = T[keyof T];
+export declare type ValueOf<T> = T[keyof T];
 declare type ShorthandFilter<Obj extends Record<string, any>> = ValueOf<{
     [K in keyof Obj]: Obj[K] extends string ? StringFilter<K, Required<Obj>[K]> : BasicFilter<K, Required<Obj>[K]>;
 }>;

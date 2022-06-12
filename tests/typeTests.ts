@@ -27,6 +27,8 @@ import type { TableHandler, SQLHandler, FullFilter, DBHandler, Select, SelectTyp
     const row = await tableHandler.findOne?.({ "c.$nin": [2] }, { select: {b: 0} });
     row.c;
     row.h;
+
+    const vals = await tableHandler.find?.({ "c.$nin": [2] }, { returnType: "values" });
   
     //@ts-expect-error
     row.b;

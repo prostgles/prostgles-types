@@ -1,4 +1,4 @@
-import { FullFilter, AnyObject, FullFilterBasic } from "./filters";
+import { FullFilter, AnyObject, FullFilterBasic, ValueOf } from "./filters";
 export declare const _PG_strings: readonly ["bpchar", "char", "varchar", "text", "citext", "uuid", "bytea", "inet", "time", "timetz", "interval", "name"];
 export declare const _PG_numbers: readonly ["int2", "int4", "int8", "float4", "float8", "numeric", "money", "oid"];
 export declare const _PG_json: readonly ["json", "jsonb"];
@@ -157,6 +157,11 @@ export declare type TableInfo = {
 };
 export declare type OnError = (err: any) => void;
 declare type GetSelectReturnType<O extends SelectParams<TD>, TD extends AnyObject> = O extends {
+    returnType: "values";
+    select: Record<string, 1>;
+} ? ValueOf<Pick<TD, keyof O["select"]>> : O extends {
+    returnType: "values";
+} ? any : O extends {
     select: "*";
 } ? TD : O extends {
     select: "";

@@ -1,5 +1,5 @@
 
-import { FullFilter, AnyObject, FullFilterBasic } from "./filters";
+import { FullFilter, AnyObject, FullFilterBasic, ValueOf } from "./filters";
 
 export const _PG_strings = ['bpchar','char','varchar','text','citext','uuid','bytea','inet','time','timetz','interval','name'] as const;
 export const _PG_numbers = ['int2','int4','int8','float4','float8','numeric','money','oid'] as const;
@@ -368,8 +368,9 @@ export type TableInfo = {
 
 export type OnError = (err: any) => void;
 
-
 type GetSelectReturnType<O extends SelectParams<TD>, TD extends AnyObject> = 
+  O extends { returnType: "values"; select: Record<string, 1> }? ValueOf<Pick<TD, keyof O["select"]>> : 
+  O extends { returnType: "values" }? any : 
   O extends { select: "*" }? TD : 
   O extends { select: "" }? Record<string, never> : 
   O extends { select: Record<string, 1> }? Pick<TD, keyof O["select"]> : 

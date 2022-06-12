@@ -129,6 +129,11 @@ import type { TableHandler, SQLHandler, FullFilter, DBHandler, Select, SelectTyp
   const r: { id: number; name: number; public: number; $rowhash: number; added_day: any } = 1 as any
   const sel1: Select = { id: 1, name: 1, public: 1, $rowhash: 1, added_day: { $day: []  } };
   const sel2: Select<{ id: number; name: number; public: number; }> = { id: 1, name: 1, public: 1, $rowhash: 1, dsds: { d: [] } };
+  const sel3: Select<{ id: number; name: number; public: number; }> = ""
+  const sel4: Select<{ id: number; name: number; public: number; }> = "*"
+  const sel12: Select = { id: 1, name: 1, public: 1, $rowhash: 1, dsds: { d: [] } };
+  const sel13: Select = ""
+  const sel14: Select = "*"
 });
 
 export const typeTestsOK = () => {};

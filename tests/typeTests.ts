@@ -115,7 +115,7 @@ import type { TableHandler, SQLHandler, FullFilter, DBHandler, Select, SelectTyp
 
   const s: SelectTyped<{ a: number; c: string }> = { a: 1 }
   db.view1.find({ "c1.$in": ["2", null] }, { select: { c1: 1, c2: 1 }  });
-  db.table1.insert({ c1: "2" });
+  db.table1.insert({ c1: "2" }, { returning: { c1: 1, c2: "func", dwad: { dwada: [] } } });
 
   // @ts-expect-error
   db.table1.update 

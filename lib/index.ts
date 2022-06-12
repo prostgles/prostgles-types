@@ -242,11 +242,11 @@ export type SelectTyped<T extends AnyObject> =
 ;
 
 type SelectFuncs<T extends AnyObject = any> = T extends AnyObject? (
-  | { [key in keyof (Partial<T> & AnyObject)]: T[key] extends null | undefined? (Record<string, any[]>) :  (1 | string | Record<string, any[]>) } 
+  | { [key in keyof (Partial<T> & AnyObject)]: T[key] extends null | undefined? (Record<string, any[]>) :  (true | 1 | string | Record<string, any[]>) } 
   | { [K in keyof Partial<T>]: 0 | false }
   | CommonSelect
 ) : (
-  | { [key: string]:  1 | string | Record<string, any[]> }
+  | { [key: string]: true |  1 | string | Record<string, any[]> }
   | { [K in keyof Partial<T>]: 0 | false }
   | CommonSelect
 );
@@ -305,11 +305,11 @@ export type SelectParams<T extends AnyObject = any> = CommonSelectParams & {
   select?: Select<T>;
   orderBy?: OrderBy<T>;
 }
-export type SubscribeParams<T = AnyObject> = SelectParams<T> & {
+export type SubscribeParams<T extends AnyObject = any> = SelectParams<T> & {
   throttle?: number;
 };
 
-export type UpdateParams<T = AnyObject> = {
+export type UpdateParams<T extends AnyObject = any> = {
   returning?: Select<T>;
   onConflictDoNothing?: boolean;
   fixIssues?: boolean;
@@ -317,7 +317,7 @@ export type UpdateParams<T = AnyObject> = {
   /* true by default. If false the update will fail if affecting more than one row */
   multi?: boolean;
 }
-export type InsertParams<T = AnyObject> = {
+export type InsertParams<T extends AnyObject = any> = {
   returning?: Select<T>;
   onConflictDoNothing?: boolean;
   fixIssues?: boolean;

@@ -1,14 +1,12 @@
 
-import type { TableHandler, SQLHandler, FullFilter, DBHandler, Select, SelectTyped, AnyObject } from "../dist/index";
+import type { TableHandler, SQLHandler, FullFilter, DBHandler, Select, SelectTyped, AnyObject, DBSchema } from "../dist/index";
 
 /**
  * Test select/return type inference
  */
  (async () => {
-
-  type TableData = { h: number; b: number; c: number; }
   
-  const tableHandler: TableHandler<TableData, { h: number; b?: number; c?: number; }> = undefined as any;
+  const tableHandler: TableHandler<{ h: number; b?: number; c?: number; }> = undefined as any;
   
   const f: FullFilter<{ a: string | null; num: number }> = {
     $and: [
@@ -99,17 +97,11 @@ import type { TableHandler, SQLHandler, FullFilter, DBHandler, Select, SelectTyp
       select: true;
       insert: true;
       update: false;
-      columns: {
-        c1: { type: string; is_nullable: true };
-        c2: { type: number; is_nullable_or_has_default: true };
-      } 
+      columns: {  c1: string; c2?: number }
     };
     view1: { 
       is_view: true
-      columns: {
-        c1: { type: string; is_nullable: true };
-        c2: { type: number; };
-      } 
+      columns: {  c1: string; c2: number }
     } 
   }> = 1 as any;
 
@@ -117,8 +109,11 @@ import type { TableHandler, SQLHandler, FullFilter, DBHandler, Select, SelectTyp
   db.view1.find({ "c1.$in": ["2", null] }, { select: { c1: 1, c2: 1 }  });
   db.table1.insert({ c1: "2" }, { returning: { c1: 1, c2: "func", dwad: { dwada: [] } } });
 
-  // @ts-expect-error
+  //@ts-expect-error
   db.table1.update 
+
+  //@ts-expect-error
+  db.table12.update 
 
   db.table1.find
 
@@ -126,14 +121,19 @@ import type { TableHandler, SQLHandler, FullFilter, DBHandler, Select, SelectTyp
     dwa: 1
   }
 
-  const r: { id: number; name: number; public: number; $rowhash: number; added_day: any } = 1 as any
+  type Fields =  { id: number; name: number; public: number; $rowhash: string; added_day: any }
+  const r:Fields = 1 as any
   const sel1: Select = { id: 1, name: 1, public: 1, $rowhash: 1, added_day: { $day: []  } };
   const sel2: Select<{ id: number; name: number; public: number; }> = { id: 1, name: 1, public: 1, $rowhash: 1, dsds: { d: [] } };
   const sel3: Select<{ id: number; name: number; public: number; }> = ""
   const sel4: Select<{ id: number; name: number; public: number; }> = "*"
   const sel12: Select = { id: 1, name: 1, public: 1, $rowhash: 1, dsds: { d: [] } };
   const sel13: Select = ""
-  const sel14: Select = "*"
+  const sel14: Select = "*";
+
+  const fRow: FullFilter<Fields> = {
+    $rowhash: { "$in": [""] }
+  }
 });
 
 export const typeTestsOK = () => {};

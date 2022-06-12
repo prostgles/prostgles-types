@@ -72,6 +72,7 @@ exports.typeTestsOK = void 0;
     db.view1.find({ "c1.$in": ["2", null] }, { select: { c1: 1, c2: 1 } });
     db.table1.insert({ c1: "2" }, { returning: { c1: 1, c2: "func", dwad: { dwada: [] } } });
     db.table1.update;
+    db.table12.update;
     db.table1.find;
     const sel = {
         dwa: 1
@@ -84,6 +85,9 @@ exports.typeTestsOK = void 0;
     const sel12 = { id: 1, name: 1, public: 1, $rowhash: 1, dsds: { d: [] } };
     const sel13 = "";
     const sel14 = "*";
+    const fRow = {
+        $rowhash: { "$in": [""] }
+    };
 }));
 const typeTestsOK = () => { };
 exports.typeTestsOK = typeTestsOK;

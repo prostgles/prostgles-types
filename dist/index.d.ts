@@ -19,32 +19,16 @@ export declare const TS_PG_Types: {
     readonly any: readonly [];
 };
 export declare type TS_COLUMN_DATA_TYPES = keyof typeof TS_PG_Types;
-export declare type DBColumnSchema = {
-    [col_name: string]: {
-        is_nullable?: boolean;
-        is_nullable_or_has_default?: boolean;
-        type: any;
-    };
-};
 export declare type DBTableSchema = {
     is_view?: boolean;
     select?: boolean;
     insert?: boolean;
     update?: boolean;
     delete?: boolean;
-    dataTypes?: Record<string, any>;
-    columns: DBColumnSchema;
+    columns: AnyObject;
 };
 export declare type DBSchema = {
     [tov_name: string]: DBTableSchema;
-};
-export declare type DBSchemaColumns<Cols extends DBColumnSchema> = {
-    [key in keyof Cols]: Cols[key]["is_nullable"] extends true ? (null | Cols[key]["type"]) : Cols[key]["type"];
-};
-export declare type DBSchemaInsertColumns<Cols extends DBColumnSchema> = {
-    [key in keyof Cols as Cols[key]["is_nullable_or_has_default"] extends true ? key : never]?: Cols[key]["type"] | null;
-} & {
-    [key in keyof Cols as Cols[key]["is_nullable_or_has_default"] extends true ? never : key]: Cols[key]["type"];
 };
 export declare type ColumnInfo = {
     name: string;
@@ -211,11 +195,11 @@ export declare type ViewHandler<TD = AnyObject> = {
     count: (filter?: FullFilter<TD>) => Promise<number>;
     size: (filter?: FullFilter<TD>, selectParams?: SelectParams<TD>) => Promise<string>;
 };
-export declare type TableHandler<TD = AnyObject, InsertType = TD> = ViewHandler<TD> & {
+export declare type TableHandler<TD = AnyObject> = ViewHandler<TD> & {
     update: <P extends UpdateParams<TD>>(filter: FullFilter<TD>, newData: PartialLax<TD>, params?: UpdateParams<TD>) => Promise<GetUpdateReturnType<P, TD>>;
     updateBatch: (data: [FullFilter<TD>, PartialLax<TD>][], params?: UpdateParams<TD>) => Promise<PartialLax<TD> | void>;
     upsert: (filter: FullFilter<TD>, newData: PartialLax<TD>, params?: UpdateParams<TD>) => Promise<PartialLax<TD> | void>;
-    insert: <P extends UpdateParams<InsertType>>(data: (InsertType | InsertType[]), params?: P) => Promise<GetUpdateReturnType<P, TD>>;
+    insert: <P extends UpdateParams<TD>>(data: (TD | TD[]), params?: P) => Promise<GetUpdateReturnType<P, TD>>;
     delete: <P extends UpdateParams<TD>>(filter?: FullFilter<TD>, params?: DeleteParams<TD>) => Promise<GetUpdateReturnType<P, TD>>;
 };
 export declare type ViewHandlerBasic = {
@@ -288,12 +272,13 @@ declare type InsertMethods<T extends DBTableSchema> = T["insert"] extends true ?
 declare type UpsertMethods<T extends DBTableSchema> = T["insert"] extends true ? T["update"] extends true ? keyof Pick<TableHandler, "upsert"> : never : never;
 declare type DeleteMethods<T extends DBTableSchema> = T["delete"] extends true ? keyof Pick<TableHandler, "delete"> : never;
 export declare type ValidatedMethods<T extends DBTableSchema> = SelectMethods<T> | UpdateMethods<T> | InsertMethods<T> | UpsertMethods<T> | DeleteMethods<T>;
-declare type ValidatedTableHandler<T extends DBTableSchema> = Pick<TableHandler<DBSchemaColumns<T["columns"]>, DBSchemaInsertColumns<T["columns"]>>, ValidatedMethods<T>>;
-export declare type DBHandler<S extends DBSchema = never> = (S extends DBSchema ? {
-    [k in keyof S]: S[k]["is_view"] extends true ? ViewHandler<DBSchemaColumns<S[k]["columns"]>> : ValidatedTableHandler<S[k]>;
+export declare type DBHandler<S = void> = (S extends DBSchema ? {
+    [k in keyof S]: S[k]["is_view"] extends true ? ViewHandler<S[k]["columns"]> : Pick<TableHandler<S[k]["columns"]>, ValidatedMethods<S[k]>>;
 } : {
     [key: string]: Partial<TableHandler>;
-}) & DbJoinMaker;
+}) & DbJoinMaker & {
+    sql?: SQLHandler;
+};
 export declare type DBHandlerBasic = {
     [key: string]: Partial<TableHandlerBasic>;
 } & {

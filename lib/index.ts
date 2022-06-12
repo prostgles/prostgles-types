@@ -43,45 +43,26 @@ export type TS_COLUMN_DATA_TYPES = keyof typeof TS_PG_Types;
  *      insert: boolean;
  *      update: boolean;
  *      delete: boolean;
- *      dataTypes: { col1: number | null; col2: string; }
- *      columns: {
- *        ..col_Name: {
- *          is_nullable?: boolean;
- *          is_nullable_or_has_default?: boolean;
- *          type: any;
- *        }
- *      }
+ *      insertColumns: { col1?: number | null; col2: string; }
+ *      columns: { col1: number | null; col2: string; }
  *    }
  * }
  */
 
- export type DBColumnSchema = {
-  [col_name: string]: {
-    is_nullable?: boolean;
-    is_nullable_or_has_default?: boolean;
-    type: any;
-  }
-}
 export type DBTableSchema = {
   is_view?: boolean;
   select?: boolean;
   insert?: boolean;
   update?: boolean;
   delete?: boolean;
-  dataTypes?: Record<string, any>;
-  columns: DBColumnSchema;
+  /**
+   * Used in update, insertm select and filters
+   * fields that are nullable or with a default value are be optional 
+   */
+  columns: AnyObject;
 }
 export type DBSchema = { 
   [tov_name: string]: DBTableSchema
-}
-
-export type DBSchemaColumns<Cols extends DBColumnSchema> = {
-  [key in keyof Cols]: Cols[key]["is_nullable"] extends true? (null | Cols[key]["type"]) : Cols[key]["type"];
-}
-export type DBSchemaInsertColumns<Cols extends DBColumnSchema> = {
-  [key in keyof Cols as Cols[key]["is_nullable_or_has_default"] extends true? key : never]?: Cols[key]["type"] | null
-} & {
-  [key in keyof Cols as Cols[key]["is_nullable_or_has_default"] extends true? never : key]: Cols[key]["type"]
 }
 
 export type ColumnInfo = {
@@ -425,11 +406,11 @@ export type ViewHandler<TD = AnyObject> = {
   size: (filter?: FullFilter<TD>, selectParams?: SelectParams<TD>) => Promise<string>;
 }
 
-export type TableHandler<TD = AnyObject, InsertType = TD> = ViewHandler<TD> & {
+export type TableHandler<TD = AnyObject> = ViewHandler<TD> & {
   update: <P extends UpdateParams<TD>>(filter: FullFilter<TD>, newData: PartialLax<TD>, params?: UpdateParams<TD>) => Promise<GetUpdateReturnType<P ,TD>>;
   updateBatch: (data: [FullFilter<TD>, PartialLax<TD>][], params?: UpdateParams<TD>) => Promise<PartialLax<TD> | void>;
   upsert: (filter: FullFilter<TD>, newData: PartialLax<TD>, params?: UpdateParams<TD>) => Promise<PartialLax<TD> | void>;
-  insert: <P extends UpdateParams<InsertType>>(data: (InsertType | InsertType[]), params?: P ) => Promise<GetUpdateReturnType<P ,TD>>;
+  insert: <P extends UpdateParams<TD>>(data: (TD | TD[]), params?: P ) => Promise<GetUpdateReturnType<P ,TD>>;
   delete: <P extends UpdateParams<TD>>(filter?: FullFilter<TD>, params?: DeleteParams<TD>) => Promise<GetUpdateReturnType<P ,TD>>;
 }
 
@@ -540,15 +521,15 @@ export type ValidatedMethods<T extends DBTableSchema> =
 | DeleteMethods<T>
 // | SyncMethods<T>
 
-type ValidatedTableHandler<T extends DBTableSchema> = Pick<
-  TableHandler<DBSchemaColumns<T["columns"]>, DBSchemaInsertColumns<T["columns"]>>,
-  ValidatedMethods<T>
->;
-export type DBHandler<S extends DBSchema = never> = (S extends DBSchema? {
-  [k in keyof S]: S[k]["is_view"] extends true ? ViewHandler<DBSchemaColumns<S[k]["columns"]>> : ValidatedTableHandler<S[k]>
+export type DBHandler<S = void> = (S extends DBSchema? {
+  [k in keyof S]: S[k]["is_view"] extends true ? 
+    ViewHandler<S[k]["columns"]> : 
+    Pick<TableHandler<S[k]["columns"]>, ValidatedMethods<S[k]>>
 } : {
   [key: string]: Partial<TableHandler>;
-}) & DbJoinMaker;
+}) & DbJoinMaker & {
+  sql?: SQLHandler
+}
 
 
 /**

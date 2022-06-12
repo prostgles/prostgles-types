@@ -96,15 +96,22 @@ export declare type _OrderBy<T = AnyObject> = {
 export declare type OrderBy<T = AnyObject> = _OrderBy<T> | _OrderBy<AnyObject>;
 declare type CommonSelect = "*" | "";
 export declare type SelectTyped<T extends AnyObject> = {
-    [K in keyof Partial<T>]: 1;
+    [K in keyof Partial<T>]: 1 | true;
 } | {
-    [K in keyof Partial<T>]: 0;
-} | {
-    [K in keyof Partial<T>]: false;
-} | {
-    [K in keyof Partial<T>]: true;
+    [K in keyof Partial<T>]: 0 | false;
 } | (keyof T)[] | CommonSelect;
-export declare type Select<T extends AnyObject = any> = T extends AnyObject ? SelectTyped<T> : (AnyObject | CommonSelect);
+declare type SelectFuncs<T extends AnyObject = any> = T extends AnyObject ? ({
+    [key in keyof (Partial<T> & AnyObject)]: T[key] extends null | undefined ? (Record<string, any[]>) : (1 | string | Record<string, any[]>);
+} | {
+    [K in keyof Partial<T>]: 0 | false;
+}) : ({
+    [key: string]: 1 | string | Record<string, any[]>;
+} | {
+    [K in keyof Partial<T>]: 0 | false;
+});
+export declare type Select<T extends AnyObject = any> = T extends AnyObject ? (SelectFuncs<T & {
+    $rowhash: string;
+}>) : (AnyObject | CommonSelect | SelectFuncs);
 export declare type SelectBasic = {
     [key: string]: any;
 } | {} | undefined | "" | "*";

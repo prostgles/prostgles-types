@@ -76,6 +76,9 @@ exports.typeTestsOK = void 0;
     const sel = {
         dwa: 1
     };
+    const r = 1;
+    const sel1 = { id: 1, name: 1, public: 1, $rowhash: 1, added_day: { $day: [] } };
+    const sel2 = { id: 1, name: 1, public: 1, $rowhash: 1, dsds: { d: [] } };
 }));
 const typeTestsOK = () => { };
 exports.typeTestsOK = typeTestsOK;

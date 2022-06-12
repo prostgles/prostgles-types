@@ -235,19 +235,26 @@ type CommonSelect =
 | "" 
 
 export type SelectTyped<T extends AnyObject> = 
-  | { [K in keyof Partial<T>]: 1 } 
-  | { [K in keyof Partial<T>]: 0 } 
-  | { [K in keyof Partial<T>]: false } 
-  | { [K in keyof Partial<T>]: true }
+  | { [K in keyof Partial<T>]: 1 | true } 
+  | { [K in keyof Partial<T>]: 0 | false } 
   | (keyof T)[]
   | CommonSelect
-  ;
+;
 
-export type Select<T extends AnyObject = any> = T extends AnyObject? SelectTyped<T> : (
+type SelectFuncs<T extends AnyObject = any> = T extends AnyObject? (
+  | { [key in keyof (Partial<T> & AnyObject)]: T[key] extends null | undefined? (Record<string, any[]>) :  (1 | string | Record<string, any[]>) } 
+  | { [K in keyof Partial<T>]: 0 | false }
+) : (
+  | { [key: string]:  1 | string | Record<string, any[]> }
+  | { [K in keyof Partial<T>]: 0 | false }
+);
+
+
+export type Select<T extends AnyObject = any> = T extends AnyObject? (SelectFuncs<T & { $rowhash: string }>) : (
   | AnyObject 
   | CommonSelect
-)
-  ;
+  | SelectFuncs
+);
 
 export type SelectBasic = 
   | { [key: string]: any } 

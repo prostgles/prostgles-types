@@ -1,52 +1,42 @@
+import { DBSchema } from ".";
+import { ExactlyOne } from "./util";
 
+
+export const CompareFilterKeys = ["=", "$eq","<>",">",">=","<=","$eq","$ne","$gt","$gte","$lte"] as const;
+export const CompareInFilterKeys = ["$in", "$nin"] as const;
 
 /**
  * Example: col_name: { $gt: 2 }
- * @alias CompareFilter
  */
  export type CompareFilter<T = Date | number | string | boolean> =
  /**
   * column value equals provided value
   */
  | T 
- | { "=": T } | { "$eq": T }
- | { "<>": T } | { "$ne": T }
- | { ">": T } | { "$gt": T }
- | { ">=": T } | { "$gte": T }
- | { "<=": T } | { "$lte": T }
+ | ExactlyOne<Record<typeof CompareFilterKeys[number], T>>
 
- | { "$in": T[] }
- | { "$nin": T[] }
+ | ExactlyOne<Record<typeof CompareInFilterKeys[number], T[]>>
  | { "$between": [T, T] }
 ;
-export const CompareFilterKeys = ["=", "$eq","<>",">",">=","<=","$eq","$ne","$gt","$gte","$lte"] as const;
-export const CompareInFilterKeys = ["$in", "$nin"] as const;
 export const TextFilterKeys = ["$ilike", "$like"] as const;
 
-export type FullTextSearchFilter = 
- | { "to_tsquery": string[] }
- | { "plainto_tsquery": string[] }
- | { "phraseto_tsquery": string[] }
- | { "websearch_to_tsquery": string[] }
-;
+export const TextFilterFTSKeys = ["@@", "@>", "<@", "$contains", "$containedBy"] as const;
+
 export const TextFilter_FullTextSearchFilterKeys = ["to_tsquery","plainto_tsquery","phraseto_tsquery","websearch_to_tsquery"] as const;
+export type FullTextSearchFilter = 
+ | ExactlyOne<Record<typeof TextFilter_FullTextSearchFilterKeys[number], string[]>>
+;
 
 export type TextFilter = 
  | CompareFilter<string>
- | { "$ilike": string }
- | { "$like": string }
+ | ExactlyOne<Record<typeof TextFilterKeys[number], string>>
 
- | { "@@": FullTextSearchFilter }
- | { "@>": FullTextSearchFilter } |  { "$contains": FullTextSearchFilter } 
- | { "<@": FullTextSearchFilter } |  { "$containedBy": FullTextSearchFilter } 
+ | ExactlyOne<Record<typeof TextFilterFTSKeys[number], FullTextSearchFilter>>
 ;
-export const TextFilterFTSKeys = ["@@", "@>", "<@", "$contains", "$containedBy"] as const;
-
+export const ArrayFilterOperands = [...TextFilterFTSKeys, "&&", "$overlaps"] as const;
 export type ArrayFilter<T = (number | boolean | string)[]> = 
  | CompareFilter<T>
- | { "@>": T } |  { "$contains": T } 
- | { "<@": T } |  { "$containedBy": T } 
- | { "&&": T } |  { "$overlaps": T }
+ | ExactlyOne<Record<typeof ArrayFilterOperands[number], T>>
 ;
 
 /* POSTGIS */
@@ -144,7 +134,13 @@ export type FilterForObject<T extends AnyObject = AnyObject> =
  */
 | ShorthandFilter<T>;
 
-
+export type ExistsFilter<S = void> = Partial<{ 
+  [key in EXISTS_KEY]: S extends DBSchema? 
+    ExactlyOne<{ 
+      [tname in keyof S]: FullFilter<S[tname]["columns"], S> 
+    }> : 
+    { [key: string]: FullFilter }
+}>
 
 /**
  * Filter that relates to a single column { col: 2 } or
@@ -152,17 +148,17 @@ export type FilterForObject<T extends AnyObject = AnyObject> =
  */
 export type FilterItem<T extends AnyObject = AnyObject> = 
   | FilterForObject<T> 
-  | Partial<{ [key in EXISTS_KEY]: { [key: string]: FilterForObject } }>
 
 
 /**
  * Full filter
  * @example { $or: [ { id: 1 }, { status: 'live' } ] }
  */
-export type FullFilter<T extends AnyObject = AnyObject> = 
+export type FullFilter<T extends AnyObject = AnyObject, S = void> = 
  | { $and: FullFilter<T>[] } 
  | { $or: FullFilter<T>[] } 
  | FilterItem<T> 
+ | ExistsFilter<S>
 
  /** Not implemented yet */
 //  | { $not: FilterItem<T>  }
@@ -181,7 +177,7 @@ const forcedFilter: FullFilter<RR> = {
 // "h.$eq": ["2"]
   $and: [
     { "h.$eq": [] },
-    { h: { "$gt": undefined } }
+    { h: { "$containedBy": [] } }
   ]
 }
 

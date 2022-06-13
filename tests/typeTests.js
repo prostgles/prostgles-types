@@ -89,6 +89,17 @@ exports.typeTestsOK = void 0;
     const fRow = {
         $rowhash: { "$in": [""] }
     };
+    const emptyFilter = {};
+    const ef = {
+        $existsJoined: {
+            tbl11: {}
+        }
+    };
+    const emptyExists = {
+        $existsJoined: {
+            tbl1: {}
+        }
+    };
 }));
 const typeTestsOK = () => { };
 exports.typeTestsOK = typeTestsOK;

@@ -61,4 +61,12 @@ export declare function get(obj: any, propertyPath: string | string[]): any;
 export declare function isObject(obj: any): obj is Record<string, any>;
 export declare function isDefined<T>(v: T | undefined | void): v is T;
 export declare function getKeys<T>(o: T): Array<keyof T>;
+export declare type Explode<T> = keyof T extends infer K ? K extends unknown ? {
+    [I in keyof T]: I extends K ? T[I] : never;
+} : never : never;
+export declare type AtMostOne<T> = Explode<Partial<T>>;
+export declare type AtLeastOne<T, U = {
+    [K in keyof T]: Pick<T, K>;
+}> = Partial<T> & U[keyof U];
+export declare type ExactlyOne<T> = AtMostOne<T> & AtLeastOne<T>;
 //# sourceMappingURL=util.d.ts.map

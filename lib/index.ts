@@ -393,26 +393,26 @@ export type SubscriptionHandler<T = AnyObject> = {
 
 type GetColumns = (lang?: string, params?: { rule: "update", data: AnyObject, filter: AnyObject }) => Promise<ValidatedColumnInfo[]>;
 
-export type ViewHandler<TD = AnyObject> = {
+export type ViewHandler<TD = AnyObject, S = void> = {
   getInfo?: (lang?: string) => Promise<TableInfo>;
   getColumns?: GetColumns
-  find: <P extends SelectParams<TD>>(filter?: FullFilter<TD>, selectParams?: P) => Promise<GetSelectReturnType<P, TD>[]>;
-  findOne: <P extends SelectParams<TD>>(filter?: FullFilter<TD>, selectParams?: P) => Promise<GetSelectReturnType<P, TD>>;
-  subscribe: <P extends SubscribeParams<TD>>(filter: FullFilter<TD>, params: P, onData: (items: GetSelectReturnType<P, TD>[], onError?: OnError) => any) => Promise<SubscriptionHandler<TD>>;
-  subscribeOne: <P extends SubscribeParams<TD>>(filter: FullFilter<TD>, params: P, onData: (item: GetSelectReturnType<P, TD>) => any, onError?: OnError) => Promise<SubscriptionHandler<TD>>;
-  count: (filter?: FullFilter<TD>) => Promise<number>;
+  find: <P extends SelectParams<TD>>(filter?: FullFilter<TD, S>, selectParams?: P) => Promise<GetSelectReturnType<P, TD>[]>;
+  findOne: <P extends SelectParams<TD>>(filter?: FullFilter<TD, S>, selectParams?: P) => Promise<GetSelectReturnType<P, TD>>;
+  subscribe: <P extends SubscribeParams<TD>>(filter: FullFilter<TD, S>, params: P, onData: (items: GetSelectReturnType<P, TD>[], onError?: OnError) => any) => Promise<SubscriptionHandler<TD>>;
+  subscribeOne: <P extends SubscribeParams<TD>>(filter: FullFilter<TD, S>, params: P, onData: (item: GetSelectReturnType<P, TD>) => any, onError?: OnError) => Promise<SubscriptionHandler<TD>>;
+  count: (filter?: FullFilter<TD, S>) => Promise<number>;
   /**
    * Returns result size in bits
    */
   size: (filter?: FullFilter<TD>, selectParams?: SelectParams<TD>) => Promise<string>;
 }
 
-export type TableHandler<TD = AnyObject> = ViewHandler<TD> & {
-  update: <P extends UpdateParams<TD>>(filter: FullFilter<TD>, newData: PartialLax<TD>, params?: UpdateParams<TD>) => Promise<GetUpdateReturnType<P ,TD>>;
-  updateBatch: (data: [FullFilter<TD>, PartialLax<TD>][], params?: UpdateParams<TD>) => Promise<PartialLax<TD> | void>;
-  upsert: (filter: FullFilter<TD>, newData: PartialLax<TD>, params?: UpdateParams<TD>) => Promise<PartialLax<TD> | void>;
+export type TableHandler<TD = AnyObject, S = void> = ViewHandler<TD, S> & {
+  update: <P extends UpdateParams<TD>>(filter: FullFilter<TD, S>, newData: PartialLax<TD>, params?: UpdateParams<TD>) => Promise<GetUpdateReturnType<P ,TD>>;
+  updateBatch: (data: [FullFilter<TD, S>, PartialLax<TD>][], params?: UpdateParams<TD>) => Promise<PartialLax<TD> | void>;
+  upsert: (filter: FullFilter<TD, S>, newData: PartialLax<TD>, params?: UpdateParams<TD>) => Promise<PartialLax<TD> | void>;
   insert: <P extends UpdateParams<TD>>(data: (TD | TD[]), params?: P ) => Promise<GetUpdateReturnType<P ,TD>>;
-  delete: <P extends UpdateParams<TD>>(filter?: FullFilter<TD>, params?: DeleteParams<TD>) => Promise<GetUpdateReturnType<P ,TD>>;
+  delete: <P extends UpdateParams<TD>>(filter?: FullFilter<TD, S>, params?: DeleteParams<TD>) => Promise<GetUpdateReturnType<P ,TD>>;
 }
 
 export type ViewHandlerBasic = {
@@ -524,8 +524,8 @@ export type ValidatedMethods<T extends DBTableSchema> =
 
 export type DBHandler<S = void> = (S extends DBSchema? {
   [k in keyof S]: S[k]["is_view"] extends true ? 
-    ViewHandler<S[k]["columns"]> : 
-    Pick<TableHandler<S[k]["columns"]>, ValidatedMethods<S[k]>>
+    ViewHandler<S[k]["columns"], S> : 
+    Pick<TableHandler<S[k]["columns"], S>, ValidatedMethods<S[k]>>
 } : {
   [key: string]: Partial<TableHandler>;
 }) & DbJoinMaker & {

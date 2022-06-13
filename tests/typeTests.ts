@@ -1,5 +1,5 @@
 
-import type { TableHandler, SQLHandler, FullFilter, DBHandler, Select, SelectTyped, AnyObject, DBSchema } from "../dist/index";
+import type { TableHandler, SQLHandler, FullFilter, DBHandler, Select, SelectTyped, ExistsFilter } from "../dist/index";
 
 /**
  * Test select/return type inference
@@ -135,6 +135,45 @@ import type { TableHandler, SQLHandler, FullFilter, DBHandler, Select, SelectTyp
 
   const fRow: FullFilter<Fields> = {
     $rowhash: { "$in": [""] }
+  };
+  const emptyFilter: FullFilter<Fields> = {
+  };
+
+  type SampleSchema = {
+    tbl1: {
+      columns: {
+        col1: number;
+        col2: string | null
+      }
+    }
+    tbl11: {
+      columns: {
+        col11: number;
+        col21: string | null
+      }
+    }
+  }
+
+  // const ff: FullFilter<SampleSchema["tbl1"]["columns"], SampleSchema> = {
+  //   AnyObject
+  // }
+
+
+  
+  const ef: ExistsFilter<SampleSchema> = {
+    $existsJoined: {
+      // tbl1: {"col1.$eq": 1 }
+      tbl11: {
+        // "col11.$eq": 1,
+        // col11: { "=": 1, $between: [1, 2] }
+      }
+    }
+  }
+
+  const emptyExists: ExistsFilter<SampleSchema> = {
+    $existsJoined: {
+      tbl1: { }
+    }
   }
 });
 

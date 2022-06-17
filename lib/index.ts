@@ -303,7 +303,7 @@ export type InsertParams<T extends AnyObject = any> = {
   onConflictDoNothing?: boolean;
   fixIssues?: boolean;
 }
-export type DeleteParams<T = AnyObject> = {
+export type DeleteParams<T extends AnyObject = AnyObject> = {
   returning?: Select<T>;
 }
 
@@ -364,6 +364,13 @@ export type TableInfo = {
   dynamicRules?: {
     update?: boolean;
   }
+
+  /**
+   * Additional table info provided through TableConfig
+   */
+  info?: {
+    label?: string;
+  }
 }
 
 export type OnError = (err: any) => void;
@@ -378,10 +385,10 @@ type GetSelectReturnType<O extends SelectParams<TD>, TD extends AnyObject> =
   TD;
 
 type GetUpdateReturnType<O extends UpdateParams, TD extends AnyObject> = 
-  O extends { returning: "*" }? TD : 
+  O extends { returning: "*" }? Required<TD> : 
   O extends { returning: "" }? Record<string, never> : 
-  O extends { returning: Record<string, 1> }? Pick<TD, keyof O["returning"]> : 
-  O extends { returning: Record<string, 0> }? Omit<TD, keyof O["returning"]> : 
+  O extends { returning: Record<string, 1> }? Pick<Required<TD>, keyof O["returning"]> : 
+  O extends { returning: Record<string, 0> }? Omit<Required<TD>, keyof O["returning"]> : 
   void;
 
 export type SubscriptionHandler<T = AnyObject> = {
@@ -408,11 +415,11 @@ export type ViewHandler<TD = AnyObject, S = void> = {
 }
 
 export type TableHandler<TD = AnyObject, S = void> = ViewHandler<TD, S> & {
-  update: <P extends UpdateParams<TD>>(filter: FullFilter<TD, S>, newData: PartialLax<TD>, params?: UpdateParams<TD>) => Promise<GetUpdateReturnType<P ,TD>>;
+  update: <P extends UpdateParams<TD>>(filter: FullFilter<TD, S>, newData: PartialLax<TD>, params?: P) => Promise<GetUpdateReturnType<P ,TD>>;
   updateBatch: (data: [FullFilter<TD, S>, PartialLax<TD>][], params?: UpdateParams<TD>) => Promise<PartialLax<TD> | void>;
-  upsert: (filter: FullFilter<TD, S>, newData: PartialLax<TD>, params?: UpdateParams<TD>) => Promise<PartialLax<TD> | void>;
+  upsert: <P extends UpdateParams<TD>>(filter: FullFilter<TD, S>, newData: PartialLax<TD>, params?: P) => Promise<GetUpdateReturnType<P ,TD>>;
   insert: <P extends UpdateParams<TD>>(data: (TD | TD[]), params?: P ) => Promise<GetUpdateReturnType<P ,TD>>;
-  delete: <P extends UpdateParams<TD>>(filter?: FullFilter<TD, S>, params?: DeleteParams<TD>) => Promise<GetUpdateReturnType<P ,TD>>;
+  delete: <P extends DeleteParams<TD>>(filter?: FullFilter<TD, S>, params?: P) => Promise<GetUpdateReturnType<P ,TD>>;
 }
 
 export type ViewHandlerBasic = {

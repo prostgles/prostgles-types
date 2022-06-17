@@ -75,6 +75,8 @@ exports.typeTestsOK = void 0;
     db.table1.update;
     db.table12.update;
     db.table1.find;
+    const result = yield db.table2.update({}, { c1: "" }, { returning: "*" });
+    result.c2 + 2;
     const sel = {
         dwa: 1
     };

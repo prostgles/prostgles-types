@@ -104,7 +104,11 @@ import type { TableHandler, SQLHandler, FullFilter, DBHandler, Select, SelectTyp
     view1: { 
       is_view: true
       columns: {  c1: string; c2: number }
-    } 
+    };
+    table2: {
+      update: true;
+      columns: {  c1: string; c2?: number }
+    };
   }> = 1 as any;
 
   const s: SelectTyped<{ a: number; c: string }> = { a: 1 }
@@ -117,7 +121,10 @@ import type { TableHandler, SQLHandler, FullFilter, DBHandler, Select, SelectTyp
   //@ts-expect-error
   db.table12.update 
 
-  db.table1.find
+  db.table1.find;
+
+  const result = await db.table2.update({}, { c1: "" }, { returning: "*" });
+  result.c2 + 2;
 
   const sel: Select = {
     dwa: 1

@@ -78,14 +78,18 @@ export declare type _OrderBy<T = AnyObject> = {
     nullEmpty?: boolean;
 }[] | Array<keyof T> | keyof T;
 export declare type OrderBy<T = AnyObject> = _OrderBy<T> | _OrderBy<AnyObject>;
-declare type CommonSelect = "*" | "";
+declare type CommonSelect = "*" | "" | {
+    "*": 1;
+};
 export declare type SelectTyped<T extends AnyObject> = {
     [K in keyof Partial<T>]: 1 | true;
 } | {
     [K in keyof Partial<T>]: 0 | false;
 } | (keyof T)[] | CommonSelect;
-declare type SelectFuncs<T extends AnyObject = any> = T extends AnyObject ? ({
-    [key in keyof (Partial<T> & AnyObject)]: T[key] extends null | undefined ? (Record<string, any[]>) : (true | 1 | string | Record<string, any[]>);
+declare type SelectFuncs<T extends AnyObject = any> = T extends AnyObject ? (({
+    [K in keyof Partial<T>]: true | 1 | string;
+} & Record<string, Record<string, any[]>>) | {
+    [K in keyof Partial<T>]: true | 1 | string;
 } | {
     [K in keyof Partial<T>]: 0 | false;
 } | CommonSelect) : ({

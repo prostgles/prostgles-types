@@ -70,6 +70,10 @@ exports.typeTestsOK = void 0;
     }
     const db = 1;
     const s = { a: 1 };
+    const s2 = { a: 1, zz: 1 };
+    const s22 = { a: 1, zz: { $max: ["c"] } };
+    const s3 = { a: 1, cc: "2" };
+    const s33 = { a: 1, c: "$max" };
     db.view1.find({ "c1.$in": ["2", null] }, { select: { c1: 1, c2: 1 } });
     db.table1.insert({ c1: "2" }, { returning: { c1: 1, c2: "func", dwad: { dwada: [] } } });
     db.table1.update;

@@ -213,7 +213,8 @@ export type OrderBy<T = AnyObject> =
 
 type CommonSelect =  
 | "*"
-| "" 
+| ""
+| { "*" : 1 }
 
 export type SelectTyped<T extends AnyObject> = 
   | { [K in keyof Partial<T>]: 1 | true } 
@@ -223,7 +224,8 @@ export type SelectTyped<T extends AnyObject> =
 ;
 
 type SelectFuncs<T extends AnyObject = any> = T extends AnyObject? (
-  | { [key in keyof (Partial<T> & AnyObject)]: T[key] extends null | undefined? (Record<string, any[]>) :  (true | 1 | string | Record<string, any[]>) } 
+  | ({ [K in keyof Partial<T>]: true | 1 | string } & Record<string, Record<string, any[]>>)
+  | { [K in keyof Partial<T>]: true | 1 | string }
   | { [K in keyof Partial<T>]: 0 | false }
   | CommonSelect
 ) : (
@@ -231,7 +233,6 @@ type SelectFuncs<T extends AnyObject = any> = T extends AnyObject? (
   | { [K in keyof Partial<T>]: 0 | false }
   | CommonSelect
 );
-
 
 export type Select<T extends AnyObject = any> = T extends AnyObject? (SelectFuncs<T & { $rowhash: string }>) : (
   | AnyObject 

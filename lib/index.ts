@@ -304,7 +304,7 @@ export type InsertParams<T extends AnyObject = any> = {
   onConflictDoNothing?: boolean;
   fixIssues?: boolean;
 }
-export type DeleteParams<T extends AnyObject = AnyObject> = {
+export type DeleteParams<T extends AnyObject = any> = {
   returning?: Select<T>;
 }
 

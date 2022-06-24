@@ -106,6 +106,9 @@ exports.typeTestsOK = void 0;
             tbl1: {}
         }
     };
+    const deletePar = {
+        returning: { id: 1, name: 1, public: 1, $rowhash: 1, added_day: { "$day": ["added"] } }
+    };
 }));
 const typeTestsOK = () => { };
 exports.typeTestsOK = typeTestsOK;

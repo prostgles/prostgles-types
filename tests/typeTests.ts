@@ -1,5 +1,5 @@
 
-import type { TableHandler, SQLHandler, FullFilter, DBHandler, Select, SelectTyped, ExistsFilter } from "../dist/index";
+import type { TableHandler, SQLHandler, FullFilter, DBHandler, Select, SelectTyped, ExistsFilter, DeleteParams } from "../dist/index";
 
 /**
  * Test select/return type inference
@@ -194,6 +194,11 @@ import type { TableHandler, SQLHandler, FullFilter, DBHandler, Select, SelectTyp
     $existsJoined: {
       tbl1: { }
     }
+  }
+
+
+  const deletePar: DeleteParams = {
+    returning: { id: 1, name: 1, public: 1 , $rowhash: 1, added_day: { "$day": ["added"] } }
   }
 });
 

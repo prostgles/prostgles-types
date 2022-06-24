@@ -127,7 +127,7 @@ export declare type InsertParams<T extends AnyObject = any> = {
     onConflictDoNothing?: boolean;
     fixIssues?: boolean;
 };
-export declare type DeleteParams<T extends AnyObject = AnyObject> = {
+export declare type DeleteParams<T extends AnyObject = any> = {
     returning?: Select<T>;
 };
 export declare type SubscribeParamsBasic = CommonSelectParams & {

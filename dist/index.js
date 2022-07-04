@@ -14,7 +14,7 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getKeys = exports.isObject = exports.isDefined = exports.get = exports.WAL = exports.unpatchText = exports.stableStringify = exports.isEmpty = exports.getTextPatch = exports.asName = exports.RULE_METHODS = exports.CHANNELS = exports.TS_PG_Types = exports._PG_postgis = exports._PG_date = exports._PG_bool = exports._PG_json = exports._PG_numbers = exports._PG_strings = void 0;
+exports.CONTENT_TYPE_TO_EXT = exports.getKeys = exports.isObject = exports.isDefined = exports.get = exports.WAL = exports.unpatchText = exports.stableStringify = exports.isEmpty = exports.getTextPatch = exports.asName = exports.RULE_METHODS = exports.CHANNELS = exports.TS_PG_Types = exports._PG_postgis = exports._PG_date = exports._PG_bool = exports._PG_json = exports._PG_numbers = exports._PG_strings = void 0;
 exports._PG_strings = ['bpchar', 'char', 'varchar', 'text', 'citext', 'uuid', 'bytea', 'inet', 'time', 'timetz', 'interval', 'name'];
 exports._PG_numbers = ['int2', 'int4', 'int8', 'float4', 'float8', 'numeric', 'money', 'oid'];
 exports._PG_json = ['json', 'jsonb'];
@@ -70,4 +70,6 @@ Object.defineProperty(exports, "isDefined", { enumerable: true, get: function ()
 Object.defineProperty(exports, "isObject", { enumerable: true, get: function () { return util_1.isObject; } });
 Object.defineProperty(exports, "getKeys", { enumerable: true, get: function () { return util_1.getKeys; } });
 __exportStar(require("./filters"), exports);
+var files_1 = require("./files");
+Object.defineProperty(exports, "CONTENT_TYPE_TO_EXT", { enumerable: true, get: function () { return files_1.CONTENT_TYPE_TO_EXT; } });
 //# sourceMappingURL=index.js.map

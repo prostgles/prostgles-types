@@ -714,4 +714,5 @@ export type { WALItem, BasicOrderBy, WALItemsObj, WALConfig, TextPatch, SyncTabl
 export { asName, getTextPatch, isEmpty, stableStringify, unpatchText, WAL, get, isDefined, isObject, getKeys } from "./util";
 export * from "./filters";
 export type { ClientExpressData, ClientSyncHandles, ClientSyncInfo, SyncConfig, ClientSyncPullResponse, SyncBatchParams, onUpdatesParams } from "./replication";
-export type { ALLOWED_CONTENT_TYPE, ALLOWED_EXTENSION, CONTENT_TYPE_TO_EXT, FileColumnConfig, FileType } from "./files";
+export type { ALLOWED_CONTENT_TYPE, ALLOWED_EXTENSION, FileColumnConfig, FileType } from "./files";
+export { CONTENT_TYPE_TO_EXT } from "./files";

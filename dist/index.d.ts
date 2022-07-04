@@ -1,4 +1,5 @@
 import { FullFilter, AnyObject, FullFilterBasic, ValueOf } from "./filters";
+import { FileColumnConfig } from "./files";
 export declare const _PG_strings: readonly ["bpchar", "char", "varchar", "text", "citext", "uuid", "bytea", "inet", "time", "timetz", "interval", "name"];
 export declare const _PG_numbers: readonly ["int2", "int4", "int8", "float4", "float8", "numeric", "money", "oid"];
 export declare const _PG_json: readonly ["json", "jsonb"];
@@ -51,6 +52,7 @@ export declare type ColumnInfo = {
     min?: string | number;
     max?: string | number;
     hint?: string;
+    file?: FileColumnConfig;
 };
 export declare type ValidatedColumnInfo = ColumnInfo & {
     tsDataType: TS_COLUMN_DATA_TYPES;
@@ -409,4 +411,5 @@ export type { WALItem, BasicOrderBy, WALItemsObj, WALConfig, TextPatch, SyncTabl
 export { asName, getTextPatch, isEmpty, stableStringify, unpatchText, WAL, get, isDefined, isObject, getKeys } from "./util";
 export * from "./filters";
 export type { ClientExpressData, ClientSyncHandles, ClientSyncInfo, SyncConfig, ClientSyncPullResponse, SyncBatchParams, onUpdatesParams } from "./replication";
+export type { ALLOWED_CONTENT_TYPE, ALLOWED_EXTENSION, CONTENT_TYPE_TO_EXT, FileColumnConfig, FileType } from "./files";
 //# sourceMappingURL=index.d.ts.map

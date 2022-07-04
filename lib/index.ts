@@ -1,5 +1,6 @@
 
 import { FullFilter, AnyObject, FullFilterBasic, ValueOf } from "./filters";
+import { FileColumnConfig } from "./files";
 
 export const _PG_strings = ['bpchar','char','varchar','text','citext','uuid','bytea','inet','time','timetz','interval','name'] as const;
 export const _PG_numbers = ['int2','int4','int8','float4','float8','numeric','money','oid'] as const;
@@ -140,7 +141,15 @@ export type ColumnInfo = {
   min?: string | number;
   max?: string | number;
   hint?: string;
+
+  /**
+   * If degined then this column is referencing the file table
+   * Extracted from FileTable config
+   * Used in SmartForm
+   */
+  file?: FileColumnConfig;
 }
+
 
 export type ValidatedColumnInfo = ColumnInfo & {
 
@@ -705,3 +714,4 @@ export type { WALItem, BasicOrderBy, WALItemsObj, WALConfig, TextPatch, SyncTabl
 export { asName, getTextPatch, isEmpty, stableStringify, unpatchText, WAL, get, isDefined, isObject, getKeys } from "./util";
 export * from "./filters";
 export type { ClientExpressData, ClientSyncHandles, ClientSyncInfo, SyncConfig, ClientSyncPullResponse, SyncBatchParams, onUpdatesParams } from "./replication";
+export type { ALLOWED_CONTENT_TYPE, ALLOWED_EXTENSION, CONTENT_TYPE_TO_EXT, FileColumnConfig, FileType } from "./files";

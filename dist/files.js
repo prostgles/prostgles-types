@@ -4,6 +4,8 @@ exports.CONTENT_TYPE_TO_EXT = void 0;
 exports.CONTENT_TYPE_TO_EXT = {
     "text/html": ["html", "htm", "shtml"],
     "text/css": ["css"],
+    "text/csv": ["csv"],
+    "text/tsv": ["tsv"],
     "text/xml": ["xml"],
     "text/mathml": ["mml"],
     "text/plain": ["txt"],
@@ -20,6 +22,7 @@ exports.CONTENT_TYPE_TO_EXT = {
     "image/x-ms-bmp": ["bmp"],
     "image/svg+xml": ["svg"],
     "image/webp": ["webp"],
+    "application/sql": ["sql"],
     "application/x-javascript": ["js"],
     "application/atom+xml": ["atom"],
     "application/rss+xml": ["rss"],

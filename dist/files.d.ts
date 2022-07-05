@@ -2,6 +2,8 @@ import { FieldFilter } from ".";
 export declare const CONTENT_TYPE_TO_EXT: {
     readonly "text/html": readonly ["html", "htm", "shtml"];
     readonly "text/css": readonly ["css"];
+    readonly "text/csv": readonly ["csv"];
+    readonly "text/tsv": readonly ["tsv"];
     readonly "text/xml": readonly ["xml"];
     readonly "text/mathml": readonly ["mml"];
     readonly "text/plain": readonly ["txt"];
@@ -18,6 +20,7 @@ export declare const CONTENT_TYPE_TO_EXT: {
     readonly "image/x-ms-bmp": readonly ["bmp"];
     readonly "image/svg+xml": readonly ["svg"];
     readonly "image/webp": readonly ["webp"];
+    readonly "application/sql": readonly ["sql"];
     readonly "application/x-javascript": readonly ["js"];
     readonly "application/atom+xml": readonly ["atom"];
     readonly "application/rss+xml": readonly ["rss"];

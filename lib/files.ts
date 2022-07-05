@@ -3,6 +3,8 @@ import { FieldFilter } from ".";
 export const CONTENT_TYPE_TO_EXT = {
   "text/html":                             ["html", "htm", "shtml"],
   "text/css":                              ["css"],
+  "text/csv":                              ["csv"],
+  "text/tsv":                              ["tsv"],
   "text/xml":                              ["xml"],
   "text/mathml":                           ["mml"],
   "text/plain":                            ["txt"],
@@ -19,6 +21,7 @@ export const CONTENT_TYPE_TO_EXT = {
   "image/x-ms-bmp":                        ["bmp"],
   "image/svg+xml":                         ["svg"],
   "image/webp":                            ["webp"],
+  "application/sql":                       ["sql"],
   "application/x-javascript":              ["js"],
   "application/atom+xml":                  ["atom"],
   "application/rss+xml":                   ["rss"],

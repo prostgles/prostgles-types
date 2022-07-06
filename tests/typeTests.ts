@@ -1,5 +1,5 @@
 
-import type { TableHandler, SQLHandler, FullFilter, DBHandler, Select, SelectTyped, ExistsFilter, DeleteParams } from "../dist/index";
+import type { TableHandler, SQLHandler, FullFilter, DBHandler, Select, SelectTyped, ExistsFilter, DeleteParams, AnyObject } from "../dist/index";
 
 /**
  * Test select/return type inference
@@ -49,7 +49,9 @@ import type { TableHandler, SQLHandler, FullFilter, DBHandler, Select, SelectTyp
       row.c;
     });
   }
-
+  const s1: Select<AnyObject> = {
+    val: { $template_string: ["$template_string"] } 
+  }
 
 
   const sqlHandler: SQLHandler = undefined as any;

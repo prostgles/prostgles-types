@@ -39,6 +39,9 @@ exports.typeTestsOK = void 0;
             row.c;
         }));
     }
+    const s1 = {
+        val: { $template_string: ["$template_string"] }
+    };
     const sqlHandler = undefined;
     if (sqlHandler) {
         const full = yield sqlHandler("SELECT 1", {});

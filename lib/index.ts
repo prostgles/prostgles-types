@@ -232,8 +232,10 @@ export type SelectTyped<T extends AnyObject> =
   | CommonSelect
 ;
 
+type FunctionSelect = Record<string, Record<string, any[]>>
 type SelectFuncs<T extends AnyObject = any> = T extends AnyObject? (
-  | ({ [K in keyof Partial<T>]: true | 1 | string } & Record<string, Record<string, any[]>>)
+  | ({ [K in keyof Partial<T>]: true | 1 | string } & FunctionSelect)
+  | FunctionSelect
   | { [K in keyof Partial<T>]: true | 1 | string }
   | { [K in keyof Partial<T>]: 0 | false }
   | CommonSelect

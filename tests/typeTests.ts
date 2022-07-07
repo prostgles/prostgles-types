@@ -29,6 +29,8 @@ import type { TableHandler, SQLHandler, FullFilter, DBHandler, Select, SelectTyp
     row.h;
 
     const vals = await tableHandler.find?.({ "c.$nin": [2] }, { returnType: "values" });
+    const vals2 = await tableHandler.find?.({ "c.$nin": [2] }, { select: { h: 1 }, returnType: "values" });
+    vals2[0]?.toExponential();
   
     //@ts-expect-error
     row.b;

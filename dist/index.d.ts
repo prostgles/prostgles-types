@@ -204,18 +204,18 @@ export declare type ViewHandler<TD = AnyObject, S = void> = {
     getInfo?: (lang?: string) => Promise<TableInfo>;
     getColumns?: GetColumns;
     find: <P extends SelectParams<TD>>(filter?: FullFilter<TD, S>, selectParams?: P) => Promise<GetSelectReturnType<P, TD>[]>;
-    findOne: <P extends SelectParams<TD>>(filter?: FullFilter<TD, S>, selectParams?: P) => Promise<GetSelectReturnType<P, TD>>;
+    findOne: <P extends SelectParams<TD>>(filter?: FullFilter<TD, S>, selectParams?: P) => Promise<undefined | GetSelectReturnType<P, TD>>;
     subscribe: <P extends SubscribeParams<TD>>(filter: FullFilter<TD, S>, params: P, onData: (items: GetSelectReturnType<P, TD>[], onError?: OnError) => any) => Promise<SubscriptionHandler<TD>>;
     subscribeOne: <P extends SubscribeParams<TD>>(filter: FullFilter<TD, S>, params: P, onData: (item: GetSelectReturnType<P, TD>) => any, onError?: OnError) => Promise<SubscriptionHandler<TD>>;
     count: (filter?: FullFilter<TD, S>) => Promise<number>;
     size: (filter?: FullFilter<TD>, selectParams?: SelectParams<TD>) => Promise<string>;
 };
 export declare type TableHandler<TD = AnyObject, S = void> = ViewHandler<TD, S> & {
-    update: <P extends UpdateParams<TD>>(filter: FullFilter<TD, S>, newData: PartialLax<TD>, params?: P) => Promise<GetUpdateReturnType<P, TD>>;
+    update: <P extends UpdateParams<TD>>(filter: FullFilter<TD, S>, newData: PartialLax<TD>, params?: P) => Promise<GetUpdateReturnType<P, TD> | undefined>;
     updateBatch: (data: [FullFilter<TD, S>, PartialLax<TD>][], params?: UpdateParams<TD>) => Promise<PartialLax<TD> | void>;
     upsert: <P extends UpdateParams<TD>>(filter: FullFilter<TD, S>, newData: PartialLax<TD>, params?: P) => Promise<GetUpdateReturnType<P, TD>>;
     insert: <P extends UpdateParams<TD>>(data: (TD | TD[]), params?: P) => Promise<GetUpdateReturnType<P, TD>>;
-    delete: <P extends DeleteParams<TD>>(filter?: FullFilter<TD, S>, params?: P) => Promise<GetUpdateReturnType<P, TD>>;
+    delete: <P extends DeleteParams<TD>>(filter?: FullFilter<TD, S>, params?: P) => Promise<GetUpdateReturnType<P, TD> | undefined>;
 };
 export declare type ViewHandlerBasic = {
     getInfo?: (lang?: string) => Promise<TableInfo>;

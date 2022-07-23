@@ -388,12 +388,12 @@ export type TableInfo = {
 export type OnError = (err: any) => void;
 
 type GetSelectReturnType<O extends SelectParams<TD>, TD extends AnyObject> = 
-  O extends { returnType: "values"; select: Record<string, 1> }? ValueOf<Pick<TD, keyof O["select"]>> : 
+  O extends { returnType: "values"; select: Record<string, 1> }? ValueOf<Pick<Required<TD>, keyof O["select"]>> : 
   O extends { returnType: "values" }? any : 
-  O extends { select: "*" }? TD : 
+  O extends { select: "*" }? Required<TD> : 
   O extends { select: "" }? Record<string, never> : 
-  O extends { select: Record<string, 1> }? Pick<TD, keyof O["select"]> : 
-  O extends { select: Record<string, 0> }? Omit<TD, keyof O["select"]> : 
+  O extends { select: Record<string, 1> }? Pick<Required<TD>, keyof O["select"]> : 
+  O extends { select: Record<string, 0> }? Omit<Required<TD>, keyof O["select"]> : 
   TD;
 
 type GetUpdateReturnType<O extends UpdateParams, TD extends AnyObject> = 

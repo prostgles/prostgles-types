@@ -32,6 +32,8 @@ import type { TableHandler, SQLHandler, FullFilter, DBHandler, Select, SelectTyp
     const vals2 = await tableHandler.find?.({ "c.$nin": [2] }, { select: { h: 1 }, returnType: "values" });
     vals2[0]?.toExponential();
   
+    const valsOptional = await tableHandler.find?.({ }, { select: { b: 1 }, returnType: "values" });
+    
     //@ts-expect-error
     row.b;
   

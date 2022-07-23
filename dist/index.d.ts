@@ -169,17 +169,17 @@ export declare type OnError = (err: any) => void;
 declare type GetSelectReturnType<O extends SelectParams<TD>, TD extends AnyObject> = O extends {
     returnType: "values";
     select: Record<string, 1>;
-} ? ValueOf<Pick<TD, keyof O["select"]>> : O extends {
+} ? ValueOf<Pick<Required<TD>, keyof O["select"]>> : O extends {
     returnType: "values";
 } ? any : O extends {
     select: "*";
-} ? TD : O extends {
+} ? Required<TD> : O extends {
     select: "";
 } ? Record<string, never> : O extends {
     select: Record<string, 1>;
-} ? Pick<TD, keyof O["select"]> : O extends {
+} ? Pick<Required<TD>, keyof O["select"]> : O extends {
     select: Record<string, 0>;
-} ? Omit<TD, keyof O["select"]> : TD;
+} ? Omit<Required<TD>, keyof O["select"]> : TD;
 declare type GetUpdateReturnType<O extends UpdateParams, TD extends AnyObject> = O extends {
     returning: "*";
 } ? Required<TD> : O extends {

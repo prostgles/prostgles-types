@@ -394,7 +394,7 @@ type GetSelectReturnType<O extends SelectParams<TD>, TD extends AnyObject> =
   O extends { select: "" }? Record<string, never> : 
   O extends { select: Record<string, 1> }? Pick<Required<TD>, keyof O["select"]> : 
   O extends { select: Record<string, 0> }? Omit<Required<TD>, keyof O["select"]> : 
-  TD;
+  Required<TD>;
 
 type GetUpdateReturnType<O extends UpdateParams, TD extends AnyObject> = 
   O extends { returning: "*" }? Required<TD> : 

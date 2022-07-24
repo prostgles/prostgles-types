@@ -388,7 +388,7 @@ export type TableInfo = {
 export type OnError = (err: any) => void;
 
 type GetSelectReturnType<O extends SelectParams<TD>, TD extends AnyObject> = 
-  O extends { returnType: "values"; select: Record<string, 1> }? ValueOf<Pick<Required<TD>, keyof O["select"]>> : 
+  O extends { returnType: "value"; select: Record<string, 1> }? ValueOf<Pick<Required<TD>, keyof O["select"]>> : 
   O extends { returnType: "values" }? any : 
   O extends { select: "*" }? Required<TD> : 
   O extends { select: "" }? Record<string, never> : 

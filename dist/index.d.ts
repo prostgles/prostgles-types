@@ -168,6 +168,8 @@ export declare type TableInfo = {
 export declare type OnError = (err: any) => void;
 declare type GetSelectReturnType<O extends SelectParams<TD>, TD extends AnyObject> = O extends {
     returnType: "value";
+} ? any : O extends {
+    returnType: "values";
     select: Record<string, 1>;
 } ? ValueOf<Pick<Required<TD>, keyof O["select"]>> : O extends {
     returnType: "values";

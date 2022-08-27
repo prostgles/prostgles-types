@@ -410,6 +410,17 @@ export declare type AuthSocketSchema = {
     logout?: boolean;
     pathGuard?: boolean;
 };
+export declare type ProstglesError = {
+    stack: string[];
+    message: string;
+    column?: string;
+    code?: string;
+    table?: string;
+    constraint?: string;
+    txt?: string;
+    code_info?: string;
+    columns?: string[];
+};
 export type { WALItem, BasicOrderBy, WALItemsObj, WALConfig, TextPatch, SyncTableInfo } from "./util";
 export { asName, getTextPatch, isEmpty, stableStringify, unpatchText, WAL, get, isDefined, isObject, getKeys } from "./util";
 export * from "./filters";

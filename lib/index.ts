@@ -711,6 +711,18 @@ export type AuthSocketSchema = {
   pathGuard?: boolean;
 };
 
+export type ProstglesError = {
+  stack: string[];
+  message: string;
+  column?: string;
+  code?: string;
+  table?: string;
+  constraint?: string;
+  txt?: string;
+  code_info?: string;
+  columns?: string[];
+}
+
 // import { md5 } from "./md5";
 // export { get, getTextPatch, unpatchText, isEmpty, WAL, WALConfig, asName } from "./util";
 export type { WALItem, BasicOrderBy, WALItemsObj, WALConfig, TextPatch, SyncTableInfo } from "./util";

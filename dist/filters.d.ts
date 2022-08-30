@@ -1,6 +1,6 @@
 import { DBSchema } from ".";
 import { ExactlyOne } from "./util";
-export declare const CompareFilterKeys: readonly ["=", "$eq", "<>", ">", ">=", "<=", "$eq", "$ne", "$gt", "$gte", "$lte"];
+export declare const CompareFilterKeys: readonly ["=", "$eq", "<>", ">", "<", ">=", "<=", "$eq", "$ne", "$gt", "$gte", "$lte"];
 export declare const CompareInFilterKeys: readonly ["$in", "$nin"];
 export declare type CompareFilter<T = Date | number | string | boolean> = T | ExactlyOne<Record<typeof CompareFilterKeys[number], T>> | ExactlyOne<Record<typeof CompareInFilterKeys[number], T[]>> | {
     "$between": [T, T];

@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.EXISTS_KEYS = exports.GeomFilter_Funcs = exports.GeomFilterKeys = exports.ArrayFilterOperands = exports.TextFilter_FullTextSearchFilterKeys = exports.TextFilterFTSKeys = exports.TextFilterKeys = exports.CompareInFilterKeys = exports.CompareFilterKeys = void 0;
-exports.CompareFilterKeys = ["=", "$eq", "<>", ">", ">=", "<=", "$eq", "$ne", "$gt", "$gte", "$lte"];
+exports.CompareFilterKeys = ["=", "$eq", "<>", ">", "<", ">=", "<=", "$eq", "$ne", "$gt", "$gte", "$lte"];
 exports.CompareInFilterKeys = ["$in", "$nin"];
 exports.TextFilterKeys = ["$ilike", "$like"];
 exports.TextFilterFTSKeys = ["@@", "@>", "<@", "$contains", "$containedBy"];

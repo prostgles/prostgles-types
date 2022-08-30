@@ -2,7 +2,7 @@ import { DBSchema } from ".";
 import { ExactlyOne } from "./util";
 
 
-export const CompareFilterKeys = ["=", "$eq","<>",">",">=","<=","$eq","$ne","$gt","$gte","$lte"] as const;
+export const CompareFilterKeys = ["=", "$eq","<>",">","<",">=","<=","$eq","$ne","$gt","$gte","$lte"] as const;
 export const CompareInFilterKeys = ["$in", "$nin"] as const;
 
 /**

@@ -88,10 +88,11 @@ export declare type SelectTyped<T extends AnyObject> = {
 } | {
     [K in keyof Partial<T>]: 0 | false;
 } | (keyof T)[] | CommonSelect;
+declare type JoinSelect = Record<string, Record<string, AnyObject>>;
 declare type FunctionSelect = Record<string, Record<string, any[]>>;
 declare type SelectFuncs<T extends AnyObject = any> = T extends AnyObject ? (({
     [K in keyof Partial<T>]: true | 1 | string;
-} & FunctionSelect) | FunctionSelect | {
+} & FunctionSelect) | JoinSelect | FunctionSelect | {
     [K in keyof Partial<T>]: true | 1 | string;
 } | {
     [K in keyof Partial<T>]: 0 | false;
@@ -166,10 +167,11 @@ export declare type TableInfo = {
     };
 };
 export declare type OnError = (err: any) => void;
+declare type JoinedSelect = Record<string, Select>;
 declare type ParseSelect<Select extends SelectParams<TD>["select"], TD extends AnyObject> = (Select extends {
     "*": 1;
 } ? Required<TD> : {}) & {
-    [Key in keyof Omit<Select, "*">]: Select[Key] extends 1 ? Required<TD>[Key] : any;
+    [Key in keyof Omit<Select, "*">]: Select[Key] extends 1 ? Required<TD>[Key] : Select[Key] extends JoinedSelect ? any[] : any;
 };
 declare type GetSelectReturnType<O extends SelectParams<TD>, TD extends AnyObject> = O extends {
     returnType: "value";

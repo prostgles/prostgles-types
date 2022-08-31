@@ -232,9 +232,11 @@ export type SelectTyped<T extends AnyObject> =
   | CommonSelect
 ;
 
+type JoinSelect = Record<string, Record<string, AnyObject>>
 type FunctionSelect = Record<string, Record<string, any[]>>
 type SelectFuncs<T extends AnyObject = any> = T extends AnyObject? (
   | ({ [K in keyof Partial<T>]: true | 1 | string } & FunctionSelect)
+  | JoinSelect
   | FunctionSelect
   | { [K in keyof Partial<T>]: true | 1 | string }
   | { [K in keyof Partial<T>]: 0 | false }
@@ -387,8 +389,10 @@ export type TableInfo = {
 
 export type OnError = (err: any) => void;
 
+type JoinedSelect = Record<string, Select>;
+
 type ParseSelect<Select extends SelectParams<TD>["select"], TD extends AnyObject> = (Select extends { "*": 1 }? Required<TD> : {}) &  {
-  [Key in keyof Omit<Select, "*">]: Select[Key] extends 1? Required<TD>[Key] : any;
+  [Key in keyof Omit<Select, "*">]: Select[Key] extends 1? Required<TD>[Key] : Select[Key] extends JoinedSelect? any[] : any;
 }
 
 

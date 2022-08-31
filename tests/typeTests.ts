@@ -1,12 +1,21 @@
 
-import type { TableHandler, SQLHandler, FullFilter, DBHandler, Select, SelectTyped, ExistsFilter, DeleteParams, AnyObject } from "../dist/index";
+import type { TableHandler, SQLHandler, FullFilter, DBHandler, Select, SelectTyped, ExistsFilter, DeleteParams, AnyObject, SelectParams } from "../dist/index";
 
 /**
  * Test select/return type inference
  */
  (async () => {
   
-  const tableHandler: TableHandler<{ h: number; b?: number; c?: number; }> = undefined as any;
+  type TableDef = { h: number; b?: number; c?: number; }
+  const tableHandler: TableHandler<TableDef> = undefined as any;
+
+  const params: SelectParams<TableDef> = {
+    select: {
+      "*": 1, 
+      bd: { $max: ["b"] },
+      joined_table: { ids: { "$array_agg": ["joined_field"] } }
+    }
+  }
   
   const f: FullFilter<{ a: string | null; num: number }> = {
     $and: [
@@ -28,13 +37,19 @@ import type { TableHandler, SQLHandler, FullFilter, DBHandler, Select, SelectTyp
     row.c;
     row.h;
 
+    //@ts-expect-error
+    row.b;
+
     const vals = await tableHandler.find?.({ "c.$nin": [2] }, { returnType: "values" });
     const vals2 = await tableHandler.find?.({ "c.$nin": [2] }, { select: { h: 1 }, returnType: "values" });
     vals2[0]?.toExponential();
   
     const valsOptional = await tableHandler.find?.({ }, { select: { b: 1 }, returnType: "values" });
-    const starSelect = await tableHandler.find?.({ }, { select: { "*": 1, bd: { $max: ["b"] } } });
+    const starSelect = await tableHandler.find?.({ }, { select: { "*": 1, bd: { $max: ["b"] }, joined_table: { ids: { "$array_agg": ["joined_field"] } } } });
     
+    starSelect[0].bd
+    starSelect[0].joined_table.at(0)
+
     //@ts-expect-error
     row.b;
   

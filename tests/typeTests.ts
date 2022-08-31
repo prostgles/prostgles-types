@@ -37,6 +37,10 @@ import type { TableHandler, SQLHandler, FullFilter, DBHandler, Select, SelectTyp
     row.c;
     row.h;
 
+
+    const query = await tableHandler.find?.({ h: 2 }, { returnType: "statement" });
+    query.toUpperCase();
+
     //@ts-expect-error
     row.b;
 

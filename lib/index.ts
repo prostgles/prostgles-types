@@ -289,6 +289,11 @@ type CommonSelectParams = {
     */
   | "values"
 
+  /**
+    * Will return the sql statement. Requires publishRawSQL privileges if called by client
+    */
+  | "statement"
+
 }
 // export type SelectParamsBasic = {
 //   select?: SelectBasic;
@@ -396,7 +401,7 @@ type ParseSelect<Select extends SelectParams<TD>["select"], TD extends AnyObject
 }
 
 
-type GetSelectReturnType<O extends SelectParams<TD>, TD extends AnyObject> = 
+type GetSelectDataType<O extends SelectParams<TD>, TD extends AnyObject> = 
   O extends { returnType: "value" }? any : 
   O extends { returnType: "values"; select: Record<string, 1> }? ValueOf<Pick<Required<TD>, keyof O["select"]>> : 
   O extends { returnType: "values" }? any : 
@@ -405,6 +410,11 @@ type GetSelectReturnType<O extends SelectParams<TD>, TD extends AnyObject> =
   O extends { select: Record<string, 0> }? Omit<Required<TD>, keyof O["select"]> : 
   O extends { select: Record<string, any> }? ParseSelect<O["select"], Required<TD>> : 
   Required<TD>;
+
+type GetSelectReturnType<O extends SelectParams<TD>, TD extends AnyObject, isMulti extends boolean> = 
+  O extends { returnType: "statement" }? string : 
+  isMulti extends true? GetSelectDataType<O, TD>[] :
+  GetSelectDataType<O, TD>;
 
 type GetUpdateReturnType<O extends UpdateParams, TD extends AnyObject> = 
   O extends { returning: "*" }? Required<TD> : 
@@ -425,10 +435,10 @@ type GetColumns = (lang?: string, params?: { rule: "update", data: AnyObject, fi
 export type ViewHandler<TD = AnyObject, S = void> = {
   getInfo?: (lang?: string) => Promise<TableInfo>;
   getColumns?: GetColumns
-  find: <P extends SelectParams<TD>>(filter?: FullFilter<TD, S>, selectParams?: P) => Promise<GetSelectReturnType<P, TD>[]>;
-  findOne: <P extends SelectParams<TD>>(filter?: FullFilter<TD, S>, selectParams?: P) => Promise<undefined | GetSelectReturnType<P, TD>>;
-  subscribe: <P extends SubscribeParams<TD>>(filter: FullFilter<TD, S>, params: P, onData: (items: GetSelectReturnType<P, TD>[], onError?: OnError) => any) => Promise<SubscriptionHandler<TD>>;
-  subscribeOne: <P extends SubscribeParams<TD>>(filter: FullFilter<TD, S>, params: P, onData: (item: GetSelectReturnType<P, TD>) => any, onError?: OnError) => Promise<SubscriptionHandler<TD>>;
+  find: <P extends SelectParams<TD>>(filter?: FullFilter<TD, S>, selectParams?: P) => Promise<GetSelectReturnType<P, TD, true>>;
+  findOne: <P extends SelectParams<TD>>(filter?: FullFilter<TD, S>, selectParams?: P) => Promise<undefined | GetSelectReturnType<P, TD, false>>;
+  subscribe: <P extends SubscribeParams<TD>>(filter: FullFilter<TD, S>, params: P, onData: (items: GetSelectReturnType<P, TD, true>, onError?: OnError) => any) => Promise<SubscriptionHandler<TD>>;
+  subscribeOne: <P extends SubscribeParams<TD>>(filter: FullFilter<TD, S>, params: P, onData: (item: GetSelectReturnType<P, TD, false>) => any, onError?: OnError) => Promise<SubscriptionHandler<TD>>;
   count: (filter?: FullFilter<TD, S>) => Promise<number>;
   /**
    * Returns result size in bits

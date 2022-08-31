@@ -33,6 +33,7 @@ import type { TableHandler, SQLHandler, FullFilter, DBHandler, Select, SelectTyp
     vals2[0]?.toExponential();
   
     const valsOptional = await tableHandler.find?.({ }, { select: { b: 1 }, returnType: "values" });
+    const starSelect = await tableHandler.find?.({ }, { select: { "*": 1, bd: { $max: ["b"] } } });
     
     //@ts-expect-error
     row.b;

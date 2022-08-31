@@ -166,6 +166,11 @@ export declare type TableInfo = {
     };
 };
 export declare type OnError = (err: any) => void;
+declare type ParseSelect<Select extends SelectParams<TD>["select"], TD extends AnyObject> = (Select extends {
+    "*": 1;
+} ? Required<TD> : {}) & {
+    [Key in keyof Omit<Select, "*">]: Select[Key] extends 1 ? Required<TD>[Key] : any;
+};
 declare type GetSelectReturnType<O extends SelectParams<TD>, TD extends AnyObject> = O extends {
     returnType: "value";
 } ? any : O extends {
@@ -178,10 +183,10 @@ declare type GetSelectReturnType<O extends SelectParams<TD>, TD extends AnyObjec
 } ? Required<TD> : O extends {
     select: "";
 } ? Record<string, never> : O extends {
-    select: Record<string, 1>;
-} ? Pick<Required<TD>, keyof O["select"]> : O extends {
     select: Record<string, 0>;
-} ? Omit<Required<TD>, keyof O["select"]> : Required<TD>;
+} ? Omit<Required<TD>, keyof O["select"]> : O extends {
+    select: Record<string, any>;
+} ? ParseSelect<O["select"], Required<TD>> : Required<TD>;
 declare type GetUpdateReturnType<O extends UpdateParams, TD extends AnyObject> = O extends {
     returning: "*";
 } ? Required<TD> : O extends {

@@ -11,7 +11,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.typeTestsOK = void 0;
 (() => __awaiter(void 0, void 0, void 0, function* () {
-    var _a, _b, _c, _d, _e, _f;
+    var _a, _b, _c, _d, _e, _f, _g;
     const tableHandler = undefined;
     const f = {
         $and: [
@@ -31,6 +31,7 @@ exports.typeTestsOK = void 0;
         const vals2 = yield ((_d = tableHandler.find) === null || _d === void 0 ? void 0 : _d.call(tableHandler, { "c.$nin": [2] }, { select: { h: 1 }, returnType: "values" }));
         (_e = vals2[0]) === null || _e === void 0 ? void 0 : _e.toExponential();
         const valsOptional = yield ((_f = tableHandler.find) === null || _f === void 0 ? void 0 : _f.call(tableHandler, {}, { select: { b: 1 }, returnType: "values" }));
+        const starSelect = yield ((_g = tableHandler.find) === null || _g === void 0 ? void 0 : _g.call(tableHandler, {}, { select: { "*": 1, bd: { $max: ["b"] } } }));
         row.b;
         tableHandler.subscribe({ h: 2 }, { select: { b: 1 } }, (rows) => __awaiter(void 0, void 0, void 0, function* () {
             const row = rows[0];

@@ -608,6 +608,12 @@ export type SQLOptions = {
    */
   returnType?: Required<SelectParams>["returnType"] | "statement" | "rows" | "noticeSubscription" | "arrayMode";
   allowListen?: boolean;
+
+  /**
+   * If false then the query will not be checked for params. Used to ignore queries with param like text (e.g.:  ${someText} )
+   * Defaults to true
+   */
+  hasParams?: boolean;
 };
 
 export type SQLRequest = {

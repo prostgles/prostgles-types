@@ -326,6 +326,7 @@ export declare type DBNotifConfig = DBNoticeConfig & {
 export declare type SQLOptions = {
     returnType?: Required<SelectParams>["returnType"] | "statement" | "rows" | "noticeSubscription" | "arrayMode";
     allowListen?: boolean;
+    hasParams?: boolean;
 };
 export declare type SQLRequest = {
     query: string;

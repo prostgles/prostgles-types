@@ -136,7 +136,7 @@ import type { TableHandler, SQLHandler, FullFilter, DBHandler, Select, SelectTyp
       columns: {  c1: string; c2?: number }
     };
   }> = 1 as any;
-
+// const v = await db.sql<{ c: string }>(``)
   const s: SelectTyped<{ a: number; c: string }> = { a: 1 }
 
   // @ts-expect-error

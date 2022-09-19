@@ -159,27 +159,32 @@ export type ValidatedColumnInfo = ColumnInfo & {
   tsDataType: TS_COLUMN_DATA_TYPES;
 
   /**
-   * Fields that can be viewed
+   * Can be viewed/selected
    */
   select: boolean;
 
   /**
-   * Fields that can be filtered by
+   * Can be ordered by
+   */
+  orderBy: boolean;
+
+  /**
+   * Can be filtered by
    */
   filter: boolean;
 
   /**
-   * Fields that can be inserted
+   * Can be inserted
    */
   insert: boolean;
 
   /**
-   * Fields that can be updated
+   * Can be updated
    */
   update: boolean;
 
   /**
-   * Fields that can be used in the delete filter
+   * Can be used in the delete filter
    */
   delete: boolean;
 }

@@ -57,6 +57,7 @@ export declare type ColumnInfo = {
 export declare type ValidatedColumnInfo = ColumnInfo & {
     tsDataType: TS_COLUMN_DATA_TYPES;
     select: boolean;
+    orderBy: boolean;
     filter: boolean;
     insert: boolean;
     update: boolean;

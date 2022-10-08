@@ -366,6 +366,8 @@ export type TableInfo = {
    */
   is_media?: boolean;
 
+  is_view?: boolean;
+
   /**
    * How many files are expected at most for each row from this table
    */

@@ -157,6 +157,7 @@ export declare type TableInfo = {
     oid: number;
     comment?: string;
     is_media?: boolean;
+    is_view?: boolean;
     has_media?: "one" | "many";
     has_direct_media?: boolean;
     media_table_name?: string;

@@ -52,6 +52,7 @@ export declare type ColumnInfo = {
     min?: string | number;
     max?: string | number;
     hint?: string;
+    jsonSchema?: AnyObject;
     file?: FileColumnConfig;
 };
 export declare type ValidatedColumnInfo = ColumnInfo & {

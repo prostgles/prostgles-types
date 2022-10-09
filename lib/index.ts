@@ -141,6 +141,7 @@ export type ColumnInfo = {
   min?: string | number;
   max?: string | number;
   hint?: string;
+  jsonSchema?: AnyObject;
 
   /**
    * If degined then this column is referencing the file table
@@ -148,6 +149,7 @@ export type ColumnInfo = {
    * Used in SmartForm
    */
   file?: FileColumnConfig;
+
 }
 
 

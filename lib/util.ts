@@ -432,7 +432,7 @@ export function isObject(obj: any): obj is Record<string, any> {
 }
 export function isDefined<T>(v: T | undefined | void): v is T { return v !== undefined && v !== null }
 
-export function getKeys<T>(o: T): Array<keyof T>{
+export function getKeys<T extends AnyObject>(o: T): Array<keyof T>{
   return Object.keys(o) as any
 }
 

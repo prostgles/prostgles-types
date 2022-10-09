@@ -203,7 +203,7 @@ declare type GetUpdateReturnType<O extends UpdateParams, TD extends AnyObject> =
 } ? Pick<Required<TD>, keyof O["returning"]> : O extends {
     returning: Record<string, 0>;
 } ? Omit<Required<TD>, keyof O["returning"]> : void;
-export declare type SubscriptionHandler<T = AnyObject> = {
+export declare type SubscriptionHandler<T extends AnyObject = AnyObject> = {
     unsubscribe: () => Promise<any>;
     update?: (newData: T, updateParams: UpdateParams<T>) => Promise<any>;
     delete?: (deleteParams: DeleteParams<T>) => Promise<any>;
@@ -214,7 +214,7 @@ declare type GetColumns = (lang?: string, params?: {
     data: AnyObject;
     filter: AnyObject;
 }) => Promise<ValidatedColumnInfo[]>;
-export declare type ViewHandler<TD = AnyObject, S = void> = {
+export declare type ViewHandler<TD extends AnyObject = AnyObject, S = void> = {
     getInfo?: (lang?: string) => Promise<TableInfo>;
     getColumns?: GetColumns;
     find: <P extends SelectParams<TD>>(filter?: FullFilter<TD, S>, selectParams?: P) => Promise<GetSelectReturnType<P, TD, true>>;
@@ -224,7 +224,7 @@ export declare type ViewHandler<TD = AnyObject, S = void> = {
     count: (filter?: FullFilter<TD, S>) => Promise<number>;
     size: (filter?: FullFilter<TD>, selectParams?: SelectParams<TD>) => Promise<string>;
 };
-export declare type TableHandler<TD = AnyObject, S = void> = ViewHandler<TD, S> & {
+export declare type TableHandler<TD extends AnyObject = AnyObject, S = void> = ViewHandler<TD, S> & {
     update: <P extends UpdateParams<TD>>(filter: FullFilter<TD, S>, newData: PartialLax<TD>, params?: P) => Promise<GetUpdateReturnType<P, TD> | undefined>;
     updateBatch: (data: [FullFilter<TD, S>, PartialLax<TD>][], params?: UpdateParams<TD>) => Promise<PartialLax<TD> | void>;
     upsert: <P extends UpdateParams<TD>>(filter: FullFilter<TD, S>, newData: PartialLax<TD>, params?: P) => Promise<GetUpdateReturnType<P, TD>>;
@@ -255,7 +255,7 @@ export declare type TableHandlerBasic = ViewHandlerBasic & {
 export declare type MethodHandler = {
     [method_name: string]: (...args: any[]) => Promise<AnyObject>;
 };
-export declare type JoinMaker<TT = AnyObject> = (filter?: FullFilter<TT>, select?: Select<TT>, options?: SelectParams<TT>) => any;
+export declare type JoinMaker<TT extends AnyObject = AnyObject> = (filter?: FullFilter<TT>, select?: Select<TT>, options?: SelectParams<TT>) => any;
 export declare type JoinMakerBasic = (filter?: FullFilterBasic, select?: SelectBasic, options?: SelectParams) => any;
 export declare type TableJoin = {
     [key: string]: JoinMaker;

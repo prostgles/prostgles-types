@@ -357,6 +357,7 @@ export declare const CHANNELS: {
     LOGIN: string;
     LOGOUT: string;
     AUTHGUARD: string;
+    CONNECTION: string;
     _preffix: string;
 };
 export declare type AuthGuardLocation = {

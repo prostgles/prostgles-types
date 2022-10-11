@@ -660,6 +660,11 @@ export const CHANNELS = {
   LOGOUT: `${preffix}logout`,
   AUTHGUARD: `${preffix}authguard`,
 
+  /**
+   * Used for sending any connection errors from onSocketConnect
+   */
+  CONNECTION: `${preffix}connection`,
+
   _preffix: preffix,
 }
 

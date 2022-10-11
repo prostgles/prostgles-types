@@ -46,6 +46,7 @@ exports.CHANNELS = {
     LOGIN: `${preffix}login`,
     LOGOUT: `${preffix}logout`,
     AUTHGUARD: `${preffix}authguard`,
+    CONNECTION: `${preffix}connection`,
     _preffix: preffix,
 };
 exports.RULE_METHODS = {

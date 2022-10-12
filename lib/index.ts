@@ -2,7 +2,11 @@
 import { FullFilter, AnyObject, FullFilterBasic, ValueOf } from "./filters";
 import { FileColumnConfig } from "./files";
 
-export const _PG_strings = ['bpchar','char','varchar','text','citext','uuid','bytea','inet','time','timetz','interval','name'] as const;
+export const _PG_strings = [
+  'bpchar','char','varchar','text','citext','uuid','bytea', 'time','timetz','interval','name', 
+  'cidr', 'inet', 'macaddr', 'macaddr8', "int4range", "int8range", "numrange",
+  'tsvector'
+] as const;
 export const _PG_numbers = ['int2','int4','int8','float4','float8','numeric','money','oid'] as const;
 export const _PG_json = ['json', 'jsonb'] as const;
 export const _PG_bool = ['bool'] as const;

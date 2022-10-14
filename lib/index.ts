@@ -451,7 +451,7 @@ export type ViewHandler<TD extends AnyObject = AnyObject, S = void> = {
   find: <P extends SelectParams<TD>>(filter?: FullFilter<TD, S>, selectParams?: P) => Promise<GetSelectReturnType<P, TD, true>>;
   findOne: <P extends SelectParams<TD>>(filter?: FullFilter<TD, S>, selectParams?: P) => Promise<undefined | GetSelectReturnType<P, TD, false>>;
   subscribe: <P extends SubscribeParams<TD>>(filter: FullFilter<TD, S>, params: P, onData: (items: GetSelectReturnType<P, TD, true>, onError?: OnError) => any) => Promise<SubscriptionHandler<TD>>;
-  subscribeOne: <P extends SubscribeParams<TD>>(filter: FullFilter<TD, S>, params: P, onData: (item: GetSelectReturnType<P, TD, false>) => any, onError?: OnError) => Promise<SubscriptionHandler<TD>>;
+  subscribeOne: <P extends SubscribeParams<TD>>(filter: FullFilter<TD, S>, params: P, onData: (item: GetSelectReturnType<P, TD, false> | undefined) => any, onError?: OnError) => Promise<SubscriptionHandler<TD>>;
   count: (filter?: FullFilter<TD, S>) => Promise<number>;
   /**
    * Returns result size in bits
@@ -473,7 +473,7 @@ export type ViewHandlerBasic = {
   find: <TD = AnyObject>(filter?: FullFilterBasic, selectParams?: SelectParams) => Promise<PartialLax<TD>[]>;
   findOne: <TD = AnyObject>(filter?: FullFilterBasic, selectParams?: SelectParams) => Promise<PartialLax<TD>>;
   subscribe: <TD = AnyObject>(filter: FullFilterBasic, params: SubscribeParamsBasic, onData: (items: PartialLax<TD>[], onError?: OnError) => any) => Promise<{ unsubscribe: () => any }>;
-  subscribeOne: <TD = AnyObject>(filter: FullFilterBasic, params: SubscribeParamsBasic, onData: (item: PartialLax<TD>, onError?: OnError) => any) => Promise<{ unsubscribe: () => any }>;
+  subscribeOne: <TD = AnyObject>(filter: FullFilterBasic, params: SubscribeParamsBasic, onData: (item: PartialLax<TD> | undefined, onError?: OnError) => any) => Promise<{ unsubscribe: () => any }>;
   count: (filter?: FullFilterBasic) => Promise<number>;
   /**
    * Returns result size in bits

@@ -120,12 +120,13 @@ export type ColumnInfo = {
 
   /**
    * Foreign key constraint 
+   * A column can reference multiple tables
    */
   references?: {
     ftable: string;
     fcols: string[];
     cols: string[];
-  }
+  }[];
 
   /**
    * true if column has a default value

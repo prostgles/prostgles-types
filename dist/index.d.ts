@@ -46,7 +46,7 @@ export declare type ColumnInfo = {
         ftable: string;
         fcols: string[];
         cols: string[];
-    };
+    }[];
     has_default: boolean;
     column_default?: any;
     min?: string | number;

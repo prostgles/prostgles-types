@@ -19,7 +19,14 @@
   "bugs": {
     "url": "https://github.com/prostgles/prostgles-types/issues"
   },
-  "homepage": "https://github.com/prostgles/prostgles-types#readme",
+  "keywords": [
+    "postgres",
+    "postgreSQL",
+    "react",
+    "typescript",
+    "realtime"
+  ],
+  "homepage": "https://prostgles.com",
   "devDependencies": {
     "tsconfig-paths-webpack-plugin": "^3.5.2",
     "typescript": "^4.8.4",

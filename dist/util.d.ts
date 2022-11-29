@@ -1,6 +1,7 @@
 /// <reference types="node" />
 import { AnyObject, TS_COLUMN_DATA_TYPES } from ".";
 export declare function asName(str: string): string;
+export declare function pickKeys<T extends AnyObject, Include extends keyof T>(obj: T, include?: Include[], onlyIfDefined?: boolean): Pick<T, Include>;
 export declare function stableStringify(data: AnyObject, opts: any): string | undefined;
 export declare type TextPatch = {
     from: number;
@@ -31,12 +32,11 @@ export declare type WALConfig = SyncTableInfo & {
     id?: string;
 };
 export declare type WALItem = {
-    initial?: any;
-    current: any;
+    initial?: AnyObject;
+    delta?: AnyObject;
+    current: AnyObject;
 };
-export declare type WALItemsObj = {
-    [key: string]: WALItem;
-};
+export declare type WALItemsObj = Record<string, WALItem>;
 export declare class WAL {
     private changed;
     private sending;

@@ -7,6 +7,27 @@ export function asName(str: string) {
   return `"${str.toString().replace(/"/g, `""`)}"`;
 }
 
+export function pickKeys<T extends AnyObject, Include extends keyof T>(obj: T, include: Include[] = [], onlyIfDefined = false): Pick<T, Include> {
+  let keys = include;
+  if (!keys.length) {
+    return {} as any;
+  }
+  if (obj && keys.length) {
+    let res: AnyObject = {};
+    keys.forEach(k => {
+      if(onlyIfDefined && obj[k] === undefined){
+
+      } else {
+        res[k] = obj[k];
+      }
+    });
+    return res as any;
+  }
+
+  return obj;
+}
+
+
 export function stableStringify(data: AnyObject, opts: any) {
   if (!opts) opts = {};
   if (typeof opts === 'function') opts = { cmp: opts };
@@ -53,7 +74,7 @@ export function stableStringify(data: AnyObject, opts: any) {
     var keys = Object.keys(node).sort(cmp && cmp(node));
     out = '';
     for (i = 0; i < keys.length; i++) {
-      var key = keys[i];
+      var key = keys[i]!;
       var value = stringify(node[key]);
 
       if (!value) continue;
@@ -170,10 +191,11 @@ export type WALConfig = SyncTableInfo & {
   id?: string;
 };
 export type WALItem = {
-  initial?: any;
-  current: any;
+  initial?: AnyObject;
+  delta?: AnyObject;
+  current: AnyObject;
 };
-export type WALItemsObj = { [key: string]: WALItem };
+export type WALItemsObj = Record<string, WALItem>;
 
 /**
  * Used to throttle and combine updates sent to server
@@ -285,15 +307,19 @@ export class WAL {
     if (isEmpty(this.changed) && this.options.onSendStart) this.options.onSendStart();
 
     data.map(d => {
-      const { initial, current } = { ...d };
+      const { initial, current, delta } = { ...d };
       if (!current) throw "Expecting { current: object, initial?: object }";
       const idStr = this.getIdStr(current);
 
       this.changed ??= {};
-      this.changed[idStr] ??= { initial, current };
-      this.changed[idStr].current = {
-        ...this.changed[idStr].current,
+      this.changed[idStr] ??= { initial, current, delta };
+      this.changed[idStr]!.current = {
+        ...this.changed[idStr]!.current,
         ...current
+      };
+      this.changed[idStr]!.delta = {
+        ...this.changed[idStr]!.delta,
+        ...delta
       };
     });
     this.sendItems();
@@ -320,10 +346,10 @@ export class WAL {
      * Prepare and remove a batch from this.changed
      */
     Object.keys(this.changed)
-      .sort((a, b) => this.sort(this.changed[a].current, this.changed[b].current))
+      .sort((a, b) => this.sort(this.changed[a]!.current, this.changed[b]!.current))
       .slice(0, batch_size)
       .map(key => {
-        let item = { ...this.changed[key] };
+        let item = { ...this.changed[key] } as WALItem;
         this.sending[key] = { ...item };
         walBatch.push({ ...item });
 
@@ -332,7 +358,21 @@ export class WAL {
 
         delete this.changed[key];
       });
-    batchItems = walBatch.map(d => d.current);
+    batchItems = walBatch.map(d => {
+      let result: AnyObject = {};
+      Object.keys(d.current).map(k => {
+        const oldVal = d.initial?.[k];
+        const newVal = d.current[k];
+        /** Send only id fields and delta */
+        if(
+          [this.options.synced_field, ...this.options.id_fields].includes(k) ||
+          !areEqual(oldVal, newVal)
+        ){
+          result[k] = newVal;
+        }
+      })
+      return result;
+    });
 
     if (DEBUG_MODE) {
       console.log(this.options.id, " SENDING lr->", batchItems[batchItems.length - 1])
@@ -424,6 +464,14 @@ export function get(obj: any, propertyPath: string | string[]): any {
       return undefined;
     }
   }, o);
+}
+
+function areEqual(a: any, b: any){
+  if(a === b) return true;
+  if(["number", "string", "boolean"].includes(typeof a)){
+    return a === b;
+  }
+  return JSON.stringify(a) === JSON.stringify(b);
 }
 
 

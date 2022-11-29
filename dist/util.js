@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getKeys = exports.isDefined = exports.isObject = exports.get = exports.isEmpty = exports.WAL = exports.unpatchText = exports.getTextPatch = exports.stableStringify = exports.asName = void 0;
+exports.getKeys = exports.isDefined = exports.isObject = exports.get = exports.isEmpty = exports.WAL = exports.unpatchText = exports.getTextPatch = exports.stableStringify = exports.pickKeys = exports.asName = void 0;
 const md5_1 = require("./md5");
 function asName(str) {
     if (str === null || str === undefined || !str.toString || !str.toString())
@@ -8,6 +8,25 @@ function asName(str) {
     return `"${str.toString().replace(/"/g, `""`)}"`;
 }
 exports.asName = asName;
+function pickKeys(obj, include = [], onlyIfDefined = false) {
+    let keys = include;
+    if (!keys.length) {
+        return {};
+    }
+    if (obj && keys.length) {
+        let res = {};
+        keys.forEach(k => {
+            if (onlyIfDefined && obj[k] === undefined) {
+            }
+            else {
+                res[k] = obj[k];
+            }
+        });
+        return res;
+    }
+    return obj;
+}
+exports.pickKeys = pickKeys;
 function stableStringify(data, opts) {
     if (!opts)
         opts = {};
@@ -153,15 +172,19 @@ class WAL {
                 this.options.onSendStart();
             data.map(d => {
                 var _a;
-                const { initial, current } = { ...d };
+                const { initial, current, delta } = { ...d };
                 if (!current)
                     throw "Expecting { current: object, initial?: object }";
                 const idStr = this.getIdStr(current);
                 this.changed ?? (this.changed = {});
-                (_a = this.changed)[idStr] ?? (_a[idStr] = { initial, current });
+                (_a = this.changed)[idStr] ?? (_a[idStr] = { initial, current, delta });
                 this.changed[idStr].current = {
                     ...this.changed[idStr].current,
                     ...current
+                };
+                this.changed[idStr].delta = {
+                    ...this.changed[idStr].delta,
+                    ...delta
                 };
             });
             this.sendItems();
@@ -186,7 +209,18 @@ class WAL {
                 batchObj[key] = { ...item.current };
                 delete this.changed[key];
             });
-            batchItems = walBatch.map(d => d.current);
+            batchItems = walBatch.map(d => {
+                let result = {};
+                Object.keys(d.current).map(k => {
+                    const oldVal = d.initial?.[k];
+                    const newVal = d.current[k];
+                    if ([this.options.synced_field, ...this.options.id_fields].includes(k) ||
+                        !areEqual(oldVal, newVal)) {
+                        result[k] = newVal;
+                    }
+                });
+                return result;
+            });
             if (DEBUG_MODE) {
                 console.log(this.options.id, " SENDING lr->", batchItems[batchItems.length - 1]);
             }
@@ -304,6 +338,14 @@ function get(obj, propertyPath) {
     }, o);
 }
 exports.get = get;
+function areEqual(a, b) {
+    if (a === b)
+        return true;
+    if (["number", "string", "boolean"].includes(typeof a)) {
+        return a === b;
+    }
+    return JSON.stringify(a) === JSON.stringify(b);
+}
 function isObject(obj) {
     return Boolean(obj && typeof obj === "object" && !Array.isArray(obj));
 }

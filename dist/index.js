@@ -14,7 +14,7 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CONTENT_TYPE_TO_EXT = exports.getKeys = exports.isObject = exports.isDefined = exports.get = exports.WAL = exports.unpatchText = exports.stableStringify = exports.isEmpty = exports.getTextPatch = exports.asName = exports.RULE_METHODS = exports.CHANNELS = exports.TS_PG_Types = exports._PG_postgis = exports._PG_date = exports._PG_bool = exports._PG_json = exports._PG_numbers = exports._PG_strings = void 0;
+exports.CONTENT_TYPE_TO_EXT = exports.getKeys = exports.isObject = exports.isDefined = exports.get = exports.WAL = exports.unpatchText = exports.stableStringify = exports.isEmpty = exports.getTextPatch = exports.pickKeys = exports.asName = exports.RULE_METHODS = exports.CHANNELS = exports.TS_PG_Types = exports._PG_postgis = exports._PG_date = exports._PG_bool = exports._PG_json = exports._PG_numbers = exports._PG_strings = void 0;
 exports._PG_strings = [
     'bpchar', 'char', 'varchar', 'text', 'citext', 'uuid', 'bytea', 'time', 'timetz', 'interval', 'name',
     'cidr', 'inet', 'macaddr', 'macaddr8', "int4range", "int8range", "numrange",
@@ -65,6 +65,7 @@ exports.RULE_METHODS = {
 };
 var util_1 = require("./util");
 Object.defineProperty(exports, "asName", { enumerable: true, get: function () { return util_1.asName; } });
+Object.defineProperty(exports, "pickKeys", { enumerable: true, get: function () { return util_1.pickKeys; } });
 Object.defineProperty(exports, "getTextPatch", { enumerable: true, get: function () { return util_1.getTextPatch; } });
 Object.defineProperty(exports, "isEmpty", { enumerable: true, get: function () { return util_1.isEmpty; } });
 Object.defineProperty(exports, "stableStringify", { enumerable: true, get: function () { return util_1.stableStringify; } });

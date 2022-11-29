@@ -20,7 +20,8 @@
     "declaration": true,
     "declarationMap": true,
     "isolatedModules": true,
-    "keyofStringsOnly": true
+    "keyofStringsOnly": true,
+    "noUncheckedIndexedAccess": true
   },
   "exclude": [
   ],

@@ -6,9 +6,10 @@ export declare const _PG_json: readonly ["json", "jsonb"];
 export declare const _PG_bool: readonly ["bool"];
 export declare const _PG_date: readonly ["date", "timestamp", "timestamptz"];
 export declare const _PG_postgis: readonly ["geometry", "geography"];
-export declare type PG_COLUMN_UDT_DATA_TYPE = typeof _PG_strings[number] | typeof _PG_numbers[number] | typeof _PG_json[number] | typeof _PG_bool[number] | typeof _PG_date[number] | typeof _PG_postgis[number];
+export declare const _PG_geometric: readonly ["point", "line", "lseg", "box", "path", "polygon", "circle"];
+export declare type PG_COLUMN_UDT_DATA_TYPE = typeof _PG_strings[number] | typeof _PG_numbers[number] | typeof _PG_geometric[number] | typeof _PG_json[number] | typeof _PG_bool[number] | typeof _PG_date[number] | typeof _PG_postgis[number];
 export declare const TS_PG_Types: {
-    readonly string: readonly ["bpchar", "char", "varchar", "text", "citext", "uuid", "bytea", "time", "timetz", "interval", "name", "cidr", "inet", "macaddr", "macaddr8", "int4range", "int8range", "numrange", "tsvector"];
+    readonly string: readonly ["bpchar", "char", "varchar", "text", "citext", "uuid", "bytea", "time", "timetz", "interval", "name", "cidr", "inet", "macaddr", "macaddr8", "int4range", "int8range", "numrange", "tsvector", "lseg"];
     readonly number: readonly ["int2", "int4", "int8", "float4", "float8", "numeric", "money", "oid"];
     readonly boolean: readonly ["bool"];
     readonly Date: readonly ["date", "timestamp", "timestamptz"];

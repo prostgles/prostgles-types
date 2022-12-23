@@ -12,16 +12,27 @@ export const _PG_json = ['json', 'jsonb'] as const;
 export const _PG_bool = ['bool'] as const;
 export const _PG_date = ['date', 'timestamp', 'timestamptz'] as const;
 export const _PG_postgis = ['geometry', 'geography'] as const;
+export const _PG_geometric = [
+  "point", 
+  "line", 
+  "lseg", 
+  "box", 
+  "path",  
+  "polygon", 
+  "circle",
+] as const;
+
 export type PG_COLUMN_UDT_DATA_TYPE = 
     | typeof _PG_strings[number] 
     | typeof _PG_numbers[number] 
+    | typeof _PG_geometric[number] 
     | typeof _PG_json[number] 
     | typeof _PG_bool[number] 
     | typeof _PG_date[number] 
     | typeof _PG_postgis[number];
     
 export const TS_PG_Types = {
-    "string": _PG_strings,
+    "string": [ ..._PG_strings, "lseg"],
     "number": _PG_numbers,
     "boolean": _PG_bool,
     // "any": _PG_json, // consider as any

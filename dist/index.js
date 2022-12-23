@@ -14,7 +14,7 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CONTENT_TYPE_TO_EXT = exports.getKeys = exports.isObject = exports.isDefined = exports.get = exports.WAL = exports.unpatchText = exports.stableStringify = exports.isEmpty = exports.getTextPatch = exports.pickKeys = exports.asName = exports.RULE_METHODS = exports.CHANNELS = exports.TS_PG_Types = exports._PG_postgis = exports._PG_date = exports._PG_bool = exports._PG_json = exports._PG_numbers = exports._PG_strings = void 0;
+exports.CONTENT_TYPE_TO_EXT = exports.getKeys = exports.isObject = exports.isDefined = exports.get = exports.WAL = exports.unpatchText = exports.stableStringify = exports.isEmpty = exports.getTextPatch = exports.pickKeys = exports.asName = exports.RULE_METHODS = exports.CHANNELS = exports.TS_PG_Types = exports._PG_geometric = exports._PG_postgis = exports._PG_date = exports._PG_bool = exports._PG_json = exports._PG_numbers = exports._PG_strings = void 0;
 exports._PG_strings = [
     'bpchar', 'char', 'varchar', 'text', 'citext', 'uuid', 'bytea', 'time', 'timetz', 'interval', 'name',
     'cidr', 'inet', 'macaddr', 'macaddr8', "int4range", "int8range", "numrange",
@@ -25,8 +25,17 @@ exports._PG_json = ['json', 'jsonb'];
 exports._PG_bool = ['bool'];
 exports._PG_date = ['date', 'timestamp', 'timestamptz'];
 exports._PG_postgis = ['geometry', 'geography'];
+exports._PG_geometric = [
+    "point",
+    "line",
+    "lseg",
+    "box",
+    "path",
+    "polygon",
+    "circle",
+];
 exports.TS_PG_Types = {
-    "string": exports._PG_strings,
+    "string": [...exports._PG_strings, "lseg"],
     "number": exports._PG_numbers,
     "boolean": exports._PG_bool,
     "Date": exports._PG_date,

@@ -421,10 +421,14 @@ export type OnError = (err: any) => void;
 
 type JoinedSelect = Record<string, Select>;
 
-type ParseSelect<Select extends SelectParams<TD>["select"], TD extends AnyObject> = (Select extends { "*": 1 }? Required<TD> : {}) &  {
-  [Key in keyof Omit<Select, "*">]: Select[Key] extends 1? Required<TD>[Key] : Select[Key] extends JoinedSelect? any[] : any;
+type ParseSelect<Select extends SelectParams<TD>["select"], TD extends AnyObject> = 
+(Select extends { "*": 1 }? Required<TD> : {})
+& {
+  [Key in keyof Omit<Select, "*">]: Select[Key] extends 1? Required<TD>[Key] : 
+    Select[Key] extends Record<string, any[]>? any : //Function select
+    Select[Key] extends JoinedSelect? any[] : 
+    any;
 }
-
 
 type GetSelectDataType<O extends SelectParams<TD>, TD extends AnyObject> = 
   O extends { returnType: "value" }? any : 

@@ -175,7 +175,7 @@ declare type JoinedSelect = Record<string, Select>;
 declare type ParseSelect<Select extends SelectParams<TD>["select"], TD extends AnyObject> = (Select extends {
     "*": 1;
 } ? Required<TD> : {}) & {
-    [Key in keyof Omit<Select, "*">]: Select[Key] extends 1 ? Required<TD>[Key] : Select[Key] extends JoinedSelect ? any[] : any;
+    [Key in keyof Omit<Select, "*">]: Select[Key] extends 1 ? Required<TD>[Key] : Select[Key] extends Record<string, any[]> ? any : Select[Key] extends JoinedSelect ? any[] : any;
 };
 declare type GetSelectDataType<O extends SelectParams<TD>, TD extends AnyObject> = O extends {
     returnType: "value";

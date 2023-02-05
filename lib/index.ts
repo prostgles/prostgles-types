@@ -741,11 +741,12 @@ export type TableSchema = {
 
 export type ObjDef = Record<string, { type: "string" | "number" | "Date"; autocomplete?: { table: string; column: string; } }>;
 export type MethodFunction = (...args: any) => (any | Promise<any>);
-export type Method = MethodFunction | {
+export type MethodFullDef = {
   input: ObjDef;
   run: MethodFunction;
   output?: ObjDef;
 };
+export type Method = MethodFunction | MethodFullDef;
 
 export type ClientSchema = { 
   rawSQL: boolean;
@@ -755,7 +756,7 @@ export type ClientSchema = {
   err?: string;
   tableSchema?: DBSchemaTable[];
   schema: TableSchemaForClient;
-  methods: string[];
+  methods: (string | { name: string; } & Pick<MethodFullDef, "input" | "output">)[];
 }
 
 /**

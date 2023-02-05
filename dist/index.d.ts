@@ -417,11 +417,12 @@ export declare type ObjDef = Record<string, {
     };
 }>;
 export declare type MethodFunction = (...args: any) => (any | Promise<any>);
-export declare type Method = MethodFunction | {
+export declare type MethodFullDef = {
     input: ObjDef;
     run: MethodFunction;
     output?: ObjDef;
 };
+export declare type Method = MethodFunction | MethodFullDef;
 export declare type ClientSchema = {
     rawSQL: boolean;
     joinTables: string[][];
@@ -430,7 +431,9 @@ export declare type ClientSchema = {
     err?: string;
     tableSchema?: DBSchemaTable[];
     schema: TableSchemaForClient;
-    methods: string[];
+    methods: (string | {
+        name: string;
+    } & Pick<MethodFullDef, "input" | "output">)[];
 };
 export declare type AuthSocketSchema = {
     user?: AnyObject;

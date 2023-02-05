@@ -739,6 +739,14 @@ export type TableSchema = {
   }
 }
 
+export type ObjDef = Record<string, { type: "string" | "number" | "Date"; autocomplete?: { table: string; column: string; } }>;
+export type MethodFunction = (...args: any) => (any | Promise<any>);
+export type Method = MethodFunction | {
+  input: ObjDef;
+  run: MethodFunction;
+  output?: ObjDef;
+};
+
 export type ClientSchema = { 
   rawSQL: boolean;
   joinTables: string[][];

@@ -409,6 +409,19 @@ export declare type TableSchema = {
         delete: boolean;
     };
 };
+export declare type ObjDef = Record<string, {
+    type: "string" | "number" | "Date";
+    autocomplete?: {
+        table: string;
+        column: string;
+    };
+}>;
+export declare type MethodFunction = (...args: any) => (any | Promise<any>);
+export declare type Method = MethodFunction | {
+    input: ObjDef;
+    run: MethodFunction;
+    output?: ObjDef;
+};
 export declare type ClientSchema = {
     rawSQL: boolean;
     joinTables: string[][];

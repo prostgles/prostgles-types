@@ -254,9 +254,6 @@ export declare type TableHandlerBasic = ViewHandlerBasic & {
     insert: <TD = AnyObject>(data: (PartialLax<TD> | PartialLax<TD>[]), params?: InsertParamsBasic) => Promise<PartialLax<TD> | void>;
     delete: <TD = AnyObject>(filter?: FullFilterBasic, params?: DeleteParamsBasic) => Promise<PartialLax<TD> | void>;
 };
-export declare type MethodHandler = {
-    [method_name: string]: (...args: any[]) => Promise<AnyObject>;
-};
 export declare type JoinMaker<TT extends AnyObject = AnyObject> = (filter?: FullFilter<TT>, select?: Select<TT>, options?: SelectParams<TT>) => any;
 export declare type JoinMakerBasic = (filter?: FullFilterBasic, select?: SelectBasic, options?: SelectParams) => any;
 export declare type TableJoin = {
@@ -423,6 +420,9 @@ export declare type MethodFullDef = {
     output?: ObjDef;
 };
 export declare type Method = MethodFunction | MethodFullDef;
+export declare type MethodHandler = {
+    [method_name: string]: Method;
+};
 export declare type ClientSchema = {
     rawSQL: boolean;
     joinTables: string[][];

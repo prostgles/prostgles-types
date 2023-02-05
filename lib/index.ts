@@ -505,10 +505,6 @@ export type TableHandlerBasic = ViewHandlerBasic & {
   delete: <TD = AnyObject>(filter?: FullFilterBasic, params?: DeleteParamsBasic) => Promise<PartialLax<TD> | void>;
 }
 
-export type MethodHandler = {
-  [method_name: string]: (...args: any[]) => Promise<AnyObject>
-}
-
 export type JoinMaker<TT extends AnyObject = AnyObject> = (filter?: FullFilter<TT>, select?: Select<TT>, options?: SelectParams<TT>) => any;
 export type JoinMakerBasic = (filter?: FullFilterBasic, select?: SelectBasic, options?: SelectParams) => any;
 
@@ -747,6 +743,10 @@ export type MethodFullDef = {
   output?: ObjDef;
 };
 export type Method = MethodFunction | MethodFullDef;
+
+export type MethodHandler = {
+  [method_name: string]: Method;
+}
 
 export type ClientSchema = { 
   rawSQL: boolean;

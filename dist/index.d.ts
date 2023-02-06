@@ -408,10 +408,12 @@ export declare type TableSchema = {
 };
 export declare type ObjDef = Record<string, {
     type: "string" | "number" | "Date";
-    autocomplete?: {
+    references?: {
         table: string;
         column: string;
     };
+    optional?: boolean;
+    defaultValue?: string | number | Date;
 }>;
 export declare type MethodFunction = (...args: any) => (any | Promise<any>);
 export declare type MethodFullDef = {

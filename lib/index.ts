@@ -735,7 +735,12 @@ export type TableSchema = {
   }
 }
 
-export type ObjDef = Record<string, { type: "string" | "number" | "Date"; autocomplete?: { table: string; column: string; } }>;
+export type ObjDef = Record<string, { 
+  type: "string" | "number" | "Date"; 
+  references?: { table: string; column: string; } 
+  optional?: boolean;
+  defaultValue?: string | number | Date;
+}>;
 export type MethodFunction = (...args: any) => (any | Promise<any>);
 export type MethodFullDef = {
   input: ObjDef;

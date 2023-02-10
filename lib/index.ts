@@ -735,12 +735,49 @@ export type TableSchema = {
   }
 }
 
-export type ObjDef = Record<string, { 
-  type: "string" | "number" | "Date"; 
-  references?: { table: string; column: string; } 
+export type  ObjDef = {
+  type: "string" | "number" | "Date";
+  defaultValue?: string;
   optional?: boolean;
-  defaultValue?: string | number | Date;
-}>;
+  references?: { 
+    table: string; 
+  } & ({
+    column: string;
+    isFullRow?: undefined;
+  } | {
+    column?: undefined;
+
+    /**
+     * If true then the argument will represent the entire row and 
+     *  the specified column will only be used to display the chosen row
+     */
+    isFullRow?: {
+
+      /**
+       * Columns used to display the selected row in the dropdown
+       */
+      displayColumns?: string[];
+
+      /**
+       * Columns used to search
+       */
+      searchColumns?: string[];
+
+      /**
+       * If true and isFullRow=true then a button will be shown
+       *  in the row edit card to display this action 
+       */
+      showInRowCard?: {
+        /**
+         * Action button text. Defaults to the method name
+         */
+        actionLabel?: string;
+        actionColor?: "danger" | "warning" | "action";
+      }
+    }
+  })
+}
+
 export type MethodFunction = (...args: any) => (any | Promise<any>);
 export type MethodFullDef = {
   input: ObjDef;

@@ -406,15 +406,27 @@ export declare type TableSchema = {
         delete: boolean;
     };
 };
-export declare type ObjDef = Record<string, {
+export declare type ObjDef = {
     type: "string" | "number" | "Date";
+    defaultValue?: string;
+    optional?: boolean;
     references?: {
         table: string;
+    } & ({
         column: string;
-    };
-    optional?: boolean;
-    defaultValue?: string | number | Date;
-}>;
+        isFullRow?: undefined;
+    } | {
+        column?: undefined;
+        isFullRow?: {
+            displayColumns?: string[];
+            searchColumns?: string[];
+            showInRowCard?: {
+                actionLabel?: string;
+                actionColor?: "danger" | "warning" | "action";
+            };
+        };
+    });
+};
 export declare type MethodFunction = (...args: any) => (any | Promise<any>);
 export declare type MethodFullDef = {
     input: ObjDef;

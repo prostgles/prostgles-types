@@ -737,6 +737,7 @@ export type TableSchema = {
 
 export type  ObjDef = {
   type: "string" | "number" | "Date";
+  label?: string;
   defaultValue?: string;
   optional?: boolean;
   references?: { 
@@ -780,9 +781,9 @@ export type  ObjDef = {
 
 export type MethodFunction = (...args: any) => (any | Promise<any>);
 export type MethodFullDef = {
-  input: ObjDef;
+  input: Record<string, ObjDef>;
   run: MethodFunction;
-  output?: ObjDef;
+  output?: Record<string, Omit<ObjDef, "references">>;
 };
 export type Method = MethodFunction | MethodFullDef;
 

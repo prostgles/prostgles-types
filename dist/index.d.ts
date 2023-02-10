@@ -408,6 +408,7 @@ export declare type TableSchema = {
 };
 export declare type ObjDef = {
     type: "string" | "number" | "Date";
+    label?: string;
     defaultValue?: string;
     optional?: boolean;
     references?: {
@@ -429,9 +430,9 @@ export declare type ObjDef = {
 };
 export declare type MethodFunction = (...args: any) => (any | Promise<any>);
 export declare type MethodFullDef = {
-    input: ObjDef;
+    input: Record<string, ObjDef>;
     run: MethodFunction;
-    output?: ObjDef;
+    output?: Record<string, Omit<ObjDef, "references">>;
 };
 export declare type Method = MethodFunction | MethodFullDef;
 export declare type MethodHandler = {

@@ -742,6 +742,21 @@ export type  ObjDef = {
   optional?: boolean;
   references?: { 
     table: string; 
+    
+    /**
+     * If true then a button will be shown
+     *  in the row card footer to access this action 
+     */
+    showInRowCard?: {
+      /**
+       * Action button text. Defaults to the method name
+       */
+      actionLabel?: string;
+      actionColor?: "danger" | "warn" | "action";
+      actionStyle?: AnyObject;
+      actionClass?: string;
+    }
+    
   } & ({
     column: string;
     isFullRow?: undefined;
@@ -764,18 +779,7 @@ export type  ObjDef = {
        */
       searchColumns?: string[];
 
-      /**
-       * If true and isFullRow=true then a button will be shown
-       *  in the row edit card to display this action 
-       */
-      showInRowCard?: {
-        /**
-         * Action button text. Defaults to the method name
-         */
-        actionLabel?: string;
-        actionColor?: "danger" | "warning" | "action";
-      }
-    }
+    };
   })
 }
 

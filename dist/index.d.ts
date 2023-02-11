@@ -413,6 +413,12 @@ export declare type ObjDef = {
     optional?: boolean;
     references?: {
         table: string;
+        showInRowCard?: {
+            actionLabel?: string;
+            actionColor?: "danger" | "warn" | "action";
+            actionStyle?: AnyObject;
+            actionClass?: string;
+        };
     } & ({
         column: string;
         isFullRow?: undefined;
@@ -421,10 +427,6 @@ export declare type ObjDef = {
         isFullRow?: {
             displayColumns?: string[];
             searchColumns?: string[];
-            showInRowCard?: {
-                actionLabel?: string;
-                actionColor?: "danger" | "warning" | "action";
-            };
         };
     });
 };

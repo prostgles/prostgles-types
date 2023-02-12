@@ -531,8 +531,9 @@ export type SQLResult<T extends SQLOptions["returnType"]> = {
       dataType: string;
       udt_name: PG_COLUMN_UDT_DATA_TYPE;
       tsDataType: TS_COLUMN_DATA_TYPES;
-      tableName?: string;
-      format: string;
+      tableName?: string; 
+      columnID?: number;
+      columnName?: string;
   }[];
   duration: number;
 }

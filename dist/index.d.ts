@@ -279,6 +279,7 @@ export declare type SQLResult<T extends SQLOptions["returnType"]> = {
         tsDataType: TS_COLUMN_DATA_TYPES;
         tableID?: number;
         tableName?: string;
+        tableSchema?: string;
         columnID?: number;
         columnName?: string;
     }[];

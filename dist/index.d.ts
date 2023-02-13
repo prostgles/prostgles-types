@@ -474,7 +474,7 @@ export declare type ProstglesError = {
     columns?: string[];
 };
 export type { WALItem, BasicOrderBy, WALItemsObj, WALConfig, TextPatch, SyncTableInfo } from "./util";
-export { asName, pickKeys, getTextPatch, isEmpty, stableStringify, unpatchText, WAL, get, isDefined, isObject, getKeys } from "./util";
+export { asName, pickKeys, omitKeys, getTextPatch, isEmpty, stableStringify, unpatchText, WAL, get, isDefined, isObject, getKeys } from "./util";
 export * from "./filters";
 export type { ClientExpressData, ClientSyncHandles, ClientSyncInfo, SyncConfig, ClientSyncPullResponse, SyncBatchParams, onUpdatesParams } from "./replication";
 export type { ALLOWED_CONTENT_TYPE, ALLOWED_EXTENSION, FileColumnConfig, FileType } from "./files";

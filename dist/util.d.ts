@@ -2,6 +2,7 @@
 import { AnyObject, TS_COLUMN_DATA_TYPES } from ".";
 export declare function asName(str: string): string;
 export declare function pickKeys<T extends AnyObject, Include extends keyof T>(obj: T, include?: Include[], onlyIfDefined?: boolean): Pick<T, Include>;
+export declare function omitKeys<T extends AnyObject, Exclude extends keyof T>(obj: T, exclude: Exclude[]): Omit<T, Exclude>;
 export declare function stableStringify(data: AnyObject, opts: any): string | undefined;
 export declare type TextPatch = {
     from: number;

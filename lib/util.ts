@@ -27,6 +27,9 @@ export function pickKeys<T extends AnyObject, Include extends keyof T>(obj: T, i
   return obj;
 }
 
+export function omitKeys<T extends AnyObject, Exclude extends keyof T>(obj: T, exclude: Exclude[]): Omit<T, Exclude> {
+  return pickKeys(obj, getKeys(obj).filter(k => !exclude.includes(k as any)))
+}
 
 export function stableStringify(data: AnyObject, opts: any) {
   if (!opts) opts = {};

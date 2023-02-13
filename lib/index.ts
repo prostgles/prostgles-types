@@ -791,7 +791,13 @@ export type MethodFullDef = {
   input: Record<string, ObjDef>;
   run: MethodFunction;
   output?: Record<string, Omit<ObjDef, "references">>;
-};
+} & ({
+  output?: undefined;
+  outputTable?: string;
+} | {
+  output?: Record<string, Omit<ObjDef, "references">>;
+  outputTable?: undefined;
+});
 export type Method = MethodFunction | MethodFullDef;
 
 export type MethodHandler = {

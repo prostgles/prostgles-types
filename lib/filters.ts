@@ -148,8 +148,12 @@ export type GeomFilter =
 //  | { "~=": GeoBBox }
 ;
 export const GeomFilterKeys = ["~","~=","@","|&>","|>>", ">>", "=", "<<|", "<<", "&>", "&<|", "&<", "&&&", "&&"] as const;
-const _GeomFilter_Funcs = ["ST_MakeEnvelope", "ST_MakePolygon"]
-export const GeomFilter_Funcs =  _GeomFilter_Funcs.concat(_GeomFilter_Funcs.map(v => v.toLowerCase()));
+export const GeomFilter_Funcs =  [
+  "ST_MakeEnvelope", 
+  "st_makeenvelope", 
+  "ST_MakePolygon",
+  "st_makepolygon",
+] as const;
 
 export type AllowedTSTypes = string | number | boolean | Date | any[];
 // export type AnyObject = { [key: string]: AllowedTSTypes };

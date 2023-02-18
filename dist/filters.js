@@ -72,8 +72,12 @@ exports.TextFilterFTSKeys = ["@@", "@>", "<@", "$contains", "$containedBy"];
 exports.TextFilter_FullTextSearchFilterKeys = ["to_tsquery", "plainto_tsquery", "phraseto_tsquery", "websearch_to_tsquery"];
 exports.ArrayFilterOperands = [...exports.TextFilterFTSKeys, "&&", "$overlaps"];
 exports.GeomFilterKeys = ["~", "~=", "@", "|&>", "|>>", ">>", "=", "<<|", "<<", "&>", "&<|", "&<", "&&&", "&&"];
-const _GeomFilter_Funcs = ["ST_MakeEnvelope", "ST_MakePolygon"];
-exports.GeomFilter_Funcs = _GeomFilter_Funcs.concat(_GeomFilter_Funcs.map(v => v.toLowerCase()));
+exports.GeomFilter_Funcs = [
+    "ST_MakeEnvelope",
+    "st_makeenvelope",
+    "ST_MakePolygon",
+    "st_makepolygon",
+];
 exports.EXISTS_KEYS = ["$exists", "$notExists", "$existsJoined", "$notExistsJoined"];
 exports.COMPLEX_FILTER_KEY = "$filter";
 const f = {

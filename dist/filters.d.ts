@@ -84,7 +84,7 @@ export declare type GeomFilter = {
     "@": GeoBBox;
 };
 export declare const GeomFilterKeys: readonly ["~", "~=", "@", "|&>", "|>>", ">>", "=", "<<|", "<<", "&>", "&<|", "&<", "&&&", "&&"];
-export declare const GeomFilter_Funcs: string[];
+export declare const GeomFilter_Funcs: readonly ["ST_MakeEnvelope", "st_makeenvelope", "ST_MakePolygon", "st_makepolygon"];
 export declare type AllowedTSTypes = string | number | boolean | Date | any[];
 export declare type AnyObject = {
     [key: string]: any;

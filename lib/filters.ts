@@ -1,9 +1,74 @@
 import { DBSchema } from ".";
-import { ExactlyOne } from "./util";
+import { ExactlyOne, getKeys } from "./util";
 
 
 export const CompareFilterKeys = ["=", "$eq","<>",">","<",">=","<=","$eq","$ne","$gt","$gte","$lte"] as const;
 export const CompareInFilterKeys = ["$in", "$nin"] as const;
+
+export const JsonbOperands = {
+  "@>": {
+    "Operator": "@>",
+    "Right Operand Type": "jsonb",
+    "Description": "Does the left JSON value contain the right JSON path/value entries at the top level?",
+    "Example": "'{\"a\":1, \"b\":2}'::jsonb @> '{\"b\":2}'::jsonb"
+  },
+  "<@": {
+    "Operator": "<@",
+    "Right Operand Type": "jsonb",
+    "Description": "Are the left JSON path/value entries contained at the top level within the right JSON value?",
+    "Example": "'{\"b\":2}'::jsonb <@ '{\"a\":1, \"b\":2}'::jsonb"
+  },
+  "?": {
+    "Operator": "?",
+    "Right Operand Type": "text",
+    "Description": "Does the string exist as a top-level key within the JSON value?",
+    "Example": "'{\"a\":1, \"b\":2}'::jsonb ? 'b'"
+  },
+  "?|": {
+    "Operator": "?|",
+    "Right Operand Type": "text[]",
+    "Description": "Do any of these array strings exist as top-level keys?",
+    "Example": "'{\"a\":1, \"b\":2, \"c\":3}'::jsonb ?| array['b', 'c']"
+  },
+  "?&": {
+    "Operator": "?&",
+    "Right Operand Type": "text[]",
+    "Description": "Do all of these array strings exist as top-level keys?",
+    "Example": "'[\"a\", \"b\"]'::jsonb ?& array['a', 'b']"
+  },
+  "||": {
+    "Operator": "||",
+    "Right Operand Type": "jsonb",
+    "Description": "Concatenate two jsonb values into a new jsonb value",
+    "Example": "'[\"a\", \"b\"]'::jsonb || '[\"c\", \"d\"]'::jsonb"
+  },
+  "-": {
+    "Operator": "-",
+    "Right Operand Type": "integer",
+    "Description": "Delete the array element with specified index (Negative integers count from the end). Throws an error if top level container is not an array.",
+    "Example": "'[\"a\", \"b\"]'::jsonb - 1"
+  },
+  "#-": {
+    "Operator": "#-",
+    "Right Operand Type": "text[]",
+    "Description": "Delete the field or element with specified path (for JSON arrays, negative integers count from the end)",
+    "Example": "'[\"a\", {\"b\":1}]'::jsonb #- '{1,b}'"
+  },
+  "@?": {
+    "Operator": "@?",
+    "Right Operand Type": "jsonpath",
+    "Description": "Does JSON path return any item for the specified JSON value?",
+    "Example": "'{\"a\":[1,2,3,4,5]}'::jsonb @? '$.a[*] ? (@ > 2)'"
+  },
+  "@@": {
+    "Operator": "@@",
+    "Right Operand Type": "jsonpath",
+    "Description": "Returns the result of JSON path predicate check for the specified JSON value. Only the first item of the result is taken into account. If the result is not Boolean, then null is returned.",
+    "Example": "'{\"a\":[1,2,3,4,5]}'::jsonb @@ '$.a[*] > 2'"
+  }
+} as const;
+
+export const JsonbFilterKeys = getKeys(JsonbOperands);
 
 /**
  * Example: col_name: { $gt: 2 }
@@ -18,7 +83,7 @@ export const CompareInFilterKeys = ["$in", "$nin"] as const;
  | ExactlyOne<Record<typeof CompareInFilterKeys[number], T[]>>
  | { "$between": [T, T] }
 ;
-export const TextFilterKeys = ["$ilike", "$like"] as const;
+export const TextFilterKeys = ["$ilike", "$like", "$nilike", "$nlike"] as const;
 
 export const TextFilterFTSKeys = ["@@", "@>", "<@", "$contains", "$containedBy"] as const;
 
@@ -91,7 +156,7 @@ export type AllowedTSTypes = string | number | boolean | Date | any[];
 export type AnyObject = { [key: string]: any };
 
 export type FilterDataType<T = any> = 
- T extends string ? TextFilter
+  T extends string ? TextFilter
 : T extends number ? CompareFilter<T>
 : T extends boolean ? CompareFilter<T>
 : T extends Date ? CompareFilter<T>
@@ -102,6 +167,16 @@ export type FilterDataType<T = any> =
 export const EXISTS_KEYS = ["$exists", "$notExists", "$existsJoined", "$notExistsJoined"] as const;
 export type EXISTS_KEY = typeof EXISTS_KEYS[number];
 
+/**
+ * { 
+ *    $filter: [
+ *      { $funcName: [...args] },
+ *      operand,
+ *      value | funcFilter
+ *    ] 
+ * }
+ */
+export const COMPLEX_FILTER_KEY = "$filter" as const;
 
 /**
  * Shortened filter operands

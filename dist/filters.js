@@ -1,9 +1,73 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.EXISTS_KEYS = exports.GeomFilter_Funcs = exports.GeomFilterKeys = exports.ArrayFilterOperands = exports.TextFilter_FullTextSearchFilterKeys = exports.TextFilterFTSKeys = exports.TextFilterKeys = exports.CompareInFilterKeys = exports.CompareFilterKeys = void 0;
+exports.COMPLEX_FILTER_KEY = exports.EXISTS_KEYS = exports.GeomFilter_Funcs = exports.GeomFilterKeys = exports.ArrayFilterOperands = exports.TextFilter_FullTextSearchFilterKeys = exports.TextFilterFTSKeys = exports.TextFilterKeys = exports.JsonbFilterKeys = exports.JsonbOperands = exports.CompareInFilterKeys = exports.CompareFilterKeys = void 0;
+const util_1 = require("./util");
 exports.CompareFilterKeys = ["=", "$eq", "<>", ">", "<", ">=", "<=", "$eq", "$ne", "$gt", "$gte", "$lte"];
 exports.CompareInFilterKeys = ["$in", "$nin"];
-exports.TextFilterKeys = ["$ilike", "$like"];
+exports.JsonbOperands = {
+    "@>": {
+        "Operator": "@>",
+        "Right Operand Type": "jsonb",
+        "Description": "Does the left JSON value contain the right JSON path/value entries at the top level?",
+        "Example": "'{\"a\":1, \"b\":2}'::jsonb @> '{\"b\":2}'::jsonb"
+    },
+    "<@": {
+        "Operator": "<@",
+        "Right Operand Type": "jsonb",
+        "Description": "Are the left JSON path/value entries contained at the top level within the right JSON value?",
+        "Example": "'{\"b\":2}'::jsonb <@ '{\"a\":1, \"b\":2}'::jsonb"
+    },
+    "?": {
+        "Operator": "?",
+        "Right Operand Type": "text",
+        "Description": "Does the string exist as a top-level key within the JSON value?",
+        "Example": "'{\"a\":1, \"b\":2}'::jsonb ? 'b'"
+    },
+    "?|": {
+        "Operator": "?|",
+        "Right Operand Type": "text[]",
+        "Description": "Do any of these array strings exist as top-level keys?",
+        "Example": "'{\"a\":1, \"b\":2, \"c\":3}'::jsonb ?| array['b', 'c']"
+    },
+    "?&": {
+        "Operator": "?&",
+        "Right Operand Type": "text[]",
+        "Description": "Do all of these array strings exist as top-level keys?",
+        "Example": "'[\"a\", \"b\"]'::jsonb ?& array['a', 'b']"
+    },
+    "||": {
+        "Operator": "||",
+        "Right Operand Type": "jsonb",
+        "Description": "Concatenate two jsonb values into a new jsonb value",
+        "Example": "'[\"a\", \"b\"]'::jsonb || '[\"c\", \"d\"]'::jsonb"
+    },
+    "-": {
+        "Operator": "-",
+        "Right Operand Type": "integer",
+        "Description": "Delete the array element with specified index (Negative integers count from the end). Throws an error if top level container is not an array.",
+        "Example": "'[\"a\", \"b\"]'::jsonb - 1"
+    },
+    "#-": {
+        "Operator": "#-",
+        "Right Operand Type": "text[]",
+        "Description": "Delete the field or element with specified path (for JSON arrays, negative integers count from the end)",
+        "Example": "'[\"a\", {\"b\":1}]'::jsonb #- '{1,b}'"
+    },
+    "@?": {
+        "Operator": "@?",
+        "Right Operand Type": "jsonpath",
+        "Description": "Does JSON path return any item for the specified JSON value?",
+        "Example": "'{\"a\":[1,2,3,4,5]}'::jsonb @? '$.a[*] ? (@ > 2)'"
+    },
+    "@@": {
+        "Operator": "@@",
+        "Right Operand Type": "jsonpath",
+        "Description": "Returns the result of JSON path predicate check for the specified JSON value. Only the first item of the result is taken into account. If the result is not Boolean, then null is returned.",
+        "Example": "'{\"a\":[1,2,3,4,5]}'::jsonb @@ '$.a[*] > 2'"
+    }
+};
+exports.JsonbFilterKeys = (0, util_1.getKeys)(exports.JsonbOperands);
+exports.TextFilterKeys = ["$ilike", "$like", "$nilike", "$nlike"];
 exports.TextFilterFTSKeys = ["@@", "@>", "<@", "$contains", "$containedBy"];
 exports.TextFilter_FullTextSearchFilterKeys = ["to_tsquery", "plainto_tsquery", "phraseto_tsquery", "websearch_to_tsquery"];
 exports.ArrayFilterOperands = [...exports.TextFilterFTSKeys, "&&", "$overlaps"];
@@ -11,6 +75,7 @@ exports.GeomFilterKeys = ["~", "~=", "@", "|&>", "|>>", ">>", "=", "<<|", "<<", 
 const _GeomFilter_Funcs = ["ST_MakeEnvelope", "ST_MakePolygon"];
 exports.GeomFilter_Funcs = _GeomFilter_Funcs.concat(_GeomFilter_Funcs.map(v => v.toLowerCase()));
 exports.EXISTS_KEYS = ["$exists", "$notExists", "$existsJoined", "$notExistsJoined"];
+exports.COMPLEX_FILTER_KEY = "$filter";
 const f = {
     "h.$eq": ["2"]
 };

@@ -97,7 +97,7 @@ export declare type JoinCondition = {
     column: string;
     rootColumn: string;
 } | ComplexFilter;
-export declare type JoinSelect = Record<string, Record<string, any>> | Record<typeof JOIN_KEYS[number], {
+export declare type JoinSelect = "*" | Record<string, Record<string, any>> | Record<typeof JOIN_KEYS[number], {
     select: Select;
     filter?: FullFilter;
     offset?: number;

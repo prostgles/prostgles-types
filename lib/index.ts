@@ -265,6 +265,7 @@ export type JoinCondition = {
 } | ComplexFilter;
 
 export type JoinSelect = 
+| "*"
 /** Shorthand join: table_name: { ...select } */
 | Record<string, Record<string, any>> 
 | Record<typeof JOIN_KEYS[number], {

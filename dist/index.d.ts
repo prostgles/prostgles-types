@@ -97,7 +97,7 @@ export declare type JoinCondition = {
     column: string;
     rootColumn: string;
 } | ComplexFilter;
-export declare type JoinSelect = "*" | Record<string, Record<string, any>> | Record<typeof JOIN_KEYS[number], {
+export declare type DetailedJoinSelect = Record<typeof JOIN_KEYS[number], {
     select: Select;
     filter?: FullFilter;
     offset?: number;
@@ -110,6 +110,7 @@ export declare type JoinSelect = "*" | Record<string, Record<string, any>> | Rec
     $path?: undefined;
     $condition: JoinCondition[];
 })>;
+export declare type JoinSelect = "*" | Record<string, Record<string, any>> | DetailedJoinSelect;
 declare type FunctionSelect = Record<string, Record<string, any[]>>;
 declare type SelectFuncs<T extends AnyObject = any> = T extends AnyObject ? (({
     [K in keyof Partial<T>]: true | 1 | string;

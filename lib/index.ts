@@ -264,11 +264,7 @@ export type JoinCondition = {
   rootColumn: string;
 } | ComplexFilter;
 
-export type JoinSelect = 
-| "*"
-/** Shorthand join: table_name: { ...select } */
-| Record<string, Record<string, any>> 
-| Record<typeof JOIN_KEYS[number], {
+export type DetailedJoinSelect = Record<typeof JOIN_KEYS[number], {
   select: Select;
   filter?: FullFilter;
   offset?: number;
@@ -287,6 +283,12 @@ export type JoinSelect =
   $condition: JoinCondition[];
 
 })>;
+
+export type JoinSelect = 
+| "*"
+/** Shorthand join: table_name: { ...select } */
+| Record<string, Record<string, any>> 
+| DetailedJoinSelect;
 
 type FunctionSelect = Record<string, Record<string, any[]>>
 type SelectFuncs<T extends AnyObject = any> = T extends AnyObject? (

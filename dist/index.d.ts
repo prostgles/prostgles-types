@@ -1,4 +1,4 @@
-import { FullFilter, AnyObject, FullFilterBasic, ValueOf } from "./filters";
+import { FullFilter, AnyObject, FullFilterBasic, ValueOf, ComplexFilter } from "./filters";
 import { FileColumnConfig } from "./files";
 export declare const _PG_strings: readonly ["bpchar", "char", "varchar", "text", "citext", "uuid", "bytea", "time", "timetz", "interval", "name", "cidr", "inet", "macaddr", "macaddr8", "int4range", "int8range", "numrange", "tsvector"];
 export declare const _PG_numbers: readonly ["int2", "int4", "int8", "float4", "float8", "numeric", "money", "oid"];
@@ -91,7 +91,25 @@ export declare type SelectTyped<T extends AnyObject> = {
 } | {
     [K in keyof Partial<T>]: 0 | false;
 } | (keyof T)[] | CommonSelect;
-declare type JoinSelect = Record<string, Record<string, AnyObject>>;
+export declare const JOIN_KEYS: readonly ["$innerJoin", "$leftJoin"];
+export declare const JOIN_PARAMS: readonly ["select", "filter", "$path", "$condition", "offset", "limit", "orderBy"];
+export declare type JoinCondition = {
+    column: string;
+    rootColumn: string;
+} | ComplexFilter;
+export declare type JoinSelect = Record<string, Record<string, any>> | Record<typeof JOIN_KEYS[number], {
+    select: Select;
+    filter?: FullFilter;
+    offset?: number;
+    limit?: number;
+    orderBy?: OrderBy;
+} & ({
+    $path?: string[];
+    $condition?: undefined;
+} | {
+    $path?: undefined;
+    $condition: JoinCondition[];
+})>;
 declare type FunctionSelect = Record<string, Record<string, any[]>>;
 declare type SelectFuncs<T extends AnyObject = any> = T extends AnyObject ? (({
     [K in keyof Partial<T>]: true | 1 | string;

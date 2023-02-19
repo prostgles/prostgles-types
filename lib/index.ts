@@ -1,5 +1,5 @@
 
-import { FullFilter, AnyObject, FullFilterBasic, ValueOf } from "./filters";
+import { FullFilter, AnyObject, FullFilterBasic, ValueOf, ComplexFilter } from "./filters";
 import { FileColumnConfig } from "./files";
 
 export const _PG_strings = [
@@ -255,7 +255,38 @@ export type SelectTyped<T extends AnyObject> =
   | CommonSelect
 ;
 
-type JoinSelect = Record<string, Record<string, AnyObject>>
+
+export const JOIN_KEYS = ["$innerJoin", "$leftJoin"] as const; 
+export const JOIN_PARAMS = ["select", "filter", "$path", "$condition", "offset", "limit", "orderBy"] as const;
+
+export type JoinCondition = {
+  column: string;
+  rootColumn: string;
+} | ComplexFilter;
+
+export type JoinSelect = 
+/** Shorthand join: table_name: { ...select } */
+| Record<string, Record<string, any>> 
+| Record<typeof JOIN_KEYS[number], {
+  select: Select;
+  filter?: FullFilter;
+  offset?: number;
+  limit?: number;
+  orderBy?: OrderBy;
+
+} & ({
+  $path?: string[];
+  $condition?: undefined;
+} | {
+  $path?: undefined;
+
+  /**
+   * If present then will overwrite $path and any inferred joins
+   */
+  $condition: JoinCondition[];
+
+})>;
+
 type FunctionSelect = Record<string, Record<string, any[]>>
 type SelectFuncs<T extends AnyObject = any> = T extends AnyObject? (
   | ({ [K in keyof Partial<T>]: true | 1 | string } & FunctionSelect)

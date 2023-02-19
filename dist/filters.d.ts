@@ -93,6 +93,13 @@ export declare type FilterDataType<T = any> = T extends string ? TextFilter : T 
 export declare const EXISTS_KEYS: readonly ["$exists", "$notExists", "$existsJoined", "$notExistsJoined"];
 export declare type EXISTS_KEY = typeof EXISTS_KEYS[number];
 export declare const COMPLEX_FILTER_KEY: "$filter";
+export declare type ComplexFilter = Record<typeof COMPLEX_FILTER_KEY, [
+    {
+        [funcName: string]: any[];
+    },
+    string?,
+    any?
+]>;
 declare type BasicFilter<Field extends string, DataType extends any> = Partial<{
     [K in Extract<typeof CompareFilterKeys[number], string> as `${Field}.${K}`]: DataType;
 }> | Partial<{

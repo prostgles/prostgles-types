@@ -181,6 +181,11 @@ export type EXISTS_KEY = typeof EXISTS_KEYS[number];
  * }
  */
 export const COMPLEX_FILTER_KEY = "$filter" as const;
+export type ComplexFilter = Record<typeof COMPLEX_FILTER_KEY, [
+  { [funcName: string]: any[] },
+  string?,
+  any?
+]>; 
 
 /**
  * Shortened filter operands

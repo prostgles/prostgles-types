@@ -31,6 +31,13 @@ export function omitKeys<T extends AnyObject, Exclude extends keyof T>(obj: T, e
   return pickKeys(obj, getKeys(obj).filter(k => !exclude.includes(k as any)))
 }
 
+export function filter<T extends AnyObject, ArrFilter extends Partial<T>>(array: T[], arrFilter: ArrFilter): T[] {
+  return array.filter(d => Object.entries(arrFilter).every(([k, v]) => d[k] === v))  
+}
+export function find<T extends AnyObject, ArrFilter extends Partial<T>>(array: T[], arrFilter: ArrFilter): T | undefined {
+  return filter(array, arrFilter)[0];
+}
+
 export function stableStringify(data: AnyObject, opts: any) {
   if (!opts) opts = {};
   if (typeof opts === 'function') opts = { cmp: opts };

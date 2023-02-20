@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getKeys = exports.isDefined = exports.isObject = exports.get = exports.isEmpty = exports.WAL = exports.unpatchText = exports.getTextPatch = exports.stableStringify = exports.omitKeys = exports.pickKeys = exports.asName = void 0;
+exports.getKeys = exports.isDefined = exports.isObject = exports.get = exports.isEmpty = exports.WAL = exports.unpatchText = exports.getTextPatch = exports.stableStringify = exports.find = exports.filter = exports.omitKeys = exports.pickKeys = exports.asName = void 0;
 const md5_1 = require("./md5");
 function asName(str) {
     if (str === null || str === undefined || !str.toString || !str.toString())
@@ -31,6 +31,14 @@ function omitKeys(obj, exclude) {
     return pickKeys(obj, getKeys(obj).filter(k => !exclude.includes(k)));
 }
 exports.omitKeys = omitKeys;
+function filter(array, arrFilter) {
+    return array.filter(d => Object.entries(arrFilter).every(([k, v]) => d[k] === v));
+}
+exports.filter = filter;
+function find(array, arrFilter) {
+    return filter(array, arrFilter)[0];
+}
+exports.find = find;
 function stableStringify(data, opts) {
     if (!opts)
         opts = {};

@@ -1,17 +1,7 @@
 "use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.typeTestsOK = void 0;
-(() => __awaiter(void 0, void 0, void 0, function* () {
-    var _a, _b, _c, _d, _e, _f, _g, _h;
+(async () => {
     const tableHandler = undefined;
     const params = {
         select: {
@@ -27,55 +17,55 @@ exports.typeTestsOK = void 0;
         ]
     };
     if (tableHandler) {
-        const newRow = yield ((_a = tableHandler.insert) === null || _a === void 0 ? void 0 : _a.call(tableHandler, { h: 2 }, { returning: { b: 1, c: 1 } }));
+        const newRow = await tableHandler.insert?.({ h: 2 }, { returning: { b: 1, c: 1 } });
         newRow.b;
         newRow.c;
         newRow.h;
-        const row = yield ((_b = tableHandler.findOne) === null || _b === void 0 ? void 0 : _b.call(tableHandler, { "c.$nin": [2] }, { select: { b: 0 } }));
+        const row = await tableHandler.findOne?.({ "c.$nin": [2] }, { select: { b: 0 } });
         row.c;
         row.h;
-        const query = yield ((_c = tableHandler.find) === null || _c === void 0 ? void 0 : _c.call(tableHandler, { h: 2 }, { returnType: "statement" }));
+        const query = await tableHandler.find?.({ h: 2 }, { returnType: "statement" });
         query.toUpperCase();
         row.b;
-        const vals = yield ((_d = tableHandler.find) === null || _d === void 0 ? void 0 : _d.call(tableHandler, { "c.$nin": [2] }, { returnType: "values" }));
-        const vals2 = yield ((_e = tableHandler.find) === null || _e === void 0 ? void 0 : _e.call(tableHandler, { "c.$nin": [2] }, { select: { h: 1 }, returnType: "values" }));
-        (_f = vals2[0]) === null || _f === void 0 ? void 0 : _f.toExponential();
-        const valsOptional = yield ((_g = tableHandler.find) === null || _g === void 0 ? void 0 : _g.call(tableHandler, {}, { select: { b: 1 }, returnType: "values" }));
-        const starSelect = yield ((_h = tableHandler.find) === null || _h === void 0 ? void 0 : _h.call(tableHandler, {}, { select: { "*": 1, bd: { $max: ["b"] }, joined_table: { ids: { "$array_agg": ["joined_field"] } } } }));
+        const vals = await tableHandler.find?.({ "c.$nin": [2] }, { returnType: "values" });
+        const vals2 = await tableHandler.find?.({ "c.$nin": [2] }, { select: { h: 1 }, returnType: "values" });
+        vals2[0]?.toExponential();
+        const valsOptional = await tableHandler.find?.({}, { select: { b: 1 }, returnType: "values" });
+        const starSelect = await tableHandler.find?.({}, { select: { "*": 1, bd: { $max: ["b"] }, joined_table: { ids: { "$array_agg": ["joined_field"] } } } });
         starSelect[0].bd;
         starSelect[0].joined_table.at(0);
         row.b;
-        tableHandler.subscribe({ h: 2 }, { select: { b: 1 } }, (rows) => __awaiter(void 0, void 0, void 0, function* () {
+        tableHandler.subscribe({ h: 2 }, { select: { b: 1 } }, async (rows) => {
             const row = rows[0];
             row.b;
             row.c;
-        }));
-        tableHandler.subscribeOne({ h: 2 }, { select: { b: 0 } }, (row) => __awaiter(void 0, void 0, void 0, function* () {
+        });
+        tableHandler.subscribeOne({ h: 2 }, { select: { b: 0 } }, async (row) => {
             row.b;
             row.c;
-        }));
+        });
     }
     const s1 = {
         val: { $template_string: ["$template_string"] }
     };
     const sqlHandler = undefined;
     if (sqlHandler) {
-        const full = yield sqlHandler("SELECT 1", {});
+        const full = await sqlHandler("SELECT 1", {});
         full.rows.flatMap;
         full.fields.find(f => f.tsDataType === "string");
-        const value = yield sqlHandler("SELECT 1", {}, { returnType: "value" });
+        const value = await sqlHandler("SELECT 1", {}, { returnType: "value" });
         value;
-        const values = yield sqlHandler("SELECT 1", {}, { returnType: "values" });
+        const values = await sqlHandler("SELECT 1", {}, { returnType: "values" });
         values.flatMap;
-        const row = yield sqlHandler("SELECT 1", {}, { returnType: "row" });
+        const row = await sqlHandler("SELECT 1", {}, { returnType: "row" });
         row.dhawjpeojfgrdfhoeisj;
-        const rows = yield sqlHandler("SELECT 1", {}, { returnType: "rows" });
+        const rows = await sqlHandler("SELECT 1", {}, { returnType: "rows" });
         rows.flatMap;
-        const handles = yield sqlHandler("SELECT 1", {}, { returnType: "noticeSubscription" });
+        const handles = await sqlHandler("SELECT 1", {}, { returnType: "noticeSubscription" });
         handles.addListener;
         handles.socketChannel;
         handles.socketUnsubChannel;
-        const listenHandlesOrData = yield sqlHandler("SELECT 1", {}, { allowListen: true });
+        const listenHandlesOrData = await sqlHandler("SELECT 1", {}, { allowListen: true });
         if ("command" in listenHandlesOrData) {
             listenHandlesOrData.command;
             listenHandlesOrData.duration;
@@ -98,7 +88,7 @@ exports.typeTestsOK = void 0;
     db.table1.update;
     db.table12.update;
     db.table1.find;
-    const result = yield db.table2.update({}, { c1: "" }, { returning: "*" });
+    const result = await db.table2.update({}, { c1: "" }, { returning: "*" });
     result.c2 + 2;
     const sel = {
         dwa: 1
@@ -128,7 +118,7 @@ exports.typeTestsOK = void 0;
     const deletePar = {
         returning: { id: 1, name: 1, public: 1, $rowhash: 1, added_day: { "$day": ["added"] } }
     };
-}));
+});
 const typeTestsOK = () => { };
 exports.typeTestsOK = typeTestsOK;
 //# sourceMappingURL=typeTests.js.map

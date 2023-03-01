@@ -501,4 +501,9 @@ export type Explode<T> = keyof T extends infer K
   : never;
 export type AtMostOne<T> = Explode<Partial<T>>;
 export type AtLeastOne<T, U = {[K in keyof T]: Pick<T, K> }> = Partial<T> & U[keyof U]
-export type ExactlyOne<T> = AtMostOne<T> & AtLeastOne<T>
+export type ExactlyOne<T> = AtMostOne<T> & AtLeastOne<T>;
+
+
+type UnionKeys<T> = T extends T ? keyof T : never;
+type StrictUnionHelper<T, TAll> = T extends any ? T & Partial<Record<Exclude<UnionKeys<TAll>, keyof T>, never>> : never;
+export type StrictUnion<T> = StrictUnionHelper<T, T>

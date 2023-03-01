@@ -1,5 +1,6 @@
 import { FullFilter, AnyObject, FullFilterBasic, ValueOf, ComplexFilter } from "./filters";
 import { FileColumnConfig } from "./files";
+import { JSONB } from "./jsonb";
 export declare const _PG_strings: readonly ["bpchar", "char", "varchar", "text", "citext", "uuid", "bytea", "time", "timetz", "interval", "name", "cidr", "inet", "macaddr", "macaddr8", "int4range", "int8range", "numrange", "tsvector"];
 export declare const _PG_numbers: readonly ["int2", "int4", "int8", "float4", "float8", "numeric", "money", "oid"];
 export declare const _PG_json: readonly ["json", "jsonb"];
@@ -7,7 +8,7 @@ export declare const _PG_bool: readonly ["bool"];
 export declare const _PG_date: readonly ["date", "timestamp", "timestamptz"];
 export declare const _PG_postgis: readonly ["geometry", "geography"];
 export declare const _PG_geometric: readonly ["point", "line", "lseg", "box", "path", "polygon", "circle"];
-export declare type PG_COLUMN_UDT_DATA_TYPE = typeof _PG_strings[number] | typeof _PG_numbers[number] | typeof _PG_geometric[number] | typeof _PG_json[number] | typeof _PG_bool[number] | typeof _PG_date[number] | typeof _PG_postgis[number];
+export type PG_COLUMN_UDT_DATA_TYPE = typeof _PG_strings[number] | typeof _PG_numbers[number] | typeof _PG_geometric[number] | typeof _PG_json[number] | typeof _PG_bool[number] | typeof _PG_date[number] | typeof _PG_postgis[number];
 export declare const TS_PG_Types: {
     readonly string: readonly ["bpchar", "char", "varchar", "text", "citext", "uuid", "bytea", "time", "timetz", "interval", "name", "cidr", "inet", "macaddr", "macaddr8", "int4range", "int8range", "numrange", "tsvector", "lseg"];
     readonly number: readonly ["int2", "int4", "int8", "float4", "float8", "numeric", "money", "oid"];
@@ -20,8 +21,8 @@ export declare const TS_PG_Types: {
     readonly "Array<Date>": string[];
     readonly any: readonly [];
 };
-export declare type TS_COLUMN_DATA_TYPES = keyof typeof TS_PG_Types;
-export declare type DBTableSchema = {
+export type TS_COLUMN_DATA_TYPES = keyof typeof TS_PG_Types;
+export type DBTableSchema = {
     is_view?: boolean;
     select?: boolean;
     insert?: boolean;
@@ -29,10 +30,10 @@ export declare type DBTableSchema = {
     delete?: boolean;
     columns: AnyObject;
 };
-export declare type DBSchema = {
+export type DBSchema = {
     [tov_name: string]: DBTableSchema;
 };
-export declare type ColumnInfo = {
+export type ColumnInfo = {
     name: string;
     label: string;
     comment: string;
@@ -53,10 +54,10 @@ export declare type ColumnInfo = {
     min?: string | number;
     max?: string | number;
     hint?: string;
-    jsonSchema?: AnyObject;
+    jsonbSchema?: JSONB.JSONBSchema;
     file?: FileColumnConfig;
 };
-export declare type ValidatedColumnInfo = ColumnInfo & {
+export type ValidatedColumnInfo = ColumnInfo & {
     tsDataType: TS_COLUMN_DATA_TYPES;
     select: boolean;
     orderBy: boolean;
@@ -65,14 +66,14 @@ export declare type ValidatedColumnInfo = ColumnInfo & {
     update: boolean;
     delete: boolean;
 };
-export declare type DBSchemaTable = {
+export type DBSchemaTable = {
     name: string;
     info: TableInfo;
     columns: ValidatedColumnInfo[];
 };
-export declare type FieldFilter<T extends AnyObject = AnyObject> = SelectTyped<T>;
-export declare type AscOrDesc = 1 | -1 | boolean;
-export declare type _OrderBy<T = AnyObject> = {
+export type FieldFilter<T extends AnyObject = AnyObject> = SelectTyped<T>;
+export type AscOrDesc = 1 | -1 | boolean;
+export type _OrderBy<T = AnyObject> = {
     [K in keyof Partial<T>]: AscOrDesc;
 } | {
     [K in keyof Partial<T>]: AscOrDesc;
@@ -82,22 +83,22 @@ export declare type _OrderBy<T = AnyObject> = {
     nulls?: "last" | "first";
     nullEmpty?: boolean;
 }[] | Array<keyof T> | keyof T;
-export declare type OrderBy<T = AnyObject> = _OrderBy<T> | _OrderBy<AnyObject>;
-declare type CommonSelect = "*" | "" | {
+export type OrderBy<T = AnyObject> = _OrderBy<T> | _OrderBy<AnyObject>;
+type CommonSelect = "*" | "" | {
     "*": 1;
 };
-export declare type SelectTyped<T extends AnyObject> = {
+export type SelectTyped<T extends AnyObject> = {
     [K in keyof Partial<T>]: 1 | true;
 } | {
     [K in keyof Partial<T>]: 0 | false;
 } | (keyof T)[] | CommonSelect;
 export declare const JOIN_KEYS: readonly ["$innerJoin", "$leftJoin"];
 export declare const JOIN_PARAMS: readonly ["select", "filter", "$path", "$condition", "offset", "limit", "orderBy"];
-export declare type JoinCondition = {
+export type JoinCondition = {
     column: string;
     rootColumn: string;
 } | ComplexFilter;
-export declare type DetailedJoinSelect = Record<typeof JOIN_KEYS[number], {
+export type DetailedJoinSelect = Record<typeof JOIN_KEYS[number], {
     select: Select;
     filter?: FullFilter;
     offset?: number;
@@ -110,9 +111,9 @@ export declare type DetailedJoinSelect = Record<typeof JOIN_KEYS[number], {
     $path?: undefined;
     $condition: JoinCondition[];
 })>;
-export declare type JoinSelect = "*" | Record<string, Record<string, any>> | DetailedJoinSelect;
-declare type FunctionSelect = Record<string, Record<string, any[]>>;
-declare type SelectFuncs<T extends AnyObject = any> = T extends AnyObject ? (({
+export type JoinSelect = "*" | Record<string, Record<string, any>> | DetailedJoinSelect;
+type FunctionSelect = Record<string, Record<string, any[]>>;
+type SelectFuncs<T extends AnyObject = any> = T extends AnyObject ? (({
     [K in keyof Partial<T>]: true | 1 | string;
 } & FunctionSelect) | JoinSelect | FunctionSelect | {
     [K in keyof Partial<T>]: true | 1 | string;
@@ -123,58 +124,58 @@ declare type SelectFuncs<T extends AnyObject = any> = T extends AnyObject ? (({
 } | {
     [K in keyof Partial<T>]: 0 | false;
 } | CommonSelect);
-export declare type Select<T extends AnyObject = any> = T extends AnyObject ? (SelectFuncs<T & {
+export type Select<T extends AnyObject = any> = T extends AnyObject ? (SelectFuncs<T & {
     $rowhash: string;
 }>) : (AnyObject | CommonSelect | SelectFuncs);
-export declare type SelectBasic = {
+export type SelectBasic = {
     [key: string]: any;
 } | {} | undefined | "" | "*";
-declare type CommonSelectParams = {
+type CommonSelectParams = {
     limit?: number;
     offset?: number;
     groupBy?: boolean;
     returnType?: "row" | "value" | "values" | "statement";
 };
-export declare type SelectParams<T extends AnyObject = any> = CommonSelectParams & {
+export type SelectParams<T extends AnyObject = any> = CommonSelectParams & {
     select?: Select<T>;
     orderBy?: OrderBy<T>;
 };
-export declare type SubscribeParams<T extends AnyObject = any> = SelectParams<T> & {
+export type SubscribeParams<T extends AnyObject = any> = SelectParams<T> & {
     throttle?: number;
 };
-export declare type UpdateParams<T extends AnyObject = any> = {
+export type UpdateParams<T extends AnyObject = any> = {
     returning?: Select<T>;
     onConflictDoNothing?: boolean;
     fixIssues?: boolean;
     multi?: boolean;
 };
-export declare type InsertParams<T extends AnyObject = any> = {
+export type InsertParams<T extends AnyObject = any> = {
     returning?: Select<T>;
     onConflictDoNothing?: boolean;
     fixIssues?: boolean;
 };
-export declare type DeleteParams<T extends AnyObject = any> = {
+export type DeleteParams<T extends AnyObject = any> = {
     returning?: Select<T>;
 };
-export declare type SubscribeParamsBasic = CommonSelectParams & {
+export type SubscribeParamsBasic = CommonSelectParams & {
     throttle?: number;
 };
-export declare type UpdateParamsBasic = {
+export type UpdateParamsBasic = {
     returning?: SelectBasic;
     onConflictDoNothing?: boolean;
     fixIssues?: boolean;
     multi?: boolean;
 };
-export declare type InsertParamsBasic = {
+export type InsertParamsBasic = {
     returning?: SelectBasic;
     onConflictDoNothing?: boolean;
     fixIssues?: boolean;
 };
-export declare type DeleteParamsBasic = {
+export type DeleteParamsBasic = {
     returning?: SelectBasic;
 };
-export declare type PartialLax<T = AnyObject> = Partial<T> & AnyObject;
-export declare type TableInfo = {
+export type PartialLax<T = AnyObject> = Partial<T> & AnyObject;
+export type TableInfo = {
     oid: number;
     comment?: string;
     is_media?: boolean;
@@ -189,14 +190,14 @@ export declare type TableInfo = {
         label?: string;
     };
 };
-export declare type OnError = (err: any) => void;
-declare type JoinedSelect = Record<string, Select>;
-declare type ParseSelect<Select extends SelectParams<TD>["select"], TD extends AnyObject> = (Select extends {
+export type OnError = (err: any) => void;
+type JoinedSelect = Record<string, Select>;
+type ParseSelect<Select extends SelectParams<TD>["select"], TD extends AnyObject> = (Select extends {
     "*": 1;
 } ? Required<TD> : {}) & {
     [Key in keyof Omit<Select, "*">]: Select[Key] extends 1 ? Required<TD>[Key] : Select[Key] extends Record<string, any[]> ? any : Select[Key] extends JoinedSelect ? any[] : any;
 };
-declare type GetSelectDataType<O extends SelectParams<TD>, TD extends AnyObject> = O extends {
+type GetSelectDataType<O extends SelectParams<TD>, TD extends AnyObject> = O extends {
     returnType: "value";
 } ? any : O extends {
     returnType: "values";
@@ -212,10 +213,10 @@ declare type GetSelectDataType<O extends SelectParams<TD>, TD extends AnyObject>
 } ? Omit<Required<TD>, keyof O["select"]> : O extends {
     select: Record<string, any>;
 } ? ParseSelect<O["select"], Required<TD>> : Required<TD>;
-declare type GetSelectReturnType<O extends SelectParams<TD>, TD extends AnyObject, isMulti extends boolean> = O extends {
+type GetSelectReturnType<O extends SelectParams<TD>, TD extends AnyObject, isMulti extends boolean> = O extends {
     returnType: "statement";
 } ? string : isMulti extends true ? GetSelectDataType<O, TD>[] : GetSelectDataType<O, TD>;
-declare type GetUpdateReturnType<O extends UpdateParams, TD extends AnyObject> = O extends {
+type GetUpdateReturnType<O extends UpdateParams, TD extends AnyObject> = O extends {
     returning: "*";
 } ? Required<TD> : O extends {
     returning: "";
@@ -224,18 +225,18 @@ declare type GetUpdateReturnType<O extends UpdateParams, TD extends AnyObject> =
 } ? Pick<Required<TD>, keyof O["returning"]> : O extends {
     returning: Record<string, 0>;
 } ? Omit<Required<TD>, keyof O["returning"]> : void;
-export declare type SubscriptionHandler<T extends AnyObject = AnyObject> = {
+export type SubscriptionHandler<T extends AnyObject = AnyObject> = {
     unsubscribe: () => Promise<any>;
     update?: (newData: T, updateParams: UpdateParams<T>) => Promise<any>;
     delete?: (deleteParams: DeleteParams<T>) => Promise<any>;
     filter: FullFilter<T> | {};
 };
-declare type GetColumns = (lang?: string, params?: {
+type GetColumns = (lang?: string, params?: {
     rule: "update";
     data: AnyObject;
     filter: AnyObject;
 }) => Promise<ValidatedColumnInfo[]>;
-export declare type ViewHandler<TD extends AnyObject = AnyObject, S = void> = {
+export type ViewHandler<TD extends AnyObject = AnyObject, S = void> = {
     getInfo?: (lang?: string) => Promise<TableInfo>;
     getColumns?: GetColumns;
     find: <P extends SelectParams<TD>>(filter?: FullFilter<TD, S>, selectParams?: P) => Promise<GetSelectReturnType<P, TD, true>>;
@@ -245,14 +246,14 @@ export declare type ViewHandler<TD extends AnyObject = AnyObject, S = void> = {
     count: (filter?: FullFilter<TD, S>) => Promise<number>;
     size: (filter?: FullFilter<TD>, selectParams?: SelectParams<TD>) => Promise<string>;
 };
-export declare type TableHandler<TD extends AnyObject = AnyObject, S = void> = ViewHandler<TD, S> & {
+export type TableHandler<TD extends AnyObject = AnyObject, S = void> = ViewHandler<TD, S> & {
     update: <P extends UpdateParams<TD>>(filter: FullFilter<TD, S>, newData: PartialLax<TD>, params?: P) => Promise<GetUpdateReturnType<P, TD> | undefined>;
     updateBatch: (data: [FullFilter<TD, S>, PartialLax<TD>][], params?: UpdateParams<TD>) => Promise<PartialLax<TD> | void>;
     upsert: <P extends UpdateParams<TD>>(filter: FullFilter<TD, S>, newData: PartialLax<TD>, params?: P) => Promise<GetUpdateReturnType<P, TD>>;
     insert: <P extends UpdateParams<TD>>(data: (TD | TD[]), params?: P) => Promise<GetUpdateReturnType<P, TD>>;
     delete: <P extends DeleteParams<TD>>(filter?: FullFilter<TD, S>, params?: P) => Promise<GetUpdateReturnType<P, TD> | undefined>;
 };
-export declare type ViewHandlerBasic = {
+export type ViewHandlerBasic = {
     getInfo?: (lang?: string) => Promise<TableInfo>;
     getColumns?: GetColumns;
     find: <TD = AnyObject>(filter?: FullFilterBasic, selectParams?: SelectParams) => Promise<PartialLax<TD>[]>;
@@ -266,28 +267,28 @@ export declare type ViewHandlerBasic = {
     count: (filter?: FullFilterBasic) => Promise<number>;
     size: (filter?: FullFilterBasic, selectParams?: SelectParams) => Promise<string>;
 };
-export declare type TableHandlerBasic = ViewHandlerBasic & {
+export type TableHandlerBasic = ViewHandlerBasic & {
     update: <TD = AnyObject>(filter: FullFilterBasic, newData: PartialLax<TD>, params?: UpdateParamsBasic) => Promise<PartialLax<TD> | void>;
     updateBatch: <TD = AnyObject>(data: [FullFilterBasic, PartialLax<TD>][], params?: UpdateParamsBasic) => Promise<PartialLax<TD> | void>;
     upsert: <TD = AnyObject>(filter: FullFilterBasic, newData: PartialLax<TD>, params?: UpdateParamsBasic) => Promise<PartialLax<TD> | void>;
     insert: <TD = AnyObject>(data: (PartialLax<TD> | PartialLax<TD>[]), params?: InsertParamsBasic) => Promise<PartialLax<TD> | void>;
     delete: <TD = AnyObject>(filter?: FullFilterBasic, params?: DeleteParamsBasic) => Promise<PartialLax<TD> | void>;
 };
-export declare type JoinMaker<TT extends AnyObject = AnyObject> = (filter?: FullFilter<TT>, select?: Select<TT>, options?: SelectParams<TT>) => any;
-export declare type JoinMakerBasic = (filter?: FullFilterBasic, select?: SelectBasic, options?: SelectParams) => any;
-export declare type TableJoin = {
+export type JoinMaker<TT extends AnyObject = AnyObject> = (filter?: FullFilter<TT>, select?: Select<TT>, options?: SelectParams<TT>) => any;
+export type JoinMakerBasic = (filter?: FullFilterBasic, select?: SelectBasic, options?: SelectParams) => any;
+export type TableJoin = {
     [key: string]: JoinMaker;
 };
-export declare type TableJoinBasic = {
+export type TableJoinBasic = {
     [key: string]: JoinMakerBasic;
 };
-export declare type DbJoinMaker = {
+export type DbJoinMaker = {
     innerJoin: TableJoin;
     leftJoin: TableJoin;
     innerJoinOne: TableJoin;
     leftJoinOne: TableJoin;
 };
-export declare type SQLResult<T extends SQLOptions["returnType"]> = {
+export type SQLResult<T extends SQLOptions["returnType"]> = {
     command: "SELECT" | "UPDATE" | "DELETE" | "CREATE" | "ALTER" | "LISTEN" | "UNLISTEN" | "INSERT" | string;
     rowCount: number;
     rows: (T extends "arrayMode" ? any : AnyObject)[];
@@ -304,32 +305,32 @@ export declare type SQLResult<T extends SQLOptions["returnType"]> = {
     }[];
     duration: number;
 };
-export declare type DBEventHandles = {
+export type DBEventHandles = {
     socketChannel: string;
     socketUnsubChannel: string;
     addListener: (listener: (event: any) => void) => {
         removeListener: () => void;
     };
 };
-export declare type CheckForListen<T, O extends SQLOptions> = O["allowListen"] extends true ? (DBEventHandles | T) : T;
-export declare type GetSQLReturnType<O extends SQLOptions> = CheckForListen<(O["returnType"] extends "row" ? AnyObject | null : O["returnType"] extends "rows" ? AnyObject[] : O["returnType"] extends "value" ? any | null : O["returnType"] extends "values" ? any[] : O["returnType"] extends "statement" ? string : O["returnType"] extends "noticeSubscription" ? DBEventHandles : SQLResult<O["returnType"]>), O>;
-export declare type SQLHandler = <Opts extends SQLOptions>(query: string, args?: AnyObject | any[], options?: Opts, serverSideOptions?: {
+export type CheckForListen<T, O extends SQLOptions> = O["allowListen"] extends true ? (DBEventHandles | T) : T;
+export type GetSQLReturnType<O extends SQLOptions> = CheckForListen<(O["returnType"] extends "row" ? AnyObject | null : O["returnType"] extends "rows" ? AnyObject[] : O["returnType"] extends "value" ? any | null : O["returnType"] extends "values" ? any[] : O["returnType"] extends "statement" ? string : O["returnType"] extends "noticeSubscription" ? DBEventHandles : SQLResult<O["returnType"]>), O>;
+export type SQLHandler = <Opts extends SQLOptions>(query: string, args?: AnyObject | any[], options?: Opts, serverSideOptions?: {
     socket: any;
 }) => Promise<GetSQLReturnType<Opts>>;
-declare type SelectMethods<T extends DBTableSchema> = T["select"] extends true ? keyof Pick<TableHandler, "count" | "find" | "findOne" | "getColumns" | "getInfo" | "size" | "subscribe" | "subscribeOne"> : never;
-declare type UpdateMethods<T extends DBTableSchema> = T["update"] extends true ? keyof Pick<TableHandler, "update" | "updateBatch"> : never;
-declare type InsertMethods<T extends DBTableSchema> = T["insert"] extends true ? keyof Pick<TableHandler, "insert"> : never;
-declare type UpsertMethods<T extends DBTableSchema> = T["insert"] extends true ? T["update"] extends true ? keyof Pick<TableHandler, "upsert"> : never : never;
-declare type DeleteMethods<T extends DBTableSchema> = T["delete"] extends true ? keyof Pick<TableHandler, "delete"> : never;
-export declare type ValidatedMethods<T extends DBTableSchema> = SelectMethods<T> | UpdateMethods<T> | InsertMethods<T> | UpsertMethods<T> | DeleteMethods<T>;
-export declare type DBHandler<S = void> = (S extends DBSchema ? {
+type SelectMethods<T extends DBTableSchema> = T["select"] extends true ? keyof Pick<TableHandler, "count" | "find" | "findOne" | "getColumns" | "getInfo" | "size" | "subscribe" | "subscribeOne"> : never;
+type UpdateMethods<T extends DBTableSchema> = T["update"] extends true ? keyof Pick<TableHandler, "update" | "updateBatch"> : never;
+type InsertMethods<T extends DBTableSchema> = T["insert"] extends true ? keyof Pick<TableHandler, "insert"> : never;
+type UpsertMethods<T extends DBTableSchema> = T["insert"] extends true ? T["update"] extends true ? keyof Pick<TableHandler, "upsert"> : never : never;
+type DeleteMethods<T extends DBTableSchema> = T["delete"] extends true ? keyof Pick<TableHandler, "delete"> : never;
+export type ValidatedMethods<T extends DBTableSchema> = SelectMethods<T> | UpdateMethods<T> | InsertMethods<T> | UpsertMethods<T> | DeleteMethods<T>;
+export type DBHandler<S = void> = (S extends DBSchema ? {
     [k in keyof S]: S[k]["is_view"] extends true ? ViewHandler<S[k]["columns"], S> : Pick<TableHandler<S[k]["columns"], S>, ValidatedMethods<S[k]>>;
 } : {
     [key: string]: Partial<TableHandler>;
 }) & DbJoinMaker & {
     sql?: SQLHandler;
 };
-export declare type DBHandlerBasic = {
+export type DBHandlerBasic = {
     [key: string]: Partial<TableHandlerBasic>;
 } & {
     innerJoin: TableJoinBasic;
@@ -339,29 +340,29 @@ export declare type DBHandlerBasic = {
 } & {
     sql?: SQLHandler;
 };
-export declare type DBNoticeConfig = {
+export type DBNoticeConfig = {
     socketChannel: string;
     socketUnsubChannel: string;
 };
-export declare type DBNotifConfig = DBNoticeConfig & {
+export type DBNotifConfig = DBNoticeConfig & {
     notifChannel: string;
 };
-export declare type SQLOptions = {
+export type SQLOptions = {
     returnType?: Required<SelectParams>["returnType"] | "statement" | "rows" | "noticeSubscription" | "arrayMode";
     allowListen?: boolean;
     hasParams?: boolean;
 };
-export declare type SQLRequest = {
+export type SQLRequest = {
     query: string;
     params?: any | any[];
     options?: SQLOptions;
 };
-export declare type NotifSubscription = {
+export type NotifSubscription = {
     socketChannel: string;
     socketUnsubChannel: string;
     notifChannel: string;
 };
-export declare type NoticeSubscription = {
+export type NoticeSubscription = {
     socketChannel: string;
     socketUnsubChannel: string;
 };
@@ -380,7 +381,7 @@ export declare const CHANNELS: {
     CONNECTION: string;
     _preffix: string;
 };
-export declare type AuthGuardLocation = {
+export type AuthGuardLocation = {
     href: string;
     origin: string;
     protocol: string;
@@ -391,7 +392,7 @@ export declare type AuthGuardLocation = {
     search: string;
     hash: string;
 };
-export declare type AuthGuardLocationResponse = {
+export type AuthGuardLocationResponse = {
     shouldReload: boolean;
 };
 export declare const RULE_METHODS: {
@@ -404,11 +405,11 @@ export declare const RULE_METHODS: {
     readonly sync: readonly ["sync", "unsync"];
     readonly subscribe: readonly ["unsubscribe", "subscribe", "subscribeOne"];
 };
-export declare type MethodKey = typeof RULE_METHODS[keyof typeof RULE_METHODS][number];
-export declare type TableSchemaForClient = Record<string, Partial<Record<MethodKey, {} | {
+export type MethodKey = typeof RULE_METHODS[keyof typeof RULE_METHODS][number];
+export type TableSchemaForClient = Record<string, Partial<Record<MethodKey, {} | {
     err: any;
 }>>>;
-export declare type TableSchema = {
+export type TableSchema = {
     schema: string;
     name: string;
     oid: number;
@@ -428,7 +429,7 @@ export declare type TableSchema = {
         delete: boolean;
     };
 };
-export declare type ObjDef = {
+export type ObjDef = {
     type: "string" | "number" | "Date";
     label?: string;
     defaultValue?: string;
@@ -452,8 +453,8 @@ export declare type ObjDef = {
         };
     });
 };
-export declare type MethodFunction = (...args: any) => (any | Promise<any>);
-export declare type MethodFullDef = {
+export type MethodFunction = (...args: any) => (any | Promise<any>);
+export type MethodFullDef = {
     input: Record<string, ObjDef>;
     run: MethodFunction;
     output?: Record<string, Omit<ObjDef, "references">>;
@@ -464,11 +465,11 @@ export declare type MethodFullDef = {
     output?: Record<string, Omit<ObjDef, "references">>;
     outputTable?: undefined;
 });
-export declare type Method = MethodFunction | MethodFullDef;
-export declare type MethodHandler = {
+export type Method = MethodFunction | MethodFullDef;
+export type MethodHandler = {
     [method_name: string]: Method;
 };
-export declare type ClientSchema = {
+export type ClientSchema = {
     rawSQL: boolean;
     joinTables: string[][];
     auth: AnyObject;
@@ -480,14 +481,14 @@ export declare type ClientSchema = {
         name: string;
     } & Pick<MethodFullDef, "input" | "output">)[];
 };
-export declare type AuthSocketSchema = {
+export type AuthSocketSchema = {
     user?: AnyObject;
     register?: boolean;
     login?: boolean;
     logout?: boolean;
     pathGuard?: boolean;
 };
-export declare type ProstglesError = {
+export type ProstglesError = {
     stack: string[];
     message: string;
     column?: string;
@@ -504,4 +505,5 @@ export * from "./filters";
 export type { ClientExpressData, ClientSyncHandles, ClientSyncInfo, SyncConfig, ClientSyncPullResponse, SyncBatchParams, onUpdatesParams } from "./replication";
 export type { ALLOWED_CONTENT_TYPE, ALLOWED_EXTENSION, FileColumnConfig, FileType } from "./files";
 export { CONTENT_TYPE_TO_EXT } from "./files";
+export * from "./jsonb";
 //# sourceMappingURL=index.d.ts.map

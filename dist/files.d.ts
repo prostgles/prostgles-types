@@ -68,9 +68,9 @@ export declare const CONTENT_TYPE_TO_EXT: {
     readonly "video/mp4": readonly ["m4v", "mp4"];
     readonly "video/webm": readonly ["webm"];
 };
-export declare type ALLOWED_CONTENT_TYPE = keyof typeof CONTENT_TYPE_TO_EXT;
-export declare type ALLOWED_EXTENSION = (typeof CONTENT_TYPE_TO_EXT)[ALLOWED_CONTENT_TYPE][number];
-export declare type FileType = {
+export type ALLOWED_CONTENT_TYPE = keyof typeof CONTENT_TYPE_TO_EXT;
+export type ALLOWED_EXTENSION = (typeof CONTENT_TYPE_TO_EXT)[ALLOWED_CONTENT_TYPE][number];
+export type FileType = {
     acceptedContent: FieldFilter<{
         "image": 1;
         "audio": 1;
@@ -83,7 +83,7 @@ export declare type FileType = {
 } | {
     acceptedFileTypes: FieldFilter<Record<ALLOWED_EXTENSION, 1>>;
 } | never;
-export declare type FileColumnConfig = FileType & {
+export type FileColumnConfig = FileType & {
     maxFileSizeMB?: number;
 };
 //# sourceMappingURL=files.d.ts.map

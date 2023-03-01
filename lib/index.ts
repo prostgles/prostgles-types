@@ -1,6 +1,7 @@
 
 import { FullFilter, AnyObject, FullFilterBasic, ValueOf, ComplexFilter } from "./filters";
 import { FileColumnConfig } from "./files";
+import { JSONB } from "./jsonb";
 
 export const _PG_strings = [
   'bpchar','char','varchar','text','citext','uuid','bytea', 'time','timetz','interval','name', 
@@ -157,7 +158,8 @@ export type ColumnInfo = {
   min?: string | number;
   max?: string | number;
   hint?: string;
-  jsonSchema?: AnyObject;
+
+  jsonbSchema?: JSONB.JSONBSchema;
 
   /**
    * If degined then this column is referencing the file table
@@ -889,3 +891,4 @@ export * from "./filters";
 export type { ClientExpressData, ClientSyncHandles, ClientSyncInfo, SyncConfig, ClientSyncPullResponse, SyncBatchParams, onUpdatesParams } from "./replication";
 export type { ALLOWED_CONTENT_TYPE, ALLOWED_EXTENSION, FileColumnConfig, FileType } from "./files";
 export { CONTENT_TYPE_TO_EXT } from "./files";
+export * from "./jsonb";

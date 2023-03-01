@@ -91,7 +91,6 @@ const getJSONSchemaObject = (rawType, rootInfo) => {
     else if (oneOf || oneOfType) {
         const _oneOf = oneOf || oneOfType.map(type => ({ type }));
         result = {
-            type: "object",
             oneOf: _oneOf.map(t => getJSONSchemaObject(t))
         };
     }
@@ -115,7 +114,6 @@ const getJSONSchemaObject = (rawType, rootInfo) => {
         }
         else
             result = {
-                type: 'object',
                 oneOf: [result, nullDef]
             };
     }

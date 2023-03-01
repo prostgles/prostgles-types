@@ -243,7 +243,6 @@ const getJSONSchemaObject = (rawType: JSONB.FieldType | JSONB.JSONBSchema, rootI
   } else if(oneOf || oneOfType){
     const _oneOf = oneOf || oneOfType!.map(type => ({ type }))
     result = {
-      type: "object",
       oneOf: _oneOf.map(t => getJSONSchemaObject(t))
     }
   } else if(record){
@@ -265,7 +264,6 @@ const getJSONSchemaObject = (rawType: JSONB.FieldType | JSONB.JSONBSchema, rootI
       result.enum.push(null)
 
     } else result = {
-      type: 'object',
       oneOf: [result, nullDef]
     }
   }

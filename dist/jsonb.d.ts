@@ -13,7 +13,7 @@ export declare namespace JSONB {
     };
     export type BasicType = BaseOptions & {
         type: DataType;
-        allowedValues?: any[];
+        allowedValues?: readonly any[] | any[];
         oneOf?: undefined;
         oneOfType?: undefined;
         arrayOf?: undefined;
@@ -85,29 +85,32 @@ export declare namespace JSONB {
     type GetWNullType<T extends FieldTypeObj | Omit<FieldTypeObj, "optional">> = T extends {
         nullable: true;
     } ? (null | _GetType<T>) : _GetType<T>;
+    type GetAllowedValues<T extends FieldTypeObj | Omit<FieldTypeObj, "optional">, TType> = T extends {
+        allowedValues: readonly any[];
+    } ? T["allowedValues"][number] : TType;
     type _GetType<T extends FieldTypeObj | Omit<FieldTypeObj, "optional">> = T extends {
         type: ObjectSchema;
     } ? GetObjectType<T["type"]> : T extends {
         type: "number";
-    } ? number : T extends {
+    } ? GetAllowedValues<T, number> : T extends {
         type: "boolean";
-    } ? boolean : T extends {
+    } ? GetAllowedValues<T, boolean> : T extends {
         type: "integer";
-    } ? number : T extends {
+    } ? GetAllowedValues<T, number> : T extends {
         type: "string";
-    } ? string : T extends {
+    } ? GetAllowedValues<T, string> : T extends {
         type: "any";
-    } ? any : T extends {
+    } ? GetAllowedValues<T, any> : T extends {
         type: "number[]";
-    } ? number[] : T extends {
+    } ? GetAllowedValues<T, number>[] : T extends {
         type: "boolean[]";
-    } ? boolean[] : T extends {
+    } ? GetAllowedValues<T, boolean>[] : T extends {
         type: "integer[]";
-    } ? number[] : T extends {
+    } ? GetAllowedValues<T, number>[] : T extends {
         type: "string[]";
-    } ? string[] : T extends {
+    } ? GetAllowedValues<T, string>[] : T extends {
         type: "any[]";
-    } ? any[] : T extends {
+    } ? GetAllowedValues<T, any>[] : T extends {
         "enum": readonly any[] | any[];
     } ? T["enum"][number] : T extends {
         "record": RecordType["record"];

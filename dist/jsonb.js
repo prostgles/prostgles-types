@@ -12,7 +12,7 @@ const t = [
     { a: 2 }
 ];
 const _oneOf = {
-    a: 2
+    a: "a"
 };
 const _a = {
     a: 2
@@ -50,7 +50,7 @@ const getJSONSchemaObject = (rawType, rootInfo) => {
     const { type, arrayOf, arrayOfType, description, nullable, oneOf, oneOfType, title, record, ...t } = typeof rawType === "string" ? { type: rawType } : rawType;
     let result = {};
     const partialProps = {
-        ...((t.enum || t.allowedValues?.length) && { enum: t.allowedValues ?? t.enum.slice(0) }),
+        ...((t.enum || t.allowedValues?.length) && { enum: t.allowedValues?.slice(0) ?? t.enum.slice(0) }),
         ...(!!description && { description }),
         ...(!!title && { title }),
     };
@@ -66,7 +66,7 @@ const getJSONSchemaObject = (rawType, rootInfo) => {
                 type?.startsWith("any") ? { type: undefined } :
                     {
                         type: type?.slice(0, -2),
-                        ...(t.allowedValues && { enum: t.allowedValues }),
+                        ...(t.allowedValues && { enum: t.allowedValues.slice(0) }),
                     };
             result = {
                 type: "array",

@@ -27,7 +27,7 @@ export namespace JSONB {
 
   export type BasicType = BaseOptions & {
     type: DataType;
-    allowedValues?: any[];
+    allowedValues?: readonly any[] | any[];
     oneOf?: undefined;
     oneOfType?: undefined;
     arrayOf?: undefined;
@@ -112,19 +112,20 @@ export namespace JSONB {
 
   export type GetType<T extends FieldType | Omit<FieldTypeObj, "optional">> = GetWNullType<T extends DataType? { type: T } : T>;
   type GetWNullType<T extends FieldTypeObj | Omit<FieldTypeObj, "optional">> = T extends { nullable: true }? (null | _GetType<T>) : _GetType<T>;
+  type GetAllowedValues<T extends FieldTypeObj | Omit<FieldTypeObj, "optional">, TType> = T extends { allowedValues: readonly any[] }? T["allowedValues"][number] : TType;
 
   type _GetType<T extends FieldTypeObj | Omit<FieldTypeObj, "optional">> =
   | T extends { type: ObjectSchema } ? GetObjectType<T["type"]> :
-  | T extends { type: "number" } ? number :
-  | T extends { type: "boolean" } ? boolean :
-  | T extends { type: "integer" } ? number :
-  | T extends { type: "string" } ? string :
-  | T extends { type: "any" } ? any :
-  | T extends { type: "number[]" } ? number[] :
-  | T extends { type: "boolean[]" } ? boolean[] :
-  | T extends { type: "integer[]" } ? number[] :
-  | T extends { type: "string[]" } ? string[] :
-  | T extends { type: "any[]" } ? any[] :
+  | T extends { type: "number" } ?    GetAllowedValues<T, number> :
+  | T extends { type: "boolean" } ?   GetAllowedValues<T, boolean> :
+  | T extends { type: "integer" } ?   GetAllowedValues<T, number> :
+  | T extends { type: "string" } ?    GetAllowedValues<T, string> :
+  | T extends { type: "any" } ?       GetAllowedValues<T, any> :
+  | T extends { type: "number[]" } ?  GetAllowedValues<T, number>[] :
+  | T extends { type: "boolean[]" } ? GetAllowedValues<T, boolean>[] :
+  | T extends { type: "integer[]" } ? GetAllowedValues<T, number>[] :
+  | T extends { type: "string[]" } ?  GetAllowedValues<T, string>[] :
+  | T extends { type: "any[]" } ?     GetAllowedValues<T, any>[] :
   | T extends { "enum": readonly any[] | any[] } ? T["enum"][number] :
   | T extends { "record": RecordType["record"] } ? Record<
     T["record"] extends { keysEnum: readonly string[] }? T["record"]["keysEnum"][number] : string, 
@@ -164,8 +165,9 @@ const t: JSONB.GetType<{ arrayOfType: { a: "number" } }> = [
 const _oneOf: JSONB.GetType<{ nullable: true, oneOf: [ 
   { enum: ["n"] },
   { type: { a: "number" } },
+  { type: { a: { type: "string", allowedValues: ["a"] }} },
 ] }> = {
-  a: 2
+  a: "a"
 }
 
 const _a: JSONB.GetType<{ type: { a: "number" } }> = {
@@ -210,7 +212,7 @@ const getJSONSchemaObject = (rawType: JSONB.FieldType | JSONB.JSONBSchema, rootI
 
   let result: JSONSchema7 = {};
   const partialProps: Partial<JSONSchema7> = {
-    ...((t.enum || t.allowedValues?.length) && { enum: t.allowedValues ?? t.enum!.slice(0) }),
+    ...((t.enum || t.allowedValues?.length) && { enum: t.allowedValues?.slice(0) ?? t.enum!.slice(0) }),
     ...(!!description && { description }),
     ...(!!title && { title }),
   };
@@ -231,7 +233,7 @@ const getJSONSchemaObject = (rawType: JSONB.FieldType | JSONB.JSONBSchema, rootI
         type?.startsWith("any")? { type: undefined } :
         {  
           type: type?.slice(0, -2) as JSONSchema7TypeName,
-          ...(t.allowedValues && { enum: t.allowedValues }), 
+          ...(t.allowedValues && { enum: t.allowedValues.slice(0) }), 
         };
       result = {
         type: "array",

@@ -125,14 +125,14 @@ export namespace JSONB {
   | T extends { type: "integer[]" } ? number[] :
   | T extends { type: "string[]" } ? string[] :
   | T extends { type: "any[]" } ? any[] :
-  | T extends { "enum": readonly any[] } ? T["enum"][number] :
+  | T extends { "enum": readonly any[] | any[] } ? T["enum"][number] :
   | T extends { "record": RecordType["record"] } ? Record<
     T["record"] extends { keysEnum: readonly string[] }? T["record"]["keysEnum"][number] : string, 
     T["record"] extends { values: FieldType }? GetType<T["record"]["values"]> : any
   > :
   | T extends { oneOf: readonly FieldType[] | FieldType[] } ? GetType<T["oneOf"][number]> :
-  | T extends { oneOfType: readonly ObjectSchema[] | ObjectSchema[] } ? GetType<T["oneOfType"][number]> :
-  | T extends { arrayOf: ObjectSchema } ? GetObjectType<T["arrayOf"]>[] :
+  | T extends { oneOfType: readonly ObjectSchema[] | ObjectSchema[] } ? GetObjectType<T["oneOfType"][number]> :
+  | T extends { arrayOf: FieldType } ? GetType<T["arrayOf"]>[] :
   | T extends { arrayOfType: ObjectSchema } ? GetObjectType<T["arrayOfType"]>[] :
   any;
 

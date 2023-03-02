@@ -108,7 +108,7 @@ export declare namespace JSONB {
     } ? string[] : T extends {
         type: "any[]";
     } ? any[] : T extends {
-        "enum": readonly any[];
+        "enum": readonly any[] | any[];
     } ? T["enum"][number] : T extends {
         "record": RecordType["record"];
     } ? Record<T["record"] extends {
@@ -119,9 +119,9 @@ export declare namespace JSONB {
         oneOf: readonly FieldType[] | FieldType[];
     } ? GetType<T["oneOf"][number]> : T extends {
         oneOfType: readonly ObjectSchema[] | ObjectSchema[];
-    } ? GetType<T["oneOfType"][number]> : T extends {
-        arrayOf: ObjectSchema;
-    } ? GetObjectType<T["arrayOf"]>[] : T extends {
+    } ? GetObjectType<T["oneOfType"][number]> : T extends {
+        arrayOf: FieldType;
+    } ? GetType<T["arrayOf"]>[] : T extends {
         arrayOfType: ObjectSchema;
     } ? GetObjectType<T["arrayOfType"]>[] : any;
     type IsOptional<F extends FieldType> = F extends DataType ? false : F extends {

@@ -79,27 +79,33 @@ export declare namespace JSONB {
     };
     export type FieldTypeObj = StrictUnion<BasicType | ObjectType | EnumType | OneOf | ArrayOf | RecordType>;
     export type FieldType = DataType | FieldTypeObj;
-    export type GetType<T extends FieldType | Omit<FieldTypeObj, "optional">> = T extends {
+    export type GetType<T extends FieldType | Omit<FieldTypeObj, "optional">> = GetWNullType<T extends DataType ? {
+        type: T;
+    } : T>;
+    type GetWNullType<T extends FieldTypeObj | Omit<FieldTypeObj, "optional">> = T extends {
+        nullable: true;
+    } ? (null | _GetType<T>) : _GetType<T>;
+    type _GetType<T extends FieldTypeObj | Omit<FieldTypeObj, "optional">> = T extends {
         type: ObjectSchema;
-    } ? GetObjectType<T["type"]> : T extends "number" | {
+    } ? GetObjectType<T["type"]> : T extends {
         type: "number";
-    } ? number : T extends "boolean" | {
+    } ? number : T extends {
         type: "boolean";
-    } ? boolean : T extends "integer" | {
+    } ? boolean : T extends {
         type: "integer";
-    } ? number : T extends "string" | {
+    } ? number : T extends {
         type: "string";
-    } ? string : T extends "any" | {
+    } ? string : T extends {
         type: "any";
-    } ? any : T extends "number[]" | {
+    } ? any : T extends {
         type: "number[]";
-    } ? number[] : T extends "boolean[]" | {
+    } ? number[] : T extends {
         type: "boolean[]";
-    } ? boolean[] : T extends "integer[]" | {
+    } ? boolean[] : T extends {
         type: "integer[]";
-    } ? number[] : T extends "string[]" | {
+    } ? number[] : T extends {
         type: "string[]";
-    } ? string[] : T extends "any[]" | {
+    } ? string[] : T extends {
         type: "any[]";
     } ? any[] : T extends {
         "enum": readonly any[];
@@ -110,25 +116,25 @@ export declare namespace JSONB {
     } ? T["record"]["keysEnum"][number] : string, T["record"] extends {
         values: FieldType;
     } ? GetType<T["record"]["values"]> : any> : T extends {
-        oneOf: FieldType[];
-    } ? StrictUnion<GetType<T["oneOf"][number]>> : T extends {
-        oneOf: readonly ObjectSchema[];
-    } ? StrictUnion<GetType<T["oneOf"][number]>> : T extends {
+        oneOf: readonly FieldType[] | FieldType[];
+    } ? GetType<T["oneOf"][number]> : T extends {
+        oneOfType: readonly ObjectSchema[] | ObjectSchema[];
+    } ? GetType<T["oneOfType"][number]> : T extends {
         arrayOf: ObjectSchema;
-    } ? GetType<T["arrayOf"]>[] : T extends {
+    } ? GetObjectType<T["arrayOf"]>[] : T extends {
         arrayOfType: ObjectSchema;
-    } ? GetType<T["arrayOfType"]>[] : any;
+    } ? GetObjectType<T["arrayOfType"]>[] : any;
     type IsOptional<F extends FieldType> = F extends DataType ? false : F extends {
         optional: true;
     } ? true : false;
-    export type ObjectSchema = Record<string, FieldType>;
+    type ObjectSchema = Record<string, FieldType>;
     export type JSONBSchema = Omit<FieldTypeObj, "optional">;
     export type GetObjectType<S extends ObjectSchema> = ({
         [K in keyof S as IsOptional<S[K]> extends true ? K : never]?: GetType<S[K]>;
     } & {
         [K in keyof S as IsOptional<S[K]> extends true ? never : K]: GetType<S[K]>;
     });
-    export type SchemaObject<S extends JSONBSchema> = S["nullable"] extends true ? (null | GetType<S>) : GetType<S>;
+    export type GetSchemaType<S extends JSONBSchema> = S["nullable"] extends true ? (null | GetType<S>) : GetType<S>;
     export {};
 }
 export declare function getJSONBSchemaAsJSONSchema(tableName: string, colName: string, schema: JSONB.JSONBSchema): JSONSchema7;

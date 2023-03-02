@@ -110,45 +110,38 @@ export namespace JSONB {
   | FieldTypeObj;
 
 
-  export type GetType<T extends FieldType | Omit<FieldTypeObj, "optional">> =
+  export type GetType<T extends FieldType | Omit<FieldTypeObj, "optional">> = GetWNullType<T extends DataType? { type: T } : T>;
+  type GetWNullType<T extends FieldTypeObj | Omit<FieldTypeObj, "optional">> = T extends { nullable: true }? (null | _GetType<T>) : _GetType<T>;
+
+  type _GetType<T extends FieldTypeObj | Omit<FieldTypeObj, "optional">> =
   | T extends { type: ObjectSchema } ? GetObjectType<T["type"]> :
-  | T extends "number" | { type: "number" } ? number :
-  | T extends "boolean" | { type: "boolean" } ? boolean :
-  | T extends "integer" | { type: "integer" } ? number :
-  | T extends "string" | { type: "string" } ? string :
-  | T extends "any" | { type: "any" } ? any :
-  | T extends "number[]" | { type: "number[]" } ? number[] :
-  | T extends "boolean[]" | { type: "boolean[]" } ? boolean[] :
-  | T extends "integer[]" | { type: "integer[]" } ? number[] :
-  | T extends "string[]" | { type: "string[]" } ? string[] :
-  | T extends "any[]" | { type: "any[]" } ? any[] :
+  | T extends { type: "number" } ? number :
+  | T extends { type: "boolean" } ? boolean :
+  | T extends { type: "integer" } ? number :
+  | T extends { type: "string" } ? string :
+  | T extends { type: "any" } ? any :
+  | T extends { type: "number[]" } ? number[] :
+  | T extends { type: "boolean[]" } ? boolean[] :
+  | T extends { type: "integer[]" } ? number[] :
+  | T extends { type: "string[]" } ? string[] :
+  | T extends { type: "any[]" } ? any[] :
   | T extends { "enum": readonly any[] } ? T["enum"][number] :
   | T extends { "record": RecordType["record"] } ? Record<
     T["record"] extends { keysEnum: readonly string[] }? T["record"]["keysEnum"][number] : string, 
     T["record"] extends { values: FieldType }? GetType<T["record"]["values"]> : any
   > :
-
-  | T extends { oneOf: FieldType[] } ? StrictUnion<GetType<T["oneOf"][number]>> :
-  | T extends { oneOf: readonly ObjectSchema[] } ? StrictUnion<GetType<T["oneOf"][number]>> :
-
-  | T extends { arrayOf: ObjectSchema } ? GetType<T["arrayOf"]>[] :
-  | T extends { arrayOfType: ObjectSchema } ? GetType<T["arrayOfType"]>[] :
+  | T extends { oneOf: readonly FieldType[] | FieldType[] } ? GetType<T["oneOf"][number]> :
+  | T extends { oneOfType: readonly ObjectSchema[] | ObjectSchema[] } ? GetType<T["oneOfType"][number]> :
+  | T extends { arrayOf: ObjectSchema } ? GetObjectType<T["arrayOf"]>[] :
+  | T extends { arrayOfType: ObjectSchema } ? GetObjectType<T["arrayOfType"]>[] :
   any;
 
   type IsOptional<F extends FieldType> = F extends DataType? false : F extends { optional: true }? true : false; 
 
-  const _r: GetType<{ record: { keysEnum: ["a", "b"], values: "integer[]" } }> = {
-    a: [2],
-    b: [221]
-  }
 
-  export type ObjectSchema = Record<string, FieldType>;
+  type ObjectSchema = Record<string, FieldType>;
   export type JSONBSchema = Omit<FieldTypeObj, "optional">;
 
-  const _dd: JSONBSchema = {
-    enum: [1],
-    type: "any"
-  }
 
   export type GetObjectType<S extends ObjectSchema> = (
     {
@@ -157,12 +150,39 @@ export namespace JSONB {
       [K in keyof S as IsOptional<S[K]> extends true ? never : K]: GetType<S[K]>
     }
   );
-  export type SchemaObject<S extends JSONBSchema> = S["nullable"] extends true? (null | GetType<S>) : GetType<S>;
+  export type GetSchemaType<S extends JSONBSchema> = S["nullable"] extends true? (null | GetType<S>) : GetType<S>;
+
 }
 
 
 /** tests */
-const s: JSONB.JSONBSchema = {
+const t: JSONB.GetType<{ arrayOfType: { a: "number" } }> = [
+  { a: 2 }
+]
+
+/** StrictUnion was removed because it doesn't work with object | string */
+const _oneOf: JSONB.GetType<{ nullable: true, oneOf: [ 
+  { enum: ["n"] },
+  { type: { a: "number" } },
+] }> = {
+  a: 2
+}
+
+const _a: JSONB.GetType<{ type: { a: "number" } }> = {
+  a: 2
+}
+
+const _r: JSONB.GetType<{ record: { keysEnum: ["a", "b"], values: "integer[]" } }> = {
+  a: [2],
+  b: [221]
+}
+
+const _dd: JSONB.JSONBSchema = {
+  enum: [1],
+  type: "any"
+}
+
+const s = {
   type: {
     a: { type: "boolean" },
     c: { type: { c1: { type: "string" } } },
@@ -174,9 +194,9 @@ const s: JSONB.JSONBSchema = {
       ]
     }
   }
-};
+} as const;// satisfies JSONB.JSONBSchema;
 
-const _ss: JSONB.SchemaObject<typeof s> = {
+const _ss: JSONB.GetType<typeof s> = {
   a: true,
   arr: [{ d: "" }],
   c: {

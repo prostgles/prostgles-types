@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getJSONBSchemaAsJSONSchema = exports.JSONB = exports.DATA_TYPES = exports.PrimitiveArrayTypes = exports.PrimitiveTypes = void 0;
+exports.getJSONBSchemaAsJSONSchema = exports.DATA_TYPES = exports.PrimitiveArrayTypes = exports.PrimitiveTypes = void 0;
 const util_1 = require("./util");
 exports.PrimitiveTypes = ["boolean", "number", "integer", "string", "any"];
 exports.PrimitiveArrayTypes = exports.PrimitiveTypes.map(v => `${v}[]`);
@@ -8,17 +8,23 @@ exports.DATA_TYPES = [
     ...exports.PrimitiveTypes,
     ...exports.PrimitiveArrayTypes
 ];
-var JSONB;
-(function (JSONB) {
-    const _r = {
-        a: [2],
-        b: [221]
-    };
-    const _dd = {
-        enum: [1],
-        type: "any"
-    };
-})(JSONB = exports.JSONB || (exports.JSONB = {}));
+const t = [
+    { a: 2 }
+];
+const _oneOf = {
+    a: 2
+};
+const _a = {
+    a: 2
+};
+const _r = {
+    a: [2],
+    b: [221]
+};
+const _dd = {
+    enum: [1],
+    type: "any"
+};
 const s = {
     type: {
         a: { type: "boolean" },

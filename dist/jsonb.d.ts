@@ -167,7 +167,9 @@ export declare namespace JSONB {
         optional: true;
     } ? true : false;
     type ObjectSchema = Record<string, FieldType>;
-    export type JSONBSchema = Omit<FieldTypeObj, "optional">;
+    export type JSONBSchema = Omit<FieldTypeObj, "optional"> & {
+        defaultValue?: any;
+    };
     export type GetObjectType<S extends ObjectSchema> = ({
         [K in keyof S as IsOptional<S[K]> extends true ? K : never]?: GetType<S[K]>;
     } & {

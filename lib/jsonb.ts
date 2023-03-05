@@ -191,7 +191,7 @@ export namespace JSONB {
 
 
   type ObjectSchema = Record<string, FieldType>;
-  export type JSONBSchema = Omit<FieldTypeObj, "optional">;
+  export type JSONBSchema = Omit<FieldTypeObj, "optional"> & { defaultValue?: any };
 
 
   export type GetObjectType<S extends ObjectSchema> = (

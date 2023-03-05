@@ -38,7 +38,7 @@ export namespace JSONB {
         /**
          * Columns to use in displaying the values
          */
-        displayColumns?: string;
+        displayColumns?: string[];
       };
     } | {
       type: "schema";

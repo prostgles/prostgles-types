@@ -21,7 +21,7 @@ export declare namespace JSONB {
             filter?: AnyObject;
             isArray?: boolean;
             isFullRow?: {
-                displayColumns?: string;
+                displayColumns?: string[];
             };
         } | {
             type: "schema";

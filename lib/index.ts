@@ -786,14 +786,14 @@ export type TableSchema = {
 
 export type MethodFunction = (...args: any) => (any | Promise<any>);
 export type MethodFullDef = {
-  input: Record<string, JSONB.JSONBSchema<JSONB.ObjectType>>;
+  input: Record<string, JSONB.JSONBSchema>;
   run: MethodFunction;
-  output?: Record<string, JSONB.JSONBSchema<JSONB.ObjectType>>;
+  output?: Record<string, JSONB.JSONBSchema>;
 } & ({
   output?: undefined;
   outputTable?: string;
 } | {
-  output?: Record<string, JSONB.JSONBSchema<JSONB.ObjectType>>;
+  output?: Record<string, JSONB.JSONBSchema>;
   outputTable?: undefined;
 });
 export type Method = MethodFunction | MethodFullDef;

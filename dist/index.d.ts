@@ -241,7 +241,7 @@ export type ViewHandler<TD extends AnyObject = AnyObject, S = void> = {
     getColumns?: GetColumns;
     find: <P extends SelectParams<TD>>(filter?: FullFilter<TD, S>, selectParams?: P) => Promise<GetSelectReturnType<P, TD, true>>;
     findOne: <P extends SelectParams<TD>>(filter?: FullFilter<TD, S>, selectParams?: P) => Promise<undefined | GetSelectReturnType<P, TD, false>>;
-    subscribe: <P extends SubscribeParams<TD>>(filter: FullFilter<TD, S>, params: P, onData: (items: GetSelectReturnType<P, TD, true>, onError?: OnError) => any) => Promise<SubscriptionHandler<TD>>;
+    subscribe: <P extends SubscribeParams<TD>>(filter: FullFilter<TD, S>, params: P, onData: (items: GetSelectReturnType<P, TD, true>) => any, onError?: OnError) => Promise<SubscriptionHandler<TD>>;
     subscribeOne: <P extends SubscribeParams<TD>>(filter: FullFilter<TD, S>, params: P, onData: (item: GetSelectReturnType<P, TD, false> | undefined) => any, onError?: OnError) => Promise<SubscriptionHandler<TD>>;
     count: (filter?: FullFilter<TD, S>) => Promise<number>;
     size: (filter?: FullFilter<TD>, selectParams?: SelectParams<TD>) => Promise<string>;

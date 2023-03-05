@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getJSONBSchemaAsJSONSchema = exports.DATA_TYPES = exports.PrimitiveArrayTypes = exports.PrimitiveTypes = void 0;
 const util_1 = require("./util");
-exports.PrimitiveTypes = ["boolean", "number", "integer", "string", "any"];
+exports.PrimitiveTypes = ["boolean", "number", "integer", "string", "Date", "time", "timestamp", "any"];
 exports.PrimitiveArrayTypes = exports.PrimitiveTypes.map(v => `${v}[]`);
 exports.DATA_TYPES = [
     ...exports.PrimitiveTypes,

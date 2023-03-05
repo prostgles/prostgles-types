@@ -1,7 +1,8 @@
 import { getKeys, isObject, StrictUnion } from "./util";
 import type { JSONSchema7, JSONSchema7TypeName } from "json-schema";
+import { AnyObject } from "./filters";
 
-export const PrimitiveTypes = ["boolean" , "number", "integer", "string", "any"] as const;
+export const PrimitiveTypes = ["boolean" , "number", "integer", "string", "Date", "time", "timestamp", "any"] as const;
 export const PrimitiveArrayTypes = PrimitiveTypes.map(v => `${v}[]` as `${typeof v}[]`);
 export const DATA_TYPES = [
   ...PrimitiveTypes,
@@ -24,6 +25,29 @@ export namespace JSONB {
     description?: string;
     title?: string;
   }; 
+
+  export type Lookup = BaseOptions & {
+    type?: DataType;
+    lookup: {
+      type: "data";
+      table: string;
+      column: string;
+      filter?: AnyObject;
+      isArray?: boolean;
+      isFullRow?: boolean;
+    } | {
+      type: "schema";
+      isArray?: boolean;
+      object: "column" | "table";
+      filter?: { table?: string; column?: string; tsDataType?: string; udt_name?: string; };
+    };
+    allowedValues?: undefined;
+    oneOf?: undefined;
+    oneOfType?: undefined;
+    arrayOf?: undefined;
+    arrayOfType?: undefined;
+    enum?: undefined;
+  };
 
   export type BasicType = BaseOptions & {
     type: DataType;
@@ -103,6 +127,7 @@ export namespace JSONB {
     | OneOf
     | ArrayOf
     | RecordType
+    | Lookup
   >;
 
   export type FieldType = 

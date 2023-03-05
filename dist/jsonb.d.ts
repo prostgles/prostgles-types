@@ -1,8 +1,9 @@
 import { StrictUnion } from "./util";
 import type { JSONSchema7 } from "json-schema";
-export declare const PrimitiveTypes: readonly ["boolean", "number", "integer", "string", "any"];
-export declare const PrimitiveArrayTypes: ("string[]" | "number[]" | "boolean[]" | "integer[]" | "any[]")[];
-export declare const DATA_TYPES: readonly ["boolean", "number", "integer", "string", "any", ...("string[]" | "number[]" | "boolean[]" | "integer[]" | "any[]")[]];
+import { AnyObject } from "./filters";
+export declare const PrimitiveTypes: readonly ["boolean", "number", "integer", "string", "Date", "time", "timestamp", "any"];
+export declare const PrimitiveArrayTypes: ("string[]" | "number[]" | "boolean[]" | "integer[]" | "time[]" | "timestamp[]" | "Date[]" | "any[]")[];
+export declare const DATA_TYPES: readonly ["boolean", "number", "integer", "string", "Date", "time", "timestamp", "any", ...("string[]" | "number[]" | "boolean[]" | "integer[]" | "time[]" | "timestamp[]" | "Date[]" | "any[]")[]];
 type DataType = typeof DATA_TYPES[number];
 export declare namespace JSONB {
     export type BaseOptions = {
@@ -10,6 +11,33 @@ export declare namespace JSONB {
         nullable?: boolean;
         description?: string;
         title?: string;
+    };
+    export type Lookup = BaseOptions & {
+        type?: DataType;
+        lookup: {
+            type: "data";
+            table: string;
+            column: string;
+            filter?: AnyObject;
+            isArray?: boolean;
+            isFullRow?: boolean;
+        } | {
+            type: "schema";
+            isArray?: boolean;
+            object: "column" | "table";
+            filter?: {
+                table?: string;
+                column?: string;
+                tsDataType?: string;
+                udt_name?: string;
+            };
+        };
+        allowedValues?: undefined;
+        oneOf?: undefined;
+        oneOfType?: undefined;
+        arrayOf?: undefined;
+        arrayOfType?: undefined;
+        enum?: undefined;
     };
     export type BasicType = BaseOptions & {
         type: DataType;
@@ -77,7 +105,7 @@ export declare namespace JSONB {
             values?: FieldType;
         };
     };
-    export type FieldTypeObj = StrictUnion<BasicType | ObjectType | EnumType | OneOf | ArrayOf | RecordType>;
+    export type FieldTypeObj = StrictUnion<BasicType | ObjectType | EnumType | OneOf | ArrayOf | RecordType | Lookup>;
     export type FieldType = DataType | FieldTypeObj;
     export type GetType<T extends FieldType | Omit<FieldTypeObj, "optional">> = GetWNullType<T extends DataType ? {
         type: T;

@@ -46,20 +46,20 @@ export namespace JSONB {
          */
         searchColumns?: string[];
 
-        /**
-         * If true then a button will be shown
-         *  in the row card footer to access this action 
-         */
-        showInRowCard?: {
-          /**
-           * Action button text. Defaults to the method name
-           */
-          actionLabel?: string;
-          actionColor?: "danger" | "warn" | "action";
-          actionStyle?: AnyObject;
-          actionClass?: string;
-        }
       };
+      /**
+       * If true then a button will be shown
+       *  in the row card footer to access this action 
+       */
+      showInRowCard?: {
+        /**
+         * Action button text. Defaults to the method name
+         */
+        actionLabel?: string;
+        actionColor?: "danger" | "warn" | "action";
+        actionStyle?: AnyObject;
+        actionClass?: string;
+      }
     } | {
       type: "schema";
       isArray?: boolean;

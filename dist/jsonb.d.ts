@@ -23,12 +23,12 @@ export declare namespace JSONB {
             isFullRow?: {
                 displayColumns?: string[];
                 searchColumns?: string[];
-                showInRowCard?: {
-                    actionLabel?: string;
-                    actionColor?: "danger" | "warn" | "action";
-                    actionStyle?: AnyObject;
-                    actionClass?: string;
-                };
+            };
+            showInRowCard?: {
+                actionLabel?: string;
+                actionColor?: "danger" | "warn" | "action";
+                actionStyle?: AnyObject;
+                actionClass?: string;
             };
         } | {
             type: "schema";

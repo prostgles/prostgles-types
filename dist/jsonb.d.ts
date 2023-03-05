@@ -14,7 +14,7 @@ export declare namespace JSONB {
     };
     export type Lookup = BaseOptions & {
         type?: DataType;
-        lookup: {
+        lookup: ({
             type: "data";
             table: string;
             column: string;
@@ -39,7 +39,7 @@ export declare namespace JSONB {
                 tsDataType?: string;
                 udt_name?: string;
             };
-        };
+        });
         allowedValues?: undefined;
         oneOf?: undefined;
         oneOfType?: undefined;
@@ -167,7 +167,7 @@ export declare namespace JSONB {
         optional: true;
     } ? true : false;
     type ObjectSchema = Record<string, FieldType>;
-    export type JSONBSchema = Omit<FieldTypeObj, "optional"> & {
+    export type JSONBSchema<T extends FieldTypeObj = FieldTypeObj> = Omit<T, "optional"> & {
         defaultValue?: any;
     };
     export type GetObjectType<S extends ObjectSchema> = ({

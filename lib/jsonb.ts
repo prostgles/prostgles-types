@@ -34,12 +34,17 @@ export namespace JSONB {
       column: string;
       filter?: AnyObject;
       isArray?: boolean;
-      isFullRow?: boolean;
+      isFullRow?: {
+        /**
+         * Columns to use in displaying the values
+         */
+        displayColumns?: string;
+      };
     } | {
       type: "schema";
       isArray?: boolean;
       object: "column" | "table";
-      filter?: { table?: string; column?: string; tsDataType?: string; udt_name?: string; };
+      filter?: { table?: string; tsDataType?: string; udt_name?: string; };
     };
     allowedValues?: undefined;
     oneOf?: undefined;

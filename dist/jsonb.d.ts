@@ -20,14 +20,15 @@ export declare namespace JSONB {
             column: string;
             filter?: AnyObject;
             isArray?: boolean;
-            isFullRow?: boolean;
+            isFullRow?: {
+                displayColumns?: string;
+            };
         } | {
             type: "schema";
             isArray?: boolean;
             object: "column" | "table";
             filter?: {
                 table?: string;
-                column?: string;
                 tsDataType?: string;
                 udt_name?: string;
             };

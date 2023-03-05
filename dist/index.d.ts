@@ -429,40 +429,16 @@ export type TableSchema = {
         delete: boolean;
     };
 };
-export type ObjDef = {
-    type: "string" | "number" | "Date";
-    label?: string;
-    defaultValue?: string;
-    optional?: boolean;
-    references?: {
-        table: string;
-        showInRowCard?: {
-            actionLabel?: string;
-            actionColor?: "danger" | "warn" | "action";
-            actionStyle?: AnyObject;
-            actionClass?: string;
-        };
-    } & ({
-        column: string;
-        isFullRow?: undefined;
-    } | {
-        column?: undefined;
-        isFullRow?: {
-            displayColumns?: string[];
-            searchColumns?: string[];
-        };
-    });
-};
 export type MethodFunction = (...args: any) => (any | Promise<any>);
 export type MethodFullDef = {
-    input: Record<string, ObjDef>;
+    input: Record<string, JSONB.JSONBSchema>;
     run: MethodFunction;
-    output?: Record<string, Omit<ObjDef, "references">>;
+    output?: Record<string, JSONB.JSONBSchema>;
 } & ({
     output?: undefined;
     outputTable?: string;
 } | {
-    output?: Record<string, Omit<ObjDef, "references">>;
+    output?: Record<string, JSONB.JSONBSchema>;
     outputTable?: undefined;
 });
 export type Method = MethodFunction | MethodFullDef;
@@ -479,6 +455,7 @@ export type ClientSchema = {
     schema: TableSchemaForClient;
     methods: (string | {
         name: string;
+        description?: string;
     } & Pick<MethodFullDef, "input" | "output">)[];
 };
 export type AuthSocketSchema = {

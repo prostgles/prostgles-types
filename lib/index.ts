@@ -784,64 +784,16 @@ export type TableSchema = {
   }
 }
 
-export type  ObjDef = {
-  type: "string" | "number" | "Date";
-  label?: string;
-  defaultValue?: string;
-  optional?: boolean;
-  references?: { 
-    table: string; 
-    
-    /**
-     * If true then a button will be shown
-     *  in the row card footer to access this action 
-     */
-    showInRowCard?: {
-      /**
-       * Action button text. Defaults to the method name
-       */
-      actionLabel?: string;
-      actionColor?: "danger" | "warn" | "action";
-      actionStyle?: AnyObject;
-      actionClass?: string;
-    }
-    
-  } & ({
-    column: string;
-    isFullRow?: undefined;
-  } | {
-    column?: undefined;
-
-    /**
-     * If true then the argument will represent the entire row and 
-     *  the specified column will only be used to display the chosen row
-     */
-    isFullRow?: {
-
-      /**
-       * Columns used to display the selected row in the dropdown
-       */
-      displayColumns?: string[];
-
-      /**
-       * Columns used to search
-       */
-      searchColumns?: string[];
-
-    };
-  })
-}
-
 export type MethodFunction = (...args: any) => (any | Promise<any>);
 export type MethodFullDef = {
-  input: Record<string, ObjDef>;
+  input: Record<string, JSONB.JSONBSchema>;
   run: MethodFunction;
-  output?: Record<string, Omit<ObjDef, "references">>;
+  output?: Record<string, JSONB.JSONBSchema>;
 } & ({
   output?: undefined;
   outputTable?: string;
 } | {
-  output?: Record<string, Omit<ObjDef, "references">>;
+  output?: Record<string, JSONB.JSONBSchema>;
   outputTable?: undefined;
 });
 export type Method = MethodFunction | MethodFullDef;
@@ -858,7 +810,7 @@ export type ClientSchema = {
   err?: string;
   tableSchema?: DBSchemaTable[];
   schema: TableSchemaForClient;
-  methods: (string | { name: string; } & Pick<MethodFullDef, "input" | "output">)[];
+  methods: (string | { name: string; description?: string; } & Pick<MethodFullDef, "input" | "output">)[];
 }
 
 /**

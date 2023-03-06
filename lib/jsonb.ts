@@ -27,15 +27,14 @@ export namespace JSONB {
   }; 
 
   export type Lookup = BaseOptions & {
-    type?: undefined;
+    type?: "Lookup" | "Lookup[]";
     lookup: ({
+      type: 
+      | "data"      
       /**
-       * This is used to generate lookup of type data
-       */
-      type: "lookup-def";
-      params?: any;
-    } | {
-      type: "data";
+       * This is used as edit-mode (to generate lookup of type data)
+       */ 
+      | "data-def";
       table: string;
       column: string;
       filter?: AnyObject;

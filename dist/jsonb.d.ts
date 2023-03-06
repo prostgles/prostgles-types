@@ -13,12 +13,9 @@ export declare namespace JSONB {
         title?: string;
     };
     export type Lookup = BaseOptions & {
-        type?: undefined;
+        type?: "Lookup" | "Lookup[]";
         lookup: ({
-            type: "lookup-def";
-            params?: any;
-        } | {
-            type: "data";
+            type: "data" | "data-def";
             table: string;
             column: string;
             filter?: AnyObject;

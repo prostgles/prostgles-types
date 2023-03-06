@@ -13,8 +13,11 @@ export declare namespace JSONB {
         title?: string;
     };
     export type Lookup = BaseOptions & {
-        type?: DataType;
+        type?: undefined;
         lookup: ({
+            type: "lookup-def";
+            params?: any;
+        } | {
             type: "data";
             table: string;
             column: string;
@@ -135,6 +138,12 @@ export declare namespace JSONB {
     } ? GetAllowedValues<T, number> : T extends {
         type: "string";
     } ? GetAllowedValues<T, string> : T extends {
+        type: "time";
+    } ? GetAllowedValues<T, string> : T extends {
+        type: "timestamp";
+    } ? GetAllowedValues<T, string> : T extends {
+        type: "Date";
+    } ? GetAllowedValues<T, string> : T extends {
         type: "any";
     } ? GetAllowedValues<T, any> : T extends {
         type: "number[]";
@@ -143,6 +152,12 @@ export declare namespace JSONB {
     } ? GetAllowedValues<T, boolean>[] : T extends {
         type: "integer[]";
     } ? GetAllowedValues<T, number>[] : T extends {
+        type: "time[]";
+    } ? GetAllowedValues<T, string>[] : T extends {
+        type: "timestamp[]";
+    } ? GetAllowedValues<T, string>[] : T extends {
+        type: "Date[]";
+    } ? GetAllowedValues<T, string>[] : T extends {
         type: "string[]";
     } ? GetAllowedValues<T, string>[] : T extends {
         type: "any[]";

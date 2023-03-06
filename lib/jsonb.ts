@@ -27,8 +27,14 @@ export namespace JSONB {
   }; 
 
   export type Lookup = BaseOptions & {
-    type?: DataType;
+    type?: undefined;
     lookup: ({
+      /**
+       * This is used to generate lookup of type data
+       */
+      type: "lookup-def";
+      params?: any;
+    } | {
       type: "data";
       table: string;
       column: string;
@@ -170,10 +176,16 @@ export namespace JSONB {
   | T extends { type: "boolean" } ?   GetAllowedValues<T, boolean> :
   | T extends { type: "integer" } ?   GetAllowedValues<T, number> :
   | T extends { type: "string" } ?    GetAllowedValues<T, string> :
+  | T extends { type: "time" } ?    GetAllowedValues<T, string> :
+  | T extends { type: "timestamp" } ?    GetAllowedValues<T, string> :
+  | T extends { type: "Date" } ?    GetAllowedValues<T, string> :
   | T extends { type: "any" } ?       GetAllowedValues<T, any> :
   | T extends { type: "number[]" } ?  GetAllowedValues<T, number>[] :
   | T extends { type: "boolean[]" } ? GetAllowedValues<T, boolean>[] :
   | T extends { type: "integer[]" } ? GetAllowedValues<T, number>[] :
+  | T extends { type: "time[]" } ?    GetAllowedValues<T, string>[] :
+  | T extends { type: "timestamp[]" } ?    GetAllowedValues<T, string>[] :
+  | T extends { type: "Date[]" } ?    GetAllowedValues<T, string>[] :
   | T extends { type: "string[]" } ?  GetAllowedValues<T, string>[] :
   | T extends { type: "any[]" } ?     GetAllowedValues<T, any>[] :
   | T extends { "enum": readonly any[] | any[] } ? T["enum"][number] :

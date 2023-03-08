@@ -45,13 +45,11 @@ export namespace JSONB {
          * Columns used to display the selected row in the dropdown
          */
         displayColumns?: string[];
-
-        /**
-         * Columns used to search
-         */
-        searchColumns?: string[];
-
       };
+      /**
+       * Columns used to search
+       */
+      searchColumns?: string[];
       /**
        * If true then a button will be shown
        *  in the row card footer to access this action 

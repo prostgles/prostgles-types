@@ -22,8 +22,8 @@ export declare namespace JSONB {
             isArray?: boolean;
             isFullRow?: {
                 displayColumns?: string[];
-                searchColumns?: string[];
             };
+            searchColumns?: string[];
             showInRowCard?: {
                 actionLabel?: string;
                 actionColor?: "danger" | "warn" | "action";

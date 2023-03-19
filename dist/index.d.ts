@@ -10,16 +10,13 @@ export declare const _PG_postgis: readonly ["geometry", "geography"];
 export declare const _PG_geometric: readonly ["point", "line", "lseg", "box", "path", "polygon", "circle"];
 export type PG_COLUMN_UDT_DATA_TYPE = typeof _PG_strings[number] | typeof _PG_numbers[number] | typeof _PG_geometric[number] | typeof _PG_json[number] | typeof _PG_bool[number] | typeof _PG_date[number] | typeof _PG_postgis[number];
 export declare const TS_PG_Types: {
-    readonly string: readonly ["bpchar", "char", "varchar", "text", "citext", "uuid", "bytea", "time", "timetz", "interval", "name", "cidr", "inet", "macaddr", "macaddr8", "int4range", "int8range", "numrange", "tsvector", "lseg"];
+    readonly "number[]": ("_numeric" | "_int2" | "_int4" | "_int8" | "_float4" | "_float8" | "_money" | "_oid")[];
+    readonly "boolean[]": "_bool"[];
+    readonly "string[]": ("_name" | "_text" | "_bpchar" | "_char" | "_varchar" | "_citext" | "_uuid" | "_bytea" | "_time" | "_timetz" | "_interval" | "_cidr" | "_inet" | "_macaddr" | "_macaddr8" | "_int4range" | "_int8range" | "_numrange" | "_tsvector" | "_date" | "_timestamp" | "_timestamptz" | "_lseg")[];
+    readonly "any[]": ("_json" | "_jsonb")[];
+    readonly string: readonly ["bpchar", "char", "varchar", "text", "citext", "uuid", "bytea", "time", "timetz", "interval", "name", "cidr", "inet", "macaddr", "macaddr8", "int4range", "int8range", "numrange", "tsvector", "date", "timestamp", "timestamptz", "lseg"];
     readonly number: readonly ["int2", "int4", "int8", "float4", "float8", "numeric", "money", "oid"];
     readonly boolean: readonly ["bool"];
-    readonly Date: readonly ["date", "timestamp", "timestamptz"];
-    readonly "Array<number>": string[];
-    readonly "Array<boolean>": string[];
-    readonly "Array<string>": string[];
-    readonly "Array<Object>": string[];
-    readonly "Array<Date>": string[];
-    readonly any: readonly [];
 };
 export type TS_COLUMN_DATA_TYPES = keyof typeof TS_PG_Types;
 export type DBTableSchema = {

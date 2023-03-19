@@ -32,18 +32,26 @@ export type PG_COLUMN_UDT_DATA_TYPE =
     | typeof _PG_date[number] 
     | typeof _PG_postgis[number];
     
+const TS_PG_PRIMITIVES = {
+  "string": [ ..._PG_strings, ..._PG_date, "lseg"],
+  "number": _PG_numbers,
+  "boolean": _PG_bool,
+  // "any": _PG_json, // consider as any
+
+  /** Timestamps are kept in original string format to avoid filters failing 
+   * TODO: cast to dates if udt_name date/timestamp(0 - 3)
+  */
+  // "Date": _PG_date,
+} as const;
+
 export const TS_PG_Types = {
-    "string": [ ..._PG_strings, "lseg"],
-    "number": _PG_numbers,
-    "boolean": _PG_bool,
-    // "any": _PG_json, // consider as any
-    "Date": _PG_date,
-    "Array<number>": _PG_numbers.map(s => `_${s}`),
-    "Array<boolean>": _PG_bool.map(s => `_${s}`),
-    "Array<string>": _PG_strings.map(s => `_${s}`),
-    "Array<Object>": _PG_json.map(s => `_${s}`),
-    "Array<Date>": _PG_date.map(s => `_${s}`),
-    "any": [],
+  ...TS_PG_PRIMITIVES,
+  "number[]": TS_PG_PRIMITIVES.number.map(s => `_${s}` as const),
+  "boolean[]": TS_PG_PRIMITIVES.boolean.map(s => `_${s}` as const),
+  "string[]": TS_PG_PRIMITIVES.string.map(s => `_${s}` as const),
+  "any[]": _PG_json.map(s => `_${s}` as const),
+  // "Date[]": _PG_date.map(s => `_${s}` as const),
+    // "any": [],
 } as const;
 export type TS_COLUMN_DATA_TYPES = keyof typeof TS_PG_Types;
 

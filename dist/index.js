@@ -34,17 +34,17 @@ exports._PG_geometric = [
     "polygon",
     "circle",
 ];
-exports.TS_PG_Types = {
-    "string": [...exports._PG_strings, "lseg"],
+const TS_PG_PRIMITIVES = {
+    "string": [...exports._PG_strings, ...exports._PG_date, "lseg"],
     "number": exports._PG_numbers,
     "boolean": exports._PG_bool,
-    "Date": exports._PG_date,
-    "Array<number>": exports._PG_numbers.map(s => `_${s}`),
-    "Array<boolean>": exports._PG_bool.map(s => `_${s}`),
-    "Array<string>": exports._PG_strings.map(s => `_${s}`),
-    "Array<Object>": exports._PG_json.map(s => `_${s}`),
-    "Array<Date>": exports._PG_date.map(s => `_${s}`),
-    "any": [],
+};
+exports.TS_PG_Types = {
+    ...TS_PG_PRIMITIVES,
+    "number[]": TS_PG_PRIMITIVES.number.map(s => `_${s}`),
+    "boolean[]": TS_PG_PRIMITIVES.boolean.map(s => `_${s}`),
+    "string[]": TS_PG_PRIMITIVES.string.map(s => `_${s}`),
+    "any[]": exports._PG_json.map(s => `_${s}`),
 };
 exports.JOIN_KEYS = ["$innerJoin", "$leftJoin"];
 exports.JOIN_PARAMS = ["select", "filter", "$path", "$condition", "offset", "limit", "orderBy"];

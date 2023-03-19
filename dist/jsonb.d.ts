@@ -2,8 +2,8 @@ import { StrictUnion } from "./util";
 import type { JSONSchema7 } from "json-schema";
 import { AnyObject } from "./filters";
 export declare const PrimitiveTypes: readonly ["boolean", "number", "integer", "string", "Date", "time", "timestamp", "any"];
-export declare const PrimitiveArrayTypes: ("string[]" | "number[]" | "boolean[]" | "integer[]" | "time[]" | "timestamp[]" | "Date[]" | "any[]")[];
-export declare const DATA_TYPES: readonly ["boolean", "number", "integer", "string", "Date", "time", "timestamp", "any", ...("string[]" | "number[]" | "boolean[]" | "integer[]" | "time[]" | "timestamp[]" | "Date[]" | "any[]")[]];
+export declare const PrimitiveArrayTypes: ("number[]" | "boolean[]" | "string[]" | "any[]" | "integer[]" | "time[]" | "timestamp[]" | "Date[]")[];
+export declare const DATA_TYPES: readonly ["boolean", "number", "integer", "string", "Date", "time", "timestamp", "any", ...("number[]" | "boolean[]" | "string[]" | "any[]" | "integer[]" | "time[]" | "timestamp[]" | "Date[]")[]];
 type DataType = typeof DATA_TYPES[number];
 export declare namespace JSONB {
     export type BaseOptions = {

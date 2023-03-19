@@ -17,6 +17,7 @@ export declare const TS_PG_Types: {
     readonly string: readonly ["bpchar", "char", "varchar", "text", "citext", "uuid", "bytea", "time", "timetz", "interval", "name", "cidr", "inet", "macaddr", "macaddr8", "int4range", "int8range", "numrange", "tsvector", "date", "timestamp", "timestamptz", "lseg"];
     readonly number: readonly ["int2", "int4", "int8", "float4", "float8", "numeric", "money", "oid"];
     readonly boolean: readonly ["bool"];
+    readonly any: readonly ["json", "jsonb"];
 };
 export type TS_COLUMN_DATA_TYPES = keyof typeof TS_PG_Types;
 export type DBTableSchema = {

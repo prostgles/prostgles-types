@@ -36,7 +36,7 @@ const TS_PG_PRIMITIVES = {
   "string": [ ..._PG_strings, ..._PG_date, "lseg"],
   "number": _PG_numbers,
   "boolean": _PG_bool,
-  // "any": _PG_json, // consider as any
+  "any": _PG_json, // consider as any
 
   /** Timestamps are kept in original string format to avoid filters failing 
    * TODO: cast to dates if udt_name date/timestamp(0 - 3)

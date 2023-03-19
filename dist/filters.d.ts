@@ -90,7 +90,7 @@ export declare const GeomFilter_Funcs: readonly ["ST_MakeEnvelope", "st_makeenve
 export type AnyObject = {
     [key: string]: any;
 };
-export type CastFromTSToPG<T extends AllowedTSType> = T extends number ? (T | string) : T extends boolean ? (T | string) : T extends Date ? (T | string) : T;
+export type CastFromTSToPG<T extends AllowedTSType> = T extends number ? (T | string) : T extends string ? (T | Date) : T extends boolean ? (T | string) : T extends Date ? (T | string) : T;
 export type FilterDataType<T extends AllowedTSType> = T extends string ? TextFilter : T extends number ? CompareFilter<CastFromTSToPG<T>> : T extends boolean ? CompareFilter<CastFromTSToPG<T>> : T extends Date ? CompareFilter<CastFromTSToPG<T>> : T extends any[] ? ArrayFilter<T> : (CompareFilter<T> | TextFilter | GeomFilter);
 export declare const EXISTS_KEYS: readonly ["$exists", "$notExists", "$existsJoined", "$notExistsJoined"];
 export type EXISTS_KEY = typeof EXISTS_KEYS[number];

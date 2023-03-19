@@ -12,6 +12,7 @@ export const _PG_numbers = ['int2','int4','int8','float4','float8','numeric','mo
 export const _PG_json = ['json', 'jsonb'] as const;
 export const _PG_bool = ['bool'] as const;
 export const _PG_date = ['date', 'timestamp', 'timestamptz'] as const;
+export const _PG_interval = ['interval'] as const;
 export const _PG_postgis = ['geometry', 'geography'] as const;
 export const _PG_geometric = [
   "point", 
@@ -30,13 +31,14 @@ export type PG_COLUMN_UDT_DATA_TYPE =
     | typeof _PG_json[number] 
     | typeof _PG_bool[number] 
     | typeof _PG_date[number] 
+    | typeof _PG_interval[number]
     | typeof _PG_postgis[number];
     
 const TS_PG_PRIMITIVES = {
   "string": [ ..._PG_strings, ..._PG_date, "lseg"],
   "number": _PG_numbers,
   "boolean": _PG_bool,
-  "any": _PG_json, // consider as any
+  "any": [..._PG_json, ..._PG_interval], // consider as any
 
   /** Timestamps are kept in original string format to avoid filters failing 
    * TODO: cast to dates if udt_name date/timestamp(0 - 3)
@@ -49,7 +51,7 @@ export const TS_PG_Types = {
   "number[]": TS_PG_PRIMITIVES.number.map(s => `_${s}` as const),
   "boolean[]": TS_PG_PRIMITIVES.boolean.map(s => `_${s}` as const),
   "string[]": TS_PG_PRIMITIVES.string.map(s => `_${s}` as const),
-  "any[]": _PG_json.map(s => `_${s}` as const),
+  "any[]": TS_PG_PRIMITIVES.any.map(s => `_${s}` as const),
   // "Date[]": _PG_date.map(s => `_${s}` as const),
     // "any": [],
 } as const;

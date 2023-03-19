@@ -103,9 +103,9 @@ export type ComplexFilter = Record<typeof COMPLEX_FILTER_KEY, [
     any?
 ]>;
 type BasicFilter<Field extends string, DataType extends any> = Partial<{
-    [K in Extract<typeof CompareFilterKeys[number], string> as `${Field}.${K}`]: DataType;
+    [K in Extract<typeof CompareFilterKeys[number], string> as `${Field}.${K}`]: CastFromTSToPG<DataType>;
 }> | Partial<{
-    [K in Extract<typeof CompareInFilterKeys[number], string> as `${Field}.${K}`]: DataType[];
+    [K in Extract<typeof CompareInFilterKeys[number], string> as `${Field}.${K}`]: CastFromTSToPG<DataType>[];
 }>;
 type StringFilter<Field extends string, DataType extends any> = BasicFilter<Field, DataType> & (Partial<{
     [K in Extract<typeof TextFilterKeys[number], string> as `${Field}.${K}`]: DataType;

@@ -538,7 +538,7 @@ export type TableHandler<TD extends AnyObject = AnyObject, S = void> = ViewHandl
   update: <P extends UpdateParams<TD>>(filter: FullFilter<TD, S>, newData: UpsertDataToPGCastLax<TD>, params?: P) => Promise<GetUpdateReturnType<P ,TD> | undefined>;
   updateBatch: (data: [FullFilter<TD, S>, UpsertDataToPGCastLax<TD>][], params?: UpdateParams<TD>) => Promise<PartialLax<TD> | void>;
   upsert: <P extends UpdateParams<TD>>(filter: FullFilter<TD, S>, newData: UpsertDataToPGCastLax<TD>, params?: P) => Promise<GetUpdateReturnType<P ,TD>>;
-  insert: <P extends UpdateParams<TD>>(data: (TD | TD[]), params?: P ) => Promise<GetUpdateReturnType<P ,TD>>;
+  insert: <P extends UpdateParams<TD>>(data: (UpsertDataToPGCast<TD> | UpsertDataToPGCast<TD>[]), params?: P ) => Promise<GetUpdateReturnType<P ,TD>>;
   delete: <P extends DeleteParams<TD>>(filter?: FullFilter<TD, S>, params?: P) => Promise<GetUpdateReturnType<P ,TD> | undefined>;
 }
 

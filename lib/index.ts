@@ -532,7 +532,7 @@ export type ViewHandler<TD extends AnyObject = AnyObject, S = void> = {
 export type UpsertDataToPGCast<TD extends AnyObject> = {
   [K in keyof TD]: CastFromTSToPG<TD[K]>
 }
-type UpsertDataToPGCastLax<T> = PartialLax<T>;
+type UpsertDataToPGCastLax<T extends AnyObject> = PartialLax<UpsertDataToPGCast<T>>;
 
 export type TableHandler<TD extends AnyObject = AnyObject, S = void> = ViewHandler<TD, S> & {
   update: <P extends UpdateParams<TD>>(filter: FullFilter<TD, S>, newData: UpsertDataToPGCastLax<TD>, params?: P) => Promise<GetUpdateReturnType<P ,TD> | undefined>;

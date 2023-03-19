@@ -1,6 +1,8 @@
 import { DBSchema } from ".";
 import { ExactlyOne, getKeys } from "./util";
 
+export type AllowedTSType = string | number | boolean | Date | any;
+export type AllowedTSTypes = AllowedTSType[];
 
 export const CompareFilterKeys = ["=", "$eq","<>",">","<",">=","<=","$eq","$ne","$gt","$gte","$lte"] as const;
 export const CompareInFilterKeys = ["$in", "$nin"] as const;
@@ -73,7 +75,7 @@ export const JsonbFilterKeys = getKeys(JsonbOperands);
 /**
  * Example: col_name: { $gt: 2 }
  */
- export type CompareFilter<T = Date | number | string | boolean> =
+ export type CompareFilter<T extends AllowedTSType = string> =
  /**
   * column value equals provided value
   */
@@ -98,9 +100,10 @@ export type TextFilter =
 
  | ExactlyOne<Record<typeof TextFilterFTSKeys[number], FullTextSearchFilter>>
 ;
-export const ArrayFilterOperands = [...TextFilterFTSKeys, "&&", "$overlaps"] as const;
-export type ArrayFilter<T = (number | boolean | string)[]> = 
- | CompareFilter<T>
+
+export const ArrayFilterOperands = ["@>", "<@", "=", "$eq", "$contains", "$containedBy", "&&", "$overlaps"] as const;
+export type ArrayFilter<T extends AllowedTSType[]> = 
+ | Record<typeof ArrayFilterOperands[number], T>
  | ExactlyOne<Record<typeof ArrayFilterOperands[number], T>>
 ;
 
@@ -155,17 +158,23 @@ export const GeomFilter_Funcs =  [
   "st_makepolygon",
 ] as const;
 
-export type AllowedTSTypes = string | number | boolean | Date | any[];
 // export type AnyObject = { [key: string]: AllowedTSTypes };
 export type AnyObject = { [key: string]: any };
 
-export type FilterDataType<T = any> = 
+// PG will try to cast strings to appropriate type
+export type CastFromTSToPG<T extends AllowedTSType> = 
+  T extends number ? (T | string) 
+: T extends boolean ? (T | string)
+: T extends Date ? (T | string)
+: T
+
+export type FilterDataType<T extends AllowedTSType> = 
   T extends string ? TextFilter
-: T extends number ? CompareFilter<T>
-: T extends boolean ? CompareFilter<T>
-: T extends Date ? CompareFilter<T>
+: T extends number ? CompareFilter<CastFromTSToPG<T>>
+: T extends boolean ? CompareFilter<CastFromTSToPG<T>>
+: T extends Date ? CompareFilter<CastFromTSToPG<T>>
 : T extends any[] ? ArrayFilter<T>
-: (CompareFilter<T> | ArrayFilter<T> | TextFilter | GeomFilter)
+: (CompareFilter<T> | TextFilter | GeomFilter)
 ;
 
 export const EXISTS_KEYS = ["$exists", "$notExists", "$existsJoined", "$notExistsJoined"] as const;

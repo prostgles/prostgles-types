@@ -1,5 +1,7 @@
 import { DBSchema } from ".";
 import { ExactlyOne } from "./util";
+export type AllowedTSType = string | number | boolean | Date | any;
+export type AllowedTSTypes = AllowedTSType[];
 export declare const CompareFilterKeys: readonly ["=", "$eq", "<>", ">", "<", ">=", "<=", "$eq", "$ne", "$gt", "$gte", "$lte"];
 export declare const CompareInFilterKeys: readonly ["$in", "$nin"];
 export declare const JsonbOperands: {
@@ -65,7 +67,7 @@ export declare const JsonbOperands: {
     };
 };
 export declare const JsonbFilterKeys: ("@>" | "<@" | "?" | "?|" | "?&" | "||" | "-" | "#-" | "@?" | "@@")[];
-export type CompareFilter<T = Date | number | string | boolean> = T | ExactlyOne<Record<typeof CompareFilterKeys[number], T>> | ExactlyOne<Record<typeof CompareInFilterKeys[number], T[]>> | {
+export type CompareFilter<T extends AllowedTSType = string> = T | ExactlyOne<Record<typeof CompareFilterKeys[number], T>> | ExactlyOne<Record<typeof CompareInFilterKeys[number], T[]>> | {
     "$between": [T, T];
 };
 export declare const TextFilterKeys: readonly ["$ilike", "$like", "$nilike", "$nlike"];
@@ -73,8 +75,8 @@ export declare const TextFilterFTSKeys: readonly ["@@", "@>", "<@", "$contains",
 export declare const TextFilter_FullTextSearchFilterKeys: readonly ["to_tsquery", "plainto_tsquery", "phraseto_tsquery", "websearch_to_tsquery"];
 export type FullTextSearchFilter = ExactlyOne<Record<typeof TextFilter_FullTextSearchFilterKeys[number], string[]>>;
 export type TextFilter = CompareFilter<string> | ExactlyOne<Record<typeof TextFilterKeys[number], string>> | ExactlyOne<Record<typeof TextFilterFTSKeys[number], FullTextSearchFilter>>;
-export declare const ArrayFilterOperands: readonly ["@@", "@>", "<@", "$contains", "$containedBy", "&&", "$overlaps"];
-export type ArrayFilter<T = (number | boolean | string)[]> = CompareFilter<T> | ExactlyOne<Record<typeof ArrayFilterOperands[number], T>>;
+export declare const ArrayFilterOperands: readonly ["@>", "<@", "=", "$eq", "$contains", "$containedBy", "&&", "$overlaps"];
+export type ArrayFilter<T extends AllowedTSType[]> = Record<typeof ArrayFilterOperands[number], T> | ExactlyOne<Record<typeof ArrayFilterOperands[number], T>>;
 export type GeoBBox = {
     ST_MakeEnvelope: number[];
 };
@@ -85,11 +87,11 @@ export type GeomFilter = {
 };
 export declare const GeomFilterKeys: readonly ["~", "~=", "@", "|&>", "|>>", ">>", "=", "<<|", "<<", "&>", "&<|", "&<", "&&&", "&&"];
 export declare const GeomFilter_Funcs: readonly ["ST_MakeEnvelope", "st_makeenvelope", "ST_MakePolygon", "st_makepolygon"];
-export type AllowedTSTypes = string | number | boolean | Date | any[];
 export type AnyObject = {
     [key: string]: any;
 };
-export type FilterDataType<T = any> = T extends string ? TextFilter : T extends number ? CompareFilter<T> : T extends boolean ? CompareFilter<T> : T extends Date ? CompareFilter<T> : T extends any[] ? ArrayFilter<T> : (CompareFilter<T> | ArrayFilter<T> | TextFilter | GeomFilter);
+export type CastFromTSToPG<T extends AllowedTSType> = T extends number ? (T | string) : T extends boolean ? (T | string) : T extends Date ? (T | string) : T;
+export type FilterDataType<T extends AllowedTSType> = T extends string ? TextFilter : T extends number ? CompareFilter<CastFromTSToPG<T>> : T extends boolean ? CompareFilter<CastFromTSToPG<T>> : T extends Date ? CompareFilter<CastFromTSToPG<T>> : T extends any[] ? ArrayFilter<T> : (CompareFilter<T> | TextFilter | GeomFilter);
 export declare const EXISTS_KEYS: readonly ["$exists", "$notExists", "$existsJoined", "$notExistsJoined"];
 export type EXISTS_KEY = typeof EXISTS_KEYS[number];
 export declare const COMPLEX_FILTER_KEY: "$filter";

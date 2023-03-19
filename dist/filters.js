@@ -70,7 +70,7 @@ exports.JsonbFilterKeys = (0, util_1.getKeys)(exports.JsonbOperands);
 exports.TextFilterKeys = ["$ilike", "$like", "$nilike", "$nlike"];
 exports.TextFilterFTSKeys = ["@@", "@>", "<@", "$contains", "$containedBy"];
 exports.TextFilter_FullTextSearchFilterKeys = ["to_tsquery", "plainto_tsquery", "phraseto_tsquery", "websearch_to_tsquery"];
-exports.ArrayFilterOperands = [...exports.TextFilterFTSKeys, "&&", "$overlaps"];
+exports.ArrayFilterOperands = ["@>", "<@", "=", "$eq", "$contains", "$containedBy", "&&", "$overlaps"];
 exports.GeomFilterKeys = ["~", "~=", "@", "|&>", "|>>", ">>", "=", "<<|", "<<", "&>", "&<|", "&<", "&&&", "&&"];
 exports.GeomFilter_Funcs = [
     "ST_MakeEnvelope",

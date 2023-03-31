@@ -35,7 +35,7 @@ export type PG_COLUMN_UDT_DATA_TYPE =
     | typeof _PG_postgis[number];
     
 const TS_PG_PRIMITIVES = {
-  "string": [ ..._PG_strings, ..._PG_date, "lseg"],
+  "string": [ ..._PG_strings, ..._PG_date, ..._PG_geometric, ..._PG_postgis, "lseg"],
   "number": _PG_numbers,
   "boolean": _PG_bool,
   "any": [..._PG_json, ..._PG_interval], // consider as any
@@ -746,6 +746,17 @@ export const CHANNELS = {
   CONNECTION: `${preffix}connection`,
 
   _preffix: preffix,
+}
+
+export type SubscriptionChannels = {
+  /** Used by server to emit data to client */
+  channelName: string;
+
+  /** Used by client to confirm when ready */
+  channelNameReady: string;
+
+  /** Used by client to stop subscription */
+  channelNameUnsubscribe: string;
 }
 
 export type AuthGuardLocation = {

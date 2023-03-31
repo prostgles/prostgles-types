@@ -36,7 +36,7 @@ exports._PG_geometric = [
     "circle",
 ];
 const TS_PG_PRIMITIVES = {
-    "string": [...exports._PG_strings, ...exports._PG_date, "lseg"],
+    "string": [...exports._PG_strings, ...exports._PG_date, ...exports._PG_geometric, ...exports._PG_postgis, "lseg"],
     "number": exports._PG_numbers,
     "boolean": exports._PG_bool,
     "any": [...exports._PG_json, ...exports._PG_interval],

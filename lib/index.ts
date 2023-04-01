@@ -376,6 +376,13 @@ export type SelectParams<T extends AnyObject = any> = CommonSelectParams & {
 }
 export type SubscribeParams<T extends AnyObject = any> = SelectParams<T> & {
   throttle?: number;
+  throttleOpts?: {
+    /** 
+     * False by default. 
+     * If true then the first value will be emitted at the end of the interval. Instant otherwise 
+     * */
+    skipFirst?: boolean;
+  };
 };
 
 export type UpdateParams<T extends AnyObject = any> = {
@@ -397,6 +404,13 @@ export type DeleteParams<T extends AnyObject = any> = {
 
 export type SubscribeParamsBasic = CommonSelectParams & {
   throttle?: number;
+  throttleOpts?: {
+    /** 
+     * False by default. 
+     * If true then the first value will be emitted at the end of the interval. Instant otherwise 
+     * */
+    skipFirst?: boolean;
+  };
 };
 
 export type UpdateParamsBasic = {
@@ -549,8 +563,8 @@ export type ViewHandlerBasic = {
   getColumns?: GetColumns
   find: <TD = AnyObject>(filter?: FullFilterBasic, selectParams?: SelectParams) => Promise<PartialLax<TD>[]>;
   findOne: <TD = AnyObject>(filter?: FullFilterBasic, selectParams?: SelectParams) => Promise<PartialLax<TD>>;
-  subscribe: <TD = AnyObject>(filter: FullFilterBasic, params: SubscribeParamsBasic, onData: (items: PartialLax<TD>[], onError?: OnError) => any) => Promise<{ unsubscribe: () => any }>;
-  subscribeOne: <TD = AnyObject>(filter: FullFilterBasic, params: SubscribeParamsBasic, onData: (item: PartialLax<TD> | undefined, onError?: OnError) => any) => Promise<{ unsubscribe: () => any }>;
+  subscribe: <TD = AnyObject>(filter: FullFilterBasic, params: SubscribeParamsBasic, onData: (items: PartialLax<TD>[]) => void, onError?: OnError) => Promise<{ unsubscribe: () => any }>;
+  subscribeOne: <TD = AnyObject>(filter: FullFilterBasic, params: SubscribeParamsBasic, onData: (item: PartialLax<TD> | undefined) => any, onError?: OnError) => Promise<{ unsubscribe: () => any }>;
   count: (filter?: FullFilterBasic) => Promise<number>;
   /**
    * Returns result size in bits

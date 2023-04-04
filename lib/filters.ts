@@ -233,7 +233,7 @@ export type ExistsFilter<S = void> = Partial<{
     ExactlyOne<{ 
       [tname in keyof S]: FullFilter<S[tname]["columns"], S> 
     }> : 
-    { [key: string]: FullFilter }
+    ExactlyOne<{ [key: string]: FullFilter }>
 }>
 
 /**

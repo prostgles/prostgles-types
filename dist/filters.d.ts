@@ -122,15 +122,13 @@ export type FilterForObject<T extends AnyObject = AnyObject> = {
 export type ExistsFilter<S = void> = Partial<{
     [key in EXISTS_KEY]: S extends DBSchema ? ExactlyOne<{
         [tname in keyof S]: FullFilter<S[tname]["columns"], S>;
-    }> : ExactlyOne<{
-        [key: string]: FullFilter;
-    }>;
+    }> : any;
 }>;
 export type FilterItem<T extends AnyObject = AnyObject> = FilterForObject<T>;
 export type FullFilter<T extends AnyObject = AnyObject, S = void> = {
-    $and: FullFilter<T>[];
+    $and: FullFilter<T, S>[];
 } | {
-    $or: FullFilter<T>[];
+    $or: FullFilter<T, S>[];
 } | FilterItem<T> | ExistsFilter<S>;
 export type FullFilterBasic<T = {
     [key: string]: any;

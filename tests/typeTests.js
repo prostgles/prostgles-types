@@ -115,10 +115,45 @@ exports.typeTestsOK = void 0;
             tbl1: {}
         }
     };
+    const sel1d = {
+        dwada: 1,
+        $rowhash: 1,
+        dwawd: { funcName: [12] }
+    };
     const deletePar = {
         returning: { id: 1, name: 1, public: 1, $rowhash: 1, added_day: { "$day": ["added"] } }
     };
 });
 const typeTestsOK = () => { };
 exports.typeTestsOK = typeTestsOK;
+(() => {
+    const schemaFFilter = { "col1.$eq": "dd" };
+    const fullFilter = schemaFFilter;
+    const ffFunc = (f) => { };
+    ffFunc(schemaFFilter);
+    const dbo = 1;
+    const filter = {};
+    const filterCheck = (f) => { };
+    filterCheck(filter);
+    const t = {};
+    const d = t;
+    const fup = (a) => { };
+    fup(t);
+    const f = (s) => { };
+    const th = {};
+    f(th);
+    const ra = (a) => {
+    };
+    const eft = { tbl1: { "col1.$eq": '2' } };
+    const fFilter = (a) => {
+    };
+    fFilter(eft);
+    const ff2 = (a) => {
+    };
+    ff2({ $exists: eft });
+    const sp = { select: {} };
+    const sf = (sp) => {
+    };
+    sf(sp);
+});
 //# sourceMappingURL=typeTests.js.map

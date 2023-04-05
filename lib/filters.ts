@@ -1,4 +1,4 @@
-import { DBSchema } from ".";
+import { DBSchema, SelectParams, TableHandler, UpsertDataToPGCast, ViewHandler } from ".";
 import { ExactlyOne, getKeys } from "./util";
 
 export type AllowedTSType = string | number | boolean | Date | any;
@@ -232,10 +232,14 @@ export type ExistsFilter<S = void> = Partial<{
   [key in EXISTS_KEY]: S extends DBSchema? 
     ExactlyOne<{ 
       [tname in keyof S]: FullFilter<S[tname]["columns"], S> 
-    }> : 
-    ExactlyOne<{ [key: string]: FullFilter }>
-}>
+    }> : any
+    /** ExactlyOne does not for any type. This produces error */
+    // ExactlyOne<{ 
+    //   [key: string]: FullFilter<AnyObject,S> 
+    // }>
+}>; 
 
+ 
 /**
  * Filter that relates to a single column { col: 2 } or
  * an exists filter: { $exists: {  } }
@@ -249,8 +253,8 @@ export type FilterItem<T extends AnyObject = AnyObject> =
  * @example { $or: [ { id: 1 }, { status: 'live' } ] }
  */
 export type FullFilter<T extends AnyObject = AnyObject, S = void> = 
- | { $and: FullFilter<T>[] } 
- | { $or: FullFilter<T>[] } 
+ | { $and: FullFilter<T, S>[] } 
+ | { $or: FullFilter<T, S>[] } 
  | FilterItem<T> 
  | ExistsFilter<S>
 
@@ -258,13 +262,24 @@ export type FullFilter<T extends AnyObject = AnyObject, S = void> =
 //  | { $not: FilterItem<T>  }
 ;
 
+/**
+ * Simpler FullFilter to reduce load on compilation
+ */
+export type FullFilterBasic<T = { [key: string]: any }> = {
+  [key in keyof Partial<T & { [key: string]: any }>]: any
+}
+
+
+/** Type checks */
+
+
 type RR = {
   h?: string[];
   id?: number;
   name?: string | null;
 }
 
-const f: FilterItem<RR> = {
+const _f: FilterItem<RR> = {
    "h.$eq": ["2"] 
 }
 const forcedFilter: FullFilter<RR> = {
@@ -273,11 +288,4 @@ const forcedFilter: FullFilter<RR> = {
     { "h.$eq": [] },
     { h: { "$containedBy": [] } }
   ]
-}
-
-/**
- * Simpler FullFilter to reduce load on compilation
- */
-export type FullFilterBasic<T = { [key: string]: any }> = {
-  [key in keyof Partial<T & { [key: string]: any }>]: any
 }

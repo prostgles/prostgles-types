@@ -1,5 +1,6 @@
 
-import type { TableHandler, SQLHandler, FullFilter, DBHandler, Select, SelectTyped, ExistsFilter, DeleteParams, AnyObject, SelectParams } from "../dist/index";
+import type { TableHandler, SQLHandler, FullFilter, DBHandler, Select, SelectTyped, ExistsFilter, DeleteParams, AnyObject, SelectParams, ViewHandler, DBSchema, UpsertDataToPGCast } from "../dist/index";
+import { ExactlyOne } from "../dist/util";
 
 /**
  * Test select/return type inference
@@ -7,8 +8,7 @@ import type { TableHandler, SQLHandler, FullFilter, DBHandler, Select, SelectTyp
  (async () => {
   
   type TableDef = { h: number; b?: number; c?: number; }
-  const tableHandler: TableHandler<TableDef> = undefined as any;
-
+  const tableHandler: TableHandler<TableDef> = undefined as any; 
   const params: SelectParams<TableDef> = {
     select: {
       "*": 1, 
@@ -222,6 +222,11 @@ import type { TableHandler, SQLHandler, FullFilter, DBHandler, Select, SelectTyp
     }
   }
 
+  const sel1d: Select = {
+    dwada: 1,
+    $rowhash: 1,
+    dwawd: { funcName: [12] }
+  }
 
   const deletePar: DeleteParams = {
     returning: { id: 1, name: 1, public: 1 , $rowhash: 1, added_day: { "$day": ["added"] } }
@@ -229,3 +234,83 @@ import type { TableHandler, SQLHandler, FullFilter, DBHandler, Select, SelectTyp
 });
 
 export const typeTestsOK = () => {};
+
+
+
+
+/** Type tests */
+(() => {
+
+  type GSchema = {
+    tbl1: {
+      is_view: false,
+      columns: {
+        col1: string,
+      },
+      delete: true,
+      select: true,
+      insert: true,
+      update: true,
+    }
+  };
+
+    
+  type DBOFullyTyped<Schema = void> = Schema extends DBSchema ? {
+    [tov_name in keyof Schema]: Schema[tov_name]["is_view"] extends true ?
+    ViewHandler<Schema[tov_name]["columns"], Schema> :
+    TableHandler<Schema[tov_name]["columns"], Schema>
+  } : Record<string, ViewHandler | TableHandler>;
+  
+
+  type TypedFFilter = FullFilter<GSchema["tbl1"]["columns"], GSchema>
+  const schemaFFilter: TypedFFilter = { "col1.$eq": "dd" };
+  const fullFilter: FullFilter = schemaFFilter;
+  
+  const ffFunc = (f: FullFilter) => {};
+  ffFunc(schemaFFilter);
+  // const thandler: TableHandler = 
+  
+  const dbo: DBOFullyTyped<GSchema> = 1 as any;
+  
+  const filter: FullFilter<GSchema["tbl1"]["columns"], GSchema> = {  };
+  
+  const filterCheck = <F extends FullFilter | undefined>(f: F) => {};
+  filterCheck(filter);
+  
+  const t: UpsertDataToPGCast<GSchema["tbl1"]["columns"]> = {} as any;
+  const d: UpsertDataToPGCast<AnyObject> = t;
+  const fup = (a: UpsertDataToPGCast) => {}
+  fup(t);
+
+  // const f = <A extends TableHandler["count"]>(a: A) => {};
+  const f = (s: TableHandler) => {};
+  const th: TableHandler<GSchema["tbl1"]["columns"], GSchema> = {  } as any;
+  f(th)
+  // f(dbo.tbl1.find)
+  const ra = <A extends AnyObject>(a: A) => {
+  
+  };
+  const eft: ExactlyOne<{ tbl1: FullFilter<{ col1: string; }, GSchema>; }> = { tbl1: { "col1.$eq": '2' } }
+
+  // Type 'ExactlyOne<{ [key: string]: FullFilter<AnyObject, void>; }>' is not assignable to type 'ExactlyOne<{ tbl1: FullFilter<{ col1: string; }, GSchema>; }>'.
+  const fFilter = (a: ExactlyOne<{ [key: string]: FullFilter<AnyObject, void>; }>) => {
+
+  };
+  fFilter(eft);
+
+  const ff2 = <F extends ExistsFilter>(a: F) => {
+
+  }
+  ff2({ $exists: eft });
+
+
+  const sp: SelectParams<GSchema["tbl1"]["columns"]> = { select: {} };
+  const sf = (sp: SelectParams) => {
+
+  }
+  sf(sp);
+  // const sub: TableHandler["count"] = dbo.tbl1.count
+  
+  
+  // ra(schema);
+})

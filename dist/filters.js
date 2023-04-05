@@ -80,7 +80,7 @@ exports.GeomFilter_Funcs = [
 ];
 exports.EXISTS_KEYS = ["$exists", "$notExists", "$existsJoined", "$notExistsJoined"];
 exports.COMPLEX_FILTER_KEY = "$filter";
-const f = {
+const _f = {
     "h.$eq": ["2"]
 };
 const forcedFilter = {

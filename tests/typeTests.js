@@ -120,6 +120,7 @@ exports.typeTestsOK = void 0;
         $rowhash: 1,
         dwawd: { funcName: [12] }
     };
+    const sel1d2 = ["a"];
     const deletePar = {
         returning: { id: 1, name: 1, public: 1, $rowhash: 1, added_day: { "$day": ["added"] } }
     };

@@ -228,6 +228,8 @@ import { ExactlyOne } from "../dist/util";
     dwawd: { funcName: [12] }
   }
 
+  const sel1d2: Select<AnyObject> = ["a"]
+
   const deletePar: DeleteParams = {
     returning: { id: 1, name: 1, public: 1 , $rowhash: 1, added_day: { "$day": ["added"] } }
   }

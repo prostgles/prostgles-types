@@ -116,14 +116,14 @@ type SelectFuncsAny = ({
     [key: string]: true | 1 | string | Record<string, any[]>;
 } | {
     [key: string]: 0 | false;
-} | CommonSelect);
+} | CommonSelect | string[]);
 type SelectFuncs<T extends AnyObject | void = void> = T extends AnyObject ? (({
     [K in keyof Partial<T>]: true | 1 | string;
 } & FunctionSelect) | JoinSelect | FunctionSelect | {
     [K in keyof Partial<T>]: true | 1 | string;
 } | {
     [K in keyof Partial<T>]: 0 | false;
-} | CommonSelect) : SelectFuncsAny;
+} | CommonSelect | (keyof Partial<T>)[]) : SelectFuncsAny;
 export type Select<T extends AnyObject | void = void> = T extends AnyObject ? (SelectFuncs<T & {
     $rowhash: string;
 }>) : (AnyObject | CommonSelect | SelectFuncs);

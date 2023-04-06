@@ -50,6 +50,33 @@ exports.TS_PG_Types = {
 };
 exports.JOIN_KEYS = ["$innerJoin", "$leftJoin"];
 exports.JOIN_PARAMS = ["select", "filter", "$path", "$condition", "offset", "limit", "orderBy"];
+const fs = {
+    a: 1,
+    c: 1,
+    ddd: { dwa: [2] }
+};
+const sel = {
+    a: 1,
+    $rowhash: 1,
+    dwadwA: { dwdwa: [5] }
+};
+const sds = sel;
+const sds01 = "";
+const sds02 = "*";
+const sds03 = {};
+const sds2 = sel;
+const badSel = {
+    a: 1,
+    b: 0
+};
+const badSel1 = {
+    b: 1,
+    a: 1
+};
+const sds3 = {
+    a: { dwda: [] },
+    $rowhashD: { dwda: [] },
+};
 const preffix = "_psqlWS_.";
 exports.CHANNELS = {
     SCHEMA_CHANGED: preffix + "schema-changed",

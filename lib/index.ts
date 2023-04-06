@@ -302,35 +302,83 @@ export type JoinSelect =
 | Record<string, Record<string, any>> 
 | DetailedJoinSelect;
 
-type FunctionSelect = Record<string, Record<string, any[]>>;
-type SelectFuncsAny = (
-  | { [key: string]: true |  1 | string | Record<string, any[]> }
-  | { [key: string]: 0 | false }
-  | CommonSelect
-  | string[]
-);
+type FunctionShorthand = string;
+type FunctionFull = Record<string, any[] | readonly any[]>;
+type FunctionSelect = FunctionShorthand | FunctionFull;
+/**
+ * { computed_field: { funcName: [args] } }
+ */
+type FunctionAliasedSelect = Record<string, FunctionFull>;
 
+type FSel <T extends AnyObject = AnyObject> = Partial<{
+  [K in keyof Partial<AnyObject>]: T[K] extends any? (1 | true | FunctionFull) : never;
+}> & ({
+  [K in keyof Partial<T>]: (true | 1 | FunctionSelect);
+} | {
+  [K in keyof Partial<T>]: (false | 0);
+});
+// { 
+//   h: { "$ts_headline_simple": ["name", { plainto_tsquery: "abc81" }] },
+//   hh: { "$ts_headline": ["name", "abc81"] } ,
+//   added: "$date_trunc_2hour",
+//   addedY: { "$date_trunc_5minute": ["added"] }
+// }
+const fs: FSel<{ a: number; c: string}> = {
+  // const fs: FSel = {
+  a: 1,
+  c: 1,
+  ddd: { dwa: [2] }
+}
 
-type SelectFuncs<T extends AnyObject | void = void> = T extends AnyObject? (
-  | ({ [K in keyof Partial<T>]: true | 1 | string } & FunctionSelect)
+type InclusiveSelect = true | 1 | FunctionSelect
+
+type SelectFuncs<T extends AnyObject = AnyObject, IsTyped = false> = (
+  | ({ [K in keyof Partial<T>]: InclusiveSelect } & Record<string, IsTyped extends true? FunctionFull : InclusiveSelect>)
   | JoinSelect
-  | FunctionSelect
+  | FunctionAliasedSelect
   | { [K in keyof Partial<T>]: true | 1 | string }
   | { [K in keyof Partial<T>]: 0 | false }
   | CommonSelect
   | (keyof Partial<T>)[]
-) : SelectFuncsAny;
-
-export type Select<T extends AnyObject | void = void> = T extends AnyObject? (SelectFuncs<T & { $rowhash: string }>) : (
-  | AnyObject 
-  | CommonSelect
-  | SelectFuncs
 );
 
-// const sds: Select = {
-//   dwadw: 1,
-//   dwadwA: { dwdwa: [] }
-// }
+export type Select<T extends AnyObject | void = void> = T extends AnyObject? SelectFuncs<T & { $rowhash: string }, true> : SelectFuncs<AnyObject & { $rowhash: string }, false>;
+
+/**
+ * Type tests
+ */
+const sel = {
+  a: 1,
+  $rowhash: 1,
+  dwadwA: { dwdwa: [5] }
+} as const; 
+
+const sds: Select = sel;
+const sds01: Select = "";
+const sds02: Select = "*";
+const sds03: Select = {};
+const sds2: Select<{a: number}> = sel;
+
+//@ts-expect-error
+const badSel: Select = {
+  a: 1,
+  b: 0
+};
+
+//@ts-expect-error
+const badSel1: Select<{a: number}> = {
+  b: 1,
+  a: 1
+};
+
+const sds3: Select<{a: number}> = {
+  // "*": 1,
+  // a: "$funcName",
+  a: { dwda: [] },
+  $rowhashD: { dwda: [] },
+  // dwadwa: 1, //{ dwa: []}
+}
+
 
 export type SelectBasic = 
   | { [key: string]: any } 
@@ -380,11 +428,11 @@ type CommonSelectParams = {
 //  ;
 // }
 
-export type SelectParams<T extends AnyObject = AnyObject> = CommonSelectParams & {
+export type SelectParams<T extends AnyObject | void = void> = CommonSelectParams & {
   select?: Select<T>;
   orderBy?: OrderBy<T>;
 }
-export type SubscribeParams<T extends AnyObject = AnyObject> = SelectParams<T> & {
+export type SubscribeParams<T extends AnyObject | void = void> = SelectParams<T> & {
   throttle?: number;
   throttleOpts?: {
     /** 
@@ -395,7 +443,7 @@ export type SubscribeParams<T extends AnyObject = AnyObject> = SelectParams<T> &
   };
 };
 
-export type UpdateParams<T extends AnyObject = AnyObject> = {
+export type UpdateParams<T extends AnyObject | void = void> = {
   returning?: Select<T>;
   onConflictDoNothing?: boolean;
   fixIssues?: boolean;
@@ -403,7 +451,7 @@ export type UpdateParams<T extends AnyObject = AnyObject> = {
   /* true by default. If false the update will fail if affecting more than one row */
   multi?: boolean;
 }
-export type InsertParams<T extends AnyObject = AnyObject> = {
+export type InsertParams<T extends AnyObject | void = void> = {
   returning?: Select<T>;
   onConflictDoNothing?: boolean;
   fixIssues?: boolean;

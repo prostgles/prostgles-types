@@ -111,22 +111,23 @@ export type DetailedJoinSelect = Record<typeof JOIN_KEYS[number], {
     $condition: JoinCondition[];
 })>;
 export type JoinSelect = "*" | Record<string, Record<string, any>> | DetailedJoinSelect;
-type FunctionSelect = Record<string, Record<string, any[]>>;
-type SelectFuncsAny = ({
-    [key: string]: true | 1 | string | Record<string, any[]>;
-} | {
-    [key: string]: 0 | false;
-} | CommonSelect | string[]);
-type SelectFuncs<T extends AnyObject | void = void> = T extends AnyObject ? (({
-    [K in keyof Partial<T>]: true | 1 | string;
-} & FunctionSelect) | JoinSelect | FunctionSelect | {
+type FunctionShorthand = string;
+type FunctionFull = Record<string, any[] | readonly any[]>;
+type FunctionSelect = FunctionShorthand | FunctionFull;
+type FunctionAliasedSelect = Record<string, FunctionFull>;
+type InclusiveSelect = true | 1 | FunctionSelect;
+type SelectFuncs<T extends AnyObject = AnyObject, IsTyped = false> = (({
+    [K in keyof Partial<T>]: InclusiveSelect;
+} & Record<string, IsTyped extends true ? FunctionFull : InclusiveSelect>) | JoinSelect | FunctionAliasedSelect | {
     [K in keyof Partial<T>]: true | 1 | string;
 } | {
     [K in keyof Partial<T>]: 0 | false;
-} | CommonSelect | (keyof Partial<T>)[]) : SelectFuncsAny;
-export type Select<T extends AnyObject | void = void> = T extends AnyObject ? (SelectFuncs<T & {
+} | CommonSelect | (keyof Partial<T>)[]);
+export type Select<T extends AnyObject | void = void> = T extends AnyObject ? SelectFuncs<T & {
     $rowhash: string;
-}>) : (AnyObject | CommonSelect | SelectFuncs);
+}, true> : SelectFuncs<AnyObject & {
+    $rowhash: string;
+}, false>;
 export type SelectBasic = {
     [key: string]: any;
 } | {} | undefined | "" | "*";
@@ -136,23 +137,23 @@ type CommonSelectParams = {
     groupBy?: boolean;
     returnType?: "row" | "value" | "values" | "statement";
 };
-export type SelectParams<T extends AnyObject = AnyObject> = CommonSelectParams & {
+export type SelectParams<T extends AnyObject | void = void> = CommonSelectParams & {
     select?: Select<T>;
     orderBy?: OrderBy<T>;
 };
-export type SubscribeParams<T extends AnyObject = AnyObject> = SelectParams<T> & {
+export type SubscribeParams<T extends AnyObject | void = void> = SelectParams<T> & {
     throttle?: number;
     throttleOpts?: {
         skipFirst?: boolean;
     };
 };
-export type UpdateParams<T extends AnyObject = AnyObject> = {
+export type UpdateParams<T extends AnyObject | void = void> = {
     returning?: Select<T>;
     onConflictDoNothing?: boolean;
     fixIssues?: boolean;
     multi?: boolean;
 };
-export type InsertParams<T extends AnyObject = AnyObject> = {
+export type InsertParams<T extends AnyObject | void = void> = {
     returning?: Select<T>;
     onConflictDoNothing?: boolean;
     fixIssues?: boolean;

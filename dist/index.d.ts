@@ -72,7 +72,7 @@ export type DBSchemaTable = {
 };
 export type FieldFilter<T extends AnyObject = AnyObject> = SelectTyped<T>;
 export type AscOrDesc = 1 | -1 | boolean;
-export type _OrderBy<T = AnyObject> = {
+export type _OrderBy<T extends AnyObject> = {
     [K in keyof Partial<T>]: AscOrDesc;
 } | {
     [K in keyof Partial<T>]: AscOrDesc;
@@ -82,7 +82,7 @@ export type _OrderBy<T = AnyObject> = {
     nulls?: "last" | "first";
     nullEmpty?: boolean;
 }[] | Array<keyof T> | keyof T;
-export type OrderBy<T = AnyObject> = _OrderBy<T> | _OrderBy<AnyObject>;
+export type OrderBy<T extends AnyObject | void = void> = T extends AnyObject ? _OrderBy<T> : _OrderBy<AnyObject>;
 type CommonSelect = "*" | "" | {
     "*": 1;
 };

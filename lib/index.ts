@@ -242,18 +242,15 @@ export type AscOrDesc = 1 | -1 | boolean;
  * Array order is maintained
  * if nullEmpty is true then empty text will be replaced to null (so nulls sorting takes effect on it)
  */
-export type _OrderBy<T = AnyObject> = 
+export type _OrderBy<T extends AnyObject> = 
   | { [K in keyof Partial<T>]: AscOrDesc }
   | { [K in keyof Partial<T>]: AscOrDesc }[]
   | { key: keyof T, asc?: AscOrDesc, nulls?: "last" | "first", nullEmpty?: boolean }[] 
   | Array<keyof T>
   | keyof T
   ;
-
-export type OrderBy<T = AnyObject> = 
-  | _OrderBy<T>
-  | _OrderBy<AnyObject>
-  ;
+  
+export type OrderBy<T extends AnyObject | void = void> = T extends AnyObject? _OrderBy<T> :  _OrderBy<AnyObject>;
 
 type CommonSelect =  
 | "*"

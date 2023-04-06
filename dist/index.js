@@ -50,33 +50,6 @@ exports.TS_PG_Types = {
 };
 exports.JOIN_KEYS = ["$innerJoin", "$leftJoin"];
 exports.JOIN_PARAMS = ["select", "filter", "$path", "$condition", "offset", "limit", "orderBy"];
-const fs = {
-    a: 1,
-    c: 1,
-    ddd: { dwa: [2] }
-};
-const sel = {
-    a: 1,
-    $rowhash: 1,
-    dwadwA: { dwdwa: [5] }
-};
-const sds = sel;
-const sds01 = "";
-const sds02 = "*";
-const sds03 = {};
-const sds2 = sel;
-const badSel = {
-    a: 1,
-    b: 0
-};
-const badSel1 = {
-    b: 1,
-    a: 1
-};
-const sds3 = {
-    a: { dwda: [] },
-    $rowhashD: { dwda: [] },
-};
 const preffix = "_psqlWS_.";
 exports.CHANNELS = {
     SCHEMA_CHANGED: preffix + "schema-changed",
@@ -103,6 +76,80 @@ exports.RULE_METHODS = {
     "sync": ["sync", "unsync"],
     "subscribe": ["unsubscribe", "subscribe", "subscribeOne"],
 };
+(() => {
+    const r = 1;
+    const sel1 = { id: 1, name: 1, public: 1, $rowhash: 1, added_day: { $day: [] } };
+    const sel2 = { id: 1, name: 1, public: 1, $rowhash: 1, dsds: { d: [] } };
+    const sel3 = "";
+    const sel4 = "*";
+    const sel12 = { id: 1, name: 1, public: 1, $rowhash: 1, dsds: { d: [] } };
+    const sel13 = "";
+    const sel14 = "*";
+    const fRow = {
+        $rowhash: { "$in": [""] }
+    };
+    const emptyFilter = {};
+    const sel32 = {
+        dwa: 1
+    };
+    const sel = {
+        a: 1,
+        $rowhash: 1,
+        dwadwA: { dwdwa: [5] }
+    };
+    const sds = sel;
+    const sds01 = "";
+    const sds02 = "*";
+    const sds03 = {};
+    const sds2 = sel;
+    const s001 = {
+        h: { "$ts_headline_simple": ["name", { plainto_tsquery: "abc81" }] },
+        hh: { "$ts_headline": ["name", "abc81"] },
+        added: "$date_trunc_2hour",
+        addedY: { "$date_trunc_5minute": ["added"] },
+    };
+    const badSel = {
+        a: 1,
+        b: 0
+    };
+    const badSel1 = {
+        b: 1,
+        a: 1
+    };
+    const sds3 = {
+        a: { dwda: [] },
+        $rowhashD: { dwda: [] },
+    };
+    const sel1d = {
+        dwada: 1,
+        $rowhash: 1,
+        dwawd: { funcName: [12] }
+    };
+    const sel1d2 = ["a"];
+    const deletePar = {
+        returning: { id: 1, name: 1, public: 1, $rowhash: 1, added_day: { "$day": ["added"] } }
+    };
+});
+(() => {
+    const schemaFFilter = { "col1.$eq": "dd" };
+    const fullFilter = schemaFFilter;
+    const ffFunc = (f) => { };
+    ffFunc(schemaFFilter);
+    const dbo = 1;
+    const filter = {};
+    const filterCheck = (f) => { };
+    filterCheck(filter);
+    const t = {};
+    const d = t;
+    const fup = (a) => { };
+    fup(t);
+    const f = (s) => { };
+    const th = {};
+    const sp = { select: {} };
+    const sf = (sp) => {
+    };
+    sf(sp);
+});
 var util_1 = require("./util");
 Object.defineProperty(exports, "asName", { enumerable: true, get: function () { return util_1.asName; } });
 Object.defineProperty(exports, "pickKeys", { enumerable: true, get: function () { return util_1.pickKeys; } });

@@ -125,11 +125,12 @@ export type ExistsFilter<S = void> = Partial<{
     }> : any;
 }>;
 export type FilterItem<T extends AnyObject = AnyObject> = FilterForObject<T>;
-export type FullFilter<T extends AnyObject = AnyObject, S = void> = {
-    $and: FullFilter<T, S>[];
+export type AnyObjIfVoid<T extends AnyObject | void> = T extends AnyObject ? T : AnyObject;
+export type FullFilter<T extends AnyObject | void = void, S = void> = {
+    $and: FullFilter<AnyObjIfVoid<T>, S>[];
 } | {
     $or: FullFilter<T, S>[];
-} | FilterItem<T> | ExistsFilter<S>;
+} | FilterItem<AnyObjIfVoid<T>> | ExistsFilter<S>;
 export type FullFilterBasic<T = {
     [key: string]: any;
 }> = {

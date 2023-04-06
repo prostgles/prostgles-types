@@ -307,26 +307,6 @@ type FunctionSelect = FunctionShorthand | FunctionFull;
  */
 type FunctionAliasedSelect = Record<string, FunctionFull>;
 
-type FSel <T extends AnyObject = AnyObject> = Partial<{
-  [K in keyof Partial<AnyObject>]: T[K] extends any? (1 | true | FunctionFull) : never;
-}> & ({
-  [K in keyof Partial<T>]: (true | 1 | FunctionSelect);
-} | {
-  [K in keyof Partial<T>]: (false | 0);
-});
-// { 
-//   h: { "$ts_headline_simple": ["name", { plainto_tsquery: "abc81" }] },
-//   hh: { "$ts_headline": ["name", "abc81"] } ,
-//   added: "$date_trunc_2hour",
-//   addedY: { "$date_trunc_5minute": ["added"] }
-// }
-const fs: FSel<{ a: number; c: string}> = {
-  // const fs: FSel = {
-  a: 1,
-  c: 1,
-  ddd: { dwa: [2] }
-}
-
 type InclusiveSelect = true | 1 | FunctionSelect
 
 type SelectFuncs<T extends AnyObject = AnyObject, IsTyped = false> = (
@@ -339,42 +319,9 @@ type SelectFuncs<T extends AnyObject = AnyObject, IsTyped = false> = (
   | (keyof Partial<T>)[]
 );
 
-export type Select<T extends AnyObject | void = void> = T extends AnyObject? SelectFuncs<T & { $rowhash: string }, true> : SelectFuncs<AnyObject & { $rowhash: string }, false>;
+/** S param is needed to ensure the non typed select works fine */
+export type Select<T extends AnyObject | void = void, S = void> = { t: T, s: S } extends { t: AnyObject, s: any } ? SelectFuncs<T & { $rowhash: string }, true> : SelectFuncs<AnyObject & { $rowhash: string }, false>;
 
-/**
- * Type tests
- */
-const sel = {
-  a: 1,
-  $rowhash: 1,
-  dwadwA: { dwdwa: [5] }
-} as const; 
-
-const sds: Select = sel;
-const sds01: Select = "";
-const sds02: Select = "*";
-const sds03: Select = {};
-const sds2: Select<{a: number}> = sel;
-
-//@ts-expect-error
-const badSel: Select = {
-  a: 1,
-  b: 0
-};
-
-//@ts-expect-error
-const badSel1: Select<{a: number}> = {
-  b: 1,
-  a: 1
-};
-
-const sds3: Select<{a: number}> = {
-  // "*": 1,
-  // a: "$funcName",
-  a: { dwda: [] },
-  $rowhashD: { dwda: [] },
-  // dwadwa: 1, //{ dwa: []}
-}
 
 
 export type SelectBasic = 
@@ -425,11 +372,11 @@ type CommonSelectParams = {
 //  ;
 // }
 
-export type SelectParams<T extends AnyObject | void = void> = CommonSelectParams & {
-  select?: Select<T>;
-  orderBy?: OrderBy<T>;
+export type SelectParams<T extends AnyObject | void = void, S = void> = CommonSelectParams & {
+  select?: Select<T, S>;
+  orderBy?: OrderBy<S extends DBSchema? T : void>;
 }
-export type SubscribeParams<T extends AnyObject | void = void> = SelectParams<T> & {
+export type SubscribeParams<T extends AnyObject | void = void, S = void> = SelectParams<T, S> & {
   throttle?: number;
   throttleOpts?: {
     /** 
@@ -440,50 +387,50 @@ export type SubscribeParams<T extends AnyObject | void = void> = SelectParams<T>
   };
 };
 
-export type UpdateParams<T extends AnyObject | void = void> = {
-  returning?: Select<T>;
+export type UpdateParams<T extends AnyObject | void = void, S = void> = {
+  returning?: Select<T, S>;
   onConflictDoNothing?: boolean;
   fixIssues?: boolean;
 
   /* true by default. If false the update will fail if affecting more than one row */
   multi?: boolean;
 }
-export type InsertParams<T extends AnyObject | void = void> = {
-  returning?: Select<T>;
+export type InsertParams<T extends AnyObject | void = void, S = void> = {
+  returning?: Select<T, S>;
   onConflictDoNothing?: boolean;
   fixIssues?: boolean;
 }
-export type DeleteParams<T extends AnyObject | void = void> = {
-  returning?: Select<T>;
+export type DeleteParams<T extends AnyObject | void = void, S = void> = {
+  returning?: Select<T, S>;
 }
 
-export type SubscribeParamsBasic = CommonSelectParams & {
-  throttle?: number;
-  throttleOpts?: {
-    /** 
-     * False by default. 
-     * If true then the first value will be emitted at the end of the interval. Instant otherwise 
-     * */
-    skipFirst?: boolean;
-  };
-};
+// export type SubscribeParamsBasic = CommonSelectParams & {
+//   throttle?: number;
+//   throttleOpts?: {
+//     /** 
+//      * False by default. 
+//      * If true then the first value will be emitted at the end of the interval. Instant otherwise 
+//      * */
+//     skipFirst?: boolean;
+//   };
+// };
 
-export type UpdateParamsBasic = {
-  returning?: SelectBasic;
-  onConflictDoNothing?: boolean;
-  fixIssues?: boolean;
+// export type UpdateParamsBasic = {
+//   returning?: SelectBasic;
+//   onConflictDoNothing?: boolean;
+//   fixIssues?: boolean;
 
-  /* true by default. If false the update will fail if affecting more than one row */
-  multi?: boolean;
-}
-export type InsertParamsBasic = {
-  returning?: SelectBasic;
-  onConflictDoNothing?: boolean;
-  fixIssues?: boolean;
-}
-export type DeleteParamsBasic = {
-  returning?: SelectBasic;
-}
+//   /* true by default. If false the update will fail if affecting more than one row */
+//   multi?: boolean;
+// }
+// export type InsertParamsBasic = {
+//   returning?: SelectBasic;
+//   onConflictDoNothing?: boolean;
+//   fixIssues?: boolean;
+// }
+// export type DeleteParamsBasic = {
+//   returning?: SelectBasic;
+// }
 /**
  * Adds unknown props to object
  * Used in represent data returned from a query that can have arbitrary computed fields
@@ -545,7 +492,7 @@ type ParseSelect<Select extends SelectParams<TD>["select"], TD extends AnyObject
     any;
 }
 
-type GetSelectDataType<O extends SelectParams<TD>, TD extends AnyObject> = 
+type GetSelectDataType<S, O extends SelectParams<TD, S>, TD extends AnyObject> = 
   O extends { returnType: "value" }? any : 
   O extends { returnType: "values"; select: Record<string, 1> }? ValueOf<Pick<Required<TD>, keyof O["select"]>> : 
   O extends { returnType: "values" }? any : 
@@ -555,12 +502,12 @@ type GetSelectDataType<O extends SelectParams<TD>, TD extends AnyObject> =
   O extends { select: Record<string, any> }? ParseSelect<O["select"], Required<TD>> : 
   Required<TD>;
 
-export type GetSelectReturnType<O extends SelectParams<TD>, TD extends AnyObject, isMulti extends boolean> = 
+export type GetSelectReturnType<S, O extends SelectParams<TD, S>, TD extends AnyObject, isMulti extends boolean> = 
   O extends { returnType: "statement" }? string : 
-  isMulti extends true? GetSelectDataType<O, TD>[] :
-  GetSelectDataType<O, TD>;
+  isMulti extends true? GetSelectDataType<S, O, TD>[] :
+  GetSelectDataType<S, O, TD>;
 
-type GetUpdateReturnType<O extends UpdateParams, TD extends AnyObject> = 
+type GetUpdateReturnType<O extends UpdateParams<TD, S>, TD extends AnyObject, S = void> = 
   O extends { returning: "*" }? Required<TD> : 
   O extends { returning: "" }? Record<string, never> : 
   O extends { returning: Record<string, 1> }? Pick<Required<TD>, keyof O["returning"]> : 
@@ -577,18 +524,18 @@ type GetColumns = (lang?: string, params?: { rule: "update", data: AnyObject, fi
 export type ViewHandler<TD extends AnyObject = AnyObject, S = void> = {
   getInfo?: (lang?: string) => Promise<TableInfo>;
   getColumns?: GetColumns
-  find: <P extends SelectParams<TD>>(filter?: FullFilter<TD, S>, selectParams?: P) => Promise<GetSelectReturnType<P, TD, true>>;
-  findOne: <P extends SelectParams<TD>>(filter?: FullFilter<TD, S>, selectParams?: P) => Promise<undefined | GetSelectReturnType<P, TD, false>>;
-  subscribe: <P extends SubscribeParams<TD>>(
+  find: <P extends SelectParams<TD, S>>(filter?: FullFilter<TD, S>, selectParams?: P) => Promise<GetSelectReturnType<S, P, TD, true>>;
+  findOne: <P extends SelectParams<TD, S>>(filter?: FullFilter<TD, S>, selectParams?: P) => Promise<undefined | GetSelectReturnType<S, P, TD, false>>;
+  subscribe: <P extends SubscribeParams<TD, S>>(
     filter: FullFilter<TD, S>, 
     params: P, 
-    onData: (items: GetSelectReturnType<P, TD, true>) => any,
+    onData: (items: GetSelectReturnType<S, P, TD, true>) => any,
     onError?: OnError
   ) => Promise<SubscriptionHandler<TD>>;
-  subscribeOne: <P extends SubscribeParams<TD>>(
+  subscribeOne: <P extends SubscribeParams<TD, S>>(
     filter: FullFilter<TD, S>, 
     params: P, 
-    onData: (item: GetSelectReturnType<P, TD, false> | undefined) => any, 
+    onData: (item: GetSelectReturnType<S, P, TD, false> | undefined) => any, 
     onError?: OnError
   ) => Promise<SubscriptionHandler<TD>>;
   count: (filter?: FullFilter<TD, S>) => Promise<number>;
@@ -606,35 +553,35 @@ type UpsertDataToPGCastLax<T extends AnyObject> = PartialLax<UpsertDataToPGCast<
 type InsertData<T extends AnyObject> = UpsertDataToPGCast<T> | UpsertDataToPGCast<T>[]
 
 export type TableHandler<TD extends AnyObject = AnyObject, S = void> = ViewHandler<TD, S> & {
-  update: <P extends UpdateParams<TD>>(filter: FullFilter<TD, S>, newData: UpsertDataToPGCastLax<TD>, params?: P) => Promise<GetUpdateReturnType<P ,TD> | undefined>;
+  update: <P extends UpdateParams<TD, S>>(filter: FullFilter<TD, S>, newData: UpsertDataToPGCastLax<TD>, params?: P) => Promise<GetUpdateReturnType<P ,TD, S> | undefined>;
   updateBatch: (data: [FullFilter<TD, S>, UpsertDataToPGCastLax<TD>][], params?: UpdateParams<TD>) => Promise<PartialLax<TD> | void>;
-  upsert: <P extends UpdateParams<TD>>(filter: FullFilter<TD, S>, newData: UpsertDataToPGCastLax<TD>, params?: P) => Promise<GetUpdateReturnType<P ,TD>>;
+  upsert: <P extends UpdateParams<TD, S>>(filter: FullFilter<TD, S>, newData: UpsertDataToPGCastLax<TD>, params?: P) => Promise<GetUpdateReturnType<P ,TD, S>>;
   // insert: <P extends UpdateParams<TD>>(data: (UpsertDataToPGCast<TD> | UpsertDataToPGCast<TD>[]), params?: P ) => Promise<GetUpdateReturnType<P ,TD>>;
-  insert: <P extends UpdateParams<TD>, Data extends InsertData<TD>>(data: Data, params?: P ) => Promise<GetUpdateReturnType<P ,TD>>;
-  delete: <P extends DeleteParams<TD>>(filter?: FullFilter<TD, S>, params?: P) => Promise<GetUpdateReturnType<P ,TD> | undefined>;
+  insert: <P extends UpdateParams<TD, S>, Data extends InsertData<TD>>(data: Data, params?: P ) => Promise<GetUpdateReturnType<P ,TD, S>>;
+  delete: <P extends DeleteParams<TD, S>>(filter?: FullFilter<TD, S>, params?: P) => Promise<GetUpdateReturnType<P ,TD, S> | undefined>;
 }
 
-export type ViewHandlerBasic = {
-  getInfo?: (lang?: string) => Promise<TableInfo>;
-  getColumns?: GetColumns
-  find: <TD = AnyObject>(filter?: FullFilterBasic, selectParams?: SelectParams) => Promise<PartialLax<TD>[]>;
-  findOne: <TD = AnyObject>(filter?: FullFilterBasic, selectParams?: SelectParams) => Promise<PartialLax<TD>>;
-  subscribe: <TD = AnyObject>(filter: FullFilterBasic, params: SubscribeParamsBasic, onData: (items: PartialLax<TD>[]) => void, onError?: OnError) => Promise<{ unsubscribe: () => any }>;
-  subscribeOne: <TD = AnyObject>(filter: FullFilterBasic, params: SubscribeParamsBasic, onData: (item: PartialLax<TD> | undefined) => any, onError?: OnError) => Promise<{ unsubscribe: () => any }>;
-  count: (filter?: FullFilterBasic) => Promise<number>;
-  /**
-   * Returns result size in bits
-   */
-  size: (filter?: FullFilterBasic, selectParams?: SelectParams) => Promise<string>;
-}
+// export type ViewHandlerBasic = {
+//   getInfo?: (lang?: string) => Promise<TableInfo>;
+//   getColumns?: GetColumns
+//   find: <TD = AnyObject>(filter?: FullFilterBasic, selectParams?: SelectParams) => Promise<PartialLax<TD>[]>;
+//   findOne: <TD = AnyObject>(filter?: FullFilterBasic, selectParams?: SelectParams) => Promise<PartialLax<TD>>;
+//   subscribe: <TD = AnyObject>(filter: FullFilterBasic, params: SubscribeParamsBasic, onData: (items: PartialLax<TD>[]) => void, onError?: OnError) => Promise<{ unsubscribe: () => any }>;
+//   subscribeOne: <TD = AnyObject>(filter: FullFilterBasic, params: SubscribeParamsBasic, onData: (item: PartialLax<TD> | undefined) => any, onError?: OnError) => Promise<{ unsubscribe: () => any }>;
+//   count: (filter?: FullFilterBasic) => Promise<number>;
+//   /**
+//    * Returns result size in bits
+//    */
+//   size: (filter?: FullFilterBasic, selectParams?: SelectParams) => Promise<string>;
+// }
 
-export type TableHandlerBasic = ViewHandlerBasic & {
-  update: <TD = AnyObject>(filter: FullFilterBasic, newData: PartialLax<TD>, params?: UpdateParamsBasic) => Promise<PartialLax<TD> | void>;
-  updateBatch: <TD = AnyObject>(data: [FullFilterBasic, PartialLax<TD>][], params?: UpdateParamsBasic) => Promise<PartialLax<TD> | void>;
-  upsert: <TD = AnyObject>(filter: FullFilterBasic, newData: PartialLax<TD>, params?: UpdateParamsBasic) => Promise<PartialLax<TD> | void>;
-  insert: <TD = AnyObject>(data: (PartialLax<TD> | PartialLax<TD>[]), params?: InsertParamsBasic) => Promise<PartialLax<TD> | void>;
-  delete: <TD = AnyObject>(filter?: FullFilterBasic, params?: DeleteParamsBasic) => Promise<PartialLax<TD> | void>;
-}
+// export type TableHandlerBasic = ViewHandlerBasic & {
+//   update: <TD = AnyObject>(filter: FullFilterBasic, newData: PartialLax<TD>, params?: UpdateParamsBasic) => Promise<PartialLax<TD> | void>;
+//   updateBatch: <TD = AnyObject>(data: [FullFilterBasic, PartialLax<TD>][], params?: UpdateParamsBasic) => Promise<PartialLax<TD> | void>;
+//   upsert: <TD = AnyObject>(filter: FullFilterBasic, newData: PartialLax<TD>, params?: UpdateParamsBasic) => Promise<PartialLax<TD> | void>;
+//   insert: <TD = AnyObject>(data: (PartialLax<TD> | PartialLax<TD>[]), params?: InsertParamsBasic) => Promise<PartialLax<TD> | void>;
+//   delete: <TD = AnyObject>(filter?: FullFilterBasic, params?: DeleteParamsBasic) => Promise<PartialLax<TD> | void>;
+// }
 
 export type JoinMaker<TT extends AnyObject = AnyObject> = (filter?: FullFilter<TT>, select?: Select<TT>, options?: SelectParams<TT>) => any;
 export type JoinMakerBasic = (filter?: FullFilterBasic, select?: SelectBasic, options?: SelectParams) => any;
@@ -734,16 +681,16 @@ export type DBHandler<S = void> = (S extends DBSchema? {
 /**
  * Simpler DBHandler types to reduce load on TS
  */
-export type DBHandlerBasic = {
-  [key: string]: Partial<TableHandlerBasic>;
-} & {
-  innerJoin: TableJoinBasic;
-  leftJoin: TableJoinBasic;
-  innerJoinOne: TableJoinBasic;
-  leftJoinOne: TableJoinBasic;
-} & {
-  sql?: SQLHandler
-}
+// export type DBHandlerBasic = {
+//   [key: string]: Partial<TableHandlerBasic>;
+// } & {
+//   innerJoin: TableJoinBasic;
+//   leftJoin: TableJoinBasic;
+//   innerJoinOne: TableJoinBasic;
+//   leftJoinOne: TableJoinBasic;
+// } & {
+//   sql?: SQLHandler
+// }
 
 
 
@@ -940,6 +887,146 @@ export type ProstglesError = {
   code_info?: string;
   columns?: string[];
 }
+
+
+/**
+ * Type tests
+ */
+ (( ) => {
+
+  type Fields =  { id: number; name: number; public: number; $rowhash: string; added_day: any }
+  const r:Fields = 1 as any
+  const sel1: Select = { id: 1, name: 1, public: 1, $rowhash: 1, added_day: { $day: []  } };
+  const sel2: Select<{ id: number; name: number; public: number; }> = { id: 1, name: 1, public: 1, $rowhash: 1, dsds: { d: [] } };
+  const sel3: Select<{ id: number; name: number; public: number; }> = ""
+  const sel4: Select<{ id: number; name: number; public: number; }> = "*"
+  const sel12: Select = { id: 1, name: 1, public: 1, $rowhash: 1, dsds: { d: [] } };
+  const sel13: Select = ""
+  const sel14: Select = "*";
+
+  const fRow: FullFilter<Fields> = {
+    $rowhash: { "$in": [""] }
+  };
+  const emptyFilter: FullFilter<Fields> = {
+  };
+
+  const sel32: Select = {
+    dwa: 1
+  }
+  
+  const sel = {
+    a: 1,
+    $rowhash: 1,
+    dwadwA: { dwdwa: [5] }
+  } as const; 
+  
+  const sds: Select = sel;
+  const sds01: Select = "";
+  const sds02: Select = "*";
+  const sds03: Select = {};
+  const sds2: Select<{a: number}> = sel;
+  
+  const s001: Select = { 
+    h: { "$ts_headline_simple": ["name", { plainto_tsquery: "abc81" }] },
+    hh: { "$ts_headline": ["name", "abc81"] } ,
+    added: "$date_trunc_2hour",
+    addedY: { "$date_trunc_5minute": ["added"] },
+  }
+  
+  //@ts-expect-error
+  const badSel: Select = {
+    a: 1,
+    b: 0
+  };
+  
+  //@ts-expect-error
+  const badSel1: Select<{a: number}> = {
+    b: 1,
+    a: 1
+  };
+  
+  const sds3: Select<{a: number}> = {
+    // "*": 1,
+    // a: "$funcName",
+    a: { dwda: [] },
+    $rowhashD: { dwda: [] },
+    // dwadwa: 1, //{ dwa: []}
+  }
+
+
+  const sel1d: Select = {
+    dwada: 1,
+    $rowhash: 1,
+    dwawd: { funcName: [12] }
+  }
+
+  const sel1d2: Select<AnyObject> = ["a"]
+
+  const deletePar: DeleteParams = {
+    returning: { id: 1, name: 1, public: 1 , $rowhash: 1, added_day: { "$day": ["added"] } }
+  }
+});
+
+/** More Type tests */
+(() => {
+
+  type GSchema = {
+    tbl1: {
+      is_view: false,
+      columns: {
+        col1: string,
+      },
+      delete: true,
+      select: true,
+      insert: true,
+      update: true,
+    }
+  };
+
+    
+  type DBOFullyTyped<Schema = void> = Schema extends DBSchema ? {
+    [tov_name in keyof Schema]: Schema[tov_name]["is_view"] extends true ?
+    ViewHandler<Schema[tov_name]["columns"], Schema> :
+    TableHandler<Schema[tov_name]["columns"], Schema>
+  } : Record<string, ViewHandler | TableHandler>;
+  
+
+  type TypedFFilter = FullFilter<GSchema["tbl1"]["columns"], GSchema>
+  const schemaFFilter: TypedFFilter = { "col1.$eq": "dd" };
+  const fullFilter: FullFilter = schemaFFilter;
+  
+  const ffFunc = (f: FullFilter) => {};
+  ffFunc(schemaFFilter);
+  // const thandler: TableHandler = 
+  
+  const dbo: DBOFullyTyped<GSchema> = 1 as any;
+  
+  const filter: FullFilter<GSchema["tbl1"]["columns"], GSchema> = {  };
+  
+  const filterCheck = <F extends FullFilter | undefined>(f: F) => {};
+  filterCheck(filter);
+  
+  const t: UpsertDataToPGCast<GSchema["tbl1"]["columns"]> = {} as any;
+  const d: UpsertDataToPGCast<AnyObject> = t;
+  const fup = (a: UpsertDataToPGCast) => {}
+  fup(t);
+
+  // const f = <A extends TableHandler["count"]>(a: A) => {};
+  const f = (s: TableHandler) => {};
+  const th: TableHandler<GSchema["tbl1"]["columns"], GSchema> = {  } as any;
+  // f(th) 
+
+  const sp: SelectParams<GSchema["tbl1"]["columns"]> = { select: {} };
+  const sf = (sp: SelectParams) => {
+
+  }
+  sf(sp);
+  // const sub: TableHandler["count"] = dbo.tbl1.count
+  
+  
+  // ra(schema);
+})
+
 
 // import { md5 } from "./md5";
 // export { get, getTextPatch, unpatchText, isEmpty, WAL, WALConfig, asName } from "./util";

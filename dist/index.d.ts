@@ -123,7 +123,13 @@ type SelectFuncs<T extends AnyObject = AnyObject, IsTyped = false> = (({
 } | {
     [K in keyof Partial<T>]: 0 | false;
 } | CommonSelect | (keyof Partial<T>)[]);
-export type Select<T extends AnyObject | void = void> = T extends AnyObject ? SelectFuncs<T & {
+export type Select<T extends AnyObject | void = void, S = void> = {
+    t: T;
+    s: S;
+} extends {
+    t: AnyObject;
+    s: any;
+} ? SelectFuncs<T & {
     $rowhash: string;
 }, true> : SelectFuncs<AnyObject & {
     $rowhash: string;
@@ -137,49 +143,29 @@ type CommonSelectParams = {
     groupBy?: boolean;
     returnType?: "row" | "value" | "values" | "statement";
 };
-export type SelectParams<T extends AnyObject | void = void> = CommonSelectParams & {
-    select?: Select<T>;
-    orderBy?: OrderBy<T>;
+export type SelectParams<T extends AnyObject | void = void, S = void> = CommonSelectParams & {
+    select?: Select<T, S>;
+    orderBy?: OrderBy<S extends DBSchema ? T : void>;
 };
-export type SubscribeParams<T extends AnyObject | void = void> = SelectParams<T> & {
+export type SubscribeParams<T extends AnyObject | void = void, S = void> = SelectParams<T, S> & {
     throttle?: number;
     throttleOpts?: {
         skipFirst?: boolean;
     };
 };
-export type UpdateParams<T extends AnyObject | void = void> = {
-    returning?: Select<T>;
+export type UpdateParams<T extends AnyObject | void = void, S = void> = {
+    returning?: Select<T, S>;
     onConflictDoNothing?: boolean;
     fixIssues?: boolean;
     multi?: boolean;
 };
-export type InsertParams<T extends AnyObject | void = void> = {
-    returning?: Select<T>;
+export type InsertParams<T extends AnyObject | void = void, S = void> = {
+    returning?: Select<T, S>;
     onConflictDoNothing?: boolean;
     fixIssues?: boolean;
 };
-export type DeleteParams<T extends AnyObject | void = void> = {
-    returning?: Select<T>;
-};
-export type SubscribeParamsBasic = CommonSelectParams & {
-    throttle?: number;
-    throttleOpts?: {
-        skipFirst?: boolean;
-    };
-};
-export type UpdateParamsBasic = {
-    returning?: SelectBasic;
-    onConflictDoNothing?: boolean;
-    fixIssues?: boolean;
-    multi?: boolean;
-};
-export type InsertParamsBasic = {
-    returning?: SelectBasic;
-    onConflictDoNothing?: boolean;
-    fixIssues?: boolean;
-};
-export type DeleteParamsBasic = {
-    returning?: SelectBasic;
+export type DeleteParams<T extends AnyObject | void = void, S = void> = {
+    returning?: Select<T, S>;
 };
 export type PartialLax<T = AnyObject> = Partial<T> & AnyObject;
 export type TableInfo = {
@@ -204,7 +190,7 @@ type ParseSelect<Select extends SelectParams<TD>["select"], TD extends AnyObject
 } ? Required<TD> : {}) & {
     [Key in keyof Omit<Select, "*">]: Select[Key] extends 1 ? Required<TD>[Key] : Select[Key] extends Record<string, any[]> ? any : Select[Key] extends JoinedSelect ? any[] : any;
 };
-type GetSelectDataType<O extends SelectParams<TD>, TD extends AnyObject> = O extends {
+type GetSelectDataType<S, O extends SelectParams<TD, S>, TD extends AnyObject> = O extends {
     returnType: "value";
 } ? any : O extends {
     returnType: "values";
@@ -220,10 +206,10 @@ type GetSelectDataType<O extends SelectParams<TD>, TD extends AnyObject> = O ext
 } ? Omit<Required<TD>, keyof O["select"]> : O extends {
     select: Record<string, any>;
 } ? ParseSelect<O["select"], Required<TD>> : Required<TD>;
-export type GetSelectReturnType<O extends SelectParams<TD>, TD extends AnyObject, isMulti extends boolean> = O extends {
+export type GetSelectReturnType<S, O extends SelectParams<TD, S>, TD extends AnyObject, isMulti extends boolean> = O extends {
     returnType: "statement";
-} ? string : isMulti extends true ? GetSelectDataType<O, TD>[] : GetSelectDataType<O, TD>;
-type GetUpdateReturnType<O extends UpdateParams, TD extends AnyObject> = O extends {
+} ? string : isMulti extends true ? GetSelectDataType<S, O, TD>[] : GetSelectDataType<S, O, TD>;
+type GetUpdateReturnType<O extends UpdateParams<TD, S>, TD extends AnyObject, S = void> = O extends {
     returning: "*";
 } ? Required<TD> : O extends {
     returning: "";
@@ -244,10 +230,10 @@ type GetColumns = (lang?: string, params?: {
 export type ViewHandler<TD extends AnyObject = AnyObject, S = void> = {
     getInfo?: (lang?: string) => Promise<TableInfo>;
     getColumns?: GetColumns;
-    find: <P extends SelectParams<TD>>(filter?: FullFilter<TD, S>, selectParams?: P) => Promise<GetSelectReturnType<P, TD, true>>;
-    findOne: <P extends SelectParams<TD>>(filter?: FullFilter<TD, S>, selectParams?: P) => Promise<undefined | GetSelectReturnType<P, TD, false>>;
-    subscribe: <P extends SubscribeParams<TD>>(filter: FullFilter<TD, S>, params: P, onData: (items: GetSelectReturnType<P, TD, true>) => any, onError?: OnError) => Promise<SubscriptionHandler<TD>>;
-    subscribeOne: <P extends SubscribeParams<TD>>(filter: FullFilter<TD, S>, params: P, onData: (item: GetSelectReturnType<P, TD, false> | undefined) => any, onError?: OnError) => Promise<SubscriptionHandler<TD>>;
+    find: <P extends SelectParams<TD, S>>(filter?: FullFilter<TD, S>, selectParams?: P) => Promise<GetSelectReturnType<S, P, TD, true>>;
+    findOne: <P extends SelectParams<TD, S>>(filter?: FullFilter<TD, S>, selectParams?: P) => Promise<undefined | GetSelectReturnType<S, P, TD, false>>;
+    subscribe: <P extends SubscribeParams<TD, S>>(filter: FullFilter<TD, S>, params: P, onData: (items: GetSelectReturnType<S, P, TD, true>) => any, onError?: OnError) => Promise<SubscriptionHandler<TD>>;
+    subscribeOne: <P extends SubscribeParams<TD, S>>(filter: FullFilter<TD, S>, params: P, onData: (item: GetSelectReturnType<S, P, TD, false> | undefined) => any, onError?: OnError) => Promise<SubscriptionHandler<TD>>;
     count: (filter?: FullFilter<TD, S>) => Promise<number>;
     size: (filter?: FullFilter<TD>, selectParams?: SelectParams<TD>) => Promise<string>;
 };
@@ -257,32 +243,11 @@ export type UpsertDataToPGCast<TD extends AnyObject = AnyObject> = {
 type UpsertDataToPGCastLax<T extends AnyObject> = PartialLax<UpsertDataToPGCast<T>>;
 type InsertData<T extends AnyObject> = UpsertDataToPGCast<T> | UpsertDataToPGCast<T>[];
 export type TableHandler<TD extends AnyObject = AnyObject, S = void> = ViewHandler<TD, S> & {
-    update: <P extends UpdateParams<TD>>(filter: FullFilter<TD, S>, newData: UpsertDataToPGCastLax<TD>, params?: P) => Promise<GetUpdateReturnType<P, TD> | undefined>;
+    update: <P extends UpdateParams<TD, S>>(filter: FullFilter<TD, S>, newData: UpsertDataToPGCastLax<TD>, params?: P) => Promise<GetUpdateReturnType<P, TD, S> | undefined>;
     updateBatch: (data: [FullFilter<TD, S>, UpsertDataToPGCastLax<TD>][], params?: UpdateParams<TD>) => Promise<PartialLax<TD> | void>;
-    upsert: <P extends UpdateParams<TD>>(filter: FullFilter<TD, S>, newData: UpsertDataToPGCastLax<TD>, params?: P) => Promise<GetUpdateReturnType<P, TD>>;
-    insert: <P extends UpdateParams<TD>, Data extends InsertData<TD>>(data: Data, params?: P) => Promise<GetUpdateReturnType<P, TD>>;
-    delete: <P extends DeleteParams<TD>>(filter?: FullFilter<TD, S>, params?: P) => Promise<GetUpdateReturnType<P, TD> | undefined>;
-};
-export type ViewHandlerBasic = {
-    getInfo?: (lang?: string) => Promise<TableInfo>;
-    getColumns?: GetColumns;
-    find: <TD = AnyObject>(filter?: FullFilterBasic, selectParams?: SelectParams) => Promise<PartialLax<TD>[]>;
-    findOne: <TD = AnyObject>(filter?: FullFilterBasic, selectParams?: SelectParams) => Promise<PartialLax<TD>>;
-    subscribe: <TD = AnyObject>(filter: FullFilterBasic, params: SubscribeParamsBasic, onData: (items: PartialLax<TD>[]) => void, onError?: OnError) => Promise<{
-        unsubscribe: () => any;
-    }>;
-    subscribeOne: <TD = AnyObject>(filter: FullFilterBasic, params: SubscribeParamsBasic, onData: (item: PartialLax<TD> | undefined) => any, onError?: OnError) => Promise<{
-        unsubscribe: () => any;
-    }>;
-    count: (filter?: FullFilterBasic) => Promise<number>;
-    size: (filter?: FullFilterBasic, selectParams?: SelectParams) => Promise<string>;
-};
-export type TableHandlerBasic = ViewHandlerBasic & {
-    update: <TD = AnyObject>(filter: FullFilterBasic, newData: PartialLax<TD>, params?: UpdateParamsBasic) => Promise<PartialLax<TD> | void>;
-    updateBatch: <TD = AnyObject>(data: [FullFilterBasic, PartialLax<TD>][], params?: UpdateParamsBasic) => Promise<PartialLax<TD> | void>;
-    upsert: <TD = AnyObject>(filter: FullFilterBasic, newData: PartialLax<TD>, params?: UpdateParamsBasic) => Promise<PartialLax<TD> | void>;
-    insert: <TD = AnyObject>(data: (PartialLax<TD> | PartialLax<TD>[]), params?: InsertParamsBasic) => Promise<PartialLax<TD> | void>;
-    delete: <TD = AnyObject>(filter?: FullFilterBasic, params?: DeleteParamsBasic) => Promise<PartialLax<TD> | void>;
+    upsert: <P extends UpdateParams<TD, S>>(filter: FullFilter<TD, S>, newData: UpsertDataToPGCastLax<TD>, params?: P) => Promise<GetUpdateReturnType<P, TD, S>>;
+    insert: <P extends UpdateParams<TD, S>, Data extends InsertData<TD>>(data: Data, params?: P) => Promise<GetUpdateReturnType<P, TD, S>>;
+    delete: <P extends DeleteParams<TD, S>>(filter?: FullFilter<TD, S>, params?: P) => Promise<GetUpdateReturnType<P, TD, S> | undefined>;
 };
 export type JoinMaker<TT extends AnyObject = AnyObject> = (filter?: FullFilter<TT>, select?: Select<TT>, options?: SelectParams<TT>) => any;
 export type JoinMakerBasic = (filter?: FullFilterBasic, select?: SelectBasic, options?: SelectParams) => any;
@@ -338,16 +303,6 @@ export type DBHandler<S = void> = (S extends DBSchema ? {
 } : {
     [key: string]: Partial<TableHandler>;
 }) & DbJoinMaker & {
-    sql?: SQLHandler;
-};
-export type DBHandlerBasic = {
-    [key: string]: Partial<TableHandlerBasic>;
-} & {
-    innerJoin: TableJoinBasic;
-    leftJoin: TableJoinBasic;
-    innerJoinOne: TableJoinBasic;
-    leftJoinOne: TableJoinBasic;
-} & {
     sql?: SQLHandler;
 };
 export type DBNoticeConfig = {

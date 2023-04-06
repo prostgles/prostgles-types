@@ -137,19 +137,19 @@ import { ExactlyOne } from "../dist/util";
     };
   }> = 1 as any;
 // const v = await db.sql<{ c: string }>(``)
-  const s: SelectTyped<{ a: number; c: string }> = { a: 1 }
+  const s: SelectTyped<{ a: number; c: string } > = { a: 1 }
 
   // @ts-expect-error
-  const s2: Select<{ a: number; c: string }> = { a: 1 , zz: 1 }
+  const s2: Select<{ a: number; c: string }, 1> = { a: 1 , zz: 1 }
 
   // Correct function
-  const s22: Select<{ a: number; c: string }> = { a: 1 , zz: { $max: ["c"] } }
+  const s22: Select<{ a: number; c: string }, 1> = { a: 1 , zz: { $max: ["c"] } }
 
   // Quick string func notation can only be used against existing column names
   // @ts-expect-error
-  const s3: Select<{ a: number; c: string }> = { a: 1 , cc: "2" }
+  const s3: Select<{ a: number; c: string }, 1> = { a: 1 , cc: "2" }
 
-  const s33: Select<{ a: number; c: string }> = { a: 1 , c: "$max" }
+  const s33: Select<{ a: number; c: string }, 1> = { a: 1 , c: "$max" }
 
   db.view1.find({ "c1.$in": ["2", null] }, { select: { c1: 1, c2: 1 }  });
   db.table1.insert({ c1: "2" }, { returning: { c1: 1, c2: "func", dwad: { dwada: [] } } });
@@ -164,26 +164,7 @@ import { ExactlyOne } from "../dist/util";
 
   const result = await db.table2.update({}, { c1: "" }, { returning: "*" });
   result.c2 + 2;
-
-  const sel: Select = {
-    dwa: 1
-  }
-
-  type Fields =  { id: number; name: number; public: number; $rowhash: string; added_day: any }
-  const r:Fields = 1 as any
-  const sel1: Select = { id: 1, name: 1, public: 1, $rowhash: 1, added_day: { $day: []  } };
-  const sel2: Select<{ id: number; name: number; public: number; }> = { id: 1, name: 1, public: 1, $rowhash: 1, dsds: { d: [] } };
-  const sel3: Select<{ id: number; name: number; public: number; }> = ""
-  const sel4: Select<{ id: number; name: number; public: number; }> = "*"
-  const sel12: Select = { id: 1, name: 1, public: 1, $rowhash: 1, dsds: { d: [] } };
-  const sel13: Select = ""
-  const sel14: Select = "*";
-
-  const fRow: FullFilter<Fields> = {
-    $rowhash: { "$in": [""] }
-  };
-  const emptyFilter: FullFilter<Fields> = {
-  };
+ 
 
   type SampleSchema = {
     tbl1: {
@@ -221,98 +202,9 @@ import { ExactlyOne } from "../dist/util";
       tbl1: { }
     }
   }
-
-  const sel1d: Select = {
-    dwada: 1,
-    $rowhash: 1,
-    dwawd: { funcName: [12] }
-  }
-
-  const sel1d2: Select<AnyObject> = ["a"]
-
-  const deletePar: DeleteParams = {
-    returning: { id: 1, name: 1, public: 1 , $rowhash: 1, added_day: { "$day": ["added"] } }
-  }
 });
 
 export const typeTestsOK = () => {};
 
 
 
-
-/** Type tests */
-(() => {
-
-  type GSchema = {
-    tbl1: {
-      is_view: false,
-      columns: {
-        col1: string,
-      },
-      delete: true,
-      select: true,
-      insert: true,
-      update: true,
-    }
-  };
-
-    
-  type DBOFullyTyped<Schema = void> = Schema extends DBSchema ? {
-    [tov_name in keyof Schema]: Schema[tov_name]["is_view"] extends true ?
-    ViewHandler<Schema[tov_name]["columns"], Schema> :
-    TableHandler<Schema[tov_name]["columns"], Schema>
-  } : Record<string, ViewHandler | TableHandler>;
-  
-
-  type TypedFFilter = FullFilter<GSchema["tbl1"]["columns"], GSchema>
-  const schemaFFilter: TypedFFilter = { "col1.$eq": "dd" };
-  const fullFilter: FullFilter = schemaFFilter;
-  
-  const ffFunc = (f: FullFilter) => {};
-  ffFunc(schemaFFilter);
-  // const thandler: TableHandler = 
-  
-  const dbo: DBOFullyTyped<GSchema> = 1 as any;
-  
-  const filter: FullFilter<GSchema["tbl1"]["columns"], GSchema> = {  };
-  
-  const filterCheck = <F extends FullFilter | undefined>(f: F) => {};
-  filterCheck(filter);
-  
-  const t: UpsertDataToPGCast<GSchema["tbl1"]["columns"]> = {} as any;
-  const d: UpsertDataToPGCast<AnyObject> = t;
-  const fup = (a: UpsertDataToPGCast) => {}
-  fup(t);
-
-  // const f = <A extends TableHandler["count"]>(a: A) => {};
-  const f = (s: TableHandler) => {};
-  const th: TableHandler<GSchema["tbl1"]["columns"], GSchema> = {  } as any;
-  f(th)
-  // f(dbo.tbl1.find)
-  const ra = <A extends AnyObject>(a: A) => {
-  
-  };
-  const eft: ExactlyOne<{ tbl1: FullFilter<{ col1: string; }, GSchema>; }> = { tbl1: { "col1.$eq": '2' } }
-
-  // Type 'ExactlyOne<{ [key: string]: FullFilter<AnyObject, void>; }>' is not assignable to type 'ExactlyOne<{ tbl1: FullFilter<{ col1: string; }, GSchema>; }>'.
-  const fFilter = (a: ExactlyOne<{ [key: string]: FullFilter<AnyObject, void>; }>) => {
-
-  };
-  fFilter(eft);
-
-  const ff2 = <F extends ExistsFilter>(a: F) => {
-
-  }
-  ff2({ $exists: eft });
-
-
-  const sp: SelectParams<GSchema["tbl1"]["columns"]> = { select: {} };
-  const sf = (sp: SelectParams) => {
-
-  }
-  sf(sp);
-  // const sub: TableHandler["count"] = dbo.tbl1.count
-  
-  
-  // ra(schema);
-})

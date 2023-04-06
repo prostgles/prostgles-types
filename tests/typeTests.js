@@ -90,21 +90,6 @@ exports.typeTestsOK = void 0;
     db.table1.find;
     const result = await db.table2.update({}, { c1: "" }, { returning: "*" });
     result.c2 + 2;
-    const sel = {
-        dwa: 1
-    };
-    const r = 1;
-    const sel1 = { id: 1, name: 1, public: 1, $rowhash: 1, added_day: { $day: [] } };
-    const sel2 = { id: 1, name: 1, public: 1, $rowhash: 1, dsds: { d: [] } };
-    const sel3 = "";
-    const sel4 = "*";
-    const sel12 = { id: 1, name: 1, public: 1, $rowhash: 1, dsds: { d: [] } };
-    const sel13 = "";
-    const sel14 = "*";
-    const fRow = {
-        $rowhash: { "$in": [""] }
-    };
-    const emptyFilter = {};
     const ef = {
         $existsJoined: {
             tbl11: {}
@@ -115,46 +100,7 @@ exports.typeTestsOK = void 0;
             tbl1: {}
         }
     };
-    const sel1d = {
-        dwada: 1,
-        $rowhash: 1,
-        dwawd: { funcName: [12] }
-    };
-    const sel1d2 = ["a"];
-    const deletePar = {
-        returning: { id: 1, name: 1, public: 1, $rowhash: 1, added_day: { "$day": ["added"] } }
-    };
 });
 const typeTestsOK = () => { };
 exports.typeTestsOK = typeTestsOK;
-(() => {
-    const schemaFFilter = { "col1.$eq": "dd" };
-    const fullFilter = schemaFFilter;
-    const ffFunc = (f) => { };
-    ffFunc(schemaFFilter);
-    const dbo = 1;
-    const filter = {};
-    const filterCheck = (f) => { };
-    filterCheck(filter);
-    const t = {};
-    const d = t;
-    const fup = (a) => { };
-    fup(t);
-    const f = (s) => { };
-    const th = {};
-    f(th);
-    const ra = (a) => {
-    };
-    const eft = { tbl1: { "col1.$eq": '2' } };
-    const fFilter = (a) => {
-    };
-    fFilter(eft);
-    const ff2 = (a) => {
-    };
-    ff2({ $exists: eft });
-    const sp = { select: {} };
-    const sf = (sp) => {
-    };
-    sf(sp);
-});
 //# sourceMappingURL=typeTests.js.map

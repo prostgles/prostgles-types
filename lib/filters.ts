@@ -248,14 +248,15 @@ export type FilterItem<T extends AnyObject = AnyObject> =
   | FilterForObject<T> 
 
 
+export type AnyObjIfVoid<T extends AnyObject | void> = T extends AnyObject? T : AnyObject;
 /**
  * Full filter
  * @example { $or: [ { id: 1 }, { status: 'live' } ] }
  */
-export type FullFilter<T extends AnyObject = AnyObject, S = void> = 
- | { $and: FullFilter<T, S>[] } 
+export type FullFilter<T extends AnyObject | void = void, S = void> = 
+ | { $and: FullFilter<AnyObjIfVoid<T>, S>[] } 
  | { $or: FullFilter<T, S>[] } 
- | FilterItem<T> 
+ | FilterItem<AnyObjIfVoid<T>> 
  | ExistsFilter<S>
 
  /** Not implemented yet */

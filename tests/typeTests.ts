@@ -139,16 +139,16 @@ import type { TableHandler, SQLHandler, FullFilter, DBHandler, Select, SelectTyp
   const s: SelectTyped<{ a: number; c: string } > = { a: 1 }
 
   // @ts-expect-error
-  const s2: Select<{ a: number; c: string }, 1> = { a: 1 , zz: 1 }
+  const s2: Select<{ a: number; c: string }, {}> = { a: 1 , zz: 1 }
 
   // Correct function
-  const s22: Select<{ a: number; c: string }, 1> = { a: 1 , zz: { $max: ["c"] } }
+  const s22: Select<{ a: number; c: string },  {}> = { a: 1 , zz: { $max: ["c"] } }
 
   // Quick string func notation can only be used against existing column names
   // @ts-expect-error
-  const s3: Select<{ a: number; c: string }, 1> = { a: 1 , cc: "2" }
+  const s3: Select<{ a: number; c: string },  {}> = { a: 1 , cc: "2" }
 
-  const s33: Select<{ a: number; c: string }, 1> = { a: 1 , c: "$max" }
+  const s33: Select<{ a: number; c: string },  {}> = { a: 1 , c: "$max" }
 
   db.view1.find({ "c1.$in": ["2", null] }, { select: { c1: 1, c2: 1 }  });
   db.table1.insert({ c1: "2" }, { returning: { c1: 1, c2: "func", dwad: { dwada: [] } } });

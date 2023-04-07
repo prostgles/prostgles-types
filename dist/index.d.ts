@@ -123,12 +123,12 @@ type SelectFuncs<T extends AnyObject = AnyObject, IsTyped = false> = (({
 } | {
     [K in keyof Partial<T>]: 0 | false;
 } | CommonSelect | (keyof Partial<T>)[]);
-export type Select<T extends AnyObject | void = void, S = void> = {
+export type Select<T extends AnyObject | void = void, S extends DBSchema | void = void> = {
     t: T;
     s: S;
 } extends {
     t: AnyObject;
-    s: any;
+    s: DBSchema;
 } ? SelectFuncs<T & {
     $rowhash: string;
 }, true> : SelectFuncs<AnyObject & {
@@ -143,28 +143,28 @@ type CommonSelectParams = {
     groupBy?: boolean;
     returnType?: "row" | "value" | "values" | "statement";
 };
-export type SelectParams<T extends AnyObject | void = void, S = void> = CommonSelectParams & {
+export type SelectParams<T extends AnyObject | void = void, S extends DBSchema | void = void> = CommonSelectParams & {
     select?: Select<T, S>;
     orderBy?: OrderBy<S extends DBSchema ? T : void>;
 };
-export type SubscribeParams<T extends AnyObject | void = void, S = void> = SelectParams<T, S> & {
+export type SubscribeParams<T extends AnyObject | void = void, S extends DBSchema | void = void> = SelectParams<T, S> & {
     throttle?: number;
     throttleOpts?: {
         skipFirst?: boolean;
     };
 };
-export type UpdateParams<T extends AnyObject | void = void, S = void> = {
+export type UpdateParams<T extends AnyObject | void = void, S extends DBSchema | void = void> = {
     returning?: Select<T, S>;
     onConflictDoNothing?: boolean;
     fixIssues?: boolean;
     multi?: boolean;
 };
-export type InsertParams<T extends AnyObject | void = void, S = void> = {
+export type InsertParams<T extends AnyObject | void = void, S extends DBSchema | void = void> = {
     returning?: Select<T, S>;
     onConflictDoNothing?: boolean;
     fixIssues?: boolean;
 };
-export type DeleteParams<T extends AnyObject | void = void, S = void> = {
+export type DeleteParams<T extends AnyObject | void = void, S extends DBSchema | void = void> = {
     returning?: Select<T, S>;
 };
 export type PartialLax<T = AnyObject> = Partial<T> & AnyObject;
@@ -190,7 +190,7 @@ type ParseSelect<Select extends SelectParams<TD>["select"], TD extends AnyObject
 } ? Required<TD> : {}) & {
     [Key in keyof Omit<Select, "*">]: Select[Key] extends 1 ? Required<TD>[Key] : Select[Key] extends Record<string, any[]> ? any : Select[Key] extends JoinedSelect ? any[] : any;
 };
-type GetSelectDataType<S, O extends SelectParams<TD, S>, TD extends AnyObject> = O extends {
+type GetSelectDataType<S extends DBSchema | void, O extends SelectParams<TD, S>, TD extends AnyObject> = O extends {
     returnType: "value";
 } ? any : O extends {
     returnType: "values";
@@ -206,10 +206,10 @@ type GetSelectDataType<S, O extends SelectParams<TD, S>, TD extends AnyObject> =
 } ? Omit<Required<TD>, keyof O["select"]> : O extends {
     select: Record<string, any>;
 } ? ParseSelect<O["select"], Required<TD>> : Required<TD>;
-export type GetSelectReturnType<S, O extends SelectParams<TD, S>, TD extends AnyObject, isMulti extends boolean> = O extends {
+export type GetSelectReturnType<S extends DBSchema | void, O extends SelectParams<TD, S>, TD extends AnyObject, isMulti extends boolean> = O extends {
     returnType: "statement";
 } ? string : isMulti extends true ? GetSelectDataType<S, O, TD>[] : GetSelectDataType<S, O, TD>;
-type GetUpdateReturnType<O extends UpdateParams<TD, S>, TD extends AnyObject, S = void> = O extends {
+type GetUpdateReturnType<O extends UpdateParams<TD, S>, TD extends AnyObject, S extends DBSchema | void = void> = O extends {
     returning: "*";
 } ? Required<TD> : O extends {
     returning: "";

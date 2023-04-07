@@ -505,7 +505,7 @@ export type ViewHandler<TD extends AnyObject = AnyObject, S extends DBSchema | v
   /**
    * Returns result size in bits
    */
-  size: (filter?: FullFilter<TD, S>, selectParams?: SelectParams<TD>) => Promise<string>;
+  size: <P extends SelectParams<TD, S>>(filter?: FullFilter<TD, S>, selectParams?: P) => Promise<string>;
 }
 
 export type UpsertDataToPGCast<TD extends AnyObject = AnyObject> = {

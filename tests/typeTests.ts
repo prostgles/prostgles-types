@@ -1,6 +1,5 @@
 
-import type { TableHandler, SQLHandler, FullFilter, DBHandler, Select, SelectTyped, ExistsFilter, DeleteParams, AnyObject, SelectParams, ViewHandler, DBSchema, UpsertDataToPGCast } from "../dist/index";
-import { ExactlyOne } from "../dist/util";
+import type { TableHandler, SQLHandler, FullFilter, DBHandler, Select, SelectTyped, ExistsFilter, AnyObject, SelectParams } from "../dist/index"; 
 
 /**
  * Test select/return type inference

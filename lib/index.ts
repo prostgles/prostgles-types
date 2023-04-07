@@ -295,8 +295,9 @@ export type DetailedJoinSelect = Record<typeof JOIN_KEYS[number], {
 
 export type JoinSelect = 
 | "*"
-/** Shorthand join: table_name: { ...select } */
-| Record<string, Record<string, any>> 
+/** Aliased Shorthand join: table_name: { ...select } */
+| Record<string, 1 | "*" | true | FunctionSelect> 
+| Record<string, 0 | false> 
 | DetailedJoinSelect;
 
 type FunctionShorthand = string;
@@ -307,11 +308,10 @@ type FunctionSelect = FunctionShorthand | FunctionFull;
  */
 type FunctionAliasedSelect = Record<string, FunctionFull>;
 
-type InclusiveSelect = true | 1 | FunctionSelect
+type InclusiveSelect = true | 1 | FunctionSelect | JoinSelect;
 
 type SelectFuncs<T extends AnyObject = AnyObject, IsTyped = false> = (
-  | ({ [K in keyof Partial<T>]: InclusiveSelect } & Record<string, IsTyped extends true? FunctionFull : InclusiveSelect>)
-  | JoinSelect
+  | ({ [K in keyof Partial<T>]: InclusiveSelect } & Record<string, IsTyped extends true? FunctionFull : InclusiveSelect>) 
   | FunctionAliasedSelect
   | { [K in keyof Partial<T>]: true | 1 | string }
   | { [K in keyof Partial<T>]: 0 | false }
@@ -321,8 +321,7 @@ type SelectFuncs<T extends AnyObject = AnyObject, IsTyped = false> = (
 
 /** S param is needed to ensure the non typed select works fine */
 export type Select<T extends AnyObject | void = void, S extends DBSchema | void = void> = { t: T, s: S } extends { t: AnyObject, s: DBSchema } ? SelectFuncs<T & { $rowhash: string }, true> : SelectFuncs<AnyObject & { $rowhash: string }, false>;
-
-
+ 
 
 export type SelectBasic = 
   | { [key: string]: any } 
@@ -538,7 +537,7 @@ export type DbJoinMaker = {
   leftJoin: TableJoin;
   innerJoinOne: TableJoin;
   leftJoinOne: TableJoin;
-}
+} 
 
 export type SQLResult<T extends SQLOptions["returnType"]> = {
   command: "SELECT" | "UPDATE" | "DELETE" | "CREATE" | "ALTER" | "LISTEN" | "UNLISTEN" | "INSERT" | string;

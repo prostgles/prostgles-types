@@ -110,15 +110,15 @@ export type DetailedJoinSelect = Record<typeof JOIN_KEYS[number], {
     $path?: undefined;
     $condition: JoinCondition[];
 })>;
-export type JoinSelect = "*" | Record<string, Record<string, any>> | DetailedJoinSelect;
+export type JoinSelect = "*" | Record<string, 1 | "*" | true | FunctionSelect> | Record<string, 0 | false> | DetailedJoinSelect;
 type FunctionShorthand = string;
 type FunctionFull = Record<string, any[] | readonly any[] | FunctionShorthand>;
 type FunctionSelect = FunctionShorthand | FunctionFull;
 type FunctionAliasedSelect = Record<string, FunctionFull>;
-type InclusiveSelect = true | 1 | FunctionSelect;
+type InclusiveSelect = true | 1 | FunctionSelect | JoinSelect;
 type SelectFuncs<T extends AnyObject = AnyObject, IsTyped = false> = (({
     [K in keyof Partial<T>]: InclusiveSelect;
-} & Record<string, IsTyped extends true ? FunctionFull : InclusiveSelect>) | JoinSelect | FunctionAliasedSelect | {
+} & Record<string, IsTyped extends true ? FunctionFull : InclusiveSelect>) | FunctionAliasedSelect | {
     [K in keyof Partial<T>]: true | 1 | string;
 } | {
     [K in keyof Partial<T>]: 0 | false;

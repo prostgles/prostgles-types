@@ -300,7 +300,7 @@ export type JoinSelect =
 | DetailedJoinSelect;
 
 type FunctionShorthand = string;
-type FunctionFull = Record<string, any[] | readonly any[]>;
+type FunctionFull = Record<string, any[] | readonly any[] | FunctionShorthand>;
 type FunctionSelect = FunctionShorthand | FunctionFull;
 /**
  * { computed_field: { funcName: [args] } }

@@ -112,7 +112,7 @@ export type DetailedJoinSelect = Record<typeof JOIN_KEYS[number], {
 })>;
 export type JoinSelect = "*" | Record<string, Record<string, any>> | DetailedJoinSelect;
 type FunctionShorthand = string;
-type FunctionFull = Record<string, any[] | readonly any[]>;
+type FunctionFull = Record<string, any[] | readonly any[] | FunctionShorthand>;
 type FunctionSelect = FunctionShorthand | FunctionFull;
 type FunctionAliasedSelect = Record<string, FunctionFull>;
 type InclusiveSelect = true | 1 | FunctionSelect;

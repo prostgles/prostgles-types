@@ -99,7 +99,7 @@ export type JoinCondition = {
 } | ComplexFilter;
 export type DetailedJoinSelect = Record<typeof JOIN_KEYS[number], {
     select: Select;
-    filter?: FullFilter;
+    filter?: FullFilter<void, void>;
     offset?: number;
     limit?: number;
     orderBy?: OrderBy;
@@ -218,38 +218,38 @@ type GetUpdateReturnType<O extends UpdateParams<TD, S>, TD extends AnyObject, S 
 } ? Pick<Required<TD>, keyof O["returning"]> : O extends {
     returning: Record<string, 0>;
 } ? Omit<Required<TD>, keyof O["returning"]> : void;
-export type SubscriptionHandler<T extends AnyObject = AnyObject> = {
+export type SubscriptionHandler = {
     unsubscribe: () => Promise<any>;
-    filter: FullFilter<T> | {};
+    filter: FullFilter<void, void> | {};
 };
 type GetColumns = (lang?: string, params?: {
     rule: "update";
     data: AnyObject;
     filter: AnyObject;
 }) => Promise<ValidatedColumnInfo[]>;
-export type ViewHandler<TD extends AnyObject = AnyObject, S = void> = {
+export type ViewHandler<TD extends AnyObject = AnyObject, S extends DBSchema | void = void> = {
     getInfo?: (lang?: string) => Promise<TableInfo>;
     getColumns?: GetColumns;
     find: <P extends SelectParams<TD, S>>(filter?: FullFilter<TD, S>, selectParams?: P) => Promise<GetSelectReturnType<S, P, TD, true>>;
     findOne: <P extends SelectParams<TD, S>>(filter?: FullFilter<TD, S>, selectParams?: P) => Promise<undefined | GetSelectReturnType<S, P, TD, false>>;
-    subscribe: <P extends SubscribeParams<TD, S>>(filter: FullFilter<TD, S>, params: P, onData: (items: GetSelectReturnType<S, P, TD, true>) => any, onError?: OnError) => Promise<SubscriptionHandler<TD>>;
-    subscribeOne: <P extends SubscribeParams<TD, S>>(filter: FullFilter<TD, S>, params: P, onData: (item: GetSelectReturnType<S, P, TD, false> | undefined) => any, onError?: OnError) => Promise<SubscriptionHandler<TD>>;
+    subscribe: <P extends SubscribeParams<TD, S>>(filter: FullFilter<TD, S>, params: P, onData: (items: GetSelectReturnType<S, P, TD, true>) => any, onError?: OnError) => Promise<SubscriptionHandler>;
+    subscribeOne: <P extends SubscribeParams<TD, S>>(filter: FullFilter<TD, S>, params: P, onData: (item: GetSelectReturnType<S, P, TD, false> | undefined) => any, onError?: OnError) => Promise<SubscriptionHandler>;
     count: (filter?: FullFilter<TD, S>) => Promise<number>;
-    size: (filter?: FullFilter<TD>, selectParams?: SelectParams<TD>) => Promise<string>;
+    size: (filter?: FullFilter<TD, S>, selectParams?: SelectParams<TD>) => Promise<string>;
 };
 export type UpsertDataToPGCast<TD extends AnyObject = AnyObject> = {
     [K in keyof TD]: CastFromTSToPG<TD[K]>;
 };
 type UpsertDataToPGCastLax<T extends AnyObject> = PartialLax<UpsertDataToPGCast<T>>;
 type InsertData<T extends AnyObject> = UpsertDataToPGCast<T> | UpsertDataToPGCast<T>[];
-export type TableHandler<TD extends AnyObject = AnyObject, S = void> = ViewHandler<TD, S> & {
+export type TableHandler<TD extends AnyObject = AnyObject, S extends DBSchema | void = void> = ViewHandler<TD, S> & {
     update: <P extends UpdateParams<TD, S>>(filter: FullFilter<TD, S>, newData: UpsertDataToPGCastLax<TD>, params?: P) => Promise<GetUpdateReturnType<P, TD, S> | undefined>;
     updateBatch: (data: [FullFilter<TD, S>, UpsertDataToPGCastLax<TD>][], params?: UpdateParams<TD>) => Promise<PartialLax<TD> | void>;
     upsert: <P extends UpdateParams<TD, S>>(filter: FullFilter<TD, S>, newData: UpsertDataToPGCastLax<TD>, params?: P) => Promise<GetUpdateReturnType<P, TD, S>>;
     insert: <P extends UpdateParams<TD, S>, Data extends InsertData<TD>>(data: Data, params?: P) => Promise<GetUpdateReturnType<P, TD, S>>;
     delete: <P extends DeleteParams<TD, S>>(filter?: FullFilter<TD, S>, params?: P) => Promise<GetUpdateReturnType<P, TD, S> | undefined>;
 };
-export type JoinMaker<TT extends AnyObject = AnyObject> = (filter?: FullFilter<TT>, select?: Select<TT>, options?: SelectParams<TT>) => any;
+export type JoinMaker<TT extends AnyObject = AnyObject, S extends DBSchema | void = void> = (filter?: FullFilter<TT, S>, select?: Select<TT>, options?: SelectParams<TT>) => any;
 export type JoinMakerBasic = (filter?: FullFilterBasic, select?: SelectBasic, options?: SelectParams) => any;
 export type TableJoin = {
     [key: string]: JoinMaker;

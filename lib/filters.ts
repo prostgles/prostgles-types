@@ -253,8 +253,8 @@ export type AnyObjIfVoid<T extends AnyObject | void> = T extends AnyObject? T : 
  * Full filter
  * @example { $or: [ { id: 1 }, { status: 'live' } ] }
  */
-export type FullFilter<T extends AnyObject | void = void, S = void> = 
- | { $and: FullFilter<AnyObjIfVoid<T>, S>[] } 
+export type FullFilter<T extends AnyObject | void, S extends DBSchema | void> = 
+ | { $and: FullFilter<T, S>[] } 
  | { $or: FullFilter<T, S>[] } 
  | FilterItem<AnyObjIfVoid<T>> 
  | ExistsFilter<S>
@@ -283,7 +283,7 @@ type RR = {
 const _f: FilterItem<RR> = {
    "h.$eq": ["2"] 
 }
-const forcedFilter: FullFilter<RR> = {
+const forcedFilter: FullFilter<RR, {}> = {
 // "h.$eq": ["2"]
   $and: [
     { "h.$eq": [] },

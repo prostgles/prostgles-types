@@ -275,7 +275,7 @@ export type JoinCondition = {
 
 export type DetailedJoinSelect = Record<typeof JOIN_KEYS[number], {
   select: Select;
-  filter?: FullFilter;
+  filter?: FullFilter<void, void>;
   offset?: number;
   limit?: number;
   orderBy?: OrderBy;
@@ -365,12 +365,7 @@ type CommonSelectParams = {
     */
   | "statement"
 
-}
-// export type SelectParamsBasic = {
-//   select?: SelectBasic;
-//   orderBy?: OrderBy;
-//  ;
-// }
+} 
 
 export type SelectParams<T extends AnyObject | void = void, S = void> = CommonSelectParams & {
   select?: Select<T, S>;
@@ -402,39 +397,7 @@ export type InsertParams<T extends AnyObject | void = void, S = void> = {
 }
 export type DeleteParams<T extends AnyObject | void = void, S = void> = {
   returning?: Select<T, S>;
-}
-
-// export type SubscribeParamsBasic = CommonSelectParams & {
-//   throttle?: number;
-//   throttleOpts?: {
-//     /** 
-//      * False by default. 
-//      * If true then the first value will be emitted at the end of the interval. Instant otherwise 
-//      * */
-//     skipFirst?: boolean;
-//   };
-// };
-
-// export type UpdateParamsBasic = {
-//   returning?: SelectBasic;
-//   onConflictDoNothing?: boolean;
-//   fixIssues?: boolean;
-
-//   /* true by default. If false the update will fail if affecting more than one row */
-//   multi?: boolean;
-// }
-// export type InsertParamsBasic = {
-//   returning?: SelectBasic;
-//   onConflictDoNothing?: boolean;
-//   fixIssues?: boolean;
-// }
-// export type DeleteParamsBasic = {
-//   returning?: SelectBasic;
-// }
-/**
- * Adds unknown props to object
- * Used in represent data returned from a query that can have arbitrary computed fields
- */
+} 
 
 export type PartialLax<T = AnyObject> = Partial<T> & AnyObject;
 
@@ -514,14 +477,14 @@ type GetUpdateReturnType<O extends UpdateParams<TD, S>, TD extends AnyObject, S 
   O extends { returning: Record<string, 0> }? Omit<Required<TD>, keyof O["returning"]> : 
   void;
 
-export type SubscriptionHandler<T extends AnyObject = AnyObject> = {
+export type SubscriptionHandler = {
   unsubscribe: () => Promise<any>;
-  filter: FullFilter<T> | {};
+  filter: FullFilter<void, void> | {};
 }
 
 type GetColumns = (lang?: string, params?: { rule: "update", data: AnyObject, filter: AnyObject }) => Promise<ValidatedColumnInfo[]>;
 
-export type ViewHandler<TD extends AnyObject = AnyObject, S = void> = {
+export type ViewHandler<TD extends AnyObject = AnyObject, S extends DBSchema | void = void> = {
   getInfo?: (lang?: string) => Promise<TableInfo>;
   getColumns?: GetColumns
   find: <P extends SelectParams<TD, S>>(filter?: FullFilter<TD, S>, selectParams?: P) => Promise<GetSelectReturnType<S, P, TD, true>>;
@@ -531,18 +494,18 @@ export type ViewHandler<TD extends AnyObject = AnyObject, S = void> = {
     params: P, 
     onData: (items: GetSelectReturnType<S, P, TD, true>) => any,
     onError?: OnError
-  ) => Promise<SubscriptionHandler<TD>>;
+  ) => Promise<SubscriptionHandler>;
   subscribeOne: <P extends SubscribeParams<TD, S>>(
     filter: FullFilter<TD, S>, 
     params: P, 
     onData: (item: GetSelectReturnType<S, P, TD, false> | undefined) => any, 
     onError?: OnError
-  ) => Promise<SubscriptionHandler<TD>>;
+  ) => Promise<SubscriptionHandler>;
   count: (filter?: FullFilter<TD, S>) => Promise<number>;
   /**
    * Returns result size in bits
    */
-  size: (filter?: FullFilter<TD>, selectParams?: SelectParams<TD>) => Promise<string>;
+  size: (filter?: FullFilter<TD, S>, selectParams?: SelectParams<TD>) => Promise<string>;
 }
 
 export type UpsertDataToPGCast<TD extends AnyObject = AnyObject> = {
@@ -552,38 +515,15 @@ export type UpsertDataToPGCast<TD extends AnyObject = AnyObject> = {
 type UpsertDataToPGCastLax<T extends AnyObject> = PartialLax<UpsertDataToPGCast<T>>;
 type InsertData<T extends AnyObject> = UpsertDataToPGCast<T> | UpsertDataToPGCast<T>[]
 
-export type TableHandler<TD extends AnyObject = AnyObject, S = void> = ViewHandler<TD, S> & {
+export type TableHandler<TD extends AnyObject = AnyObject, S extends DBSchema | void = void> = ViewHandler<TD, S> & {
   update: <P extends UpdateParams<TD, S>>(filter: FullFilter<TD, S>, newData: UpsertDataToPGCastLax<TD>, params?: P) => Promise<GetUpdateReturnType<P ,TD, S> | undefined>;
   updateBatch: (data: [FullFilter<TD, S>, UpsertDataToPGCastLax<TD>][], params?: UpdateParams<TD>) => Promise<PartialLax<TD> | void>;
-  upsert: <P extends UpdateParams<TD, S>>(filter: FullFilter<TD, S>, newData: UpsertDataToPGCastLax<TD>, params?: P) => Promise<GetUpdateReturnType<P ,TD, S>>;
-  // insert: <P extends UpdateParams<TD>>(data: (UpsertDataToPGCast<TD> | UpsertDataToPGCast<TD>[]), params?: P ) => Promise<GetUpdateReturnType<P ,TD>>;
+  upsert: <P extends UpdateParams<TD, S>>(filter: FullFilter<TD, S>, newData: UpsertDataToPGCastLax<TD>, params?: P) => Promise<GetUpdateReturnType<P ,TD, S>>; 
   insert: <P extends UpdateParams<TD, S>, Data extends InsertData<TD>>(data: Data, params?: P ) => Promise<GetUpdateReturnType<P ,TD, S>>;
   delete: <P extends DeleteParams<TD, S>>(filter?: FullFilter<TD, S>, params?: P) => Promise<GetUpdateReturnType<P ,TD, S> | undefined>;
-}
+} 
 
-// export type ViewHandlerBasic = {
-//   getInfo?: (lang?: string) => Promise<TableInfo>;
-//   getColumns?: GetColumns
-//   find: <TD = AnyObject>(filter?: FullFilterBasic, selectParams?: SelectParams) => Promise<PartialLax<TD>[]>;
-//   findOne: <TD = AnyObject>(filter?: FullFilterBasic, selectParams?: SelectParams) => Promise<PartialLax<TD>>;
-//   subscribe: <TD = AnyObject>(filter: FullFilterBasic, params: SubscribeParamsBasic, onData: (items: PartialLax<TD>[]) => void, onError?: OnError) => Promise<{ unsubscribe: () => any }>;
-//   subscribeOne: <TD = AnyObject>(filter: FullFilterBasic, params: SubscribeParamsBasic, onData: (item: PartialLax<TD> | undefined) => any, onError?: OnError) => Promise<{ unsubscribe: () => any }>;
-//   count: (filter?: FullFilterBasic) => Promise<number>;
-//   /**
-//    * Returns result size in bits
-//    */
-//   size: (filter?: FullFilterBasic, selectParams?: SelectParams) => Promise<string>;
-// }
-
-// export type TableHandlerBasic = ViewHandlerBasic & {
-//   update: <TD = AnyObject>(filter: FullFilterBasic, newData: PartialLax<TD>, params?: UpdateParamsBasic) => Promise<PartialLax<TD> | void>;
-//   updateBatch: <TD = AnyObject>(data: [FullFilterBasic, PartialLax<TD>][], params?: UpdateParamsBasic) => Promise<PartialLax<TD> | void>;
-//   upsert: <TD = AnyObject>(filter: FullFilterBasic, newData: PartialLax<TD>, params?: UpdateParamsBasic) => Promise<PartialLax<TD> | void>;
-//   insert: <TD = AnyObject>(data: (PartialLax<TD> | PartialLax<TD>[]), params?: InsertParamsBasic) => Promise<PartialLax<TD> | void>;
-//   delete: <TD = AnyObject>(filter?: FullFilterBasic, params?: DeleteParamsBasic) => Promise<PartialLax<TD> | void>;
-// }
-
-export type JoinMaker<TT extends AnyObject = AnyObject> = (filter?: FullFilter<TT>, select?: Select<TT>, options?: SelectParams<TT>) => any;
+export type JoinMaker<TT extends AnyObject = AnyObject, S extends DBSchema | void = void> = (filter?: FullFilter<TT, S>, select?: Select<TT>, options?: SelectParams<TT>) => any;
 export type JoinMakerBasic = (filter?: FullFilterBasic, select?: SelectBasic, options?: SelectParams) => any;
 
 export type TableJoin = {
@@ -904,10 +844,10 @@ export type ProstglesError = {
   const sel13: Select = ""
   const sel14: Select = "*";
 
-  const fRow: FullFilter<Fields> = {
+  const fRow: FullFilter<Fields, {}> = {
     $rowhash: { "$in": [""] }
   };
-  const emptyFilter: FullFilter<Fields> = {
+  const emptyFilter: FullFilter<Fields, {}> = {
   };
 
   const sel32: Select = {
@@ -993,17 +933,16 @@ export type ProstglesError = {
 
   type TypedFFilter = FullFilter<GSchema["tbl1"]["columns"], GSchema>
   const schemaFFilter: TypedFFilter = { "col1.$eq": "dd" };
-  const fullFilter: FullFilter = schemaFFilter;
+  const fullFilter: FullFilter<void, void> = schemaFFilter;
   
-  const ffFunc = (f: FullFilter) => {};
-  ffFunc(schemaFFilter);
-  // const thandler: TableHandler = 
+  const ffFunc = (f: FullFilter<void, void>) => {};
+  ffFunc(schemaFFilter); 
   
   const dbo: DBOFullyTyped<GSchema> = 1 as any;
   
   const filter: FullFilter<GSchema["tbl1"]["columns"], GSchema> = {  };
   
-  const filterCheck = <F extends FullFilter | undefined>(f: F) => {};
+  const filterCheck = <F extends FullFilter<void, void> | undefined>(f: F) => {};
   filterCheck(filter);
   
   const t: UpsertDataToPGCast<GSchema["tbl1"]["columns"]> = {} as any;

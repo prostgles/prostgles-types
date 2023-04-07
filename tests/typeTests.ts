@@ -17,7 +17,7 @@ import { ExactlyOne } from "../dist/util";
     }
   }
   
-  const f: FullFilter<{ a: string | null; num: number }> = {
+  const f: FullFilter<{ a: string | null; num: number }, {}> = {
     $and: [
       { a: "d", num: { ">": 232 } }, 
       { "num.$eq": 2,  }

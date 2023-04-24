@@ -158,15 +158,15 @@ export type UpdateParams<T extends AnyObject | void = void, S extends DBSchema |
     onConflictDoNothing?: boolean;
     fixIssues?: boolean;
     multi?: boolean;
-};
+} & Pick<CommonSelectParams, "returnType">;
 export type InsertParams<T extends AnyObject | void = void, S extends DBSchema | void = void> = {
     returning?: Select<T, S>;
     onConflictDoNothing?: boolean;
     fixIssues?: boolean;
-};
+} & Pick<CommonSelectParams, "returnType">;
 export type DeleteParams<T extends AnyObject | void = void, S extends DBSchema | void = void> = {
     returning?: Select<T, S>;
-};
+} & Pick<CommonSelectParams, "returnType">;
 export type PartialLax<T = AnyObject> = Partial<T> & AnyObject;
 export type TableInfo = {
     oid: number;

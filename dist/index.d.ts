@@ -38,6 +38,7 @@ export type ColumnInfo = {
     comment: string;
     ordinal_position: number;
     is_nullable: boolean;
+    is_updatable: boolean;
     data_type: string;
     udt_name: PG_COLUMN_UDT_DATA_TYPE;
     element_type: string;

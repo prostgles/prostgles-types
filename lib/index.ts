@@ -115,6 +115,8 @@ export type ColumnInfo = {
    */
   is_nullable: boolean;
 
+  is_updatable: boolean;
+
   /**
    * Simplified data type
    */

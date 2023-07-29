@@ -5,6 +5,7 @@ export declare function pickKeys<T extends AnyObject, Include extends keyof T>(o
 export declare function omitKeys<T extends AnyObject, Exclude extends keyof T>(obj: T, exclude: Exclude[]): Omit<T, Exclude>;
 export declare function filter<T extends AnyObject, ArrFilter extends Partial<T>>(array: T[], arrFilter: ArrFilter): T[];
 export declare function find<T extends AnyObject, ArrFilter extends Partial<T>>(array: T[], arrFilter: ArrFilter): T | undefined;
+export declare function includes<Arr extends any[] | readonly any[], Elem extends Arr[number]>(array: Arr, elem: Elem): boolean;
 export declare function stableStringify(data: AnyObject, opts: any): string | undefined;
 export type TextPatch = {
     from: number;
@@ -75,5 +76,12 @@ export type ExactlyOne<T> = AtMostOne<T> & AtLeastOne<T>;
 type UnionKeys<T> = T extends T ? keyof T : never;
 type StrictUnionHelper<T, TAll> = T extends any ? T & Partial<Record<Exclude<UnionKeys<TAll>, keyof T>, never>> : never;
 export type StrictUnion<T> = StrictUnionHelper<T, T>;
+export declare const tryCatch: <T extends AnyObject>(func: () => T | Promise<T>) => Promise<(T & {
+    error?: undefined;
+    duration: number;
+}) | (Partial<Record<keyof T, undefined>> & {
+    error: unknown;
+    duration: number;
+})>;
 export {};
 //# sourceMappingURL=util.d.ts.map

@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getKeys = exports.isDefined = exports.isObject = exports.get = exports.isEmpty = exports.WAL = exports.unpatchText = exports.getTextPatch = exports.stableStringify = exports.find = exports.filter = exports.omitKeys = exports.pickKeys = exports.asName = void 0;
+exports.tryCatch = exports.getKeys = exports.isDefined = exports.isObject = exports.get = exports.isEmpty = exports.WAL = exports.unpatchText = exports.getTextPatch = exports.stableStringify = exports.includes = exports.find = exports.filter = exports.omitKeys = exports.pickKeys = exports.asName = void 0;
 const md5_1 = require("./md5");
 function asName(str) {
     if (str === null || str === undefined || !str.toString || !str.toString())
@@ -39,6 +39,10 @@ function find(array, arrFilter) {
     return filter(array, arrFilter)[0];
 }
 exports.find = find;
+function includes(array, elem) {
+    return array.some(v => v === elem);
+}
+exports.includes = includes;
 function stableStringify(data, opts) {
     if (!opts)
         opts = {};
@@ -368,4 +372,21 @@ function getKeys(o) {
     return Object.keys(o);
 }
 exports.getKeys = getKeys;
+const tryCatch = async (func) => {
+    const startTime = Date.now();
+    try {
+        const res = await func();
+        return {
+            ...res,
+            duration: Date.now() - startTime,
+        };
+    }
+    catch (error) {
+        return {
+            error,
+            duration: Date.now() - startTime,
+        };
+    }
+};
+exports.tryCatch = tryCatch;
 //# sourceMappingURL=util.js.map

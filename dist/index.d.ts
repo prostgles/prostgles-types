@@ -447,7 +447,6 @@ export type ProstglesError = {
     code_info?: string;
     columns?: string[];
 };
-export type { WALItem, BasicOrderBy, WALItemsObj, WALConfig, TextPatch, SyncTableInfo } from "./util";
 export * from "./util";
 export * from "./filters";
 export type { ClientExpressData, ClientSyncHandles, ClientSyncInfo, SyncConfig, ClientSyncPullResponse, SyncBatchParams, onUpdatesParams } from "./replication";

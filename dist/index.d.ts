@@ -98,7 +98,7 @@ export type JoinCondition = {
     column: string;
     rootColumn: string;
 } | ComplexFilter;
-type JoinPath = {
+export type JoinPath = {
     table: string;
     on: Record<string, string>;
 }[];

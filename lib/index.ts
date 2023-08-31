@@ -275,7 +275,7 @@ export type JoinCondition = {
   rootColumn: string;
 } | ComplexFilter;
 
-type JoinPath = {
+export type JoinPath = {
   table: string;
   /**
    * {

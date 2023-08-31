@@ -306,11 +306,14 @@ export type DetailedJoinSelect = Record<typeof JOIN_KEYS[number], string | JoinP
   }
 );
 
-export type JoinSelect = 
+export type SimpleJoinSelect = 
 | "*"
 /** Aliased Shorthand join: table_name: { ...select } */
 | Record<string, 1 | "*" | true | FunctionSelect> 
 | Record<string, 0 | false> 
+
+export type JoinSelect = 
+| SimpleJoinSelect
 | DetailedJoinSelect;
 
 type FunctionShorthand = string;

@@ -98,7 +98,11 @@ export type JoinCondition = {
     column: string;
     rootColumn: string;
 } | ComplexFilter;
-export type DetailedJoinSelect = Record<typeof JOIN_KEYS[number], {
+type JoinPath = {
+    table: string;
+    on: Record<string, string>;
+}[];
+export type DetailedJoinSelect = Record<typeof JOIN_KEYS[number], string | JoinPath> & {
     select: Select;
     filter?: FullFilter<void, void>;
     offset?: number;
@@ -110,7 +114,7 @@ export type DetailedJoinSelect = Record<typeof JOIN_KEYS[number], {
 } | {
     $path?: undefined;
     $condition: JoinCondition[];
-})>;
+});
 export type JoinSelect = "*" | Record<string, 1 | "*" | true | FunctionSelect> | Record<string, 0 | false> | DetailedJoinSelect;
 type FunctionShorthand = string;
 type FunctionFull = Record<string, any[] | readonly any[] | FunctionShorthand>;

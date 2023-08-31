@@ -275,25 +275,36 @@ export type JoinCondition = {
   rootColumn: string;
 } | ComplexFilter;
 
-export type DetailedJoinSelect = Record<typeof JOIN_KEYS[number], {
+type JoinPath = {
+  table: string;
+  /**
+   * {
+   *    leftColumn: "rightColumn"
+   * }
+   */
+  on: Record<string, string>;
+}[]
+
+export type DetailedJoinSelect = Record<typeof JOIN_KEYS[number], string | JoinPath> & {
   select: Select;
   filter?: FullFilter<void, void>;
   offset?: number;
   limit?: number;
   orderBy?: OrderBy;
+} & (
+  {
+    $path?: string[];
+    $condition?: undefined;
+  } | {
+    $path?: undefined;
 
-} & ({
-  $path?: string[];
-  $condition?: undefined;
-} | {
-  $path?: undefined;
+    /**
+     * If present then will overwrite $path and any inferred joins
+     */
+    $condition: JoinCondition[];
 
-  /**
-   * If present then will overwrite $path and any inferred joins
-   */
-  $condition: JoinCondition[];
-
-})>;
+  }
+);
 
 export type JoinSelect = 
 | "*"

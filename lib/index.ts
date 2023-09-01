@@ -286,7 +286,7 @@ export type JoinPath = {
 };
 export type RawJoinPath = (JoinPath | string)[]
 
-export type DetailedJoinSelect = Record<typeof JOIN_KEYS[number], string | JoinPath> & {
+export type DetailedJoinSelect = Record<typeof JOIN_KEYS[number], string | JoinPath[]> & {
   select: Select;
   filter?: FullFilter<void, void>;
   offset?: number;

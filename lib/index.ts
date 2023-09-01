@@ -283,7 +283,8 @@ export type JoinPath = {
    * }
    */
   on?: Record<string, string>;
-}[]
+};
+export type RawJoinPath = (JoinPath | string)[]
 
 export type DetailedJoinSelect = Record<typeof JOIN_KEYS[number], string | JoinPath> & {
   select: Select;
@@ -292,16 +293,13 @@ export type DetailedJoinSelect = Record<typeof JOIN_KEYS[number], string | JoinP
   limit?: number;
   orderBy?: OrderBy;
 } & (
-  {
-    $path?: string[];
+  { 
     $condition?: undefined;
   } | {
-    $path?: undefined;
-
     /**
      * If present then will overwrite $path and any inferred joins
      */
-    $condition: JoinCondition[];
+    $condition?: JoinCondition[];
 
   }
 );

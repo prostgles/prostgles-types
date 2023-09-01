@@ -101,7 +101,8 @@ export type JoinCondition = {
 export type JoinPath = {
     table: string;
     on?: Record<string, string>;
-}[];
+};
+export type RawJoinPath = (JoinPath | string)[];
 export type DetailedJoinSelect = Record<typeof JOIN_KEYS[number], string | JoinPath> & {
     select: Select;
     filter?: FullFilter<void, void>;
@@ -109,11 +110,9 @@ export type DetailedJoinSelect = Record<typeof JOIN_KEYS[number], string | JoinP
     limit?: number;
     orderBy?: OrderBy;
 } & ({
-    $path?: string[];
     $condition?: undefined;
 } | {
-    $path?: undefined;
-    $condition: JoinCondition[];
+    $condition?: JoinCondition[];
 });
 export type SimpleJoinSelect = "*" | Record<string, 1 | "*" | true | FunctionSelect> | Record<string, 0 | false>;
 export type JoinSelect = SimpleJoinSelect | DetailedJoinSelect;

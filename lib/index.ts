@@ -282,7 +282,7 @@ export type JoinPath = {
    *    leftColumn: "rightColumn"
    * }
    */
-  on?: Record<string, string>;
+  on?: Record<string, string>[];
 };
 export type RawJoinPath = string | (JoinPath | string)[]
 

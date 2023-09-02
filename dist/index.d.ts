@@ -100,7 +100,7 @@ export type JoinCondition = {
 } | ComplexFilter;
 export type JoinPath = {
     table: string;
-    on?: Record<string, string>;
+    on?: Record<string, string>[];
 };
 export type RawJoinPath = string | (JoinPath | string)[];
 export type DetailedJoinSelect = Record<typeof JOIN_KEYS[number], RawJoinPath> & {

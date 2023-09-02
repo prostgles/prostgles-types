@@ -1,4 +1,4 @@
-import { DBSchema } from ".";
+import { DBSchema, RawJoinPath } from ".";
 import { ExactlyOne } from "./util";
 export type AllowedTSType = string | number | boolean | Date | any;
 export type AllowedTSTypes = AllowedTSType[];
@@ -121,7 +121,10 @@ export type FilterForObject<T extends AnyObject = AnyObject> = {
 } | ShorthandFilter<T>;
 export type ExistsFilter<S = void> = Partial<{
     [key in EXISTS_KEY]: S extends DBSchema ? ExactlyOne<{
-        [tname in keyof S]: FullFilter<S[tname]["columns"], S>;
+        [tname in keyof S]: FullFilter<S[tname]["columns"], S> | {
+            path: RawJoinPath[];
+            filter: FullFilter<S[tname]["columns"], S>;
+        };
     }> : any;
 }>;
 export type FilterItem<T extends AnyObject = AnyObject> = FilterForObject<T>;

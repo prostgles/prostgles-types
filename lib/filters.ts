@@ -1,4 +1,4 @@
-import { DBSchema, SelectParams, TableHandler, UpsertDataToPGCast, ViewHandler } from ".";
+import { DBSchema, RawJoinPath } from ".";
 import { ExactlyOne, getKeys } from "./util";
 
 export type AllowedTSType = string | number | boolean | Date | any;
@@ -231,7 +231,12 @@ export type FilterForObject<T extends AnyObject = AnyObject> =
 export type ExistsFilter<S = void> = Partial<{ 
   [key in EXISTS_KEY]: S extends DBSchema? 
     ExactlyOne<{ 
-      [tname in keyof S]: FullFilter<S[tname]["columns"], S> 
+      [tname in keyof S]: 
+       | FullFilter<S[tname]["columns"], S> 
+       | {
+          path: RawJoinPath[];
+          filter: FullFilter<S[tname]["columns"], S> 
+        }
     }> : any
     /** ExactlyOne does not for any type. This produces error */
     // ExactlyOne<{ 

@@ -103,7 +103,7 @@ export type JoinPath = {
     on?: Record<string, string>;
 };
 export type RawJoinPath = string | (JoinPath | string)[];
-export type DetailedJoinSelect = Record<typeof JOIN_KEYS[number], string | RawJoinPath[]> & {
+export type DetailedJoinSelect = Record<typeof JOIN_KEYS[number], RawJoinPath> & {
     select: Select;
     filter?: FullFilter<void, void>;
     offset?: number;

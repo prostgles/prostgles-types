@@ -103,8 +103,7 @@ export type JoinPath = {
     on?: Record<string, string>[];
 };
 export type RawJoinPath = string | (JoinPath | string)[];
-type SelectJoinPath = Partial<Record<typeof JOIN_KEYS[number], RawJoinPath>>;
-export type DetailedJoinSelect = SelectJoinPath & {
+export type DetailedJoinSelect = Partial<Record<typeof JOIN_KEYS[number], RawJoinPath>> & {
     select: Select;
     filter?: FullFilter<void, void>;
     offset?: number;
@@ -255,8 +254,13 @@ export type TableHandler<TD extends AnyObject = AnyObject, S extends DBSchema | 
     insert: <P extends UpdateParams<TD, S>>(data: InsertData<TD>, params?: P) => Promise<GetUpdateReturnType<P, TD, S>>;
     delete: <P extends DeleteParams<TD, S>>(filter?: FullFilter<TD, S>, params?: P) => Promise<GetUpdateReturnType<P, TD, S> | undefined>;
 };
-export type JoinMaker<TT extends AnyObject = AnyObject, S extends DBSchema | void = void> = (filter?: FullFilter<TT, S>, select?: Select<TT>, options?: SelectParams<TT> & SelectJoinPath) => any;
-export type JoinMakerBasic = (filter?: FullFilterBasic, select?: SelectBasic, options?: SelectParams & SelectJoinPath) => any;
+export type JoinMakerOptions<TT extends AnyObject = AnyObject> = SelectParams<TT> & {
+    path?: RawJoinPath;
+};
+export type JoinMaker<TT extends AnyObject = AnyObject, S extends DBSchema | void = void> = (filter?: FullFilter<TT, S>, select?: Select<TT>, options?: JoinMakerOptions<TT>) => any;
+export type JoinMakerBasic = (filter?: FullFilterBasic, select?: SelectBasic, options?: SelectParams & {
+    path?: RawJoinPath;
+}) => any;
 export type TableJoin = {
     [key: string]: JoinMaker;
 };

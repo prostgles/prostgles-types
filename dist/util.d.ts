@@ -1,5 +1,5 @@
 /// <reference types="node" />
-import { AnyObject, TS_COLUMN_DATA_TYPES } from ".";
+import { AnyObject, JoinMaker, TS_COLUMN_DATA_TYPES } from ".";
 export declare function asName(str: string): string;
 export declare function pickKeys<T extends AnyObject, Include extends keyof T>(obj: T, include?: Include[], onlyIfDefined?: boolean): Pick<T, Include>;
 export declare function omitKeys<T extends AnyObject, Exclude extends keyof T>(obj: T, exclude: Exclude[]): Omit<T, Exclude>;
@@ -83,5 +83,11 @@ export declare const tryCatch: <T extends AnyObject>(func: () => T | Promise<T>)
     error: unknown;
     duration: number;
 })>;
+export declare const getJoinHandlers: (tableName: string) => {
+    innerJoin: JoinMaker<AnyObject, void>;
+    leftJoin: JoinMaker<AnyObject, void>;
+    innerJoinOne: JoinMaker<AnyObject, void>;
+    leftJoinOne: JoinMaker<AnyObject, void>;
+};
 export {};
 //# sourceMappingURL=util.d.ts.map

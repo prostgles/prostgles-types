@@ -1,4 +1,4 @@
-import { AnyObject, TS_COLUMN_DATA_TYPES } from ".";
+import { AnyObject, FullFilter, JoinMaker, SelectParams, TS_COLUMN_DATA_TYPES } from ".";
 import { md5 } from "./md5";
 
 export function asName(str: string) {
@@ -525,5 +525,26 @@ export const tryCatch = async <T extends AnyObject>(func: () => T | Promise<T>):
       error,
       duration: Date.now() - startTime, 
     } as any;
+  }
+}
+
+export const getJoinHandlers = (tableName: string) => {
+  const getJoinFunc = (isLeft: boolean, expectsOne: boolean): JoinMaker => {
+    return (filter: Parameters<JoinMaker<AnyObject>>[0], select: Parameters<JoinMaker<AnyObject>>[1], options: Parameters<JoinMaker<AnyObject>>[2] = {}) => {
+      // return makeJoin(isLeft, filter, select, expectsOne? { ...options, limit: 1 } : options);
+      return {
+        [isLeft ? "$leftJoin" : "$innerJoin"]: options.path ?? tableName,
+        filter,
+        ... omitKeys(options, ["path", "select"]),
+        select,
+      }
+    }
+  }
+
+  return {
+    innerJoin: getJoinFunc(false, false),
+    leftJoin: getJoinFunc(true, false),
+    innerJoinOne: getJoinFunc(false, true),
+    leftJoinOne: getJoinFunc(true, true),
   }
 }

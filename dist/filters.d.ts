@@ -66,7 +66,7 @@ export declare const JsonbOperands: {
         readonly Example: "'{\"a\":[1,2,3,4,5]}'::jsonb @@ '$.a[*] > 2'";
     };
 };
-export declare const JsonbFilterKeys: ("@>" | "<@" | "?" | "?|" | "?&" | "||" | "-" | "#-" | "@?" | "@@")[];
+export declare const JsonbFilterKeys: ("@@" | "@>" | "<@" | "?" | "?|" | "?&" | "||" | "-" | "#-" | "@?")[];
 export type CompareFilter<T extends AllowedTSType = string> = T | ExactlyOne<Record<typeof CompareFilterKeys[number], T>> | ExactlyOne<Record<typeof CompareInFilterKeys[number], T[]>> | {
     "$between": [T, T];
 };

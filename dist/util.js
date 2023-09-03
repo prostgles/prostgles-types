@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.tryCatch = exports.getKeys = exports.isDefined = exports.isObject = exports.get = exports.isEmpty = exports.WAL = exports.unpatchText = exports.getTextPatch = exports.stableStringify = exports.includes = exports.find = exports.filter = exports.omitKeys = exports.pickKeys = exports.asName = void 0;
+exports.getJoinHandlers = exports.tryCatch = exports.getKeys = exports.isDefined = exports.isObject = exports.get = exports.isEmpty = exports.WAL = exports.unpatchText = exports.getTextPatch = exports.stableStringify = exports.includes = exports.find = exports.filter = exports.omitKeys = exports.pickKeys = exports.asName = void 0;
 const md5_1 = require("./md5");
 function asName(str) {
     if (str === null || str === undefined || !str.toString || !str.toString())
@@ -389,4 +389,23 @@ const tryCatch = async (func) => {
     }
 };
 exports.tryCatch = tryCatch;
+const getJoinHandlers = (tableName) => {
+    const getJoinFunc = (isLeft, expectsOne) => {
+        return (filter, select, options = {}) => {
+            return {
+                [isLeft ? "$leftJoin" : "$innerJoin"]: options.path ?? tableName,
+                filter,
+                ...omitKeys(options, ["path", "select"]),
+                select,
+            };
+        };
+    };
+    return {
+        innerJoin: getJoinFunc(false, false),
+        leftJoin: getJoinFunc(true, false),
+        innerJoinOne: getJoinFunc(false, true),
+        leftJoinOne: getJoinFunc(true, true),
+    };
+};
+exports.getJoinHandlers = getJoinHandlers;
 //# sourceMappingURL=util.js.map

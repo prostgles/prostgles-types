@@ -116,9 +116,9 @@ export type ValueOf<T> = T[keyof T];
 type ShorthandFilter<Obj extends Record<string, any>> = ValueOf<{
     [K in keyof Obj]: Obj[K] extends string ? StringFilter<K, Required<Obj>[K]> : BasicFilter<K, Required<Obj>[K]>;
 }>;
-export type FilterForObject<T extends AnyObject = AnyObject> = ({
+export type FilterForObject<T extends AnyObject = AnyObject> = {
     [K in keyof Partial<T>]: FilterDataType<T[K]>;
-} | ShorthandFilter<T>) & Partial<ComplexFilter>;
+} & Partial<ComplexFilter> | ShorthandFilter<T>;
 export type ExistsFilter<S = void> = Partial<{
     [key in EXISTS_KEY]: S extends DBSchema ? ExactlyOne<{
         [tname in keyof S]: FullFilter<S[tname]["columns"], S> | {

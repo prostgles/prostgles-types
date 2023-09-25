@@ -218,17 +218,16 @@ type ShorthandFilter<Obj extends Record<string, any>> = ValueOf<{
 
 /* Traverses object keys to make filter */
 export type FilterForObject<T extends AnyObject = AnyObject> = 
-(
   /* { col: { $func: ["value"] } } */
   | {
     [K in keyof Partial<T>]: FilterDataType<T[K]>
-  } 
+  } & Partial<ComplexFilter>
   /**
    * Filters with shorthand notation
    * @example: { "name.$ilike": 'abc' }
    */
   | ShorthandFilter<T>
-) & Partial<ComplexFilter>;
+;
 
 export type ExistsFilter<S = void> = Partial<{ 
   [key in EXISTS_KEY]: S extends DBSchema? 

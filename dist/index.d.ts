@@ -239,8 +239,8 @@ export type ViewHandler<TD extends AnyObject = AnyObject, S extends DBSchema | v
     findOne: <P extends SelectParams<TD, S>>(filter?: FullFilter<TD, S>, selectParams?: P) => Promise<undefined | GetSelectReturnType<S, P, TD, false>>;
     subscribe: <P extends SubscribeParams<TD, S>>(filter: FullFilter<TD, S>, params: P, onData: (items: GetSelectReturnType<S, P, TD, true>) => any, onError?: OnError) => Promise<SubscriptionHandler>;
     subscribeOne: <P extends SubscribeParams<TD, S>>(filter: FullFilter<TD, S>, params: P, onData: (item: GetSelectReturnType<S, P, TD, false> | undefined) => any, onError?: OnError) => Promise<SubscriptionHandler>;
-    count: (filter?: FullFilter<TD, S>, selectParams?: SelectParams<TD, S>) => Promise<number>;
-    size: (filter?: FullFilter<TD, S>, selectParams?: SelectParams<TD, S>) => Promise<string>;
+    count: <P extends SelectParams<TD, S>>(filter?: FullFilter<TD, S>, selectParams?: P) => Promise<number>;
+    size: <P extends SelectParams<TD, S>>(filter?: FullFilter<TD, S>, selectParams?: P) => Promise<string>;
 };
 export type UpsertDataToPGCast<TD extends AnyObject = AnyObject> = {
     [K in keyof TD]: CastFromTSToPG<TD[K]>;

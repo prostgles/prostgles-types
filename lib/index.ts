@@ -516,11 +516,11 @@ export type ViewHandler<TD extends AnyObject = AnyObject, S extends DBSchema | v
     onData: (item: GetSelectReturnType<S, P, TD, false> | undefined) => any, 
     onError?: OnError
   ) => Promise<SubscriptionHandler>;
-  count: (filter?: FullFilter<TD, S>) => Promise<number>;
+  count: (filter?: FullFilter<TD, S>, selectParams?: SelectParams<TD, S>) => Promise<number>;
   /**
    * Returns result size in bits
    */
-  size: <P extends SelectParams<TD, S>>(filter?: FullFilter<TD, S>, selectParams?: P) => Promise<string>;
+  size: (filter?: FullFilter<TD, S>, selectParams?: SelectParams<TD, S>) => Promise<string>;
 }
 
 export type UpsertDataToPGCast<TD extends AnyObject = AnyObject> = {

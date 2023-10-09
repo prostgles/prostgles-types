@@ -143,7 +143,7 @@ export type SelectBasic = {
     [key: string]: any;
 } | {} | undefined | "" | "*";
 type CommonSelectParams = {
-    limit?: number;
+    limit?: number | null;
     offset?: number;
     groupBy?: boolean;
     returnType?: "row" | "value" | "values" | "statement";

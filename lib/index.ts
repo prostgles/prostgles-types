@@ -348,7 +348,11 @@ export type SelectBasic =
 /* Simpler types */
 type CommonSelectParams = {
 
-  limit?: number;
+  /**
+   * If null then maxLimit if present will be applied
+   * If undefined then 1000 will be applied as the default
+   */
+  limit?: number | null;
   offset?: number;
 
   /**

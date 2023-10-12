@@ -111,6 +111,7 @@ export declare namespace JSONB {
         record: {
             keysEnum?: readonly string[];
             values?: FieldType;
+            partial?: boolean;
         };
     };
     export type FieldTypeObj = StrictUnion<BasicType | ObjectType | EnumType | OneOf | ArrayOf | RecordType | Lookup>;

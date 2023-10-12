@@ -145,6 +145,7 @@ export namespace JSONB {
     record: {
       keysEnum?: readonly string[];
       values?: FieldType;
+      partial?: boolean;
     }
   }
 

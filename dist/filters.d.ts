@@ -99,7 +99,7 @@ export type ComplexFilter = Record<typeof COMPLEX_FILTER_KEY, [
     {
         [funcName: string]: any[];
     },
-    string?,
+    typeof CompareFilterKeys[number]?,
     any?
 ]>;
 type BasicFilter<Field extends string, DataType extends any> = Partial<{

@@ -89,4 +89,7 @@ const forcedFilter = {
         { h: { "$containedBy": [] } }
     ]
 };
+const _f2 = {
+    $filter: [{ $funcName: ["colname", "opts"] }, ">", 2]
+};
 //# sourceMappingURL=filters.js.map

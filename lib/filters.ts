@@ -193,7 +193,7 @@ export type EXISTS_KEY = typeof EXISTS_KEYS[number];
 export const COMPLEX_FILTER_KEY = "$filter" as const;
 export type ComplexFilter = Record<typeof COMPLEX_FILTER_KEY, [
   { [funcName: string]: any[] },
-  string?,
+  typeof CompareFilterKeys[number]?,
   any?
 ]>; 
 
@@ -296,4 +296,7 @@ const forcedFilter: FullFilter<RR, {}> = {
     { "h.$eq": [] },
     { h: { "$containedBy": [] } }
   ]
+}
+const _f2: FilterItem<RR> = {
+   $filter: [{ $funcName: ["colname", "opts"] }, ">", 2] 
 }

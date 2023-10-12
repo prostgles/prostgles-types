@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getJoinHandlers = exports.tryCatch = exports.getKeys = exports.isDefined = exports.isObject = exports.get = exports.isEmpty = exports.WAL = exports.unpatchText = exports.getTextPatch = exports.stableStringify = exports.includes = exports.find = exports.filter = exports.omitKeys = exports.pickKeys = exports.asName = void 0;
+exports.reverseParsedPath = exports.reverseJoinOn = exports.getJoinHandlers = exports.tryCatch = exports.getKeys = exports.isDefined = exports.isObject = exports.get = exports.isEmpty = exports.WAL = exports.unpatchText = exports.getTextPatch = exports.stableStringify = exports.includes = exports.find = exports.filter = exports.omitKeys = exports.pickKeys = exports.asName = void 0;
 const md5_1 = require("./md5");
 function asName(str) {
     if (str === null || str === undefined || !str.toString || !str.toString())
@@ -408,4 +408,25 @@ const getJoinHandlers = (tableName) => {
     };
 };
 exports.getJoinHandlers = getJoinHandlers;
+const reverseJoinOn = (on) => {
+    return on.map(constraint => Object.fromEntries(Object.entries(constraint)
+        .map(([left, right]) => [right, left])));
+};
+exports.reverseJoinOn = reverseJoinOn;
+const reverseParsedPath = (parsedPath, table) => {
+    const newPPath = [
+        { table, on: [{}] },
+        ...(parsedPath ?? [])
+    ];
+    return newPPath.map((pp, i) => {
+        const nextPath = newPPath[i + 1];
+        if (!nextPath)
+            return undefined;
+        return {
+            table: pp.table,
+            on: (0, exports.reverseJoinOn)(nextPath.on)
+        };
+    }).filter(isDefined).reverse();
+};
+exports.reverseParsedPath = reverseParsedPath;
 //# sourceMappingURL=util.js.map

@@ -1,4 +1,4 @@
-import { AnyObject, FullFilter, JoinMaker, SelectParams, TS_COLUMN_DATA_TYPES } from ".";
+import { AnyObject, FullFilter, JoinMaker, JoinPath, SelectParams, TS_COLUMN_DATA_TYPES } from ".";
 import { md5 } from "./md5";
 
 export function asName(str: string) {
@@ -547,4 +547,37 @@ export const getJoinHandlers = (tableName: string) => {
     innerJoinOne: getJoinFunc(false, true),
     leftJoinOne: getJoinFunc(true, true),
   }
+}
+
+export type ParsedJoinPath = Required<JoinPath>;
+export const reverseJoinOn = (on: ParsedJoinPath["on"]) => {
+  return on.map(constraint => 
+    Object.fromEntries(
+      Object.entries(constraint)
+        .map(([left, right]) => 
+          [right, left]
+        )
+    )
+  );
+}
+
+/**
+ * result = [
+ *  { table, on: parsedPath[0] }
+ *  ...parsedPath.map(p => ({ table: p.table, on: reversedOn(parsedPath[i+1].on) }))
+ * ]
+ */
+export const reverseParsedPath = (parsedPath: ParsedJoinPath[], table: string) => {
+  const newPPath: ParsedJoinPath[] = [
+    { table, on: [{}] },
+    ...(parsedPath ?? [])
+  ]
+  return newPPath.map((pp, i) => {
+    const nextPath = newPPath[i+1];
+    if(!nextPath) return undefined;
+    return {
+      table: pp.table,
+      on: reverseJoinOn(nextPath.on)
+    }
+  }).filter(isDefined).reverse();
 }

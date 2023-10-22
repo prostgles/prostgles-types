@@ -146,7 +146,7 @@ type CommonSelectParams = {
     limit?: number | null;
     offset?: number;
     groupBy?: boolean;
-    returnType?: "row" | "value" | "values" | "statement";
+    returnType?: "row" | "value" | "values" | "statement" | "statement-no-rls" | "statement-where";
 };
 export type SelectParams<T extends AnyObject | void = void, S extends DBSchema | void = void> = CommonSelectParams & {
     select?: Select<T, S>;

@@ -382,6 +382,16 @@ type CommonSelectParams = {
     */
   | "statement"
 
+  /**
+    * Will return the sql statement excluding the user header. Requires publishRawSQL privileges if called by client
+    */
+  | "statement-no-rls"
+
+  /**
+    * Will return the sql statement where condition. Requires publishRawSQL privileges if called by client
+    */
+  | "statement-where"
+
 } 
 
 export type SelectParams<T extends AnyObject | void = void, S extends DBSchema | void = void> = CommonSelectParams & {

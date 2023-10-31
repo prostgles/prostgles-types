@@ -15,13 +15,12 @@
     "moduleResolution": "node",
     "allowSyntheticDefaultImports": true,
     "resolveJsonModule": true,
-    // "outFile": "bundle.js",
-    // "moduleResolution": "node"
+    "skipLibCheck": true,
     "declaration": true,
     "declarationMap": true,
     "isolatedModules": true,
-    "keyofStringsOnly": true,
     "ignoreDeprecations": "5.0",
+    "keyofStringsOnly": true,
     "noUncheckedIndexedAccess": true
   },
   "exclude": [

@@ -5,7 +5,7 @@ module.exports = {
   entry: {
    'index_umd': './dist/index.js'
   },
-  mode: 'production', // "development",// 
+  mode: 'production',
   module: {
     rules: [
       {

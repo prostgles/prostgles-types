@@ -214,7 +214,7 @@ type GetSelectDataType<S extends DBSchema | void, O extends SelectParams<TD, S>,
 export type GetSelectReturnType<S extends DBSchema | void, O extends SelectParams<TD, S>, TD extends AnyObject, isMulti extends boolean> = O extends {
     returnType: "statement";
 } ? string : isMulti extends true ? GetSelectDataType<S, O, TD>[] : GetSelectDataType<S, O, TD>;
-type GetUpdateReturnType<O extends UpdateParams<TD, S>, TD extends AnyObject, S extends DBSchema | void = void> = O extends {
+type GetReturningReturnType<O extends UpdateParams<TD, S>, TD extends AnyObject, S extends DBSchema | void = void> = O extends {
     returning: "*";
 } ? Required<TD> : O extends {
     returning: "";
@@ -223,6 +223,10 @@ type GetUpdateReturnType<O extends UpdateParams<TD, S>, TD extends AnyObject, S 
 } ? Pick<Required<TD>, keyof O["returning"]> : O extends {
     returning: Record<string, 0>;
 } ? Omit<Required<TD>, keyof O["returning"]> : void;
+type GetUpdateReturnType<O extends UpdateParams<TD, S>, TD extends AnyObject, S extends DBSchema | void = void> = O extends {
+    multi: false;
+} ? GetReturningReturnType<O, TD, S> : GetReturningReturnType<O, TD, S>[];
+type GetInsertReturnType<Data extends AnyObject | AnyObject[], O extends UpdateParams<TD, S>, TD extends AnyObject, S extends DBSchema | void = void> = Data extends any[] ? GetReturningReturnType<O, TD, S>[] : GetReturningReturnType<O, TD, S>;
 export type SubscriptionHandler = {
     unsubscribe: () => Promise<any>;
     filter: FullFilter<void, void> | {};
@@ -251,7 +255,7 @@ export type TableHandler<TD extends AnyObject = AnyObject, S extends DBSchema | 
     update: <P extends UpdateParams<TD, S>>(filter: FullFilter<TD, S>, newData: UpsertDataToPGCastLax<TD>, params?: P) => Promise<GetUpdateReturnType<P, TD, S> | undefined>;
     updateBatch: <P extends UpdateParams<TD, S>>(data: [FullFilter<TD, S>, UpsertDataToPGCastLax<TD>][], params?: P) => Promise<GetUpdateReturnType<P, TD, S> | void>;
     upsert: <P extends UpdateParams<TD, S>>(filter: FullFilter<TD, S>, newData: UpsertDataToPGCastLax<TD>, params?: P) => Promise<GetUpdateReturnType<P, TD, S>>;
-    insert: <P extends UpdateParams<TD, S>>(data: InsertData<TD>, params?: P) => Promise<GetUpdateReturnType<P, TD, S>>;
+    insert: <P extends InsertParams<TD, S>, D extends InsertData<TD>>(data: D, params?: P) => Promise<GetInsertReturnType<D, P, TD, S>>;
     delete: <P extends DeleteParams<TD, S>>(filter?: FullFilter<TD, S>, params?: P) => Promise<GetUpdateReturnType<P, TD, S> | undefined>;
 };
 export type JoinMakerOptions<TT extends AnyObject = AnyObject> = SelectParams<TT> & {

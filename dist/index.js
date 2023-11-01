@@ -130,12 +130,31 @@ exports.RULE_METHODS = {
         returning: { id: 1, name: 1, public: 1, $rowhash: 1, added_day: { "$day": ["added"] } }
     };
 });
-(() => {
+(async () => {
     const schemaFFilter = { "col1.$eq": "dd" };
     const fullFilter = schemaFFilter;
     const ffFunc = (f) => { };
     ffFunc(schemaFFilter);
     const dbo = 1;
+    const noRow = await dbo.tbl1.update({}, { col1: "" });
+    noRow.length;
+    noRow.col1;
+    const oneRow = await dbo.tbl1.update({}, { col1: "" }, { returning: "*", multi: false });
+    oneRow?.length;
+    oneRow.col1;
+    oneRow?.col1;
+    const manyRows = await dbo.tbl1.update({}, { col1: "" }, { returning: "*" });
+    manyRows?.col1;
+    manyRows?.at(0)?.col1;
+    const noIRow = await dbo.tbl1.insert({ col1: "" });
+    noIRow.length;
+    noIRow.col1;
+    const irow = await dbo.tbl1.insert({ col1: "" }, { returning: "*" });
+    irow.length;
+    irow.col1;
+    const irows = await dbo.tbl1.insert([{ col1: "" }], { returning: "*" });
+    irows.col1;
+    irows.length;
     const filter = {};
     const filterCheck = (f) => { };
     filterCheck(filter);

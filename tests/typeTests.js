@@ -89,7 +89,7 @@ exports.typeTestsOK = void 0;
     db.table12.update;
     db.table1.find;
     const result = await db.table2.update({}, { c1: "" }, { returning: "*" });
-    result.c2 + 2;
+    result.at(0).c2 + 2;
     const ef = {
         $existsJoined: {
             tbl11: {}

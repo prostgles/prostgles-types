@@ -162,7 +162,7 @@ import type { TableHandler, SQLHandler, FullFilter, DBHandler, Select, SelectTyp
   db.table1.find;
 
   const result = await db.table2.update({}, { c1: "" }, { returning: "*" });
-  result.c2 + 2;
+  result.at(0).c2 + 2;
  
 
   type SampleSchema = {

@@ -431,29 +431,34 @@ export type DeleteParams<T extends AnyObject | void = void, S extends DBSchema |
 export type PartialLax<T = AnyObject> = Partial<T> & AnyObject;
 
 export type TableInfo = {
+  /**
+   * OID from the postgres database
+   */
   oid: number;
+  /**
+   * Comment from the postgres database
+   */
   comment?: string;
   /**
-   * Created by prostgles for managing files
+   * Defined if this is the fileTable
    */
-  is_media?: boolean;
+  isFileTable?: {
+    /** 
+     * Defined if direct inserts are disabled. 
+     * Only nested inserts through the specified tables/columns are allowed
+     * */
+    allowedNestedInserts?: {
+      table: string;
+      column: string;
+    }[] | undefined;
+  };
 
-  is_view?: boolean;
+  isView?: boolean;
 
   /**
-   * How many files are expected at most for each row from this table
+   * Name of the fileTable (if enabled)
    */
-  has_media?: "one" | "many";
-
-  /**
-   * True if the media relates to this table only (does not relate to some joined table)
-   */
-  has_direct_media?: boolean;
-
-  /**
-   * Name of the table that contains the files
-   */
-  media_table_name?: string;
+  fileTableName?: string;
 
   /**
    * Used for getColumns in cases where the columns are dynamic based on the request.
@@ -862,6 +867,7 @@ export type ProstglesError = {
   constraint?: string;
   txt?: string;
   code_info?: string;
+  detail?: string;
   columns?: string[];
 }
 

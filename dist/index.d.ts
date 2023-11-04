@@ -176,11 +176,14 @@ export type PartialLax<T = AnyObject> = Partial<T> & AnyObject;
 export type TableInfo = {
     oid: number;
     comment?: string;
-    is_media?: boolean;
-    is_view?: boolean;
-    has_media?: "one" | "many";
-    has_direct_media?: boolean;
-    media_table_name?: string;
+    isFileTable?: {
+        allowedNestedInserts?: {
+            table: string;
+            column: string;
+        }[] | undefined;
+    };
+    isView?: boolean;
+    fileTableName?: string;
     dynamicRules?: {
         update?: boolean;
     };
@@ -457,6 +460,7 @@ export type ProstglesError = {
     constraint?: string;
     txt?: string;
     code_info?: string;
+    detail?: string;
     columns?: string[];
 };
 export * from "./util";

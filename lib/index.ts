@@ -453,6 +453,11 @@ export type TableInfo = {
     }[] | undefined;
   };
 
+  /**
+   * True if fileTable is enabled and this table references the fileTable
+   */
+  hasFiles: boolean;
+
   isView?: boolean;
 
   /**

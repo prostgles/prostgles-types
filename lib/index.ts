@@ -456,7 +456,7 @@ export type TableInfo = {
   /**
    * True if fileTable is enabled and this table references the fileTable
    */
-  hasFiles: boolean;
+  hasFiles?: boolean;
 
   isView?: boolean;
 

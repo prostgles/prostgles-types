@@ -182,7 +182,7 @@ export type TableInfo = {
             column: string;
         }[] | undefined;
     };
-    hasFiles: boolean;
+    hasFiles?: boolean;
     isView?: boolean;
     fileTableName?: string;
     dynamicRules?: {

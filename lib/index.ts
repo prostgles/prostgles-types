@@ -623,6 +623,7 @@ export type GetSQLReturnType<O extends SQLOptions> = CheckForListen<
     O["returnType"] extends "values"? any[] :
     O["returnType"] extends "statement"? string :
     O["returnType"] extends "noticeSubscription"? DBEventHandles :
+    O["returnType"] extends "stream"? Pick<DBEventHandles, "socketChannel" | "socketUnsubChannel"> :
     SQLResult<O["returnType"]>
   )
 , O>;
@@ -702,7 +703,7 @@ export type SQLOptions = {
   /**
    * if allowListen not specified and a LISTEN query is issued then expect error
    */
-  returnType?: Required<SelectParams>["returnType"] | "statement" | "rows" | "noticeSubscription" | "arrayMode";
+  returnType?: Required<SelectParams>["returnType"] | "statement" | "rows" | "noticeSubscription" | "arrayMode" | "stream";
   allowListen?: boolean;
 
   /**

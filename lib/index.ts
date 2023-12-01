@@ -612,6 +612,11 @@ export type DBEventHandles = {
   socketUnsubChannel: string;
   addListener: (listener: (event: any) => void) => { removeListener: () => void; } 
 };
+export type SocketSQLStream = {
+  channel: string;
+  unsubChannel: string;
+  start: (listener: (data: any) => void) => { stop: () => void; } 
+};
 
 export type CheckForListen<T, O extends SQLOptions> = O["allowListen"] extends true? (DBEventHandles | T) : T;
 
@@ -623,7 +628,7 @@ export type GetSQLReturnType<O extends SQLOptions> = CheckForListen<
     O["returnType"] extends "values"? any[] :
     O["returnType"] extends "statement"? string :
     O["returnType"] extends "noticeSubscription"? DBEventHandles :
-    O["returnType"] extends "stream"? DBEventHandles :
+    O["returnType"] extends "stream"? SocketSQLStream :
     SQLResult<O["returnType"]>
   )
 , O>;

@@ -305,8 +305,15 @@ export type DBEventHandles = {
         removeListener: () => void;
     };
 };
+export type SocketSQLStream = {
+    channel: string;
+    unsubChannel: string;
+    start: (listener: (data: any) => void) => {
+        stop: () => void;
+    };
+};
 export type CheckForListen<T, O extends SQLOptions> = O["allowListen"] extends true ? (DBEventHandles | T) : T;
-export type GetSQLReturnType<O extends SQLOptions> = CheckForListen<(O["returnType"] extends "row" ? AnyObject | null : O["returnType"] extends "rows" ? AnyObject[] : O["returnType"] extends "value" ? any | null : O["returnType"] extends "values" ? any[] : O["returnType"] extends "statement" ? string : O["returnType"] extends "noticeSubscription" ? DBEventHandles : O["returnType"] extends "stream" ? DBEventHandles : SQLResult<O["returnType"]>), O>;
+export type GetSQLReturnType<O extends SQLOptions> = CheckForListen<(O["returnType"] extends "row" ? AnyObject | null : O["returnType"] extends "rows" ? AnyObject[] : O["returnType"] extends "value" ? any | null : O["returnType"] extends "values" ? any[] : O["returnType"] extends "statement" ? string : O["returnType"] extends "noticeSubscription" ? DBEventHandles : O["returnType"] extends "stream" ? SocketSQLStream : SQLResult<O["returnType"]>), O>;
 export type SQLHandler = <Opts extends SQLOptions>(query: string, args?: AnyObject | any[], options?: Opts, serverSideOptions?: {
     socket: any;
 }) => Promise<GetSQLReturnType<Opts>>;

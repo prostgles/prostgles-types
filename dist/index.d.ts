@@ -310,9 +310,9 @@ export type SocketSQLStreamServer = {
     unsubChannel: string;
 };
 export type SocketSQLStreamClient = SocketSQLStreamServer & {
-    start: (listener: (data: any) => void) => {
+    start: (listener: (data: any) => void) => Promise<{
         stop: () => void;
-    };
+    }>;
 };
 export type CheckForListen<T, O extends SQLOptions> = O["allowListen"] extends true ? (DBEventHandles | T) : T;
 export type GetSQLReturnType<O extends SQLOptions> = CheckForListen<(O["returnType"] extends "row" ? AnyObject | null : O["returnType"] extends "rows" ? AnyObject[] : O["returnType"] extends "value" ? any | null : O["returnType"] extends "values" ? any[] : O["returnType"] extends "statement" ? string : O["returnType"] extends "noticeSubscription" ? DBEventHandles : O["returnType"] extends "stream" ? SocketSQLStreamClient : SQLResult<O["returnType"]>), O>;

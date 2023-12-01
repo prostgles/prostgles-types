@@ -617,7 +617,7 @@ export type SocketSQLStreamServer = {
   unsubChannel: string;
 };
 export type SocketSQLStreamClient = SocketSQLStreamServer & {
-  start: (listener: (data: any) => void) => { stop: () => void; } 
+  start: (listener: (data: any) => void) => Promise<{ stop: () => void; }>
 };
 
 export type CheckForListen<T, O extends SQLOptions> = O["allowListen"] extends true? (DBEventHandles | T) : T;

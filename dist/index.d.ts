@@ -363,6 +363,7 @@ export declare const CHANNELS: {
     SCHEMA: string;
     DEFAULT: string;
     SQL: string;
+    SQL_STREAM: string;
     METHOD: string;
     NOTICE_EV: string;
     LISTEN_EV: string;

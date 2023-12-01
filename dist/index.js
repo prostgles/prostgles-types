@@ -56,6 +56,7 @@ exports.CHANNELS = {
     SCHEMA: preffix + "schema",
     DEFAULT: preffix,
     SQL: `${preffix}sql`,
+    SQL_STREAM: `${preffix}sql-stream`,
     METHOD: `${preffix}method`,
     NOTICE_EV: `${preffix}notice`,
     LISTEN_EV: `${preffix}listen`,

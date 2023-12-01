@@ -623,7 +623,7 @@ export type GetSQLReturnType<O extends SQLOptions> = CheckForListen<
     O["returnType"] extends "values"? any[] :
     O["returnType"] extends "statement"? string :
     O["returnType"] extends "noticeSubscription"? DBEventHandles :
-    O["returnType"] extends "stream"? Pick<DBEventHandles, "socketChannel" | "socketUnsubChannel"> :
+    O["returnType"] extends "stream"? DBEventHandles :
     SQLResult<O["returnType"]>
   )
 , O>;

@@ -318,14 +318,14 @@ export type SocketSQLStreamPacket = {
     type: "start";
     fields: any[];
     rows: any[];
+    ended?: boolean;
 } | {
     type: "rows";
     rows: any[];
+    ended?: boolean;
 } | {
-    type: "end-error";
+    type: "error";
     error: any;
-} | {
-    type: "end";
 };
 export type CheckForListen<T, O extends SQLOptions> = O["allowListen"] extends true ? (DBEventHandles | T) : T;
 export type GetSQLReturnType<O extends SQLOptions> = CheckForListen<(O["returnType"] extends "row" ? AnyObject | null : O["returnType"] extends "rows" ? AnyObject[] : O["returnType"] extends "value" ? any | null : O["returnType"] extends "values" ? any[] : O["returnType"] extends "statement" ? string : O["returnType"] extends "noticeSubscription" ? DBEventHandles : O["returnType"] extends "stream" ? SocketSQLStreamClient : SQLResult<O["returnType"]>), O>;

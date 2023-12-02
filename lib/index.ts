@@ -624,16 +624,15 @@ export type SocketSQLStreamPacket = {
   type: "start";
   fields: any[];
   rows: any[];
+  ended?: boolean;
 } | {
   type: "rows";
   rows: any[];
+  ended?: boolean;
 } | {
-  type: "end-error";
+  type: "error";
   error: any;
-} | {
-  type: "end";
-}
-
+};
 
 
 export type CheckForListen<T, O extends SQLOptions> = O["allowListen"] extends true? (DBEventHandles | T) : T;

@@ -689,27 +689,6 @@ export type DBHandler<S = void> = (S extends DBSchema? {
   sql?: SQLHandler
 }
 
-
-/**
- * Simpler DBHandler types to reduce load on TS
- */
-// export type DBHandlerBasic = {
-//   [key: string]: Partial<TableHandlerBasic>;
-// } & {
-//   innerJoin: TableJoinBasic;
-//   leftJoin: TableJoinBasic;
-//   innerJoinOne: TableJoinBasic;
-//   leftJoinOne: TableJoinBasic;
-// } & {
-//   sql?: SQLHandler
-// }
-
-
-
-/**
- * Other
- */
-
 export type DBNoticeConfig = {
   socketChannel: string;
   socketUnsubChannel: string;
@@ -722,9 +701,13 @@ export type DBNotifConfig = DBNoticeConfig & {
 
 export type SQLOptions = {
   /**
-   * If allowListen not specified and a LISTEN query is issued then expect error
+   * Return type of the query
    */
   returnType?: Required<SelectParams>["returnType"] | "statement" | "rows" | "noticeSubscription" | "arrayMode" | "stream";
+  
+  /**
+   * If allowListen not specified and a LISTEN query is issued then expect error
+   */
   allowListen?: boolean;
 
   /**
@@ -732,6 +715,17 @@ export type SQLOptions = {
    * If provided then the query will be cancelled when the specified number of rows have been streamed 
    */
   streamLimit?: number;
+  
+  /**
+   * If true then the connection will be persisted and used for subsequent queries
+   */
+  persistStreamConnection?: boolean;
+
+  /**
+   * connectionId of the stream connection to use
+   * Acquired from the first query with persistStreamConnection=true
+   */
+  streamConnectionId?: string;
 
   /**
    * If false then the query will not be checked for params. Used to ignore queries with param like text (e.g.:  ${someText} )

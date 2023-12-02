@@ -355,6 +355,7 @@ export type DBNotifConfig = DBNoticeConfig & {
 export type SQLOptions = {
     returnType?: Required<SelectParams>["returnType"] | "statement" | "rows" | "noticeSubscription" | "arrayMode" | "stream";
     allowListen?: boolean;
+    streamLimit?: number;
     hasParams?: boolean;
 };
 export type SQLRequest = {

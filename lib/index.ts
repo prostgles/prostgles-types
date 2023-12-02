@@ -722,10 +722,16 @@ export type DBNotifConfig = DBNoticeConfig & {
 
 export type SQLOptions = {
   /**
-   * if allowListen not specified and a LISTEN query is issued then expect error
+   * If allowListen not specified and a LISTEN query is issued then expect error
    */
   returnType?: Required<SelectParams>["returnType"] | "statement" | "rows" | "noticeSubscription" | "arrayMode" | "stream";
   allowListen?: boolean;
+
+  /**
+   * Positive integer that works only with returnType="stream". 
+   * If provided then the query will be cancelled when the specified number of rows have been streamed 
+   */
+  streamLimit?: number;
 
   /**
    * If false then the query will not be checked for params. Used to ignore queries with param like text (e.g.:  ${someText} )

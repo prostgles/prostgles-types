@@ -620,6 +620,22 @@ export type SocketSQLStreamClient = SocketSQLStreamServer & {
   start: (listener: (data: any) => void) => Promise<{ stop: () => void; }>
 };
 
+export type SocketSQLStreamPacket = {
+  type: "start";
+  fields: any[];
+  rows: any[];
+} | {
+  type: "rows";
+  rows: any[];
+} | {
+  type: "end-error";
+  error: any;
+} | {
+  type: "end";
+}
+
+
+
 export type CheckForListen<T, O extends SQLOptions> = O["allowListen"] extends true? (DBEventHandles | T) : T;
 
 export type GetSQLReturnType<O extends SQLOptions> = CheckForListen<

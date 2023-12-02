@@ -305,15 +305,6 @@ export type DBEventHandles = {
         removeListener: () => void;
     };
 };
-export type SocketSQLStreamServer = {
-    channel: string;
-    unsubChannel: string;
-};
-export type SocketSQLStreamClient = SocketSQLStreamServer & {
-    start: (listener: (data: any) => void) => Promise<{
-        stop: () => void;
-    }>;
-};
 export type SocketSQLStreamPacket = {
     type: "start";
     fields: any[];
@@ -326,6 +317,15 @@ export type SocketSQLStreamPacket = {
 } | {
     type: "error";
     error: any;
+};
+export type SocketSQLStreamServer = {
+    channel: string;
+    unsubChannel: string;
+};
+export type SocketSQLStreamClient = SocketSQLStreamServer & {
+    start: (listener: (packet: SocketSQLStreamPacket) => void) => Promise<{
+        stop: () => void;
+    }>;
 };
 export type CheckForListen<T, O extends SQLOptions> = O["allowListen"] extends true ? (DBEventHandles | T) : T;
 export type GetSQLReturnType<O extends SQLOptions> = CheckForListen<(O["returnType"] extends "row" ? AnyObject | null : O["returnType"] extends "rows" ? AnyObject[] : O["returnType"] extends "value" ? any | null : O["returnType"] extends "values" ? any[] : O["returnType"] extends "statement" ? string : O["returnType"] extends "noticeSubscription" ? DBEventHandles : O["returnType"] extends "stream" ? SocketSQLStreamClient : SQLResult<O["returnType"]>), O>;

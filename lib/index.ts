@@ -612,13 +612,6 @@ export type DBEventHandles = {
   socketUnsubChannel: string;
   addListener: (listener: (event: any) => void) => { removeListener: () => void; } 
 };
-export type SocketSQLStreamServer = {
-  channel: string;
-  unsubChannel: string;
-};
-export type SocketSQLStreamClient = SocketSQLStreamServer & {
-  start: (listener: (data: any) => void) => Promise<{ stop: () => void; }>
-};
 
 export type SocketSQLStreamPacket = {
   type: "start";
@@ -633,7 +626,13 @@ export type SocketSQLStreamPacket = {
   type: "error";
   error: any;
 };
-
+export type SocketSQLStreamServer = {
+  channel: string;
+  unsubChannel: string;
+};
+export type SocketSQLStreamClient = SocketSQLStreamServer & {
+  start: (listener: (packet: SocketSQLStreamPacket) => void) => Promise<{ stop: () => void; }>
+};
 
 export type CheckForListen<T, O extends SQLOptions> = O["allowListen"] extends true? (DBEventHandles | T) : T;
 

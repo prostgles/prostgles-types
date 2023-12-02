@@ -312,7 +312,7 @@ export type SocketSQLStreamPacket = {
     ended?: boolean;
 } | {
     type: "rows";
-    rows: any[];
+    rows: any[][];
     ended?: boolean;
 } | {
     type: "error";

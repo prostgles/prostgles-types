@@ -666,6 +666,8 @@ export type SQLHandler =
   options?: Opts,
   serverSideOptions?: {
     socket: any
+  } | { 
+    httpReq: any;
   }
 ) => Promise<GetSQLReturnType<Opts>>
 

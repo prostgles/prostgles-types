@@ -313,6 +313,7 @@ export type SocketSQLStreamPacket = {
     rows: any[];
     ended?: boolean;
     info?: SQLResultInfo;
+    processId: number;
 } | {
     type: "rows";
     rows: any[][];

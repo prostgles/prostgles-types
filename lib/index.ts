@@ -598,15 +598,15 @@ export type SQLResultInfo = {
 export type SQLResult<T extends SQLOptions["returnType"]> = SQLResultInfo & {
   rows: (T extends "arrayMode"? any : AnyObject)[];
   fields: {
-      name: string;
-      dataType: string;
-      udt_name: PG_COLUMN_UDT_DATA_TYPE;
-      tsDataType: TS_COLUMN_DATA_TYPES;
-      tableID?: number;
-      tableName?: string; 
-      tableSchema?: string; 
-      columnID?: number;
-      columnName?: string;
+    name: string;
+    dataType: string;
+    udt_name: PG_COLUMN_UDT_DATA_TYPE;
+    tsDataType: TS_COLUMN_DATA_TYPES;
+    tableID?: number;
+    tableName?: string; 
+    tableSchema?: string; 
+    columnID?: number;
+    columnName?: string;
   }[];
 }
 export type DBEventHandles = {
@@ -621,6 +621,7 @@ export type SocketSQLStreamPacket = {
   rows: any[];
   ended?: boolean;
   info?: SQLResultInfo;
+  processId: number;
 } | {
   type: "rows";
   rows: any[][];

@@ -590,9 +590,12 @@ export type DbJoinMaker = {
   leftJoinOne: TableJoin;
 } 
 
-export type SQLResult<T extends SQLOptions["returnType"]> = {
+export type SQLResultInfo = {
   command: "SELECT" | "UPDATE" | "DELETE" | "CREATE" | "ALTER" | "LISTEN" | "UNLISTEN" | "INSERT" | string;
   rowCount: number;
+  duration: number;
+}
+export type SQLResult<T extends SQLOptions["returnType"]> = SQLResultInfo & {
   rows: (T extends "arrayMode"? any : AnyObject)[];
   fields: {
       name: string;
@@ -605,7 +608,6 @@ export type SQLResult<T extends SQLOptions["returnType"]> = {
       columnID?: number;
       columnName?: string;
   }[];
-  duration: number;
 }
 export type DBEventHandles = {
   socketChannel: string;
@@ -618,10 +620,12 @@ export type SocketSQLStreamPacket = {
   fields: any[];
   rows: any[];
   ended?: boolean;
+  info?: SQLResultInfo;
 } | {
   type: "rows";
   rows: any[][];
   ended?: boolean;
+  info?: SQLResultInfo;
 } | {
   type: "error";
   error: any;

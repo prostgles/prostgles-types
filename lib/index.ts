@@ -616,17 +616,12 @@ export type DBEventHandles = {
 };
 
 export type SocketSQLStreamPacket = {
-  type: "start";
-  fields: any[];
+  type: "data";
+  fields?: any[];
   rows: any[];
   ended?: boolean;
   info?: SQLResultInfo;
   processId: number;
-} | {
-  type: "rows";
-  rows: any[][];
-  ended?: boolean;
-  info?: SQLResultInfo;
 } | {
   type: "error";
   error: any;
@@ -635,8 +630,12 @@ export type SocketSQLStreamServer = {
   channel: string;
   unsubChannel: string;
 };
+export type SocketSQLStreamHandlers = {
+  run: (query: string, params?: any | any[]) => Promise<void>;
+  stop: (terminate?: boolean) => Promise<void>;
+};
 export type SocketSQLStreamClient = SocketSQLStreamServer & {
-  start: (listener: (packet: SocketSQLStreamPacket) => void) => Promise<{ stop: (terminate?: boolean) => Promise<void>; }>
+  start: (listener: (packet: SocketSQLStreamPacket) => void) => Promise<SocketSQLStreamHandlers>
 };
 
 export type CheckForListen<T, O extends SQLOptions> = O["allowListen"] extends true? (DBEventHandles | T) : T;

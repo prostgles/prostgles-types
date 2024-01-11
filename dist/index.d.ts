@@ -160,13 +160,13 @@ export type SubscribeParams<T extends AnyObject | void = void, S extends DBSchem
 };
 export type UpdateParams<T extends AnyObject | void = void, S extends DBSchema | void = void> = {
     returning?: Select<T, S>;
-    onConflictDoNothing?: boolean;
+    onConflict?: "DoNothing" | "DoUpdate";
     fixIssues?: boolean;
     multi?: boolean;
 } & Pick<CommonSelectParams, "returnType">;
 export type InsertParams<T extends AnyObject | void = void, S extends DBSchema | void = void> = {
     returning?: Select<T, S>;
-    onConflictDoNothing?: boolean;
+    onConflict?: "DoNothing" | "DoUpdate";
     fixIssues?: boolean;
 } & Pick<CommonSelectParams, "returnType">;
 export type DeleteParams<T extends AnyObject | void = void, S extends DBSchema | void = void> = {

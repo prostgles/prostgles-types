@@ -411,7 +411,7 @@ export type SubscribeParams<T extends AnyObject | void = void, S extends DBSchem
 
 export type UpdateParams<T extends AnyObject | void = void, S extends DBSchema | void = void> = {
   returning?: Select<T, S>;
-  onConflictDoNothing?: boolean;
+  onConflict?: "DoNothing" | "DoUpdate";
   fixIssues?: boolean;
 
   /* true by default. If false the update will fail if affecting more than one row */
@@ -420,7 +420,7 @@ export type UpdateParams<T extends AnyObject | void = void, S extends DBSchema |
 
 export type InsertParams<T extends AnyObject | void = void, S extends DBSchema | void = void> = {
   returning?: Select<T, S>;
-  onConflictDoNothing?: boolean;
+  onConflict?: "DoNothing" | "DoUpdate";
   fixIssues?: boolean;
 } & Pick<CommonSelectParams, "returnType">;
 

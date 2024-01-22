@@ -132,28 +132,34 @@ exports.RULE_METHODS = {
     };
 });
 (async () => {
+    const tableHandler = undefined;
+    tableHandler.insert({ h: 1, c: 2, "b.$func": { dwa: [] } });
     const schemaFFilter = { "col1.$eq": "dd" };
     const fullFilter = schemaFFilter;
     const ffFunc = (f) => { };
     ffFunc(schemaFFilter);
     const dbo = 1;
+    const funcData = { funcName: [] };
     const noRow = await dbo.tbl1.update({}, { col1: "" });
     noRow.length;
     noRow.col1;
+    const noRowFunc = await dbo.tbl1.update({}, { col1: "" });
     const oneRow = await dbo.tbl1.update({}, { col1: "" }, { returning: "*", multi: false });
     oneRow?.length;
     oneRow.col1;
     oneRow?.col1;
+    const oneRowFunc = await dbo.tbl1.update({}, { "col1.$func": funcData }, { returning: "*", multi: false });
     const manyRows = await dbo.tbl1.update({}, { col1: "" }, { returning: "*" });
     manyRows?.col1;
     manyRows?.at(0)?.col1;
-    const noIRow = await dbo.tbl1.insert({ col1: "" });
+    const noIRow = await dbo.tbl1.insert({ col1: "", col2: { $func: [] } });
     noIRow.length;
     noIRow.col1;
-    const irow = await dbo.tbl1.insert({ col1: "" }, { returning: "*" });
+    const irow = await dbo.tbl1.insert({ col1: "", col2: funcData }, { returning: "*" });
     irow.length;
     irow.col1;
-    const irows = await dbo.tbl1.insert([{ col1: "" }], { returning: "*" });
+    const irowFunc = await dbo.tbl1.insert({ col1: funcData, col2: "" }, { returning: "*" });
+    const irows = await dbo.tbl1.insert([{ col1: "", col2: "" }], { returning: "*" });
     irows.col1;
     irows.length;
     const filter = {};
@@ -169,10 +175,23 @@ exports.RULE_METHODS = {
     const sf = (sp) => {
     };
     sf(sp);
+    const gdw = {
+        a: { dwa: [] },
+        z: { dwa: [] }
+    };
+    const gdwn = {
+        a: 2,
+        z: { dwa: [] }
+    };
+    const gdw1 = { a: 1, z: 2 };
+    const gdw1Opt = { a: {}, z: 2 };
+    const gdw2 = { a: { dwa: [] }, z: { dwa: [] } };
+    const missingKey = { z: 1, z: { dwa: [] } };
+    const missingKey2 = { z: 1 };
 });
-__exportStar(require("./util"), exports);
-__exportStar(require("./filters"), exports);
 var files_1 = require("./files");
 Object.defineProperty(exports, "CONTENT_TYPE_TO_EXT", { enumerable: true, get: function () { return files_1.CONTENT_TYPE_TO_EXT; } });
+__exportStar(require("./filters"), exports);
 __exportStar(require("./jsonb"), exports);
+__exportStar(require("./util"), exports);
 //# sourceMappingURL=index.js.map

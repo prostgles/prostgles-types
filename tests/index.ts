@@ -5,7 +5,7 @@ import { typeTestsOK } from "./typeTests";
 
 typeTestsOK();
 
-let error;
+let error: any;
 
 let failed = -1;
 const vals = [
@@ -21,7 +21,7 @@ const vals = [
 ];
 
 vals.map(({ o, n }, i) => {
-  const patch = getTextPatch(o, n) as TextPatch;
+  const patch = getTextPatch(o as any, n as any) as TextPatch;
   // console.log(o, patch)
   const unpatched = unpatchText(o, patch);
   // console.log(o, unpatched, n)

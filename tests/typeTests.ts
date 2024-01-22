@@ -1,14 +1,35 @@
 
-import type { TableHandler, SQLHandler, FullFilter, DBHandler, Select, SelectTyped, ExistsFilter, AnyObject, SelectParams } from "../dist/index"; 
+import type { TableHandler, SQLHandler, FullFilter, DBHandler, Select, SelectTyped, ExistsFilter, AnyObject, SelectParams, DBSchema, ViewHandler } from "../dist/index"; 
 
 /**
  * Test select/return type inference
  */
  (async () => {
   
-  type TableDef = { h: number; b?: number; c?: number; }
-  const tableHandler: TableHandler<TableDef> = undefined as any; 
-  const params: SelectParams<TableDef> = {
+  type DBOFullyTyped<Schema = void> = Schema extends DBSchema ? {
+    [tov_name in keyof Schema]: Schema[tov_name]["is_view"] extends true ?
+    ViewHandler<Schema[tov_name]["columns"], Schema> :
+    TableHandler<Schema[tov_name]["columns"], Schema>
+  } : Record<string, ViewHandler | TableHandler>;
+
+  type GSchema = {
+    tbl1: {
+      is_view: false,
+      columns: {
+        h: number; 
+        b?: number; 
+        c?: number;
+      },
+      delete: true,
+      select: true,
+      insert: true,
+      update: true,
+    }
+  };
+  const dbo: DBOFullyTyped<GSchema> = 1 as any;
+  // type SchemaDef = { h: number; b?: number; c?: number; }
+  const tableHandler = dbo.tbl1; //: TableHandler<TableDef> = undefined as any; 
+  const params: SelectParams<GSchema["tbl1"]["columns"]> = {
     select: {
       "*": 1, 
       bd: { $max: ["b"] },
@@ -24,7 +45,7 @@ import type { TableHandler, SQLHandler, FullFilter, DBHandler, Select, SelectTyp
   };
 
   if(tableHandler){
-    const newRow = await tableHandler.insert?.({ h: 2 }, { returning: {b: 1, c: 1} });
+    const newRow = await tableHandler.insert?.({ h: 2 }, { returning: { b: 1, c: 1 } });
     newRow.b;
     newRow.c;
   
@@ -33,8 +54,8 @@ import type { TableHandler, SQLHandler, FullFilter, DBHandler, Select, SelectTyp
   
     // const f: FullFilter<Partial<{ a: number; s: string}>> = {  }
     const row = await tableHandler.findOne?.({ "c.$nin": [2] }, { select: {b: 0} });
-    row.c;
-    row.h;
+    row?.c;
+    row?.h;
 
 
     const query = await tableHandler.find?.({ h: 2 }, { returnType: "statement" });
@@ -68,8 +89,11 @@ import type { TableHandler, SQLHandler, FullFilter, DBHandler, Select, SelectTyp
       
       //@ts-expect-error
       row.b;
-  
+
+      //@ts-expect-error
       row.c;
+  
+      row?.c;
     });
   }
   const s1: Select<AnyObject> = {
@@ -91,7 +115,7 @@ import type { TableHandler, SQLHandler, FullFilter, DBHandler, Select, SelectTyp
     values.flatMap
 
     const row = await sqlHandler("SELECT 1", {}, { returnType: "row" });
-    row.dhawjpeojfgrdfhoeisj;
+    row?.dhawjpeojfgrdfhoeisj;
 
     const rows = await sqlHandler("SELECT 1", {}, { returnType: "rows" });
     rows.flatMap
@@ -150,7 +174,7 @@ import type { TableHandler, SQLHandler, FullFilter, DBHandler, Select, SelectTyp
 
   const s33: Select<{ a: number; c: string },  {}> = { a: 1 , c: "$max" }
 
-  db.view1.find({ "c1.$in": ["2", null] }, { select: { c1: 1, c2: 1 }  });
+  db.view1.find({ "c1.$in": ["2", new Date()] }, { select: { c1: 1, c2: 1 }  });
   db.table1.insert({ c1: "2" }, { returning: { c1: 1, c2: "func", dwad: { dwada: [] } } });
 
   //@ts-expect-error
@@ -162,7 +186,7 @@ import type { TableHandler, SQLHandler, FullFilter, DBHandler, Select, SelectTyp
   db.table1.find;
 
   const result = await db.table2.update({}, { c1: "" }, { returning: "*" });
-  result.at(0).c2 + 2;
+  result?.at(0)?.c2 ?? 0 + 2;
  
 
   type SampleSchema = {

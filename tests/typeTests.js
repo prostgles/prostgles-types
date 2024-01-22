@@ -2,7 +2,8 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.typeTestsOK = void 0;
 (async () => {
-    const tableHandler = undefined;
+    const dbo = 1;
+    const tableHandler = dbo.tbl1;
     const params = {
         select: {
             "*": 1,
@@ -22,8 +23,8 @@ exports.typeTestsOK = void 0;
         newRow.c;
         newRow.h;
         const row = await tableHandler.findOne?.({ "c.$nin": [2] }, { select: { b: 0 } });
-        row.c;
-        row.h;
+        row?.c;
+        row?.h;
         const query = await tableHandler.find?.({ h: 2 }, { returnType: "statement" });
         query.toUpperCase();
         row.b;
@@ -43,6 +44,7 @@ exports.typeTestsOK = void 0;
         tableHandler.subscribeOne({ h: 2 }, { select: { b: 0 } }, async (row) => {
             row.b;
             row.c;
+            row?.c;
         });
     }
     const s1 = {
@@ -58,7 +60,7 @@ exports.typeTestsOK = void 0;
         const values = await sqlHandler("SELECT 1", {}, { returnType: "values" });
         values.flatMap;
         const row = await sqlHandler("SELECT 1", {}, { returnType: "row" });
-        row.dhawjpeojfgrdfhoeisj;
+        row?.dhawjpeojfgrdfhoeisj;
         const rows = await sqlHandler("SELECT 1", {}, { returnType: "rows" });
         rows.flatMap;
         const handles = await sqlHandler("SELECT 1", {}, { returnType: "noticeSubscription" });
@@ -83,13 +85,13 @@ exports.typeTestsOK = void 0;
     const s22 = { a: 1, zz: { $max: ["c"] } };
     const s3 = { a: 1, cc: "2" };
     const s33 = { a: 1, c: "$max" };
-    db.view1.find({ "c1.$in": ["2", null] }, { select: { c1: 1, c2: 1 } });
+    db.view1.find({ "c1.$in": ["2", new Date()] }, { select: { c1: 1, c2: 1 } });
     db.table1.insert({ c1: "2" }, { returning: { c1: 1, c2: "func", dwad: { dwada: [] } } });
     db.table1.update;
     db.table12.update;
     db.table1.find;
     const result = await db.table2.update({}, { c1: "" }, { returning: "*" });
-    result.at(0).c2 + 2;
+    result?.at(0)?.c2 ?? 0 + 2;
     const ef = {
         $existsJoined: {
             tbl11: {}

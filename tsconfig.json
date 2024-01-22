@@ -21,6 +21,7 @@
     "isolatedModules": true,
     "ignoreDeprecations": "5.0",
     "keyofStringsOnly": true,
+    "skipDefaultLibCheck": true,
     "noUncheckedIndexedAccess": true
   },
   "exclude": [

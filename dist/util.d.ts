@@ -14,7 +14,7 @@ export type TextPatch = {
     md5: string;
 };
 export declare function getTextPatch(oldStr: string, newStr: string): TextPatch | string;
-export declare function unpatchText(original: string, patch: TextPatch): string;
+export declare function unpatchText(original: string | null, patch: TextPatch): string;
 export type SyncTableInfo = {
     id_fields: string[];
     synced_field: string;
@@ -84,10 +84,10 @@ export declare const tryCatch: <T extends AnyObject>(func: () => T | Promise<T>)
     duration: number;
 })>;
 export declare const getJoinHandlers: (tableName: string) => {
-    innerJoin: JoinMaker<AnyObject, void>;
-    leftJoin: JoinMaker<AnyObject, void>;
-    innerJoinOne: JoinMaker<AnyObject, void>;
-    leftJoinOne: JoinMaker<AnyObject, void>;
+    innerJoin: JoinMaker;
+    leftJoin: JoinMaker;
+    innerJoinOne: JoinMaker;
+    leftJoinOne: JoinMaker;
 };
 export type ParsedJoinPath = Required<JoinPath>;
 export declare const reverseJoinOn: (on: ParsedJoinPath["on"]) => {

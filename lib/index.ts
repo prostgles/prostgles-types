@@ -1,8 +1,8 @@
 
-import { FullFilter, AnyObject, FullFilterBasic, ValueOf, ComplexFilter, CastFromTSToPG } from "./filters";
 import { FileColumnConfig } from "./files";
+import { AnyObject, ComplexFilter, FullFilter, FullFilterBasic, ValueOf } from "./filters";
+import type { UpsertDataToPGCast } from "./insertUpdateUtils";
 import { JSONB } from "./jsonb";
-
 export const _PG_strings = [
   'bpchar','char','varchar','text','citext','uuid','bytea', 'time','timetz','interval','name', 
   'cidr', 'inet', 'macaddr', 'macaddr8', "int4range", "int8range", "numrange",
@@ -484,12 +484,12 @@ export type TableInfo = {
 export type OnError = (err: any) => void;
 
 type JoinedSelect = Record<string, Select>;
-
+export type SelectFunction = Record<string, any[]>;
 type ParseSelect<Select extends SelectParams<TD>["select"], TD extends AnyObject> = 
 (Select extends { "*": 1 }? Required<TD> : {})
 & {
   [Key in keyof Omit<Select, "*">]: Select[Key] extends 1? Required<TD>[Key] : 
-    Select[Key] extends Record<string, any[]>? any : //Function select
+    Select[Key] extends SelectFunction? any : //Function select
     Select[Key] extends JoinedSelect? any[] : 
     any;
 }
@@ -516,13 +516,13 @@ type GetReturningReturnType<O extends UpdateParams<TD, S>, TD extends AnyObject,
   O extends { returning: Record<string, 0> }? Omit<Required<TD>, keyof O["returning"]> : 
   void;
 
-type GetUpdateReturnType<O extends UpdateParams<TD, S>, TD extends AnyObject, S extends DBSchema | void = void> = 
+export type GetUpdateReturnType<O extends UpdateParams<TD, S>, TD extends AnyObject, S extends DBSchema | void = void> = 
   O extends { multi: false }? 
     GetReturningReturnType<O, TD, S> : 
     GetReturningReturnType<O, TD, S>[];
 
-type GetInsertReturnType<Data extends AnyObject | AnyObject[], O extends UpdateParams<TD, S>, TD extends AnyObject, S extends DBSchema | void = void> = 
-  Data extends any[]? 
+export type GetInsertReturnType<Data extends InsertData<AnyObject>, O extends UpdateParams<TD, S>, TD extends AnyObject, S extends DBSchema | void = void> = 
+  Data extends any[] | readonly any[]? 
     GetReturningReturnType<O, TD, S>[] :
     GetReturningReturnType<O, TD, S>;
 
@@ -555,12 +555,9 @@ export type ViewHandler<TD extends AnyObject = AnyObject, S extends DBSchema | v
    * Returns result size in bits
    */
   size: <P extends SelectParams<TD, S>>(filter?: FullFilter<TD, S>, selectParams?: P) => Promise<string>;
-}
+} 
 
-export type UpsertDataToPGCast<TD extends AnyObject = AnyObject> = {
-  [K in keyof TD]: CastFromTSToPG<TD[K]>
-};
-
+ 
 type UpsertDataToPGCastLax<T extends AnyObject> = PartialLax<UpsertDataToPGCast<T>>;
 type InsertData<T extends AnyObject> = UpsertDataToPGCast<T> | UpsertDataToPGCast<T>[]
 
@@ -568,7 +565,7 @@ export type TableHandler<TD extends AnyObject = AnyObject, S extends DBSchema | 
   update: <P extends UpdateParams<TD, S>>(filter: FullFilter<TD, S>, newData: UpsertDataToPGCastLax<TD>, params?: P) => Promise<GetUpdateReturnType<P ,TD, S> | undefined>;
   updateBatch: <P extends UpdateParams<TD, S>>(data: [FullFilter<TD, S>, UpsertDataToPGCastLax<TD>][], params?: P) => Promise<GetUpdateReturnType<P ,TD, S> | void>;
   upsert: <P extends UpdateParams<TD, S>>(filter: FullFilter<TD, S>, newData: UpsertDataToPGCastLax<TD>, params?: P) => Promise<GetUpdateReturnType<P ,TD, S>>; 
-  insert: <P extends InsertParams<TD, S>, D extends InsertData<TD>>(data: D, params?: P ) => Promise<GetInsertReturnType<D, P ,TD, S>>;
+  insert: <P extends InsertParams<TD, S>, D extends InsertData<TD>>(data: D, params?: P) => Promise<GetInsertReturnType<D, P ,TD, S>>;
   delete: <P extends DeleteParams<TD, S>>(filter?: FullFilter<TD, S>, params?: P) => Promise<GetUpdateReturnType<P ,TD, S> | undefined>;
 } 
 
@@ -992,6 +989,7 @@ export type ProstglesError = {
       is_view: false,
       columns: {
         col1: string,
+        col2: string,
       },
       delete: true,
       select: true,
@@ -1000,6 +998,9 @@ export type ProstglesError = {
     }
   };
 
+  type TableDef = { h: number; b?: number; c?: number; }
+  const tableHandler: TableHandler<TableDef> = undefined as any; 
+  tableHandler.insert({ h: 1, c: 2, "b.$func": { dwa: [] } })
     
   type DBOFullyTyped<Schema = void> = Schema extends DBSchema ? {
     [tov_name in keyof Schema]: Schema[tov_name]["is_view"] extends true ?
@@ -1016,12 +1017,14 @@ export type ProstglesError = {
   ffFunc(schemaFFilter); 
   
   const dbo: DBOFullyTyped<GSchema> = 1 as any;
-
+  const funcData = { funcName: [] };
   const noRow = await dbo.tbl1.update({}, { col1: "" });
   //@ts-expect-error 
   noRow.length;
   //@ts-expect-error
   noRow.col1;
+
+  const noRowFunc = await dbo.tbl1.update({}, { col1: "" });
 
   const oneRow = await dbo.tbl1.update({}, { col1: "" }, { returning: "*", multi: false });
   //@ts-expect-error
@@ -1030,24 +1033,28 @@ export type ProstglesError = {
   oneRow.col1;
   oneRow?.col1;
 
+  const oneRowFunc = await dbo.tbl1.update({}, { "col1.$func": funcData }, { returning: "*", multi: false });
+
   const manyRows = await dbo.tbl1.update({}, { col1: "" }, { returning: "*" });
   //@ts-expect-error
   manyRows?.col1;
   manyRows?.at(0)?.col1;
 
 
-  const noIRow = await dbo.tbl1.insert({ col1: "" });
+  const noIRow = await dbo.tbl1.insert({ col1: "", col2: { $func: [] } });
   //@ts-expect-error 
   noIRow.length;
   //@ts-expect-error
   noIRow.col1;
   
-  const irow = await dbo.tbl1.insert({ col1: "" }, { returning: "*" });
+  const irow = await dbo.tbl1.insert({ col1: "", col2: funcData }, { returning: "*" });
   //@ts-expect-error 
   irow.length;
   irow.col1;
 
-  const irows = await dbo.tbl1.insert([{ col1: "" }], { returning: "*" });
+  const irowFunc = await dbo.tbl1.insert({ col1: funcData, col2: "" }, { returning: "*" });
+
+  const irows = await dbo.tbl1.insert([{ col1: "", col2: "" }], { returning: "*" });
   //@ts-expect-error 
   irows.col1;
   irows.length;
@@ -1059,7 +1066,7 @@ export type ProstglesError = {
   
   const t: UpsertDataToPGCast<GSchema["tbl1"]["columns"]> = {} as any;
   const d: UpsertDataToPGCast<AnyObject> = t;
-  const fup = (a: UpsertDataToPGCast) => {}
+  const fup = (a: UpsertDataToPGCast<AnyObject>) => {}
   fup(t);
 
   // const f = <A extends TableHandler["count"]>(a: A) => {};
@@ -1074,7 +1081,24 @@ export type ProstglesError = {
   sf(sp);
   // const sub: TableHandler["count"] = dbo.tbl1.count
   
-  
+  /**
+   * Upsert data funcs
+   */
+  const gdw: InsertData<{ a: number; z: number }> = {  
+    a: { dwa: [] }, 
+    z: { dwa: [] } 
+  }
+  const gdwn: InsertData<{ a: number; z: number }> = {  
+    a: 2, 
+    z: { dwa: [] } 
+  }
+  const gdw1: InsertData<{ a: number; z: number }> = {  a: 1, z: 2 }
+  const gdw1Opt: InsertData<{ a: number; z?: number }> = {  a: {}, z: 2 }
+  const gdw2: InsertData<{ a: number; z: number;  }> = { a: { dwa: [] } , z: { dwa: [] } }
+  //@ts-expect-error
+  const missingKey: InsertData<{ a: number; z: number;  }> = { z: 1, z: { dwa: [] } }
+  //@ts-expect-error
+  const missingKey2: InsertData<{ a: number; z: number;  }> = { z: 1 };
   // ra(schema);
 })
 
@@ -1082,9 +1106,9 @@ export type ProstglesError = {
 // import { md5 } from "./md5";
 // export { get, getTextPatch, unpatchText, isEmpty, WAL, WALConfig, asName } from "./util";
 // export type { WALItem, BasicOrderBy, WALItemsObj, WALConfig, TextPatch, SyncTableInfo } from "./util";
-export * from "./util";
-export * from "./filters";
-export type { ClientExpressData, ClientSyncHandles, ClientSyncInfo, SyncConfig, ClientSyncPullResponse, SyncBatchParams, onUpdatesParams } from "./replication";
-export type { ALLOWED_CONTENT_TYPE, ALLOWED_EXTENSION, FileColumnConfig, FileType } from "./files";
 export { CONTENT_TYPE_TO_EXT } from "./files";
+export type { ALLOWED_CONTENT_TYPE, ALLOWED_EXTENSION, FileColumnConfig, FileType } from "./files";
+export * from "./filters";
 export * from "./jsonb";
+export type { ClientExpressData, ClientSyncHandles, ClientSyncInfo, ClientSyncPullResponse, SyncBatchParams, SyncConfig, onUpdatesParams } from "./replication";
+export * from "./util";

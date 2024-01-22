@@ -148,7 +148,7 @@ export function getTextPatch(oldStr: string, newStr: string): TextPatch | string
 }
 
 
-export function unpatchText(original: string, patch: TextPatch): string {
+export function unpatchText(original: string | null, patch: TextPatch): string {
   if (!patch || typeof patch === "string") return (patch as unknown as string);
   const { from, to, text, md5: md5Hash } = patch;
   if (text === null || original === null) return text;

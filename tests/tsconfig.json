@@ -6,7 +6,7 @@
     "lib": [
       "es2019"
     ],
-    // "strict": true,
+    "strict": true,
     "module": "commonjs",
     "removeComments": true,
     "sourceMap": true,
@@ -17,8 +17,10 @@
     "resolveJsonModule": true,
     // "outFile": "bundle.js",
     // "moduleResolution": "node"
+    "skipDefaultLibCheck": true,
     "declaration": true,
     "declarationMap": true,
+    "ignoreDeprecations": "5.0",
     "keyofStringsOnly": true
   },
   "exclude": [

@@ -1,5 +1,6 @@
-import { FullFilter, AnyObject, FullFilterBasic, ValueOf, ComplexFilter, CastFromTSToPG } from "./filters";
 import { FileColumnConfig } from "./files";
+import { AnyObject, ComplexFilter, FullFilter, FullFilterBasic, ValueOf } from "./filters";
+import type { UpsertDataToPGCast } from "./insertUpdateUtils";
 import { JSONB } from "./jsonb";
 export declare const _PG_strings: readonly ["bpchar", "char", "varchar", "text", "citext", "uuid", "bytea", "time", "timetz", "interval", "name", "cidr", "inet", "macaddr", "macaddr8", "int4range", "int8range", "numrange", "tsvector"];
 export declare const _PG_numbers: readonly ["int2", "int4", "int8", "float4", "float8", "numeric", "money", "oid"];
@@ -194,10 +195,11 @@ export type TableInfo = {
 };
 export type OnError = (err: any) => void;
 type JoinedSelect = Record<string, Select>;
+export type SelectFunction = Record<string, any[]>;
 type ParseSelect<Select extends SelectParams<TD>["select"], TD extends AnyObject> = (Select extends {
     "*": 1;
 } ? Required<TD> : {}) & {
-    [Key in keyof Omit<Select, "*">]: Select[Key] extends 1 ? Required<TD>[Key] : Select[Key] extends Record<string, any[]> ? any : Select[Key] extends JoinedSelect ? any[] : any;
+    [Key in keyof Omit<Select, "*">]: Select[Key] extends 1 ? Required<TD>[Key] : Select[Key] extends SelectFunction ? any : Select[Key] extends JoinedSelect ? any[] : any;
 };
 type GetSelectDataType<S extends DBSchema | void, O extends SelectParams<TD, S>, TD extends AnyObject> = O extends {
     returnType: "value";
@@ -227,10 +229,10 @@ type GetReturningReturnType<O extends UpdateParams<TD, S>, TD extends AnyObject,
 } ? Pick<Required<TD>, keyof O["returning"]> : O extends {
     returning: Record<string, 0>;
 } ? Omit<Required<TD>, keyof O["returning"]> : void;
-type GetUpdateReturnType<O extends UpdateParams<TD, S>, TD extends AnyObject, S extends DBSchema | void = void> = O extends {
+export type GetUpdateReturnType<O extends UpdateParams<TD, S>, TD extends AnyObject, S extends DBSchema | void = void> = O extends {
     multi: false;
 } ? GetReturningReturnType<O, TD, S> : GetReturningReturnType<O, TD, S>[];
-type GetInsertReturnType<Data extends AnyObject | AnyObject[], O extends UpdateParams<TD, S>, TD extends AnyObject, S extends DBSchema | void = void> = Data extends any[] ? GetReturningReturnType<O, TD, S>[] : GetReturningReturnType<O, TD, S>;
+export type GetInsertReturnType<Data extends InsertData<AnyObject>, O extends UpdateParams<TD, S>, TD extends AnyObject, S extends DBSchema | void = void> = Data extends any[] | readonly any[] ? GetReturningReturnType<O, TD, S>[] : GetReturningReturnType<O, TD, S>;
 export type SubscriptionHandler = {
     unsubscribe: () => Promise<any>;
     filter: FullFilter<void, void> | {};
@@ -249,9 +251,6 @@ export type ViewHandler<TD extends AnyObject = AnyObject, S extends DBSchema | v
     subscribeOne: <P extends SubscribeParams<TD, S>>(filter: FullFilter<TD, S>, params: P, onData: (item: GetSelectReturnType<S, P, TD, false> | undefined) => any, onError?: OnError) => Promise<SubscriptionHandler>;
     count: <P extends SelectParams<TD, S>>(filter?: FullFilter<TD, S>, selectParams?: P) => Promise<number>;
     size: <P extends SelectParams<TD, S>>(filter?: FullFilter<TD, S>, selectParams?: P) => Promise<string>;
-};
-export type UpsertDataToPGCast<TD extends AnyObject = AnyObject> = {
-    [K in keyof TD]: CastFromTSToPG<TD[K]>;
 };
 type UpsertDataToPGCastLax<T extends AnyObject> = PartialLax<UpsertDataToPGCast<T>>;
 type InsertData<T extends AnyObject> = UpsertDataToPGCast<T> | UpsertDataToPGCast<T>[];
@@ -494,10 +493,10 @@ export type ProstglesError = {
     detail?: string;
     columns?: string[];
 };
-export * from "./util";
-export * from "./filters";
-export type { ClientExpressData, ClientSyncHandles, ClientSyncInfo, SyncConfig, ClientSyncPullResponse, SyncBatchParams, onUpdatesParams } from "./replication";
-export type { ALLOWED_CONTENT_TYPE, ALLOWED_EXTENSION, FileColumnConfig, FileType } from "./files";
 export { CONTENT_TYPE_TO_EXT } from "./files";
+export type { ALLOWED_CONTENT_TYPE, ALLOWED_EXTENSION, FileColumnConfig, FileType } from "./files";
+export * from "./filters";
 export * from "./jsonb";
+export type { ClientExpressData, ClientSyncHandles, ClientSyncInfo, ClientSyncPullResponse, SyncBatchParams, SyncConfig, onUpdatesParams } from "./replication";
+export * from "./util";
 //# sourceMappingURL=index.d.ts.map

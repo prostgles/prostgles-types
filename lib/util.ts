@@ -1,4 +1,4 @@
-import { AnyObject, FullFilter, JoinMaker, JoinPath, SelectParams, TS_COLUMN_DATA_TYPES } from ".";
+import { AnyObject, JoinMaker, JoinPath, TS_COLUMN_DATA_TYPES } from ".";
 import { md5 } from "./md5";
 
 export function asName(str: string) {
@@ -7,10 +7,9 @@ export function asName(str: string) {
   return `"${str.toString().replace(/"/g, `""`)}"`;
 }
 
-export function pickKeys<T extends AnyObject, Include extends keyof T>(obj: T, include: Include[] = [], onlyIfDefined = false): Pick<T, Include> {
-  let keys = include;
+export const pickKeys = <T extends AnyObject, Include extends keyof T>(obj: T, keys: Include[] = [], onlyIfDefined = true): Pick<T, Include> => {
   if (!keys.length) {
-    return {} as any;
+    return {} as T;
   }
   if (obj && keys.length) {
     let res: AnyObject = {};

@@ -8,8 +8,7 @@ function asName(str) {
     return `"${str.toString().replace(/"/g, `""`)}"`;
 }
 exports.asName = asName;
-function pickKeys(obj, include = [], onlyIfDefined = false) {
-    let keys = include;
+const pickKeys = (obj, keys = [], onlyIfDefined = true) => {
     if (!keys.length) {
         return {};
     }
@@ -25,10 +24,10 @@ function pickKeys(obj, include = [], onlyIfDefined = false) {
         return res;
     }
     return obj;
-}
+};
 exports.pickKeys = pickKeys;
 function omitKeys(obj, exclude) {
-    return pickKeys(obj, getKeys(obj).filter(k => !exclude.includes(k)));
+    return (0, exports.pickKeys)(obj, getKeys(obj).filter(k => !exclude.includes(k)));
 }
 exports.omitKeys = omitKeys;
 function filter(array, arrFilter) {

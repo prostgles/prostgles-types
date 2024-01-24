@@ -173,7 +173,7 @@ export type InsertParams<T extends AnyObject | void = void, S extends DBSchema |
 export type DeleteParams<T extends AnyObject | void = void, S extends DBSchema | void = void> = {
     returning?: Select<T, S>;
 } & Pick<CommonSelectParams, "returnType">;
-export type PartialLax<T = AnyObject> = Partial<T> & AnyObject;
+export type PartialLax<T = AnyObject> = Partial<T>;
 export type TableInfo = {
     oid: number;
     comment?: string;

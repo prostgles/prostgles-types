@@ -148,7 +148,6 @@ exports.RULE_METHODS = {
     oneRow?.length;
     oneRow.col1;
     oneRow?.col1;
-    const oneRowFunc = await dbo.tbl1.update({}, { "col1.$func": funcData }, { returning: "*", multi: false });
     const manyRows = await dbo.tbl1.update({}, { col1: "" }, { returning: "*" });
     manyRows?.col1;
     manyRows?.at(0)?.col1;

@@ -428,7 +428,7 @@ export type DeleteParams<T extends AnyObject | void = void, S extends DBSchema |
   returning?: Select<T, S>;
 } & Pick<CommonSelectParams, "returnType">;
 
-export type PartialLax<T = AnyObject> = Partial<T> & AnyObject;
+export type PartialLax<T = AnyObject> = Partial<T>;// & AnyObject;
 
 export type TableInfo = {
   /**
@@ -1032,8 +1032,6 @@ export type ProstglesError = {
   //@ts-expect-error
   oneRow.col1;
   oneRow?.col1;
-
-  const oneRowFunc = await dbo.tbl1.update({}, { "col1.$func": funcData }, { returning: "*", multi: false });
 
   const manyRows = await dbo.tbl1.update({}, { col1: "" }, { returning: "*" });
   //@ts-expect-error

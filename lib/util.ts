@@ -12,7 +12,7 @@ export const pickKeys = <T extends AnyObject, Include extends keyof T>(obj: T, k
     return {} as T;
   }
   if (obj && keys.length) {
-    let res: AnyObject = {};
+    let res = {} as T;
     keys.forEach(k => {
       if(onlyIfDefined && obj[k] === undefined){
 
@@ -20,7 +20,7 @@ export const pickKeys = <T extends AnyObject, Include extends keyof T>(obj: T, k
         res[k] = obj[k];
       }
     });
-    return res as any;
+    return res;
   }
 
   return obj;

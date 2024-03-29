@@ -216,6 +216,11 @@ type ShorthandFilter<Obj extends Record<string, any>> = ValueOf<{
   [K in keyof Obj]: Obj[K] extends string? StringFilter<K, Required<Obj>[K]> : BasicFilter<K, Required<Obj>[K]>;
 }>
 
+
+export type EqualityFilter<T extends AnyObject> = {
+  [K in keyof Partial<T>]: CastFromTSToPG<T[K]>;
+};
+
 /* Traverses object keys to make filter */
 export type FilterForObject<T extends AnyObject = AnyObject> = 
   /* { col: { $func: ["value"] } } */

@@ -482,7 +482,6 @@ export type AuthSocketSchema = {
     pathGuard?: boolean;
 };
 export type ProstglesError = {
-    stack: string[];
     message: string;
     column?: string;
     code?: string;

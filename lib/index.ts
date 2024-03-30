@@ -890,7 +890,6 @@ export type AuthSocketSchema = {
 };
 
 export type ProstglesError = {
-  stack: string[];
   message: string;
   column?: string;
   code?: string;

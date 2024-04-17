@@ -464,7 +464,7 @@ export type MethodHandler = {
 export type ClientSchema = {
     rawSQL: boolean;
     joinTables: string[][];
-    auth: AnyObject;
+    auth: AuthSocketSchema | undefined;
     version: any;
     err?: string;
     tableSchema?: DBSchemaTable[];

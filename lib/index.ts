@@ -289,6 +289,7 @@ export type RawJoinPath = string | (JoinPath | string)[]
 export type DetailedJoinSelect = Partial<Record<typeof JOIN_KEYS[number], RawJoinPath>> & {
   select: Select;
   filter?: FullFilter<void, void>;
+  having?: FullFilter<void, void>;
   offset?: number;
   limit?: number;
   orderBy?: OrderBy;

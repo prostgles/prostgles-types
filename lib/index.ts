@@ -397,6 +397,7 @@ type CommonSelectParams = {
 export type SelectParams<T extends AnyObject | void = void, S extends DBSchema | void = void> = CommonSelectParams & {
   select?: Select<T, S>;
   orderBy?: OrderBy<S extends DBSchema? T : void>;
+  having?: FullFilter<T, S>;
 }
 export type SubscribeParams<T extends AnyObject | void = void, S extends DBSchema | void = void> = SelectParams<T, S> & {
   throttle?: number;

@@ -626,11 +626,11 @@ export type SocketSQLStreamPacket = {
   error: any;
 };
 export type SocketSQLStreamServer = {
-  pid: number;
   channel: string;
   unsubChannel: string;
 };
 export type SocketSQLStreamHandlers = {
+  pid: number;
   run: (query: string, params?: any | any[]) => Promise<void>;
   stop: (terminate?: boolean) => Promise<void>;
 };

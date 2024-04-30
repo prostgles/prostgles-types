@@ -164,7 +164,7 @@ export type AnyObject = { [key: string]: any };
 // PG will try to cast strings to appropriate type
 export type CastFromTSToPG<T extends AllowedTSType> = 
   T extends number ? (T | string) 
-: T extends string ? (T | Date) 
+: T extends string ? (T | number | Date) 
 : T extends boolean ? (T | string)
 : T extends Date ? (T | string)
 : T

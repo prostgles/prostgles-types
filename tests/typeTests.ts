@@ -47,7 +47,7 @@ import type { TableHandler, SQLHandler, FullFilter, DBHandler, Select, SelectTyp
   if(tableHandler){
     const newRow = await tableHandler.insert?.({ h: 2 }, { returning: { b: 1, c: 1 } });
     newRow.b;
-    newRow.c;
+    newRow.c; 
   
     //@ts-expect-error
     newRow.h;

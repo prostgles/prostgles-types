@@ -18,7 +18,7 @@ import type { TableHandler, SQLHandler, FullFilter, DBHandler, Select, SelectTyp
       columns: {
         h: number; 
         b?: number; 
-        c?: number;
+        c?: string;
       },
       delete: true,
       select: true,
@@ -45,7 +45,7 @@ import type { TableHandler, SQLHandler, FullFilter, DBHandler, Select, SelectTyp
   };
 
   if(tableHandler){
-    const newRow = await tableHandler.insert?.({ h: 2 }, { returning: { b: 1, c: 1 } });
+    const newRow = await tableHandler.insert?.({ h: 2, c: 1 }, { returning: { b: 1, c: 1 } });
     newRow.b;
     newRow.c; 
   

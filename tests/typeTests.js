@@ -18,7 +18,7 @@ exports.typeTestsOK = void 0;
         ]
     };
     if (tableHandler) {
-        const newRow = await tableHandler.insert?.({ h: 2 }, { returning: { b: 1, c: 1 } });
+        const newRow = await tableHandler.insert?.({ h: 2, c: 1 }, { returning: { b: 1, c: 1 } });
         newRow.b;
         newRow.c;
         newRow.h;

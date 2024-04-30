@@ -320,6 +320,7 @@ export type SocketSQLStreamPacket = {
     error: any;
 };
 export type SocketSQLStreamServer = {
+    pid: number;
     channel: string;
     unsubChannel: string;
 };

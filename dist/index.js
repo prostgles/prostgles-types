@@ -14,13 +14,18 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CONTENT_TYPE_TO_EXT = exports.RULE_METHODS = exports.CHANNELS = exports.JOIN_PARAMS = exports.JOIN_KEYS = exports.TS_PG_Types = exports._PG_geometric = exports._PG_postgis = exports._PG_interval = exports._PG_date = exports._PG_bool = exports._PG_json = exports._PG_numbers = exports._PG_strings = void 0;
+exports.CONTENT_TYPE_TO_EXT = exports.RULE_METHODS = exports.CHANNELS = exports.JOIN_PARAMS = exports.JOIN_KEYS = exports.TS_PG_Types = exports._PG_geometric = exports._PG_postgis = exports._PG_interval = exports._PG_date = exports._PG_bool = exports._PG_json = exports._PG_numbers = exports._PG_numbers_str = exports._PG_numbers_num = exports._PG_strings = void 0;
 exports._PG_strings = [
     'bpchar', 'char', 'varchar', 'text', 'citext', 'uuid', 'bytea', 'time', 'timetz', 'interval', 'name',
     'cidr', 'inet', 'macaddr', 'macaddr8', "int4range", "int8range", "numrange",
     'tsvector'
 ];
-exports._PG_numbers = ['int2', 'int4', 'int8', 'float4', 'float8', 'numeric', 'money', 'oid'];
+exports._PG_numbers_num = ['int2', 'int4', 'float4', 'float8', 'oid'];
+exports._PG_numbers_str = ['int8', 'numeric', 'money'];
+exports._PG_numbers = [
+    ...exports._PG_numbers_num,
+    ...exports._PG_numbers_str
+];
 exports._PG_json = ['json', 'jsonb'];
 exports._PG_bool = ['bool'];
 exports._PG_date = ['date', 'timestamp', 'timestamptz'];
@@ -36,8 +41,8 @@ exports._PG_geometric = [
     "circle",
 ];
 const TS_PG_PRIMITIVES = {
-    "string": [...exports._PG_strings, ...exports._PG_date, ...exports._PG_geometric, ...exports._PG_postgis, "lseg"],
-    "number": exports._PG_numbers,
+    "string": [...exports._PG_strings, ...exports._PG_numbers_str, ...exports._PG_date, ...exports._PG_geometric, ...exports._PG_postgis, "lseg"],
+    "number": exports._PG_numbers_num,
     "boolean": exports._PG_bool,
     "any": [...exports._PG_json, ...exports._PG_interval],
 };

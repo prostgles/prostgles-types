@@ -8,7 +8,12 @@ export const _PG_strings = [
   'cidr', 'inet', 'macaddr', 'macaddr8', "int4range", "int8range", "numrange",
   'tsvector'
 ] as const;
-export const _PG_numbers = ['int2','int4','int8','float4','float8','numeric','money','oid'] as const;
+export const _PG_numbers_num = ['int2', 'int4', 'float4', 'float8', 'oid'] as const;
+export const _PG_numbers_str = ['int8', 'numeric', 'money'] as const;
+export const _PG_numbers = [
+  ..._PG_numbers_num,
+  ..._PG_numbers_str
+] as const;
 export const _PG_json = ['json', 'jsonb'] as const;
 export const _PG_bool = ['bool'] as const;
 export const _PG_date = ['date', 'timestamp', 'timestamptz'] as const;
@@ -35,8 +40,8 @@ export type PG_COLUMN_UDT_DATA_TYPE =
     | typeof _PG_postgis[number];
     
 const TS_PG_PRIMITIVES = {
-  "string": [ ..._PG_strings, ..._PG_date, ..._PG_geometric, ..._PG_postgis, "lseg"],
-  "number": _PG_numbers,
+  "string": [ ..._PG_strings, ..._PG_numbers_str, ..._PG_date, ..._PG_geometric, ..._PG_postgis, "lseg"],
+  "number": _PG_numbers_num,
   "boolean": _PG_bool,
   "any": [..._PG_json, ..._PG_interval], // consider as any
 

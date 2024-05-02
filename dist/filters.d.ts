@@ -2,8 +2,9 @@ import { DBSchema, RawJoinPath } from ".";
 import { ExactlyOne } from "./util";
 export type AllowedTSType = string | number | boolean | Date | any;
 export type AllowedTSTypes = AllowedTSType[];
-export declare const CompareFilterKeys: readonly ["=", "$eq", "<>", ">", "<", ">=", "<=", "$eq", "$ne", "$gt", "$gte", "$lt", "$lte"];
+export declare const CompareFilterKeys: readonly ["=", "$eq", "<>", ">", "<", ">=", "<=", "$eq", "$ne", "$gt", "$gte", "$lt", "$lte", "$isDistinctFrom", "$isNotDistinctFrom"];
 export declare const CompareInFilterKeys: readonly ["$in", "$nin"];
+export declare const BetweenFilterKeys: readonly ["$between", "$notBetween"];
 export declare const JsonbOperands: {
     readonly "@>": {
         readonly Operator: "@>";
@@ -67,9 +68,7 @@ export declare const JsonbOperands: {
     };
 };
 export declare const JsonbFilterKeys: ("@@" | "@>" | "<@" | "?" | "?|" | "?&" | "||" | "-" | "#-" | "@?")[];
-export type CompareFilter<T extends AllowedTSType = string> = T | ExactlyOne<Record<typeof CompareFilterKeys[number], T>> | ExactlyOne<Record<typeof CompareInFilterKeys[number], T[]>> | {
-    "$between": [T, T];
-};
+export type CompareFilter<T extends AllowedTSType = string> = T | ExactlyOne<Record<typeof CompareFilterKeys[number], T>> | ExactlyOne<Record<typeof CompareInFilterKeys[number], T[]>> | ExactlyOne<Record<typeof BetweenFilterKeys[number], [T, T]>>;
 export declare const TextFilterKeys: readonly ["$ilike", "$like", "$nilike", "$nlike"];
 export declare const TextFilterFTSKeys: readonly ["@@", "@>", "<@", "$contains", "$containedBy"];
 export declare const TextFilter_FullTextSearchFilterKeys: readonly ["to_tsquery", "plainto_tsquery", "phraseto_tsquery", "websearch_to_tsquery"];

@@ -1,9 +1,15 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.COMPLEX_FILTER_KEY = exports.EXISTS_KEYS = exports.GeomFilter_Funcs = exports.GeomFilterKeys = exports.ArrayFilterOperands = exports.TextFilter_FullTextSearchFilterKeys = exports.TextFilterFTSKeys = exports.TextFilterKeys = exports.JsonbFilterKeys = exports.JsonbOperands = exports.CompareInFilterKeys = exports.CompareFilterKeys = void 0;
+exports.COMPLEX_FILTER_KEY = exports.EXISTS_KEYS = exports.GeomFilter_Funcs = exports.GeomFilterKeys = exports.ArrayFilterOperands = exports.TextFilter_FullTextSearchFilterKeys = exports.TextFilterFTSKeys = exports.TextFilterKeys = exports.JsonbFilterKeys = exports.JsonbOperands = exports.BetweenFilterKeys = exports.CompareInFilterKeys = exports.CompareFilterKeys = void 0;
 const util_1 = require("./util");
-exports.CompareFilterKeys = ["=", "$eq", "<>", ">", "<", ">=", "<=", "$eq", "$ne", "$gt", "$gte", "$lt", "$lte"];
+exports.CompareFilterKeys = [
+    "=", "$eq",
+    "<>", ">", "<", ">=", "<=",
+    "$eq", "$ne", "$gt", "$gte", "$lt", "$lte",
+    "$isDistinctFrom", "$isNotDistinctFrom",
+];
 exports.CompareInFilterKeys = ["$in", "$nin"];
+exports.BetweenFilterKeys = ["$between", "$notBetween"];
 exports.JsonbOperands = {
     "@>": {
         "Operator": "@>",

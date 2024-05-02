@@ -4,8 +4,14 @@ import { ExactlyOne, getKeys } from "./util";
 export type AllowedTSType = string | number | boolean | Date | any;
 export type AllowedTSTypes = AllowedTSType[];
 
-export const CompareFilterKeys = ["=", "$eq","<>",">","<",">=","<=","$eq","$ne","$gt","$gte","$lt","$lte"] as const;
+export const CompareFilterKeys = [
+  "=", "$eq",
+  "<>",">","<",">=","<=",
+  "$eq","$ne","$gt","$gte","$lt","$lte",
+  "$isDistinctFrom","$isNotDistinctFrom",
+] as const;
 export const CompareInFilterKeys = ["$in", "$nin"] as const;
+export const BetweenFilterKeys = ["$between", "$notBetween"] as const;
 
 export const JsonbOperands = {
   "@>": {
@@ -83,7 +89,7 @@ export const JsonbFilterKeys = getKeys(JsonbOperands);
  | ExactlyOne<Record<typeof CompareFilterKeys[number], T>>
 
  | ExactlyOne<Record<typeof CompareInFilterKeys[number], T[]>>
- | { "$between": [T, T] }
+ | ExactlyOne<Record<typeof BetweenFilterKeys[number],[T, T]>>
 ;
 export const TextFilterKeys = ["$ilike", "$like", "$nilike", "$nlike"] as const;
 

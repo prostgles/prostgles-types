@@ -13,6 +13,7 @@ export const CompareFilterKeys = [
 export const CompareInFilterKeys = ["$in", "$nin"] as const;
 export const BetweenFilterKeys = ["$between", "$notBetween"] as const;
 
+
 export const JsonbOperands = {
   "@>": {
     "Operator": "@>",
@@ -78,6 +79,15 @@ export const JsonbOperands = {
 
 export const JsonbFilterKeys = getKeys(JsonbOperands);
 
+export const TextFilterKeys = ["$ilike", "$like", "$nilike", "$nlike"] as const;
+
+export const TextFilterFTSKeys = ["@@", "@>", "<@", "$contains", "$containedBy"] as const;
+
+export const TextFilter_FullTextSearchFilterKeys = ["to_tsquery","plainto_tsquery","phraseto_tsquery","websearch_to_tsquery"] as const;
+export type FullTextSearchFilter = 
+ | ExactlyOne<Record<typeof TextFilter_FullTextSearchFilterKeys[number], string[]>>
+;
+
 /**
  * Example: col_name: { $gt: 2 }
  */
@@ -90,14 +100,6 @@ export const JsonbFilterKeys = getKeys(JsonbOperands);
 
  | ExactlyOne<Record<typeof CompareInFilterKeys[number], T[]>>
  | ExactlyOne<Record<typeof BetweenFilterKeys[number],[T, T]>>
-;
-export const TextFilterKeys = ["$ilike", "$like", "$nilike", "$nlike"] as const;
-
-export const TextFilterFTSKeys = ["@@", "@>", "<@", "$contains", "$containedBy"] as const;
-
-export const TextFilter_FullTextSearchFilterKeys = ["to_tsquery","plainto_tsquery","phraseto_tsquery","websearch_to_tsquery"] as const;
-export type FullTextSearchFilter = 
- | ExactlyOne<Record<typeof TextFilter_FullTextSearchFilterKeys[number], string[]>>
 ;
 
 export type TextFilter = 
@@ -196,10 +198,20 @@ export type EXISTS_KEY = typeof EXISTS_KEYS[number];
  *    ] 
  * }
  */
+
+
+export const ComplexFilterComparisonKeys = [
+  ...TextFilterKeys,
+  ...JsonbFilterKeys,
+  ...CompareFilterKeys,
+  ...BetweenFilterKeys,
+  ...CompareInFilterKeys
+] as const;
+
 export const COMPLEX_FILTER_KEY = "$filter" as const;
 export type ComplexFilter = Record<typeof COMPLEX_FILTER_KEY, [
   { [funcName: string]: any[] },
-  typeof CompareFilterKeys[number]?,
+  typeof ComplexFilterComparisonKeys[number]?,
   any?
 ]>; 
 

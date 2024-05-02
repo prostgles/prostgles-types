@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.COMPLEX_FILTER_KEY = exports.EXISTS_KEYS = exports.GeomFilter_Funcs = exports.GeomFilterKeys = exports.ArrayFilterOperands = exports.TextFilter_FullTextSearchFilterKeys = exports.TextFilterFTSKeys = exports.TextFilterKeys = exports.JsonbFilterKeys = exports.JsonbOperands = exports.BetweenFilterKeys = exports.CompareInFilterKeys = exports.CompareFilterKeys = void 0;
+exports.COMPLEX_FILTER_KEY = exports.ComplexFilterComparisonKeys = exports.EXISTS_KEYS = exports.GeomFilter_Funcs = exports.GeomFilterKeys = exports.ArrayFilterOperands = exports.TextFilter_FullTextSearchFilterKeys = exports.TextFilterFTSKeys = exports.TextFilterKeys = exports.JsonbFilterKeys = exports.JsonbOperands = exports.BetweenFilterKeys = exports.CompareInFilterKeys = exports.CompareFilterKeys = void 0;
 const util_1 = require("./util");
 exports.CompareFilterKeys = [
     "=", "$eq",
@@ -85,6 +85,13 @@ exports.GeomFilter_Funcs = [
     "st_makepolygon",
 ];
 exports.EXISTS_KEYS = ["$exists", "$notExists", "$existsJoined", "$notExistsJoined"];
+exports.ComplexFilterComparisonKeys = [
+    ...exports.TextFilterKeys,
+    ...exports.JsonbFilterKeys,
+    ...exports.CompareFilterKeys,
+    ...exports.BetweenFilterKeys,
+    ...exports.CompareInFilterKeys
+];
 exports.COMPLEX_FILTER_KEY = "$filter";
 const _f = {
     "h.$eq": ["2"]

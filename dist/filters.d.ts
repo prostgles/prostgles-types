@@ -68,11 +68,11 @@ export declare const JsonbOperands: {
     };
 };
 export declare const JsonbFilterKeys: ("@@" | "@>" | "<@" | "?" | "?|" | "?&" | "||" | "-" | "#-" | "@?")[];
-export type CompareFilter<T extends AllowedTSType = string> = T | ExactlyOne<Record<typeof CompareFilterKeys[number], T>> | ExactlyOne<Record<typeof CompareInFilterKeys[number], T[]>> | ExactlyOne<Record<typeof BetweenFilterKeys[number], [T, T]>>;
 export declare const TextFilterKeys: readonly ["$ilike", "$like", "$nilike", "$nlike"];
 export declare const TextFilterFTSKeys: readonly ["@@", "@>", "<@", "$contains", "$containedBy"];
 export declare const TextFilter_FullTextSearchFilterKeys: readonly ["to_tsquery", "plainto_tsquery", "phraseto_tsquery", "websearch_to_tsquery"];
 export type FullTextSearchFilter = ExactlyOne<Record<typeof TextFilter_FullTextSearchFilterKeys[number], string[]>>;
+export type CompareFilter<T extends AllowedTSType = string> = T | ExactlyOne<Record<typeof CompareFilterKeys[number], T>> | ExactlyOne<Record<typeof CompareInFilterKeys[number], T[]>> | ExactlyOne<Record<typeof BetweenFilterKeys[number], [T, T]>>;
 export type TextFilter = CompareFilter<string> | ExactlyOne<Record<typeof TextFilterKeys[number], string>> | ExactlyOne<Record<typeof TextFilterFTSKeys[number], FullTextSearchFilter>>;
 export declare const ArrayFilterOperands: readonly ["@>", "<@", "=", "$eq", "$contains", "$containedBy", "&&", "$overlaps"];
 export type ArrayFilter<T extends AllowedTSType[]> = Record<typeof ArrayFilterOperands[number], T> | ExactlyOne<Record<typeof ArrayFilterOperands[number], T>>;
@@ -93,12 +93,13 @@ export type CastFromTSToPG<T extends AllowedTSType> = T extends number ? (T | st
 export type FilterDataType<T extends AllowedTSType> = T extends string ? TextFilter : T extends number ? CompareFilter<CastFromTSToPG<T>> : T extends boolean ? CompareFilter<CastFromTSToPG<T>> : T extends Date ? CompareFilter<CastFromTSToPG<T>> : T extends any[] ? ArrayFilter<T> : (CompareFilter<T> | TextFilter | GeomFilter);
 export declare const EXISTS_KEYS: readonly ["$exists", "$notExists", "$existsJoined", "$notExistsJoined"];
 export type EXISTS_KEY = typeof EXISTS_KEYS[number];
+export declare const ComplexFilterComparisonKeys: readonly ["$ilike", "$like", "$nilike", "$nlike", ...("@@" | "@>" | "<@" | "?" | "?|" | "?&" | "||" | "-" | "#-" | "@?")[], "=", "$eq", "<>", ">", "<", ">=", "<=", "$eq", "$ne", "$gt", "$gte", "$lt", "$lte", "$isDistinctFrom", "$isNotDistinctFrom", "$between", "$notBetween", "$in", "$nin"];
 export declare const COMPLEX_FILTER_KEY: "$filter";
 export type ComplexFilter = Record<typeof COMPLEX_FILTER_KEY, [
     {
         [funcName: string]: any[];
     },
-    typeof CompareFilterKeys[number]?,
+    typeof ComplexFilterComparisonKeys[number]?,
     any?
 ]>;
 type BasicFilter<Field extends string, DataType extends any> = Partial<{

@@ -2,7 +2,7 @@ import { DBSchema, RawJoinPath } from ".";
 import { ExactlyOne } from "./util";
 export type AllowedTSType = string | number | boolean | Date | any;
 export type AllowedTSTypes = AllowedTSType[];
-export declare const CompareFilterKeys: readonly ["=", "$eq", "<>", ">", "<", ">=", "<=", "$eq", "$ne", "$gt", "$gte", "$lte"];
+export declare const CompareFilterKeys: readonly ["=", "$eq", "<>", ">", "<", ">=", "<=", "$eq", "$ne", "$gt", "$gte", "$lt", "$lte"];
 export declare const CompareInFilterKeys: readonly ["$in", "$nin"];
 export declare const JsonbOperands: {
     readonly "@>": {

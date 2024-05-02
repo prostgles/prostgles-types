@@ -4,7 +4,7 @@ import { ExactlyOne, getKeys } from "./util";
 export type AllowedTSType = string | number | boolean | Date | any;
 export type AllowedTSTypes = AllowedTSType[];
 
-export const CompareFilterKeys = ["=", "$eq","<>",">","<",">=","<=","$eq","$ne","$gt","$gte","$lte"] as const;
+export const CompareFilterKeys = ["=", "$eq","<>",">","<",">=","<=","$eq","$ne","$gt","$gte","$lt","$lte"] as const;
 export const CompareInFilterKeys = ["$in", "$nin"] as const;
 
 export const JsonbOperands = {

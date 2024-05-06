@@ -123,6 +123,11 @@ export type ColumnInfo = {
   is_updatable: boolean;
 
   /**
+   * If the column is a generated column (converted to boolean from ALWAYS and NEVER)
+   */
+  is_generated: boolean;
+
+  /**
    * Simplified data type
    */
   data_type: string;

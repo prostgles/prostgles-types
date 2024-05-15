@@ -511,7 +511,7 @@ type StrictUnionHelper<T, TAll> = T extends any ? T & Partial<Record<Exclude<Uni
 export type StrictUnion<T> = StrictUnionHelper<T, T>;
 
 export const tryCatch = async <T extends AnyObject>(func: () => T | Promise<T>): 
-  Promise<T & { error?: undefined; duration: number; } | Partial<Record<keyof T, undefined>> & { error: unknown; duration: number; }> => {
+Promise<T & { hasError?: false; error?: undefined; duration: number; } | Partial<Record<keyof T, undefined>> & { hasError: true; error: unknown; duration: number; }> => {
   const startTime = Date.now();
   try {
     const res = await func();

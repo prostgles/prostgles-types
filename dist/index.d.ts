@@ -362,7 +362,7 @@ export type DBNotifConfig = DBNoticeConfig & {
     notifChannel: string;
 };
 export type SQLOptions = {
-    returnType?: Required<SelectParams>["returnType"] | "statement" | "rows" | "noticeSubscription" | "arrayMode" | "stream";
+    returnType?: Required<SelectParams>["returnType"] | "default-with-rollback" | "statement" | "rows" | "noticeSubscription" | "arrayMode" | "stream";
     allowListen?: boolean;
     streamLimit?: number;
     persistStreamConnection?: boolean;

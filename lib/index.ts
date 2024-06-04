@@ -719,7 +719,13 @@ export type SQLOptions = {
   /**
    * Return type of the query
    */
-  returnType?: Required<SelectParams>["returnType"] | "statement" | "rows" | "noticeSubscription" | "arrayMode" | "stream";
+  returnType?: Required<SelectParams>["returnType"]
+    | "default-with-rollback"
+    | "statement" 
+    | "rows" 
+    | "noticeSubscription" 
+    | "arrayMode" 
+    | "stream";
   
   /**
    * If allowListen not specified and a LISTEN query is issued then expect error

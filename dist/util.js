@@ -383,6 +383,7 @@ const tryCatch = async (func) => {
     catch (error) {
         return {
             error,
+            hasError: true,
             duration: Date.now() - startTime,
         };
     }

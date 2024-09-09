@@ -522,6 +522,7 @@ Promise<T & { hasError?: false; error?: undefined; duration: number; } | Partial
   } catch(error){
     return { 
       error,
+      hasError: true,
       duration: Date.now() - startTime, 
     } as any;
   }

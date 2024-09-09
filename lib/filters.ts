@@ -241,7 +241,9 @@ export type EqualityFilter<T extends AnyObject> = {
 
 /* Traverses object keys to make filter */
 export type FilterForObject<T extends AnyObject = AnyObject> = 
-  /* { col: { $func: ["value"] } } */
+  /**
+   *  { col: { $func: ["value"] } } 
+   * */
   | {
     [K in keyof Partial<T>]: FilterDataType<T[K]>
   } & Partial<ComplexFilter>

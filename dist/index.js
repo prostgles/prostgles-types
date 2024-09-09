@@ -148,6 +148,7 @@ exports.RULE_METHODS = {
     const noRow = await dbo.tbl1.update({}, { col1: "" });
     noRow.length;
     noRow.col1;
+    const someData = await dbo.tbl1.find({}, { select: { col1: 1 }, orderBy: { col1: -1 } });
     const noRowFunc = await dbo.tbl1.update({}, { col1: "" });
     const oneRow = await dbo.tbl1.update({}, { col1: "" }, { returning: "*", multi: false });
     oneRow?.length;

@@ -166,8 +166,7 @@ export const GeomFilter_Funcs =  [
   "st_makepolygon",
 ] as const;
 
-// export type AnyObject = { [key: string]: AllowedTSTypes };
-export type AnyObject = { [key: string]: any };
+export type AnyObject = Record<string, any>;
 
 // PG will try to cast strings to appropriate type
 export type CastFromTSToPG<T extends AllowedTSType> = 

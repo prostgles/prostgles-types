@@ -86,9 +86,7 @@ export type GeomFilter = {
 };
 export declare const GeomFilterKeys: readonly ["~", "~=", "@", "|&>", "|>>", ">>", "=", "<<|", "<<", "&>", "&<|", "&<", "&&&", "&&"];
 export declare const GeomFilter_Funcs: readonly ["ST_MakeEnvelope", "st_makeenvelope", "ST_MakePolygon", "st_makepolygon"];
-export type AnyObject = {
-    [key: string]: any;
-};
+export type AnyObject = Record<string, any>;
 export type CastFromTSToPG<T extends AllowedTSType> = T extends number ? (T | string) : T extends string ? (T | number | Date) : T extends boolean ? (T | string) : T extends Date ? (T | string) : T;
 export type FilterDataType<T extends AllowedTSType> = T extends string ? TextFilter : T extends number ? CompareFilter<CastFromTSToPG<T>> : T extends boolean ? CompareFilter<CastFromTSToPG<T>> : T extends Date ? CompareFilter<CastFromTSToPG<T>> : T extends any[] ? ArrayFilter<T> : (CompareFilter<T> | TextFilter | GeomFilter);
 export declare const EXISTS_KEYS: readonly ["$exists", "$notExists", "$existsJoined", "$notExistsJoined"];

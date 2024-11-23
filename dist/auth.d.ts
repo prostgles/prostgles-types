@@ -3,7 +3,9 @@ export type IdentityProvider = "google" | "microsoft" | "github" | "apple" | "fa
 export type EmailAuthType = "withPassword" | "magicLink";
 export type AuthSocketSchema = {
     user: AnyObject | undefined;
-    providers: Partial<Record<IdentityProvider, true>>;
+    providers: Partial<Record<IdentityProvider, {
+        url: string;
+    }>>;
     login: EmailAuthType | undefined;
     register: EmailAuthType | undefined;
     pathGuard?: boolean;

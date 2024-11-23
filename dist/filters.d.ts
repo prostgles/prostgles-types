@@ -100,6 +100,7 @@ export type ComplexFilter = Record<typeof COMPLEX_FILTER_KEY, [
     typeof ComplexFilterComparisonKeys[number]?,
     any?
 ]>;
+export type KeyofString<T> = keyof T & string;
 type BasicFilter<Field extends string, DataType extends any> = Partial<{
     [K in Extract<typeof CompareFilterKeys[number], string> as `${Field}.${K}`]: CastFromTSToPG<DataType>;
 }> | Partial<{
@@ -112,17 +113,17 @@ type StringFilter<Field extends string, DataType extends any> = BasicFilter<Fiel
 }>);
 export type ValueOf<T> = T[keyof T];
 type ShorthandFilter<Obj extends Record<string, any>> = ValueOf<{
-    [K in keyof Obj & string]: Obj[K] extends string ? StringFilter<K, Required<Obj>[K]> : BasicFilter<K, Required<Obj>[K]>;
+    [K in KeyofString<Obj>]: Obj[K] extends string ? StringFilter<K, Required<Obj>[K]> : BasicFilter<K, Required<Obj>[K]>;
 }>;
 export type EqualityFilter<T extends AnyObject> = {
-    [K in keyof Partial<T>]: CastFromTSToPG<T[K]>;
+    [K in KeyofString<Partial<T>>]: CastFromTSToPG<T[K]>;
 };
 export type FilterForObject<T extends AnyObject = AnyObject> = {
     [K in keyof Partial<T>]: FilterDataType<T[K]>;
 } & Partial<ComplexFilter> | ShorthandFilter<T>;
 export type ExistsFilter<S = void> = Partial<{
     [key in EXISTS_KEY]: S extends DBSchema ? ExactlyOne<{
-        [tname in keyof S]: FullFilter<S[tname]["columns"], S> | {
+        [tname in KeyofString<S>]: FullFilter<S[tname]["columns"], S> | {
             path: RawJoinPath[];
             filter: FullFilter<S[tname]["columns"], S>;
         };
@@ -138,9 +139,9 @@ export type FullFilter<T extends AnyObject | void, S extends DBSchema | void> = 
 export type FullFilterBasic<T = {
     [key: string]: any;
 }> = {
-    [key in keyof Partial<T & {
+    [key in KeyofString<Partial<T>> & {
         [key: string]: any;
-    }>]: any;
+    }]: any;
 };
 export {};
 //# sourceMappingURL=filters.d.ts.map

@@ -8,7 +8,7 @@ export type PartialBy<T, K extends keyof T | string> = Omit<T, K> & Partial<Pick
 
 export const FUNC_ENDING_HINT = "$func" as const; 
 type DataOrFuncValuesObject<ObjectType> = {
-  [Key in keyof ObjectType]:
+  [Key in keyof ObjectType & string]:
     | { [K in Key]: ObjectType[Key] }
     | { [K in `${Key}.${typeof FUNC_ENDING_HINT}`]: Record<string, any[]> };
 };

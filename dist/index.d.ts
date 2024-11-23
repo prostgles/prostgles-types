@@ -1,3 +1,4 @@
+import { AuthSocketSchema } from "./auth";
 import { FileColumnConfig } from "./files";
 import { AnyObject, ComplexFilter, FullFilter, FullFilterBasic, ValueOf } from "./filters";
 import type { UpsertDataToPGCast } from "./insertUpdateUtils";
@@ -204,7 +205,7 @@ export type SelectFunction = Record<string, any[]>;
 type ParseSelect<Select extends SelectParams<TD>["select"], TD extends AnyObject> = (Select extends {
     "*": 1;
 } ? Required<TD> : {}) & {
-    [Key in keyof Omit<Select, "*">]: Select[Key] extends 1 ? Required<TD>[Key] : Select[Key] extends SelectFunction ? any : Select[Key] extends JoinedSelect ? any[] : any;
+    [Key in keyof Omit<Select, "*"> & string]: Select[Key] extends 1 ? Required<TD>[Key] : Select[Key] extends SelectFunction ? any : Select[Key] extends JoinedSelect ? any[] : any;
 };
 type GetSelectDataType<S extends DBSchema | void, O extends SelectParams<TD, S>, TD extends AnyObject> = O extends {
     returnType: "value";
@@ -480,13 +481,6 @@ export type ClientSchema = {
         description?: string;
     } & Pick<MethodFullDef, "input" | "output">)[];
 };
-export type AuthSocketSchema = {
-    user?: AnyObject;
-    register?: boolean;
-    login?: boolean;
-    logout?: boolean;
-    pathGuard?: boolean;
-};
 export type ProstglesError = {
     message: string;
     column?: string;
@@ -504,4 +498,5 @@ export * from "./filters";
 export * from "./jsonb";
 export type { ClientExpressData, ClientSyncHandles, ClientSyncInfo, ClientSyncPullResponse, SyncBatchParams, SyncConfig, onUpdatesParams } from "./replication";
 export * from "./util";
+export * from "./auth";
 //# sourceMappingURL=index.d.ts.map

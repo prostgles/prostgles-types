@@ -19,8 +19,7 @@
     "declaration": true,
     "declarationMap": true,
     "isolatedModules": true,
-    "ignoreDeprecations": "5.0",
-    "keyofStringsOnly": true,
+    "ignoreDeprecations": "5.0", 
     "skipDefaultLibCheck": true,
     "noUncheckedIndexedAccess": true
   },

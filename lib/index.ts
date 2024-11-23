@@ -1,4 +1,5 @@
 
+import { AuthSocketSchema } from "./auth";
 import { FileColumnConfig } from "./files";
 import { AnyObject, ComplexFilter, FullFilter, FullFilterBasic, ValueOf } from "./filters";
 import type { UpsertDataToPGCast } from "./insertUpdateUtils";
@@ -500,7 +501,7 @@ export type SelectFunction = Record<string, any[]>;
 type ParseSelect<Select extends SelectParams<TD>["select"], TD extends AnyObject> = 
 (Select extends { "*": 1 }? Required<TD> : {})
 & {
-  [Key in keyof Omit<Select, "*">]: Select[Key] extends 1? Required<TD>[Key] : 
+  [Key in keyof Omit<Select, "*">  & string]: Select[Key] extends 1? Required<TD>[Key] : 
     Select[Key] extends SelectFunction? any : 
     Select[Key] extends JoinedSelect? any[] : 
     any;
@@ -888,26 +889,6 @@ export type ClientSchema = {
   methods: (string | { name: string; description?: string; } & Pick<MethodFullDef, "input" | "output">)[];
 }
 
-/**
- * Auth object sent from server to client
- */
-export type AuthSocketSchema = {
-  /**
-   * User data as returned from server auth.getClientUser
-   */
-  user?: AnyObject;
-
-  register?: boolean;
-  login?: boolean;
-  logout?: boolean;
-
-  /**
-   * If server auth publicRoutes is set up and AuthGuard is not explicitly disabled ( disableSocketAuthGuard: true ):
-   *  on each connect/reconnect the client pathname is checked and page reloaded if it's not a public page and the client is not logged in
-   */
-  pathGuard?: boolean;
-};
-
 export type ProstglesError = {
   message: string;
   column?: string;
@@ -1131,3 +1112,4 @@ export * from "./filters";
 export * from "./jsonb";
 export type { ClientExpressData, ClientSyncHandles, ClientSyncInfo, ClientSyncPullResponse, SyncBatchParams, SyncConfig, onUpdatesParams } from "./replication";
 export * from "./util";
+export * from "./auth";

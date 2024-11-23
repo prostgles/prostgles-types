@@ -10,6 +10,12 @@ export type IdentityProvider =
 | "linkedin" 
 ;
 
+export type UserLike = {
+  id: string;
+  type: string;
+  [key: string]: any;
+};
+
 export type EmailAuthType = "withPassword" | "magicLink";
 
 /**
@@ -21,7 +27,7 @@ export type AuthSocketSchema = {
    * User data as returned from server auth.getClientUser
    * if undefined, the client is not logged in
    */
-  user: AnyObject | undefined;
+  user: UserLike | undefined;
 
   /**
    * Identity providers enabled on the server

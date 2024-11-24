@@ -14,7 +14,7 @@ export type UserLike = {
   [key: string]: any;
 };
 
-export type EmailAuthType = "withPassword" | "withMagicLink"; // TODO: | "magicLink";
+export type EmailAuthType = "withPassword" | "withMagicLink";
 export type EmailSignupType = "withPassword" | "withMagicLink";
 
 /**

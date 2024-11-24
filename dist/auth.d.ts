@@ -10,7 +10,7 @@ export type AuthSocketSchema = {
     user: UserLike | undefined;
     providers: Partial<Record<IdentityProvider, {
         url: string;
-    }>>;
+    }>> | undefined;
     login: {
         type: EmailAuthType;
         url: string;

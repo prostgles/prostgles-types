@@ -32,7 +32,7 @@ export type AuthSocketSchema = {
    * Identity providers enabled on the server
    * if undefined, the server does not support social login
    */
-  providers: Partial<Record<IdentityProvider, { url: string; }>>;
+  providers: Partial<Record<IdentityProvider, { url: string; }>> | undefined;
 
   /**
    * Email login methods enabled on the server

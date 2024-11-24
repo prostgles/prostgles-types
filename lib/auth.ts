@@ -16,7 +16,8 @@ export type UserLike = {
   [key: string]: any;
 };
 
-export type EmailAuthType = "withPassword" | "magicLink";
+export type EmailAuthType = "withPassword" | "withPasswordAndTOTP"; // TODO: | "magicLink";
+export type EmailSignupType = "withPassword" | "magicLink";
 
 /**
  * Auth object sent from server to client
@@ -38,12 +39,12 @@ export type AuthSocketSchema = {
   /**
    * Email login methods enabled on the server
    */
-  login: EmailAuthType | undefined;
+  login: { type: EmailAuthType; url: string; } | undefined;
 
   /**
    * Email registration methods enabled on the server
    */
-  register: EmailAuthType | undefined;
+  register: { type: EmailSignupType; url: string; } | undefined;
 
   /**
    * If server auth publicRoutes is set up and AuthGuard is not explicitly disabled ( disableSocketAuthGuard: true ):

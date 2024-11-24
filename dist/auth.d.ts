@@ -4,14 +4,21 @@ export type UserLike = {
     type: string;
     [key: string]: any;
 };
-export type EmailAuthType = "withPassword" | "magicLink";
+export type EmailAuthType = "withPassword" | "withPasswordAndTOTP";
+export type EmailSignupType = "withPassword" | "magicLink";
 export type AuthSocketSchema = {
     user: UserLike | undefined;
     providers: Partial<Record<IdentityProvider, {
         url: string;
     }>>;
-    login: EmailAuthType | undefined;
-    register: EmailAuthType | undefined;
+    login: {
+        type: EmailAuthType;
+        url: string;
+    } | undefined;
+    register: {
+        type: EmailSignupType;
+        url: string;
+    } | undefined;
     pathGuard?: boolean;
 };
 //# sourceMappingURL=auth.d.ts.map

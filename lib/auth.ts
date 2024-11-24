@@ -37,7 +37,7 @@ export type AuthSocketSchema = {
   /**
    * Email login methods enabled on the server
    */
-  loginType: EmailAuthType;
+  loginType: EmailAuthType | undefined;
 
   /**
    * Email registration methods enabled on the server

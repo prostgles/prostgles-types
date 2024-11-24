@@ -1,4 +1,4 @@
-import { AuthSocketSchema } from "./auth";
+import * as AuthTypes from "./auth";
 import { FileColumnConfig } from "./files";
 import { AnyObject, ComplexFilter, FullFilter, FullFilterBasic, ValueOf } from "./filters";
 import type { UpsertDataToPGCast } from "./insertUpdateUtils";
@@ -471,7 +471,7 @@ export type MethodHandler = {
 export type ClientSchema = {
     rawSQL: boolean;
     joinTables: string[][];
-    auth: AuthSocketSchema | undefined;
+    auth: AuthTypes.AuthSocketSchema | undefined;
     version: any;
     err?: string;
     tableSchema?: DBSchemaTable[];

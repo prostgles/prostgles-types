@@ -214,7 +214,7 @@ export type ComplexFilter = Record<typeof COMPLEX_FILTER_KEY, [
   any?
 ]>; 
 
-export type KeyofString<T, WithPartial = false> = WithPartial extends true? keyof Partial<T> : keyof T & string;
+export type KeyofString<T> = keyof T & string;
 
 /**
  * Shortened filter operands
@@ -237,7 +237,7 @@ type ShorthandFilter<Obj extends Record<string, any>> = ValueOf<{
 
 
 export type EqualityFilter<T extends AnyObject> = {
-  [K in KeyofString<T, true>]: CastFromTSToPG<T[K]>;
+  [K in keyof Partial<T>]: CastFromTSToPG<T[K]>;
 };
 
 /* Traverses object keys to make filter */
@@ -300,7 +300,7 @@ export type FullFilter<T extends AnyObject | void, S extends DBSchema | void> =
  * Simpler FullFilter to reduce load on compilation
  */
 export type FullFilterBasic<T = { [key: string]: any }> = {
-  [key in KeyofString<T, true> & { [key: string]: any }]: any
+  [key in keyof Partial<T> & { [key: string]: any }]: any
 }
 
 
@@ -326,3 +326,7 @@ const forcedFilter: FullFilter<RR, {}> = {
 const _f2: FilterItem<RR> = {
    $filter: [{ $funcName: ["colname", "opts"] }, ">", 2] 
 }
+
+const _d: EqualityFilter<{ a: number; b: string; }> = {
+  a: 2,
+};

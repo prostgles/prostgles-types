@@ -105,4 +105,7 @@ const forcedFilter = {
 const _f2 = {
     $filter: [{ $funcName: ["colname", "opts"] }, ">", 2]
 };
+const _d = {
+    a: 2,
+};
 //# sourceMappingURL=filters.js.map

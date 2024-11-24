@@ -4,8 +4,8 @@ export type UserLike = {
     type: string;
     [key: string]: any;
 };
-export type EmailAuthType = "withPassword" | "withPasswordAndTOTP";
-export type EmailSignupType = "withPassword" | "magicLink";
+export type EmailAuthType = "withPassword" | "withMagicLink";
+export type EmailSignupType = "withPassword" | "withMagicLink";
 export type AuthSocketSchema = {
     user: UserLike | undefined;
     providers: Partial<Record<IdentityProvider, {

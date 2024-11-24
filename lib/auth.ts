@@ -1,5 +1,3 @@
-import { AnyObject } from "./filters";
-
 export type IdentityProvider = 
 | "google" 
 | "microsoft" 
@@ -16,8 +14,8 @@ export type UserLike = {
   [key: string]: any;
 };
 
-export type EmailAuthType = "withPassword" | "withPasswordAndTOTP"; // TODO: | "magicLink";
-export type EmailSignupType = "withPassword" | "magicLink";
+export type EmailAuthType = "withPassword" | "withMagicLink"; // TODO: | "magicLink";
+export type EmailSignupType = "withPassword" | "withMagicLink";
 
 /**
  * Auth object sent from server to client

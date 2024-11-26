@@ -478,6 +478,11 @@ export function get(obj: any, propertyPath: string | string[]): any {
   }, o);
 }
 
+
+export const getObjectEntries = <T extends Record<string, any>> (obj: T): [keyof T, T[keyof T]][] => {
+  return Object.entries(obj) as [keyof T, T[keyof T]][];
+}
+
 function areEqual(a: any, b: any){
   if(a === b) return true;
   if(["number", "string", "boolean"].includes(typeof a)){

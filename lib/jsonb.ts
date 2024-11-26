@@ -1,4 +1,4 @@
-import { getKeys, isObject, StrictUnion } from "./util";
+import { getKeys, getObjectEntries, isObject, StrictUnion } from "./util";
 import type { JSONSchema7, JSONSchema7TypeName } from "json-schema";
 import { AnyObject } from "./filters";
 
@@ -266,12 +266,12 @@ const _ss: JSONB.GetType<typeof s> = {
   o: { z1: 23 }
 }
 
-const getJSONSchemaObject = (rawType: JSONB.FieldType | JSONB.JSONBSchema, rootInfo?: { id: string }): JSONSchema7 => {
+export const getJSONSchemaObject = (rawType: JSONB.FieldType | JSONB.JSONBSchema, rootInfo?: { id: string }): JSONSchema7 => {
   const {  type, arrayOf, arrayOfType, description, nullable, oneOf, oneOfType, title, record, ...t } = typeof rawType === "string"? ({ type: rawType } as JSONB.FieldTypeObj) : rawType; 
 
   let result: JSONSchema7 = {};
   const partialProps: Partial<JSONSchema7> = {
-    ...((t.enum || t.allowedValues?.length) && { enum: t.allowedValues?.slice(0) ?? t.enum!.slice(0) }),
+    ...((t.enum || t.allowedValues?.length && (typeof type !== "string" || !type.endsWith("[]"))) && { enum: t.allowedValues?.slice(0) ?? t.enum!.slice(0) }),
     ...(!!description && { description }),
     ...(!!title && { title }),
   };
@@ -314,10 +314,10 @@ const getJSONSchemaObject = (rawType: JSONB.FieldType | JSONB.JSONBSchema, rootI
         const t = type[k]!;
         return typeof t === "string" || !t.optional;
       }),
-      properties: getKeys(type).reduce((a, k) => { 
+      properties: getObjectEntries(type).reduce((a, [k, v]) => { 
         return {
           ...a,
-          [k]: getJSONSchemaObject(type[k]!)
+          [k]: getJSONSchemaObject(v)
         }
       }, {}),
     }
@@ -364,4 +364,3 @@ const getJSONSchemaObject = (rawType: JSONB.FieldType | JSONB.JSONBSchema, rootI
 export function getJSONBSchemaAsJSONSchema(tableName: string, colName: string, schema: JSONB.JSONBSchema): JSONSchema7 { 
   return getJSONSchemaObject(schema, { id: `${tableName}.${colName}` })
 }
-

@@ -191,6 +191,9 @@ export declare namespace JSONB {
     export type GetSchemaType<S extends JSONBSchema> = S["nullable"] extends true ? (null | GetType<S>) : GetType<S>;
     export {};
 }
+export declare const getJSONSchemaObject: (rawType: JSONB.FieldType | JSONB.JSONBSchema, rootInfo?: {
+    id: string;
+}) => JSONSchema7;
 export declare function getJSONBSchemaAsJSONSchema(tableName: string, colName: string, schema: JSONB.JSONBSchema): JSONSchema7;
 export {};
 //# sourceMappingURL=jsonb.d.ts.map

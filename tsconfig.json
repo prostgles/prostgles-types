@@ -1,5 +1,5 @@
 {
-  "files": ["lib/index.ts"],
+  "include": ["lib/**/*"],
   "compilerOptions": {
     "baseUrl": ".",
     "target": "es2020",
@@ -24,5 +24,6 @@
     "noUncheckedIndexedAccess": true
   },
   "exclude": [
+    "node_modules"
   ],
 }

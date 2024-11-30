@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.reverseParsedPath = exports.reverseJoinOn = exports.getJoinHandlers = exports.tryCatch = exports.getKeys = exports.isDefined = exports.isObject = exports.getObjectEntries = exports.get = exports.isEmpty = exports.WAL = exports.unpatchText = exports.getTextPatch = exports.stableStringify = exports.includes = exports.find = exports.filter = exports.omitKeys = exports.pickKeys = exports.asName = void 0;
+exports.reverseParsedPath = exports.reverseJoinOn = exports.getJoinHandlers = exports.tryCatchV2 = exports.tryCatch = exports.getKeys = exports.isDefined = exports.isObject = exports.getObjectEntries = exports.get = exports.isEmpty = exports.WAL = exports.unpatchText = exports.getTextPatch = exports.stableStringify = exports.includes = exports.find = exports.filter = exports.omitKeys = exports.pickKeys = exports.asName = void 0;
 const md5_1 = require("./md5");
 function asName(str) {
     if (str === null || str === undefined || !str.toString || !str.toString())
@@ -393,6 +393,35 @@ const tryCatch = async (func) => {
     }
 };
 exports.tryCatch = tryCatch;
+const tryCatchV2 = (func) => {
+    const startTime = Date.now();
+    try {
+        const dataOrResult = func();
+        if (dataOrResult instanceof Promise) {
+            return new Promise(async (resolve, reject) => {
+                const duration = Date.now() - startTime;
+                const data = await dataOrResult;
+                resolve({
+                    data,
+                    duration,
+                });
+            });
+        }
+        return {
+            data: dataOrResult,
+            duration: Date.now() - startTime,
+        };
+    }
+    catch (error) {
+        console.error(error);
+        return {
+            error,
+            hasError: true,
+            duration: Date.now() - startTime,
+        };
+    }
+};
+exports.tryCatchV2 = tryCatchV2;
 const getJoinHandlers = (tableName) => {
     const getJoinFunc = (isLeft, expectsOne) => {
         return (filter, select, options = {}) => {

@@ -515,6 +515,10 @@ type UnionKeys<T> = T extends T ? keyof T : never;
 type StrictUnionHelper<T, TAll> = T extends any ? T & Partial<Record<Exclude<UnionKeys<TAll>, keyof T>, never>> : never;
 export type StrictUnion<T> = StrictUnionHelper<T, T>;
 
+/**
+ * @deprecated
+ * use tryCatchV2 instead
+ */
 export const tryCatch = async <T extends AnyObject>(func: () => T | Promise<T>): 
 Promise<T & { hasError?: false; error?: undefined; duration: number; } | Partial<Record<keyof T, undefined>> & { hasError: true; error: unknown; duration: number; }> => {
   const startTime = Date.now();
@@ -525,6 +529,38 @@ Promise<T & { hasError?: false; error?: undefined; duration: number; } | Partial
       duration: Date.now() - startTime,
     }
   } catch(error){
+    return { 
+      error,
+      hasError: true,
+      duration: Date.now() - startTime, 
+    } as any;
+  }
+}
+
+type TryCatchResult<T> = 
+| { data: T; hasError?: false; error?: undefined; duration: number; }
+| { data?: undefined; hasError: true; error: unknown; duration: number; } 
+
+export const tryCatchV2 = <T,>(func: () => T | Promise<T>): T extends Promise<T>? Promise<TryCatchResult<Awaited<T>>> : TryCatchResult<T> => {
+  const startTime = Date.now();
+  try {
+    const dataOrResult = func();
+    if(dataOrResult instanceof Promise){
+      return new Promise(async (resolve, reject) => {
+        const duration = Date.now() - startTime;
+        const data = await dataOrResult
+        resolve({
+          data,
+          duration,
+        });
+      }) as any;
+    }
+    return {
+      data: dataOrResult,
+      duration: Date.now() - startTime,
+    } as any;
+  } catch(error){
+    console.error(error);
     return { 
       error,
       hasError: true,

@@ -86,6 +86,18 @@ export declare const tryCatch: <T extends AnyObject>(func: () => T | Promise<T>)
     error: unknown;
     duration: number;
 })>;
+type TryCatchResult<T> = {
+    data: T;
+    hasError?: false;
+    error?: undefined;
+    duration: number;
+} | {
+    data?: undefined;
+    hasError: true;
+    error: unknown;
+    duration: number;
+};
+export declare const tryCatchV2: <T>(func: () => T | Promise<T>) => T extends Promise<T> ? Promise<TryCatchResult<Awaited<T>>> : TryCatchResult<T>;
 export declare const getJoinHandlers: (tableName: string) => {
     innerJoin: JoinMaker;
     leftJoin: JoinMaker;

@@ -432,9 +432,7 @@ export declare const RULE_METHODS: {
 export type MethodKey = typeof RULE_METHODS[keyof typeof RULE_METHODS][number];
 export type TableSchemaForClient = Record<string, Partial<Record<MethodKey, (MethodKey extends "insert" ? {
     allowedNestedInserts?: string[];
-} : {}) | {
-    err: any;
-}>>>;
+} : Record<string, never>)>>>;
 export type TableSchema = {
     schema: string;
     name: string;

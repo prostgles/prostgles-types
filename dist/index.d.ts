@@ -468,12 +468,20 @@ export type Method = MethodFunction | MethodFullDef;
 export type MethodHandler = {
     [method_name: string]: Method;
 };
+export type TableSchemaErrors = {
+    [tableName: string]: {
+        [method: string]: {
+            error: any;
+        };
+    };
+};
 export type ClientSchema = {
     rawSQL: boolean;
     joinTables: string[][];
     auth: AuthTypes.AuthSocketSchema | undefined;
     version: any;
     err?: string;
+    tableSchemaErrors: TableSchemaErrors;
     tableSchema?: DBSchemaTable[];
     schema: TableSchemaForClient;
     methods: (string | {

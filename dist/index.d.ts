@@ -198,6 +198,7 @@ export type TableInfo = {
     info?: {
         label?: string;
     };
+    uniqueColumnGroups: string[][] | undefined;
 };
 export type OnError = (err: any) => void;
 type JoinedSelect = Record<string, Select>;

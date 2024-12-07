@@ -104,8 +104,10 @@ function stableStringify(data, opts) {
 exports.stableStringify = stableStringify;
 ;
 function getTextPatch(oldStr, newStr) {
+    /* Big change, no point getting diff */
     if (!oldStr || !newStr || !oldStr.trim().length || !newStr.trim().length)
         return newStr;
+    /* Return no change if matching */
     if (oldStr === newStr)
         return {
             from: 0,
@@ -146,10 +148,23 @@ function unpatchText(original, patch) {
     return res;
 }
 exports.unpatchText = unpatchText;
+/**
+ * Used to throttle and combine updates sent to server
+ * This allows a high rate of optimistic updates on the client
+ */
 class WAL {
     constructor(args) {
+        /**
+         * Instantly merged records for prepared for update
+         */
         this.changed = {};
+        /**
+         * Batch of records (removed from this.changed) that are currently being sent
+         */
         this.sending = {};
+        /**
+         * Historic data used to reduce data pushes from server to client
+         */
         this.sentHistory = {};
         this.callbacks = [];
         this.sort = (a, b) => {
@@ -157,6 +172,7 @@ class WAL {
             if (!orderBy || !a || !b)
                 return 0;
             return orderBy.map(ob => {
+                /* TODO: add fullData to changed items + ensure orderBy is in select */
                 if (!(ob.fieldName in a) || !(ob.fieldName in b)) {
                     throw `Replication error: \n   some orderBy fields missing from data`;
                 }
@@ -165,6 +181,12 @@ class WAL {
                 return (ob.tsDataType === "number" && Number.isFinite(vNum)) ? vNum : vStr;
             }).find(v => v) || 0;
         };
+        /**
+         * Used by server to avoid unnecessary data push to client.
+         * This can happen due to the same data item having been previously pushed by the client
+         * @param item data item
+         * @returns boolean
+         */
         this.isInHistory = (item) => {
             if (!item)
                 throw "Provide item";
@@ -209,11 +231,17 @@ class WAL {
         this.willDeleteHistory = undefined;
         this.sendItems = async () => {
             const { DEBUG_MODE, onSend, onSendEnd, batch_size, throttle, historyAgeSeconds = 2 } = this.options;
+            // Sending data. stop here
             if (this.isSendingTimeout || this.sending && !isEmpty(this.sending))
                 return;
+            // Nothing to send. stop here
             if (!this.changed || isEmpty(this.changed))
                 return;
+            // Prepare batch to send
             let batchItems = [], walBatch = [], batchObj = {};
+            /**
+             * Prepare and remove a batch from this.changed
+             */
             Object.keys(this.changed)
                 .sort((a, b) => this.sort(this.changed[a].current, this.changed[b].current))
                 .slice(0, batch_size)
@@ -221,6 +249,7 @@ class WAL {
                 let item = { ...this.changed[key] };
                 this.sending[key] = { ...item };
                 walBatch.push({ ...item });
+                /* Used for history */
                 batchObj[key] = { ...item.current };
                 delete this.changed[key];
             });
@@ -229,6 +258,7 @@ class WAL {
                 Object.keys(d.current).map(k => {
                     const oldVal = d.initial?.[k];
                     const newVal = d.current[k];
+                    /** Send only id fields and delta */
                     if ([this.options.synced_field, ...this.options.id_fields].includes(k) ||
                         !areEqual(oldVal, newVal)) {
                         result[k] = newVal;
@@ -239,6 +269,7 @@ class WAL {
             if (DEBUG_MODE) {
                 console.log(this.options.id, " SENDING lr->", batchItems[batchItems.length - 1]);
             }
+            // Throttle next data send
             if (!this.isSendingTimeout) {
                 this.isSendingTimeout = setTimeout(() => {
                     this.isSendingTimeout = undefined;
@@ -250,12 +281,19 @@ class WAL {
             let error;
             this.isOnSending = true;
             try {
-                await onSend(batchItems, walBatch);
+                /* Deleted data should be sent normally through await db.table.delete(...) */
+                await onSend(batchItems, walBatch); //, deletedData);
+                /**
+                 * Keep history if required
+                 */
                 if (historyAgeSeconds) {
                     this.sentHistory = {
                         ...this.sentHistory,
                         ...batchObj,
                     };
+                    /**
+                     * Delete history after some time
+                     */
                     if (!this.willDeleteHistory) {
                         this.willDeleteHistory = setTimeout(() => {
                             this.willDeleteHistory = undefined;
@@ -269,6 +307,7 @@ class WAL {
                 console.error("WAL onSend failed:", err, batchItems, walBatch);
             }
             this.isOnSending = false;
+            /* Fire any callbacks */
             if (this.callbacks.length) {
                 const ids = Object.keys(this.sending);
                 this.callbacks.forEach((c, i) => {
@@ -337,6 +376,7 @@ function isEmpty(obj) {
     return true;
 }
 exports.isEmpty = isEmpty;
+/* Get nested property from an object */
 function get(obj, propertyPath) {
     let p = propertyPath, o = obj;
     if (!obj)
@@ -375,6 +415,10 @@ function getKeys(o) {
     return Object.keys(o);
 }
 exports.getKeys = getKeys;
+/**
+ * @deprecated
+ * use tryCatchV2 instead
+ */
 const tryCatch = async (func) => {
     const startTime = Date.now();
     try {
@@ -425,6 +469,7 @@ exports.tryCatchV2 = tryCatchV2;
 const getJoinHandlers = (tableName) => {
     const getJoinFunc = (isLeft, expectsOne) => {
         return (filter, select, options = {}) => {
+            // return makeJoin(isLeft, filter, select, expectsOne? { ...options, limit: 1 } : options);
             return {
                 [isLeft ? "$leftJoin" : "$innerJoin"]: options.path ?? tableName,
                 filter,
@@ -446,6 +491,12 @@ const reverseJoinOn = (on) => {
         .map(([left, right]) => [right, left])));
 };
 exports.reverseJoinOn = reverseJoinOn;
+/**
+ * result = [
+ *  { table, on: parsedPath[0] }
+ *  ...parsedPath.map(p => ({ table: p.table, on: reversedOn(parsedPath[i+1].on) }))
+ * ]
+ */
 const reverseParsedPath = (parsedPath, table) => {
     const newPPath = [
         { table, on: [{}] },

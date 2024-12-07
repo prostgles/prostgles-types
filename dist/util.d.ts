@@ -23,14 +23,32 @@ export type SyncTableInfo = {
 };
 export type BasicOrderBy = {
     fieldName: string;
+    /**
+     * Used to ensure numbers are not left as strings in some cases
+     */
     tsDataType: TS_COLUMN_DATA_TYPES;
     asc: boolean;
 }[];
 export type WALConfig = SyncTableInfo & {
+    /**
+     * Fired when new data is added and there is no sending in progress
+     */
     onSendStart?: () => any;
+    /**
+     * Fired on each data send batch
+     */
     onSend: (items: any[], fullItems: WALItem[]) => Promise<any>;
+    /**
+     * Fired after all data was sent or when a batch error is thrown
+     */
     onSendEnd?: (batch: any[], fullItems: WALItem[], error?: any) => any;
+    /**
+     * Order by which the items will be synced. Defaults to [synced_field, ...id_fields.sort()]
+     */
     orderBy?: BasicOrderBy;
+    /**
+     * Defaults to 2 seconds
+     */
     historyAgeSeconds?: number;
     DEBUG_MODE?: boolean;
     id?: string;
@@ -41,15 +59,34 @@ export type WALItem = {
     current: AnyObject;
 };
 export type WALItemsObj = Record<string, WALItem>;
+/**
+ * Used to throttle and combine updates sent to server
+ * This allows a high rate of optimistic updates on the client
+ */
 export declare class WAL {
+    /**
+     * Instantly merged records for prepared for update
+     */
     private changed;
+    /**
+     * Batch of records (removed from this.changed) that are currently being sent
+     */
     private sending;
+    /**
+     * Historic data used to reduce data pushes from server to client
+     */
     private sentHistory;
     private options;
     private callbacks;
     constructor(args: WALConfig);
     sort: (a?: AnyObject, b?: AnyObject) => number;
     isSending(): boolean;
+    /**
+     * Used by server to avoid unnecessary data push to client.
+     * This can happen due to the same data item having been previously pushed by the client
+     * @param item data item
+     * @returns boolean
+     */
     isInHistory: (item: AnyObject) => boolean;
     getIdStr(d: AnyObject): string;
     getIdObj(d: AnyObject): AnyObject;
@@ -77,6 +114,10 @@ export type ExactlyOne<T> = AtMostOne<T> & AtLeastOne<T>;
 type UnionKeys<T> = T extends T ? keyof T : never;
 type StrictUnionHelper<T, TAll> = T extends any ? T & Partial<Record<Exclude<UnionKeys<TAll>, keyof T>, never>> : never;
 export type StrictUnion<T> = StrictUnionHelper<T, T>;
+/**
+ * @deprecated
+ * use tryCatchV2 instead
+ */
 export declare const tryCatch: <T extends AnyObject>(func: () => T | Promise<T>) => Promise<(T & {
     hasError?: false | undefined;
     error?: undefined;
@@ -108,6 +149,12 @@ export type ParsedJoinPath = Required<JoinPath>;
 export declare const reverseJoinOn: (on: ParsedJoinPath["on"]) => {
     [k: string]: string;
 }[];
+/**
+ * result = [
+ *  { table, on: parsedPath[0] }
+ *  ...parsedPath.map(p => ({ table: p.table, on: reversedOn(parsedPath[i+1].on) }))
+ * ]
+ */
 export declare const reverseParsedPath: (parsedPath: ParsedJoinPath[], table: string) => {
     table: string;
     on: {

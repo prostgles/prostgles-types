@@ -625,7 +625,7 @@ export type ViewHandler<TD extends AnyObject = AnyObject, S extends DBSchema | v
   getColumns?: GetColumns;
 
   /**
-   * Retrieves a list of records from the view/table
+   * Retrieves a list of matching records from the view/table
    */
   find: <P extends SelectParams<TD, S>>(filter?: FullFilter<TD, S>, selectParams?: P) => Promise<GetSelectReturnType<S, P, TD, true>>;
 
@@ -635,7 +635,7 @@ export type ViewHandler<TD extends AnyObject = AnyObject, S extends DBSchema | v
   findOne: <P extends SelectParams<TD, S>>(filter?: FullFilter<TD, S>, selectParams?: P) => Promise<undefined | GetSelectReturnType<S, P, TD, false>>;
 
   /**
-   * Subscribes to changes in the view/table that match the filter
+   * Retrieves a list of matching records from the view/table and subscribes to changes
    */
   subscribe: <P extends SubscribeParams<TD, S>>(
     filter: FullFilter<TD, S>, 
@@ -644,6 +644,9 @@ export type ViewHandler<TD extends AnyObject = AnyObject, S extends DBSchema | v
     onError?: OnError
   ) => Promise<SubscriptionHandler>;
 
+  /**
+   * Retrieves first matching record from the view/table and subscribes to changes
+   */
   subscribeOne: <P extends SubscribeParams<TD, S>>(
     filter: FullFilter<TD, S>, 
     params: P, 

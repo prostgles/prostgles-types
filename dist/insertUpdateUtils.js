@@ -15,8 +15,10 @@ const mixed = {
     col2: { func: [] },
 };
 const badKey = {
+    //@ts-expect-error
     badkey: { func: [] },
 };
+//@ts-expect-error
 const wrong = {
     col2: { func: [] },
 };

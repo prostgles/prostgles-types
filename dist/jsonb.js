@@ -8,9 +8,11 @@ exports.DATA_TYPES = [
     ...exports.PrimitiveTypes,
     ...exports.PrimitiveArrayTypes
 ];
+/** tests */
 const t = [
     { a: 2 }
 ];
+/** StrictUnion was removed because it doesn't work with object | string */
 const _oneOf = {
     a: "a"
 };
@@ -37,7 +39,7 @@ const s = {
             ]
         }
     }
-};
+}; // satisfies JSONB.JSONBSchema;
 const _ss = {
     a: true,
     arr: [{ d: "" }],
@@ -58,6 +60,7 @@ const getJSONSchemaObject = (rawType, rootInfo) => {
         partialProps.type = typeof t.enum[0];
     }
     if (typeof type === "string" || arrayOf || arrayOfType) {
+        /** ARRAY */
         if (type && typeof type !== "string") {
             throw "Not expected";
         }
@@ -72,12 +75,14 @@ const getJSONSchemaObject = (rawType, rootInfo) => {
                 type: "array",
                 items: arrayItems,
             };
+            /** PRIMITIVES */
         }
         else {
             result = {
                 type: type,
             };
         }
+        /** OBJECT */
     }
     else if ((0, util_1.isObject)(type)) {
         result = {

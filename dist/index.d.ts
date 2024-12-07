@@ -25,12 +25,33 @@ export declare const TS_PG_Types: {
     readonly any: readonly ["json", "jsonb", "interval"];
 };
 export type TS_COLUMN_DATA_TYPES = keyof typeof TS_PG_Types;
+/**
+ * Generated Typescript schema for the tables and views in the database
+ * Example:
+ *
+ *
+ * type DBSchema = {
+ *    ..view_name: {
+ *      is_view: boolean;
+ *      select: boolean;
+ *      insert: boolean;
+ *      update: boolean;
+ *      delete: boolean;
+ *      insertColumns: { col1?: number | null; col2: string; }
+ *      columns: { col1: number | null; col2: string; }
+ *    }
+ * }
+ */
 export type DBTableSchema = {
     is_view?: boolean;
     select?: boolean;
     insert?: boolean;
     update?: boolean;
     delete?: boolean;
+    /**
+     * Used in update, insertm select and filters
+     * fields that are nullable or with a default value are be optional
+     */
     columns: AnyObject;
 };
 export type DBSchema = {
@@ -38,37 +59,108 @@ export type DBSchema = {
 };
 export type ColumnInfo = {
     name: string;
+    /**
+     * Column display name. Will be first non empty value from i18n data, comment, name
+     */
     label: string;
+    /**
+     * Column description (if provided)
+     */
     comment: string;
+    /**
+     * Ordinal position of the column within the table (count starts at 1)
+     */
     ordinal_position: number;
+    /**
+     * True if column is nullable. A not-null constraint is one way a column can be known not nullable, but there may be others.
+     */
     is_nullable: boolean;
     is_updatable: boolean;
+    /**
+     * If the column is a generated column (converted to boolean from ALWAYS and NEVER)
+     */
     is_generated: boolean;
+    /**
+     * Simplified data type
+     */
     data_type: string;
+    /**
+     * Postgres raw data types. values starting with underscore means it's an array of that data type
+     */
     udt_name: PG_COLUMN_UDT_DATA_TYPE;
+    /**
+     * Element data type
+     */
     element_type: string;
+    /**
+     * Element raw data type
+     */
     element_udt_name: string;
+    /**
+     * PRIMARY KEY constraint on column. A table can have more then one PK
+     */
     is_pkey: boolean;
+    /**
+     * Foreign key constraint
+     * A column can reference multiple tables
+     */
     references?: {
         ftable: string;
         fcols: string[];
         cols: string[];
     }[];
+    /**
+     * true if column has a default value
+     * Used for excluding pkey from insert
+     */
     has_default: boolean;
+    /**
+     * Column default value
+     */
     column_default?: any;
+    /**
+     * Extracted from tableConfig
+     * Used in SmartForm
+     */
     min?: string | number;
     max?: string | number;
     hint?: string;
     jsonbSchema?: JSONB.JSONBSchema;
+    /**
+     * If degined then this column is referencing the file table
+     * Extracted from FileTable config
+     * Used in SmartForm
+     */
     file?: FileColumnConfig;
 };
 export type ValidatedColumnInfo = ColumnInfo & {
+    /**
+     * TypeScript data type
+     */
     tsDataType: TS_COLUMN_DATA_TYPES;
+    /**
+     * Can be viewed/selected
+     */
     select: boolean;
+    /**
+     * Can be ordered by
+     */
     orderBy: boolean;
+    /**
+     * Can be filtered by
+     */
     filter: boolean;
+    /**
+     * Can be inserted
+     */
     insert: boolean;
+    /**
+     * Can be updated
+     */
     update: boolean;
+    /**
+     * Can be used in the delete filter
+     */
     delete: boolean;
 };
 export type DBSchemaTable = {
@@ -76,8 +168,20 @@ export type DBSchemaTable = {
     info: TableInfo;
     columns: ValidatedColumnInfo[];
 };
+/**
+ * List of fields to include or exclude
+ */
 export type FieldFilter<T extends AnyObject = AnyObject> = SelectTyped<T>;
 export type AscOrDesc = 1 | -1 | boolean;
+/**
+ * @example
+ * { product_name: -1 } -> SORT BY product_name DESC
+ * [{ field_name: (1 | -1 | boolean) }]
+ * true | 1 -> ascending
+ * false | -1 -> descending
+ * Array order is maintained
+ * if nullEmpty is true then empty text will be replaced to null (so nulls sorting takes effect on it)
+ */
 export type _OrderBy<T extends AnyObject> = {
     [K in keyof Partial<T>]: AscOrDesc;
 } | {
@@ -105,6 +209,11 @@ export type JoinCondition = {
 } | ComplexFilter;
 export type JoinPath = {
     table: string;
+    /**
+     * {
+     *    leftColumn: "rightColumn"
+     * }
+     */
     on?: Record<string, string>[];
 };
 export type RawJoinPath = string | (JoinPath | string)[];
@@ -118,13 +227,21 @@ export type DetailedJoinSelect = Partial<Record<typeof JOIN_KEYS[number], RawJoi
 } & ({
     $condition?: undefined;
 } | {
+    /**
+     * If present then will overwrite $path and any inferred joins
+     */
     $condition?: JoinCondition[];
 });
-export type SimpleJoinSelect = "*" | Record<string, 1 | "*" | true | FunctionSelect> | Record<string, 0 | false>;
+export type SimpleJoinSelect = "*"
+/** Aliased Shorthand join: table_name: { ...select } */
+ | Record<string, 1 | "*" | true | FunctionSelect> | Record<string, 0 | false>;
 export type JoinSelect = SimpleJoinSelect | DetailedJoinSelect;
 type FunctionShorthand = string;
 type FunctionFull = Record<string, any[] | readonly any[] | FunctionShorthand>;
 type FunctionSelect = FunctionShorthand | FunctionFull;
+/**
+ * { computed_field: { funcName: [args] } }
+ */
 type FunctionAliasedSelect = Record<string, FunctionFull>;
 type InclusiveSelect = true | 1 | FunctionSelect | JoinSelect;
 type SelectFuncs<T extends AnyObject = AnyObject, IsTyped = false> = (({
@@ -134,6 +251,7 @@ type SelectFuncs<T extends AnyObject = AnyObject, IsTyped = false> = (({
 } | {
     [K in keyof Partial<T>]: 0 | false;
 } | CommonSelect | (keyof Partial<T>)[]);
+/** S param is needed to ensure the non typed select works fine */
 export type Select<T extends AnyObject | void = void, S extends DBSchema | void = void> = {
     t: T;
     s: S;
@@ -149,30 +267,116 @@ export type SelectBasic = {
     [key: string]: any;
 } | {} | undefined | "" | "*";
 type CommonSelectParams = {
+    /**
+     * Max number of rows to return
+     * - If undefined then 1000 will be applied as the default
+     * - On client publish rules can affect this behaviour: cannot request more than the maxLimit (if present)
+     */
     limit?: number | null;
+    /**
+     * Number of rows to skip
+     */
     offset?: number;
+    /**
+     * Will group by all non aggregated fields specified in select (or all fields by default)
+     */
     groupBy?: boolean;
-    returnType?: "row" | "value" | "values" | "statement" | "statement-no-rls" | "statement-where";
+    /**
+     * Result data structure/type:
+     * - row: the first row as an object
+     * - value: the first value from of first field
+     * - values: array of values from the selected field
+     * - statement: sql statement
+     * - statement-no-rls: sql statement without row level security
+     * - statement-where: sql statement where condition
+     */
+    returnType?: 
+    /**
+     * Will return the first row as an object. Will throw an error if more than a row is returned. Use limit: 1 to avoid error.
+     */
+    "row"
+    /**
+      * Will return the first value from the selected field
+      */
+     | "value"
+    /**
+      * Will return an array of values from the selected field. Similar to array_agg(field).
+      */
+     | "values"
+    /**
+      * Will return the sql statement. Requires publishRawSQL privileges if called by client
+      */
+     | "statement"
+    /**
+      * Will return the sql statement excluding the user header. Requires publishRawSQL privileges if called by client
+      */
+     | "statement-no-rls"
+    /**
+      * Will return the sql statement where condition. Requires publishRawSQL privileges if called by client
+      */
+     | "statement-where";
 };
 export type SelectParams<T extends AnyObject | void = void, S extends DBSchema | void = void> = CommonSelectParams & {
+    /**
+     * Fields/expressions/linked data to select
+     * - If empty then all fields will be selected
+     * - If "*" then all fields will be selected
+     * - If { field: 0 } then all fields except the specified field will be selected
+     * - If { field: 1 } then only the specified field will be selected
+     * - If { field: { funcName: [args] } } then the field will be selected with the specified function applied
+     * - If { field: { nestedTable: { field: 1 } } } then the field will be selected with the nested table fields
+     */
     select?: Select<T, S>;
+    /**
+     * Order by options
+     * - If array then the order will be maintained
+     */
     orderBy?: OrderBy<S extends DBSchema ? T : void>;
+    /**
+     * Filter applied after any aggregations (group by)
+     */
     having?: FullFilter<T, S>;
 };
 export type SubscribeParams<T extends AnyObject | void = void, S extends DBSchema | void = void> = SelectParams<T, S> & {
+    /**
+     * If true then the subscription will be throttled to the provided number of milliseconds
+     */
     throttle?: number;
     throttleOpts?: {
+        /**
+         * False by default.
+         * If true then the first value will be emitted at the end of the interval. Instant otherwise
+         * */
         skipFirst?: boolean;
     };
 };
 export type UpdateParams<T extends AnyObject | void = void, S extends DBSchema | void = void> = {
+    /**
+     * If defined will returns the specified fields of the updated record(s)
+     */
     returning?: Select<T, S>;
+    /**
+     * Used for sync.
+     * If true then only valid and allowed fields will be updated
+     */
     removeDisallowedFields?: boolean;
     multi?: boolean;
 } & Pick<CommonSelectParams, "returnType">;
 export type InsertParams<T extends AnyObject | void = void, S extends DBSchema | void = void> = {
+    /**
+     * If defined will returns the specified fields of the updated record(s)
+     */
     returning?: Select<T, S>;
+    /**
+     * By default the insert may fail due to a unique/exclusion constraint violation error. To control this:
+     * - DoNothing: will ignore the error and do nothing
+     * - DoUpdate: will update all non primary key columns of the conflicting row
+     */
     onConflict?: "DoNothing" | "DoUpdate";
+    /**
+     * Used for sync.
+     * If true then only valid and allowed fields will be inserted
+     */
     removeDisallowedFields?: boolean;
 } & Pick<CommonSelectParams, "returnType">;
 export type DeleteParams<T extends AnyObject | void = void, S extends DBSchema | void = void> = {
@@ -180,23 +384,54 @@ export type DeleteParams<T extends AnyObject | void = void, S extends DBSchema |
 } & Pick<CommonSelectParams, "returnType">;
 export type PartialLax<T = AnyObject> = Partial<T>;
 export type TableInfo = {
+    /**
+     * OID from the postgres database
+     * Useful in handling renamed tables
+     */
     oid: number;
+    /**
+     * Comment from the postgres database
+     */
     comment?: string;
+    /**
+     * Defined if this is the fileTable
+     */
     isFileTable?: {
+        /**
+         * Defined if direct inserts are disabled.
+         * Only nested inserts through the specified tables/columns are allowed
+         * */
         allowedNestedInserts?: {
             table: string;
             column: string;
         }[] | undefined;
     };
+    /**
+     * True if fileTable is enabled and this table references the fileTable
+     */
     hasFiles?: boolean;
     isView?: boolean;
+    /**
+     * Name of the fileTable (if enabled)
+     */
     fileTableName?: string;
+    /**
+     * Used for getColumns in cases where the columns are dynamic based on the request.
+     * See dynamicFields from Update rules
+     */
     dynamicRules?: {
         update?: boolean;
     };
+    /**
+     * Additional table info provided through TableConfig
+     */
     info?: {
         label?: string;
     };
+    /**
+     * List of unique column indexes/constraints.
+     * Column groups where at least a column is not allowed to be viewed (selected) are omitted.
+     */
     uniqueColumnGroups: string[][] | undefined;
 };
 export type OnError = (err: any) => void;
@@ -249,22 +484,66 @@ type GetColumns = (lang?: string, params?: {
     filter: AnyObject;
 }) => Promise<ValidatedColumnInfo[]>;
 export type ViewHandler<TD extends AnyObject = AnyObject, S extends DBSchema | void = void> = {
+    /**
+     * Retrieves the table/view info
+     */
     getInfo?: (lang?: string) => Promise<TableInfo>;
+    /**
+     * Retrieves columns metadata of the table/view
+     */
     getColumns?: GetColumns;
+    /**
+     * Retrieves a list of matching records from the view/table
+     */
     find: <P extends SelectParams<TD, S>>(filter?: FullFilter<TD, S>, selectParams?: P) => Promise<GetSelectReturnType<S, P, TD, true>>;
+    /**
+     * Retrieves a record from the view/table
+     */
     findOne: <P extends SelectParams<TD, S>>(filter?: FullFilter<TD, S>, selectParams?: P) => Promise<undefined | GetSelectReturnType<S, P, TD, false>>;
+    /**
+     * Retrieves a list of matching records from the view/table and subscribes to changes
+     */
     subscribe: <P extends SubscribeParams<TD, S>>(filter: FullFilter<TD, S>, params: P, onData: (items: GetSelectReturnType<S, P, TD, true>) => any, onError?: OnError) => Promise<SubscriptionHandler>;
+    /**
+     * Retrieves first matching record from the view/table and subscribes to changes
+     */
     subscribeOne: <P extends SubscribeParams<TD, S>>(filter: FullFilter<TD, S>, params: P, onData: (item: GetSelectReturnType<S, P, TD, false> | undefined) => any, onError?: OnError) => Promise<SubscriptionHandler>;
+    /**
+     * Returns the number of rows that match the filter
+     */
     count: <P extends SelectParams<TD, S>>(filter?: FullFilter<TD, S>, selectParams?: P) => Promise<number>;
+    /**
+     * Returns result size in bits
+     */
     size: <P extends SelectParams<TD, S>>(filter?: FullFilter<TD, S>, selectParams?: P) => Promise<string>;
 };
 type UpsertDataToPGCastLax<T extends AnyObject> = PartialLax<UpsertDataToPGCast<T>>;
 type InsertData<T extends AnyObject> = UpsertDataToPGCast<T> | UpsertDataToPGCast<T>[];
 export type TableHandler<TD extends AnyObject = AnyObject, S extends DBSchema | void = void> = ViewHandler<TD, S> & {
+    /**
+     * Updates a record in the table based on the specified filter criteria
+     * - Use { multi: false } to ensure no more than one row is updated
+     */
     update: <P extends UpdateParams<TD, S>>(filter: FullFilter<TD, S>, newData: UpsertDataToPGCastLax<TD>, params?: P) => Promise<GetUpdateReturnType<P, TD, S> | undefined>;
+    /**
+     * Updates multiple records in the table in a batch operation.
+     * - Each item in the `data` array contains a filter and the corresponding data to update.
+     */
     updateBatch: <P extends UpdateParams<TD, S>>(data: [FullFilter<TD, S>, UpsertDataToPGCastLax<TD>][], params?: P) => Promise<GetUpdateReturnType<P, TD, S> | void>;
+    /**
+     * Inserts a new record into the table.
+     */
     insert: <P extends InsertParams<TD, S>, D extends InsertData<TD>>(data: D, params?: P) => Promise<GetInsertReturnType<D, P, TD, S>>;
+    /**
+     * Inserts or updates a record in the table.
+     * - If a record matching the `filter` exists, it updates the record.
+     * - If no matching record exists, it inserts a new record.
+     */
     upsert: <P extends UpdateParams<TD, S>>(filter: FullFilter<TD, S>, newData: UpsertDataToPGCastLax<TD>, params?: P) => Promise<GetUpdateReturnType<P, TD, S>>;
+    /**
+     * Deletes records from the table based on the specified filter criteria.
+     * - If no filter is provided, all records may be deleted (use with caution).
+     */
     delete: <P extends DeleteParams<TD, S>>(filter?: FullFilter<TD, S>, params?: P) => Promise<GetUpdateReturnType<P, TD, S> | undefined>;
 };
 export type JoinMakerOptions<TT extends AnyObject = AnyObject> = SelectParams<TT> & {
@@ -337,7 +616,14 @@ export type SocketSQLStreamClient = SocketSQLStreamServer & {
 };
 export type CheckForListen<T, O extends SQLOptions> = O["allowListen"] extends true ? (DBEventHandles | T) : T;
 export type GetSQLReturnType<O extends SQLOptions> = CheckForListen<(O["returnType"] extends "row" ? AnyObject | null : O["returnType"] extends "rows" ? AnyObject[] : O["returnType"] extends "value" ? any | null : O["returnType"] extends "values" ? any[] : O["returnType"] extends "statement" ? string : O["returnType"] extends "noticeSubscription" ? DBEventHandles : O["returnType"] extends "stream" ? SocketSQLStreamClient : SQLResult<O["returnType"]>), O>;
-export type SQLHandler = <Opts extends SQLOptions>(query: string, args?: AnyObject | any[], options?: Opts, serverSideOptions?: {
+export type SQLHandler = 
+/**
+ *
+ * @param query <string> query. e.g.: SELECT * FROM users;
+ * @param params <any[] | object> query arguments to be escaped. e.g.: { name: 'dwadaw' }
+ * @param options <object> { returnType: "statement" | "rows" | "noticeSubscription" }
+ */
+<Opts extends SQLOptions>(query: string, args?: AnyObject | any[], options?: Opts, serverSideOptions?: {
     socket: any;
 } | {
     httpReq: any;
@@ -363,11 +649,32 @@ export type DBNotifConfig = DBNoticeConfig & {
     notifChannel: string;
 };
 export type SQLOptions = {
+    /**
+     * Return type of the query
+     */
     returnType?: Required<SelectParams>["returnType"] | "default-with-rollback" | "statement" | "rows" | "noticeSubscription" | "arrayMode" | "stream";
+    /**
+     * If allowListen not specified and a LISTEN query is issued then expect error
+     */
     allowListen?: boolean;
+    /**
+     * Positive integer that works only with returnType="stream".
+     * If provided then the query will be cancelled when the specified number of rows have been streamed
+     */
     streamLimit?: number;
+    /**
+     * If true then the connection will be persisted and used for subsequent queries
+     */
     persistStreamConnection?: boolean;
+    /**
+     * connectionId of the stream connection to use
+     * Acquired from the first query with persistStreamConnection=true
+     */
     streamConnectionId?: string;
+    /**
+     * If false then the query will not be checked for params. Used to ignore queries with param like text (e.g.:  ${someText} )
+     * Defaults to true
+     */
     hasParams?: boolean;
 };
 export type SQLRequest = {
@@ -397,12 +704,18 @@ export declare const CHANNELS: {
     LOGIN: string;
     LOGOUT: string;
     AUTHGUARD: string;
+    /**
+     * Used for sending any connection errors from onSocketConnect
+     */
     CONNECTION: string;
     _preffix: string;
 };
 export type SubscriptionChannels = {
+    /** Used by server to emit data to client */
     channelName: string;
+    /** Used by client to confirm when ready */
     channelNameReady: string;
+    /** Used by client to stop subscription */
     channelNameUnsubscribe: string;
 };
 export type AuthGuardLocation = {

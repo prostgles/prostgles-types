@@ -7,7 +7,13 @@ export declare const DATA_TYPES: readonly ["boolean", "number", "integer", "stri
 type DataType = typeof DATA_TYPES[number];
 export declare namespace JSONB {
     export type BaseOptions = {
+        /**
+         * False by default
+         */
         optional?: boolean;
+        /**
+         * False by default
+         */
         nullable?: boolean;
         description?: string;
         title?: string;
@@ -15,16 +21,33 @@ export declare namespace JSONB {
     export type Lookup = BaseOptions & {
         type?: "Lookup" | "Lookup[]";
         lookup: ({
-            type: "data" | "data-def";
+            type: "data"
+            /**
+             * This is used as edit-mode (to generate lookup of type data)
+             */
+             | "data-def";
             table: string;
             column: string;
             filter?: AnyObject;
             isArray?: boolean;
             isFullRow?: {
+                /**
+                 * Columns used to display the selected row in the dropdown
+                 */
                 displayColumns?: string[];
             };
+            /**
+             * Columns used to search
+             */
             searchColumns?: string[];
+            /**
+             * If true then a button will be shown
+             *  in the row card footer to access this action
+             */
             showInRowCard?: {
+                /**
+                 * Action button text. Defaults to the method name
+                 */
                 actionLabel?: string;
                 actionColor?: "danger" | "warn" | "action";
                 actionStyle?: AnyObject;

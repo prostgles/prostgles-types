@@ -97,6 +97,7 @@ const _f = {
     "h.$eq": ["2"]
 };
 const forcedFilter = {
+    // "h.$eq": ["2"]
     $and: [
         { "h.$eq": [] },
         { h: { "$containedBy": [] } }

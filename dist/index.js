@@ -44,7 +44,11 @@ const TS_PG_PRIMITIVES = {
     "string": [...exports._PG_strings, ...exports._PG_numbers_str, ...exports._PG_date, ...exports._PG_geometric, ...exports._PG_postgis, "lseg"],
     "number": exports._PG_numbers_num,
     "boolean": exports._PG_bool,
-    "any": [...exports._PG_json, ...exports._PG_interval],
+    "any": [...exports._PG_json, ...exports._PG_interval], // consider as any
+    /** Timestamps are kept in original string format to avoid filters failing
+     * TODO: cast to dates if udt_name date/timestamp(0 - 3)
+    */
+    // "Date": _PG_date,
 };
 exports.TS_PG_Types = {
     ...TS_PG_PRIMITIVES,
@@ -52,6 +56,8 @@ exports.TS_PG_Types = {
     "boolean[]": TS_PG_PRIMITIVES.boolean.map(s => `_${s}`),
     "string[]": TS_PG_PRIMITIVES.string.map(s => `_${s}`),
     "any[]": TS_PG_PRIMITIVES.any.map(s => `_${s}`),
+    // "Date[]": _PG_date.map(s => `_${s}` as const),
+    // "any": [],
 };
 exports.JOIN_KEYS = ["$innerJoin", "$leftJoin"];
 exports.JOIN_PARAMS = ["select", "filter", "$path", "$condition", "offset", "limit", "orderBy"];
@@ -65,10 +71,14 @@ exports.CHANNELS = {
     METHOD: `${preffix}method`,
     NOTICE_EV: `${preffix}notice`,
     LISTEN_EV: `${preffix}listen`,
+    /* Auth channels */
     REGISTER: `${preffix}register`,
     LOGIN: `${preffix}login`,
     LOGOUT: `${preffix}logout`,
     AUTHGUARD: `${preffix}authguard`,
+    /**
+     * Used for sending any connection errors from onSocketConnect
+     */
     CONNECTION: `${preffix}connection`,
     _preffix: preffix,
 };
@@ -82,6 +92,9 @@ exports.RULE_METHODS = {
     "sync": ["sync", "unsync"],
     "subscribe": ["unsubscribe", "subscribe", "subscribeOne"],
 };
+/**
+ * Type tests
+ */
 (() => {
     const r = 1;
     const sel1 = { id: 1, name: 1, public: 1, $rowhash: 1, added_day: { $day: [] } };
@@ -114,17 +127,22 @@ exports.RULE_METHODS = {
         added: "$date_trunc_2hour",
         addedY: { "$date_trunc_5minute": ["added"] },
     };
+    //@ts-expect-error
     const badSel = {
         a: 1,
         b: 0
     };
+    //@ts-expect-error
     const badSel1 = {
         b: 1,
         a: 1
     };
     const sds3 = {
+        // "*": 1,
+        // a: "$funcName",
         a: { dwda: [] },
         $rowhashD: { dwda: [] },
+        // dwadwa: 1, //{ dwa: []}
     };
     const sel1d = {
         dwada: 1,
@@ -136,6 +154,7 @@ exports.RULE_METHODS = {
         returning: { id: 1, name: 1, public: 1, $rowhash: 1, added_day: { "$day": ["added"] } }
     };
 });
+/** More Type tests */
 (async () => {
     const tableHandler = undefined;
     tableHandler.insert({ h: 1, c: 2, "b.$func": { dwa: [] } });
@@ -146,25 +165,34 @@ exports.RULE_METHODS = {
     const dbo = 1;
     const funcData = { funcName: [] };
     const noRow = await dbo.tbl1.update({}, { col1: "" });
+    //@ts-expect-error 
     noRow.length;
+    //@ts-expect-error
     noRow.col1;
     const someData = await dbo.tbl1.find({}, { select: { col1: 1 }, orderBy: { col1: -1 } });
     const noRowFunc = await dbo.tbl1.update({}, { col1: "" });
     const oneRow = await dbo.tbl1.update({}, { col1: "" }, { returning: "*", multi: false });
+    //@ts-expect-error
     oneRow?.length;
+    //@ts-expect-error
     oneRow.col1;
     oneRow?.col1;
     const manyRows = await dbo.tbl1.update({}, { col1: "" }, { returning: "*" });
+    //@ts-expect-error
     manyRows?.col1;
     manyRows?.at(0)?.col1;
     const noIRow = await dbo.tbl1.insert({ col1: "", col2: { $func: [] } });
+    //@ts-expect-error 
     noIRow.length;
+    //@ts-expect-error
     noIRow.col1;
     const irow = await dbo.tbl1.insert({ col1: "", col2: funcData }, { returning: "*" });
+    //@ts-expect-error 
     irow.length;
     irow.col1;
     const irowFunc = await dbo.tbl1.insert({ col1: funcData, col2: "" }, { returning: "*" });
     const irows = await dbo.tbl1.insert([{ col1: "", col2: "" }], { returning: "*" });
+    //@ts-expect-error 
     irows.col1;
     irows.length;
     const filter = {};
@@ -174,12 +202,18 @@ exports.RULE_METHODS = {
     const d = t;
     const fup = (a) => { };
     fup(t);
+    // const f = <A extends TableHandler["count"]>(a: A) => {};
     const f = (s) => { };
     const th = {};
+    // f(th) 
     const sp = { select: {} };
     const sf = (sp) => {
     };
     sf(sp);
+    // const sub: TableHandler["count"] = dbo.tbl1.count
+    /**
+     * Upsert data funcs
+     */
     const gdw = {
         a: { dwa: [] },
         z: { dwa: [] }
@@ -191,9 +225,15 @@ exports.RULE_METHODS = {
     const gdw1 = { a: 1, z: 2 };
     const gdw1Opt = { a: {}, z: 2 };
     const gdw2 = { a: { dwa: [] }, z: { dwa: [] } };
+    //@ts-expect-error
     const missingKey = { z: 1, z: { dwa: [] } };
+    //@ts-expect-error
     const missingKey2 = { z: 1 };
+    // ra(schema);
 });
+// import { md5 } from "./md5";
+// export { get, getTextPatch, unpatchText, isEmpty, WAL, WALConfig, asName } from "./util";
+// export type { WALItem, BasicOrderBy, WALItemsObj, WALConfig, TextPatch, SyncTableInfo } from "./util";
 var files_1 = require("./files");
 Object.defineProperty(exports, "CONTENT_TYPE_TO_EXT", { enumerable: true, get: function () { return files_1.CONTENT_TYPE_TO_EXT; } });
 __exportStar(require("./filters"), exports);

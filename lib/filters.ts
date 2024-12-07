@@ -176,27 +176,10 @@ export type CastFromTSToPG<T extends AllowedTSType> =
 : T extends Date ? (T | string)
 : T
 
-export type FilterDataType<T extends AllowedTSType> = 
-  T extends string ? TextFilter
-: T extends number ? CompareFilter<CastFromTSToPG<T>>
-: T extends boolean ? CompareFilter<CastFromTSToPG<T>>
-: T extends Date ? CompareFilter<CastFromTSToPG<T>>
-: T extends any[] ? ArrayFilter<T>
-: (CompareFilter<T> | TextFilter | GeomFilter)
-;
 
 export const EXISTS_KEYS = ["$exists", "$notExists", "$existsJoined", "$notExistsJoined"] as const;
 export type EXISTS_KEY = typeof EXISTS_KEYS[number];
 
-/**
- * { 
- *    $filter: [
- *      { $funcName: [...args] },
- *      operand,
- *      value | funcFilter
- *    ] 
- * }
- */
 
 
 export const ComplexFilterComparisonKeys = [
@@ -208,6 +191,18 @@ export const ComplexFilterComparisonKeys = [
 ] as const;
 
 export const COMPLEX_FILTER_KEY = "$filter" as const;
+
+/**
+ * Complex filter that allows applying functions to columns
+ * @example: 
+ *  { 
+ *    $filter: [
+ *      { $funcName: [...args] },
+ *      operand,
+ *      value | funcFilter
+ *    ] 
+ *  }
+ */
 export type ComplexFilter = Record<typeof COMPLEX_FILTER_KEY, [
   { [funcName: string]: any[] },
   typeof ComplexFilterComparisonKeys[number]?,
@@ -231,27 +226,47 @@ type StringFilter<Field extends string, DataType extends any> = BasicFilter<Fiel
 }>);
 export type ValueOf<T> = T[keyof T];
 
-type ShorthandFilter<Obj extends Record<string, any>> = ValueOf<{
-  [K in KeyofString<Obj>]: Obj[K] extends string? StringFilter<K, Required<Obj>[K]> : BasicFilter<K, Required<Obj>[K]>;
-}>
-
-
+/**
+ * Equality filter used for sync
+ * Multiple columns are combined with AND
+ */
 export type EqualityFilter<T extends AnyObject> = {
   [K in keyof Partial<T>]: CastFromTSToPG<T[K]>;
 };
 
+/**
+ * Filter operators for each PG data type
+ */
+export type FilterDataType<T extends AllowedTSType> = 
+  T extends string ? TextFilter
+: T extends number ? CompareFilter<CastFromTSToPG<T>>
+: T extends boolean ? CompareFilter<CastFromTSToPG<T>>
+: T extends Date ? CompareFilter<CastFromTSToPG<T>>
+: T extends any[] ? ArrayFilter<T>
+: (CompareFilter<T> | TextFilter | GeomFilter)
+;
+
+/**
+ * Column filter with operators
+ * Multiple columns are combined with AND
+ * @example: { colName: { $operator: ["value"] } } 
+ * */
+type NormalFilter<T> = {
+  [K in keyof Partial<T>]: FilterDataType<T[K]>
+} & Partial<ComplexFilter>;
+
+/**
+ * Filters with shorthand notation for autocomplete convenience
+ * Operator is inside the key: ` "{columnName}.{operator}": value`
+ * @example: { "name.$ilike": 'abc' }
+ */
+type ShorthandFilter<Obj extends Record<string, any>> = ValueOf<{
+  [K in KeyofString<Obj>]: Obj[K] extends string? StringFilter<K, Required<Obj>[K]> : BasicFilter<K, Required<Obj>[K]>;
+}>
+
 /* Traverses object keys to make filter */
 export type FilterForObject<T extends AnyObject = AnyObject> = 
-  /**
-   *  { col: { $func: ["value"] } } 
-   * */
-  | {
-    [K in keyof Partial<T>]: FilterDataType<T[K]>
-  } & Partial<ComplexFilter>
-  /**
-   * Filters with shorthand notation
-   * @example: { "name.$ilike": 'abc' }
-   */
+  | NormalFilter<T>
   | ShorthandFilter<T>
 ;
 
@@ -273,16 +288,15 @@ export type ExistsFilter<S = void> = Partial<{
 
  
 /**
- * Filter that relates to a single column { col: 2 } or
- * an exists filter: { $exists: {  } }
+ * Filter that relates to a single column
  */
 export type FilterItem<T extends AnyObject = AnyObject> = 
   | FilterForObject<T> 
 
-
 export type AnyObjIfVoid<T extends AnyObject | void> = T extends AnyObject? T : AnyObject;
+
 /**
- * Full filter
+ * Group or simple filter
  * @example { $or: [ { id: 1 }, { status: 'live' } ] }
  */
 export type FullFilter<T extends AnyObject | void, S extends DBSchema | void> = 
@@ -291,9 +305,6 @@ export type FullFilter<T extends AnyObject | void, S extends DBSchema | void> =
  | FilterItem<AnyObjIfVoid<T>> 
  | ExistsFilter<S>
  | ComplexFilter
-
- /** Not implemented yet */
-//  | { $not: FilterItem<T>  }
 ;
 
 /**
@@ -305,8 +316,6 @@ export type FullFilterBasic<T = { [key: string]: any }> = {
 
 
 /** Type checks */
-
-
 type RR = {
   h?: string[];
   id?: number;

@@ -347,7 +347,6 @@ type SelectFuncs<T extends AnyObject = AnyObject, IsTyped = false> = (
 
 /** S param is needed to ensure the non typed select works fine */
 export type Select<T extends AnyObject | void = void, S extends DBSchema | void = void> = { t: T, s: S } extends { t: AnyObject, s: DBSchema } ? SelectFuncs<T & { $rowhash: string }, true> : SelectFuncs<AnyObject & { $rowhash: string }, false>;
- 
 
 export type SelectBasic = 
   | { [key: string]: any } 
@@ -361,10 +360,14 @@ export type SelectBasic =
 type CommonSelectParams = {
 
   /**
-   * If null then maxLimit if present will be applied
-   * If undefined then 1000 will be applied as the default
+   * Max number of rows to return
+   * - If undefined then 1000 will be applied as the default
+   * - On client publish rules can affect this behaviour: cannot request more than the maxLimit (if present)
    */
   limit?: number | null;
+  /**
+   * Number of rows to skip
+   */
   offset?: number;
 
   /**
@@ -372,6 +375,15 @@ type CommonSelectParams = {
    */
   groupBy?: boolean;
 
+  /**
+   * Result data structure/type:
+   * - row: the first row as an object
+   * - value: the first value from of first field
+   * - values: array of values from the selected field
+   * - statement: sql statement
+   * - statement-no-rls: sql statement without row level security
+   * - statement-where: sql statement where condition
+   */
   returnType?: 
 
   /**
@@ -407,11 +419,33 @@ type CommonSelectParams = {
 } 
 
 export type SelectParams<T extends AnyObject | void = void, S extends DBSchema | void = void> = CommonSelectParams & {
+
+  /**
+   * Fields/expressions/linked data to select
+   * - If empty then all fields will be selected
+   * - If "*" then all fields will be selected
+   * - If { field: 0 } then all fields except the specified field will be selected
+   * - If { field: 1 } then only the specified field will be selected
+   * - If { field: { funcName: [args] } } then the field will be selected with the specified function applied
+   * - If { field: { nestedTable: { field: 1 } } } then the field will be selected with the nested table fields
+   */
   select?: Select<T, S>;
+
+  /**
+   * Order by options
+   * - If array then the order will be maintained
+   */
   orderBy?: OrderBy<S extends DBSchema? T : void>;
+
+  /**
+   * Filter applied after any aggregations (group by)
+   */
   having?: FullFilter<T, S>;
 }
 export type SubscribeParams<T extends AnyObject | void = void, S extends DBSchema | void = void> = SelectParams<T, S> & {
+  /**
+   * If true then the subscription will be throttled to the provided number of milliseconds
+   */
   throttle?: number;
   throttleOpts?: {
     /** 
@@ -423,35 +457,62 @@ export type SubscribeParams<T extends AnyObject | void = void, S extends DBSchem
 };
 
 export type UpdateParams<T extends AnyObject | void = void, S extends DBSchema | void = void> = {
+
+  /**
+   * If defined will returns the specified fields of the updated record(s)
+   */
   returning?: Select<T, S>;
-  onConflict?: "DoNothing" | "DoUpdate";
-  fixIssues?: boolean;
+  /**
+   * Used for sync.
+   * If true then only valid and allowed fields will be updated
+   */
+  removeDisallowedFields?: boolean;
 
   /* true by default. If false the update will fail if affecting more than one row */
   multi?: boolean;
+
 } & Pick<CommonSelectParams, "returnType">;
 
 export type InsertParams<T extends AnyObject | void = void, S extends DBSchema | void = void> = {
+
+  /**
+   * If defined will returns the specified fields of the updated record(s)
+   */
   returning?: Select<T, S>;
+
+  /**
+   * By default the insert may fail due to a unique/exclusion constraint violation error. To control this:
+   * - DoNothing: will ignore the error and do nothing
+   * - DoUpdate: will update all non primary key columns of the conflicting row
+   */
   onConflict?: "DoNothing" | "DoUpdate";
-  fixIssues?: boolean;
+
+  /**
+   * Used for sync.
+   * If true then only valid and allowed fields will be inserted
+   */
+  removeDisallowedFields?: boolean;
 } & Pick<CommonSelectParams, "returnType">;
 
 export type DeleteParams<T extends AnyObject | void = void, S extends DBSchema | void = void> = {
   returning?: Select<T, S>;
 } & Pick<CommonSelectParams, "returnType">;
 
-export type PartialLax<T = AnyObject> = Partial<T>;// & AnyObject;
+export type PartialLax<T = AnyObject> = Partial<T>;
 
 export type TableInfo = {
+
   /**
    * OID from the postgres database
+   * Useful in handling renamed tables
    */
   oid: number;
+
   /**
    * Comment from the postgres database
    */
   comment?: string;
+
   /**
    * Defined if this is the fileTable
    */
@@ -493,6 +554,10 @@ export type TableInfo = {
     label?: string;
   }
 
+  /**
+   * List of unique column indexes/constraints.
+   * Column groups where at least a column is not allowed to be viewed (selected) are omitted.
+   */
   uniqueColumnGroups: string[][] | undefined;
 }
 
@@ -549,23 +614,48 @@ export type SubscriptionHandler = {
 type GetColumns = (lang?: string, params?: { rule: "update", data: AnyObject, filter: AnyObject }) => Promise<ValidatedColumnInfo[]>;
 
 export type ViewHandler<TD extends AnyObject = AnyObject, S extends DBSchema | void = void> = {
+  /**
+   * Retrieves the table/view info
+   */
   getInfo?: (lang?: string) => Promise<TableInfo>;
-  getColumns?: GetColumns
+
+  /**
+   * Retrieves columns metadata of the table/view
+   */
+  getColumns?: GetColumns;
+
+  /**
+   * Retrieves a list of records from the view/table
+   */
   find: <P extends SelectParams<TD, S>>(filter?: FullFilter<TD, S>, selectParams?: P) => Promise<GetSelectReturnType<S, P, TD, true>>;
+
+  /**
+   * Retrieves a record from the view/table
+   */
   findOne: <P extends SelectParams<TD, S>>(filter?: FullFilter<TD, S>, selectParams?: P) => Promise<undefined | GetSelectReturnType<S, P, TD, false>>;
+
+  /**
+   * Subscribes to changes in the view/table that match the filter
+   */
   subscribe: <P extends SubscribeParams<TD, S>>(
     filter: FullFilter<TD, S>, 
     params: P, 
     onData: (items: GetSelectReturnType<S, P, TD, true>) => any,
     onError?: OnError
   ) => Promise<SubscriptionHandler>;
+
   subscribeOne: <P extends SubscribeParams<TD, S>>(
     filter: FullFilter<TD, S>, 
     params: P, 
     onData: (item: GetSelectReturnType<S, P, TD, false> | undefined) => any, 
     onError?: OnError
   ) => Promise<SubscriptionHandler>;
+
+  /**
+   * Returns the number of rows that match the filter
+   */
   count: <P extends SelectParams<TD, S>>(filter?: FullFilter<TD, S>, selectParams?: P) => Promise<number>;
+
   /**
    * Returns result size in bits
    */
@@ -577,12 +667,37 @@ type UpsertDataToPGCastLax<T extends AnyObject> = PartialLax<UpsertDataToPGCast<
 type InsertData<T extends AnyObject> = UpsertDataToPGCast<T> | UpsertDataToPGCast<T>[]
 
 export type TableHandler<TD extends AnyObject = AnyObject, S extends DBSchema | void = void> = ViewHandler<TD, S> & {
+
+  /**
+   * Updates a record in the table based on the specified filter criteria
+   * - Use { multi: false } to ensure no more than one row is updated
+   */
   update: <P extends UpdateParams<TD, S>>(filter: FullFilter<TD, S>, newData: UpsertDataToPGCastLax<TD>, params?: P) => Promise<GetUpdateReturnType<P ,TD, S> | undefined>;
+
+  /**
+   * Updates multiple records in the table in a batch operation.
+   * - Each item in the `data` array contains a filter and the corresponding data to update.
+   */
   updateBatch: <P extends UpdateParams<TD, S>>(data: [FullFilter<TD, S>, UpsertDataToPGCastLax<TD>][], params?: P) => Promise<GetUpdateReturnType<P ,TD, S> | void>;
-  upsert: <P extends UpdateParams<TD, S>>(filter: FullFilter<TD, S>, newData: UpsertDataToPGCastLax<TD>, params?: P) => Promise<GetUpdateReturnType<P ,TD, S>>; 
+
+  /**
+   * Inserts a new record into the table.
+   */
   insert: <P extends InsertParams<TD, S>, D extends InsertData<TD>>(data: D, params?: P) => Promise<GetInsertReturnType<D, P ,TD, S>>;
+
+  /**
+   * Inserts or updates a record in the table.
+   * - If a record matching the `filter` exists, it updates the record.
+   * - If no matching record exists, it inserts a new record.
+   */
+  upsert: <P extends UpdateParams<TD, S>>(filter: FullFilter<TD, S>, newData: UpsertDataToPGCastLax<TD>, params?: P) => Promise<GetUpdateReturnType<P ,TD, S>>;
+
+  /**
+   * Deletes records from the table based on the specified filter criteria.
+   * - If no filter is provided, all records may be deleted (use with caution).
+   */
   delete: <P extends DeleteParams<TD, S>>(filter?: FullFilter<TD, S>, params?: P) => Promise<GetUpdateReturnType<P ,TD, S> | undefined>;
-} 
+}
 
 export type JoinMakerOptions<TT extends AnyObject = AnyObject> = SelectParams<TT> & { path?: RawJoinPath };
 export type JoinMaker<TT extends AnyObject = AnyObject, S extends DBSchema | void = void> = (filter?: FullFilter<TT, S>, select?: Select<TT>, options?: JoinMakerOptions<TT> ) => any;

@@ -88,7 +88,6 @@ export declare const GeomFilterKeys: readonly ["~", "~=", "@", "|&>", "|>>", ">>
 export declare const GeomFilter_Funcs: readonly ["ST_MakeEnvelope", "st_makeenvelope", "ST_MakePolygon", "st_makepolygon"];
 export type AnyObject = Record<string, any>;
 export type CastFromTSToPG<T extends AllowedTSType> = T extends number ? (T | string) : T extends string ? (T | number | Date) : T extends boolean ? (T | string) : T extends Date ? (T | string) : T;
-export type FilterDataType<T extends AllowedTSType> = T extends string ? TextFilter : T extends number ? CompareFilter<CastFromTSToPG<T>> : T extends boolean ? CompareFilter<CastFromTSToPG<T>> : T extends Date ? CompareFilter<CastFromTSToPG<T>> : T extends any[] ? ArrayFilter<T> : (CompareFilter<T> | TextFilter | GeomFilter);
 export declare const EXISTS_KEYS: readonly ["$exists", "$notExists", "$existsJoined", "$notExistsJoined"];
 export type EXISTS_KEY = typeof EXISTS_KEYS[number];
 export declare const ComplexFilterComparisonKeys: readonly ["$ilike", "$like", "$nilike", "$nlike", ...("@@" | "@>" | "<@" | "?" | "?|" | "?&" | "||" | "-" | "#-" | "@?")[], "=", "$eq", "<>", ">", "<", ">=", "<=", "$eq", "$ne", "$gt", "$gte", "$lt", "$lte", "$isDistinctFrom", "$isNotDistinctFrom", "$between", "$notBetween", "$in", "$nin"];
@@ -112,15 +111,17 @@ type StringFilter<Field extends string, DataType extends any> = BasicFilter<Fiel
     [K in Extract<typeof TextFilterFTSKeys[number], string> as `${Field}.${K}`]: any;
 }>);
 export type ValueOf<T> = T[keyof T];
-type ShorthandFilter<Obj extends Record<string, any>> = ValueOf<{
-    [K in KeyofString<Obj>]: Obj[K] extends string ? StringFilter<K, Required<Obj>[K]> : BasicFilter<K, Required<Obj>[K]>;
-}>;
 export type EqualityFilter<T extends AnyObject> = {
     [K in keyof Partial<T>]: CastFromTSToPG<T[K]>;
 };
-export type FilterForObject<T extends AnyObject = AnyObject> = {
+export type FilterDataType<T extends AllowedTSType> = T extends string ? TextFilter : T extends number ? CompareFilter<CastFromTSToPG<T>> : T extends boolean ? CompareFilter<CastFromTSToPG<T>> : T extends Date ? CompareFilter<CastFromTSToPG<T>> : T extends any[] ? ArrayFilter<T> : (CompareFilter<T> | TextFilter | GeomFilter);
+type NormalFilter<T> = {
     [K in keyof Partial<T>]: FilterDataType<T[K]>;
-} & Partial<ComplexFilter> | ShorthandFilter<T>;
+} & Partial<ComplexFilter>;
+type ShorthandFilter<Obj extends Record<string, any>> = ValueOf<{
+    [K in KeyofString<Obj>]: Obj[K] extends string ? StringFilter<K, Required<Obj>[K]> : BasicFilter<K, Required<Obj>[K]>;
+}>;
+export type FilterForObject<T extends AnyObject = AnyObject> = NormalFilter<T> | ShorthandFilter<T>;
 export type ExistsFilter<S = void> = Partial<{
     [key in EXISTS_KEY]: S extends DBSchema ? ExactlyOne<{
         [tname in KeyofString<S>]: FullFilter<S[tname]["columns"], S> | {

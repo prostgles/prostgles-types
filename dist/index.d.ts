@@ -167,14 +167,13 @@ export type SubscribeParams<T extends AnyObject | void = void, S extends DBSchem
 };
 export type UpdateParams<T extends AnyObject | void = void, S extends DBSchema | void = void> = {
     returning?: Select<T, S>;
-    onConflict?: "DoNothing" | "DoUpdate";
-    fixIssues?: boolean;
+    removeDisallowedFields?: boolean;
     multi?: boolean;
 } & Pick<CommonSelectParams, "returnType">;
 export type InsertParams<T extends AnyObject | void = void, S extends DBSchema | void = void> = {
     returning?: Select<T, S>;
     onConflict?: "DoNothing" | "DoUpdate";
-    fixIssues?: boolean;
+    removeDisallowedFields?: boolean;
 } & Pick<CommonSelectParams, "returnType">;
 export type DeleteParams<T extends AnyObject | void = void, S extends DBSchema | void = void> = {
     returning?: Select<T, S>;
@@ -264,8 +263,8 @@ type InsertData<T extends AnyObject> = UpsertDataToPGCast<T> | UpsertDataToPGCas
 export type TableHandler<TD extends AnyObject = AnyObject, S extends DBSchema | void = void> = ViewHandler<TD, S> & {
     update: <P extends UpdateParams<TD, S>>(filter: FullFilter<TD, S>, newData: UpsertDataToPGCastLax<TD>, params?: P) => Promise<GetUpdateReturnType<P, TD, S> | undefined>;
     updateBatch: <P extends UpdateParams<TD, S>>(data: [FullFilter<TD, S>, UpsertDataToPGCastLax<TD>][], params?: P) => Promise<GetUpdateReturnType<P, TD, S> | void>;
-    upsert: <P extends UpdateParams<TD, S>>(filter: FullFilter<TD, S>, newData: UpsertDataToPGCastLax<TD>, params?: P) => Promise<GetUpdateReturnType<P, TD, S>>;
     insert: <P extends InsertParams<TD, S>, D extends InsertData<TD>>(data: D, params?: P) => Promise<GetInsertReturnType<D, P, TD, S>>;
+    upsert: <P extends UpdateParams<TD, S>>(filter: FullFilter<TD, S>, newData: UpsertDataToPGCastLax<TD>, params?: P) => Promise<GetUpdateReturnType<P, TD, S>>;
     delete: <P extends DeleteParams<TD, S>>(filter?: FullFilter<TD, S>, params?: P) => Promise<GetUpdateReturnType<P, TD, S> | undefined>;
 };
 export type JoinMakerOptions<TT extends AnyObject = AnyObject> = SelectParams<TT> & {

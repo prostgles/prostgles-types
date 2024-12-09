@@ -16,51 +16,71 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CONTENT_TYPE_TO_EXT = exports.RULE_METHODS = exports.CHANNELS = exports.JOIN_PARAMS = exports.JOIN_KEYS = exports.TS_PG_Types = exports._PG_geometric = exports._PG_postgis = exports._PG_interval = exports._PG_date = exports._PG_bool = exports._PG_json = exports._PG_numbers = exports._PG_numbers_str = exports._PG_numbers_num = exports._PG_strings = void 0;
 exports._PG_strings = [
-    'bpchar', 'char', 'varchar', 'text', 'citext', 'uuid', 'bytea', 'time', 'timetz', 'interval', 'name',
-    'cidr', 'inet', 'macaddr', 'macaddr8', "int4range", "int8range", "numrange",
-    'tsvector'
+    "bpchar",
+    "char",
+    "varchar",
+    "text",
+    "citext",
+    "uuid",
+    "bytea",
+    "time",
+    "timetz",
+    "interval",
+    "name",
+    "cidr",
+    "inet",
+    "macaddr",
+    "macaddr8",
+    "int4range",
+    "int8range",
+    "numrange",
+    "tsvector",
 ];
-exports._PG_numbers_num = ['int2', 'int4', 'float4', 'float8', 'oid'];
-exports._PG_numbers_str = ['int8', 'numeric', 'money'];
-exports._PG_numbers = [
-    ...exports._PG_numbers_num,
-    ...exports._PG_numbers_str
-];
-exports._PG_json = ['json', 'jsonb'];
-exports._PG_bool = ['bool'];
-exports._PG_date = ['date', 'timestamp', 'timestamptz'];
-exports._PG_interval = ['interval'];
-exports._PG_postgis = ['geometry', 'geography'];
-exports._PG_geometric = [
-    "point",
-    "line",
-    "lseg",
-    "box",
-    "path",
-    "polygon",
-    "circle",
-];
+exports._PG_numbers_num = ["int2", "int4", "float4", "float8", "oid"];
+exports._PG_numbers_str = ["int8", "numeric", "money"];
+exports._PG_numbers = [...exports._PG_numbers_num, ...exports._PG_numbers_str];
+exports._PG_json = ["json", "jsonb"];
+exports._PG_bool = ["bool"];
+exports._PG_date = ["date", "timestamp", "timestamptz"];
+exports._PG_interval = ["interval"];
+exports._PG_postgis = ["geometry", "geography"];
+exports._PG_geometric = ["point", "line", "lseg", "box", "path", "polygon", "circle"];
 const TS_PG_PRIMITIVES = {
-    "string": [...exports._PG_strings, ...exports._PG_numbers_str, ...exports._PG_date, ...exports._PG_geometric, ...exports._PG_postgis, "lseg"],
-    "number": exports._PG_numbers_num,
-    "boolean": exports._PG_bool,
-    "any": [...exports._PG_json, ...exports._PG_interval], // consider as any
+    string: [
+        ...exports._PG_strings,
+        ...exports._PG_numbers_str,
+        ...exports._PG_date,
+        ...exports._PG_geometric,
+        ...exports._PG_postgis,
+        "lseg",
+    ],
+    number: exports._PG_numbers_num,
+    boolean: exports._PG_bool,
+    any: [...exports._PG_json, ...exports._PG_interval], // consider as any
     /** Timestamps are kept in original string format to avoid filters failing
      * TODO: cast to dates if udt_name date/timestamp(0 - 3)
-    */
+     */
     // "Date": _PG_date,
 };
 exports.TS_PG_Types = {
     ...TS_PG_PRIMITIVES,
-    "number[]": TS_PG_PRIMITIVES.number.map(s => `_${s}`),
-    "boolean[]": TS_PG_PRIMITIVES.boolean.map(s => `_${s}`),
-    "string[]": TS_PG_PRIMITIVES.string.map(s => `_${s}`),
-    "any[]": TS_PG_PRIMITIVES.any.map(s => `_${s}`),
+    "number[]": TS_PG_PRIMITIVES.number.map((s) => `_${s}`),
+    "boolean[]": TS_PG_PRIMITIVES.boolean.map((s) => `_${s}`),
+    "string[]": TS_PG_PRIMITIVES.string.map((s) => `_${s}`),
+    "any[]": TS_PG_PRIMITIVES.any.map((s) => `_${s}`),
     // "Date[]": _PG_date.map(s => `_${s}` as const),
     // "any": [],
 };
 exports.JOIN_KEYS = ["$innerJoin", "$leftJoin"];
-exports.JOIN_PARAMS = ["select", "filter", "$path", "$condition", "offset", "limit", "orderBy"];
+exports.JOIN_PARAMS = [
+    "select",
+    "filter",
+    "$path",
+    "$condition",
+    "offset",
+    "limit",
+    "orderBy",
+];
 const preffix = "_psqlWS_.";
 exports.CHANNELS = {
     SCHEMA_CHANGED: preffix + "schema-changed",
@@ -83,38 +103,44 @@ exports.CHANNELS = {
     _preffix: preffix,
 };
 exports.RULE_METHODS = {
-    "getColumns": ["getColumns"],
-    "getInfo": ["getInfo"],
-    "insert": ["insert", "upsert"],
-    "update": ["update", "upsert", "updateBatch"],
-    "select": ["findOne", "find", "count", "size"],
-    "delete": ["delete", "remove"],
-    "sync": ["sync", "unsync"],
-    "subscribe": ["unsubscribe", "subscribe", "subscribeOne"],
+    getColumns: ["getColumns"],
+    getInfo: ["getInfo"],
+    insert: ["insert", "upsert"],
+    update: ["update", "upsert", "updateBatch"],
+    select: ["findOne", "find", "count", "size"],
+    delete: ["delete", "remove"],
+    sync: ["sync", "unsync"],
+    subscribe: ["unsubscribe", "subscribe", "subscribeOne"],
 };
 /**
  * Type tests
  */
-(() => {
+() => {
     const r = 1;
     const sel1 = { id: 1, name: 1, public: 1, $rowhash: 1, added_day: { $day: [] } };
-    const sel2 = { id: 1, name: 1, public: 1, $rowhash: 1, dsds: { d: [] } };
+    const sel2 = {
+        id: 1,
+        name: 1,
+        public: 1,
+        $rowhash: 1,
+        dsds: { d: [] },
+    };
     const sel3 = "";
     const sel4 = "*";
     const sel12 = { id: 1, name: 1, public: 1, $rowhash: 1, dsds: { d: [] } };
     const sel13 = "";
     const sel14 = "*";
     const fRow = {
-        $rowhash: { "$in": [""] }
+        $rowhash: { $in: [""] },
     };
     const emptyFilter = {};
     const sel32 = {
-        dwa: 1
+        dwa: 1,
     };
     const sel = {
         a: 1,
         $rowhash: 1,
-        dwadwA: { dwdwa: [5] }
+        dwadwA: { dwdwa: [5] },
     };
     const sds = sel;
     const sds01 = "";
@@ -122,20 +148,20 @@ exports.RULE_METHODS = {
     const sds03 = {};
     const sds2 = sel;
     const s001 = {
-        h: { "$ts_headline_simple": ["name", { plainto_tsquery: "abc81" }] },
-        hh: { "$ts_headline": ["name", "abc81"] },
+        h: { $ts_headline_simple: ["name", { plainto_tsquery: "abc81" }] },
+        hh: { $ts_headline: ["name", "abc81"] },
         added: "$date_trunc_2hour",
-        addedY: { "$date_trunc_5minute": ["added"] },
+        addedY: { $date_trunc_5minute: ["added"] },
     };
     //@ts-expect-error
     const badSel = {
         a: 1,
-        b: 0
+        b: 0,
     };
     //@ts-expect-error
     const badSel1 = {
         b: 1,
-        a: 1
+        a: 1,
     };
     const sds3 = {
         // "*": 1,
@@ -147,15 +173,15 @@ exports.RULE_METHODS = {
     const sel1d = {
         dwada: 1,
         $rowhash: 1,
-        dwawd: { funcName: [12] }
+        dwawd: { funcName: [12] },
     };
     const sel1d2 = ["a"];
     const deletePar = {
-        returning: { id: 1, name: 1, public: 1, $rowhash: 1, added_day: { "$day": ["added"] } }
+        returning: { id: 1, name: 1, public: 1, $rowhash: 1, added_day: { $day: ["added"] } },
     };
-});
+};
 /** More Type tests */
-(async () => {
+async () => {
     const tableHandler = undefined;
     tableHandler.insert({ h: 1, c: 2, "b.$func": { dwa: [] } });
     const schemaFFilter = { "col1.$eq": "dd" };
@@ -165,7 +191,7 @@ exports.RULE_METHODS = {
     const dbo = 1;
     const funcData = { funcName: [] };
     const noRow = await dbo.tbl1.update({}, { col1: "" });
-    //@ts-expect-error 
+    //@ts-expect-error
     noRow.length;
     //@ts-expect-error
     noRow.col1;
@@ -182,17 +208,17 @@ exports.RULE_METHODS = {
     manyRows?.col1;
     manyRows?.at(0)?.col1;
     const noIRow = await dbo.tbl1.insert({ col1: "", col2: { $func: [] } });
-    //@ts-expect-error 
+    //@ts-expect-error
     noIRow.length;
     //@ts-expect-error
     noIRow.col1;
     const irow = await dbo.tbl1.insert({ col1: "", col2: funcData }, { returning: "*" });
-    //@ts-expect-error 
+    //@ts-expect-error
     irow.length;
     irow.col1;
     const irowFunc = await dbo.tbl1.insert({ col1: funcData, col2: "" }, { returning: "*" });
     const irows = await dbo.tbl1.insert([{ col1: "", col2: "" }], { returning: "*" });
-    //@ts-expect-error 
+    //@ts-expect-error
     irows.col1;
     irows.length;
     const filter = {};
@@ -205,10 +231,9 @@ exports.RULE_METHODS = {
     // const f = <A extends TableHandler["count"]>(a: A) => {};
     const f = (s) => { };
     const th = {};
-    // f(th) 
+    // f(th)
     const sp = { select: {} };
-    const sf = (sp) => {
-    };
+    const sf = (sp) => { };
     sf(sp);
     // const sub: TableHandler["count"] = dbo.tbl1.count
     /**
@@ -216,11 +241,11 @@ exports.RULE_METHODS = {
      */
     const gdw = {
         a: { dwa: [] },
-        z: { dwa: [] }
+        z: { dwa: [] },
     };
     const gdwn = {
         a: 2,
-        z: { dwa: [] }
+        z: { dwa: [] },
     };
     const gdw1 = { a: 1, z: 2 };
     const gdw1Opt = { a: {}, z: 2 };
@@ -230,7 +255,7 @@ exports.RULE_METHODS = {
     //@ts-expect-error
     const missingKey2 = { z: 1 };
     // ra(schema);
-});
+};
 // import { md5 } from "./md5";
 // export { get, getTextPatch, unpatchText, isEmpty, WAL, WALConfig, asName } from "./util";
 // export type { WALItem, BasicOrderBy, WALItemsObj, WALConfig, TextPatch, SyncTableInfo } from "./util";

@@ -72,11 +72,11 @@ export type ALLOWED_CONTENT_TYPE = keyof typeof CONTENT_TYPE_TO_EXT;
 export type ALLOWED_EXTENSION = (typeof CONTENT_TYPE_TO_EXT)[ALLOWED_CONTENT_TYPE][number];
 export type FileType = {
     acceptedContent: FieldFilter<{
-        "image": 1;
-        "audio": 1;
-        "video": 1;
-        "text": 1;
-        "application": 1;
+        image: 1;
+        audio: 1;
+        video: 1;
+        text: 1;
+        application: 1;
     }>;
 } | {
     acceptedContentType: FieldFilter<typeof CONTENT_TYPE_TO_EXT>;

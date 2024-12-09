@@ -1,12 +1,11 @@
-export type IdentityProvider = 
-| "google" 
-| "microsoft" 
-| "github" 
-| "apple"
-| "facebook" 
-| "twitter" 
-| "linkedin" 
-;
+export type IdentityProvider =
+  | "google"
+  | "microsoft"
+  | "github"
+  | "apple"
+  | "facebook"
+  | "twitter"
+  | "linkedin";
 
 export type UserLike = {
   id: string;
@@ -21,7 +20,6 @@ export type EmailSignupType = "withPassword" | "withMagicLink";
  * Auth object sent from server to client
  */
 export type AuthSocketSchema = {
-
   /**
    * User data as returned from server auth.getClientUser
    * if undefined, the client is not logged in
@@ -32,7 +30,7 @@ export type AuthSocketSchema = {
    * Identity providers enabled on the server
    * if undefined, the server does not support social login
    */
-  providers: Partial<Record<IdentityProvider, { url: string; }>> | undefined;
+  providers: Partial<Record<IdentityProvider, { url: string }>> | undefined;
 
   /**
    * Email login methods enabled on the server
@@ -42,7 +40,7 @@ export type AuthSocketSchema = {
   /**
    * Email registration methods enabled on the server
    */
-  register: { type: EmailSignupType; url: string; } | undefined;
+  register: { type: EmailSignupType; url: string } | undefined;
 
   /**
    * If server auth publicRoutes is set up and AuthGuard is not explicitly disabled ( disableSocketAuthGuard: true ):

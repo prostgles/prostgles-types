@@ -2,30 +2,34 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getJSONBSchemaAsJSONSchema = exports.getJSONSchemaObject = exports.DATA_TYPES = exports.PrimitiveArrayTypes = exports.PrimitiveTypes = void 0;
 const util_1 = require("./util");
-exports.PrimitiveTypes = ["boolean", "number", "integer", "string", "Date", "time", "timestamp", "any"];
-exports.PrimitiveArrayTypes = exports.PrimitiveTypes.map(v => `${v}[]`);
-exports.DATA_TYPES = [
-    ...exports.PrimitiveTypes,
-    ...exports.PrimitiveArrayTypes
+exports.PrimitiveTypes = [
+    "boolean",
+    "number",
+    "integer",
+    "string",
+    "Date",
+    "time",
+    "timestamp",
+    "any",
 ];
+exports.PrimitiveArrayTypes = exports.PrimitiveTypes.map((v) => `${v}[]`);
+exports.DATA_TYPES = [...exports.PrimitiveTypes, ...exports.PrimitiveArrayTypes];
 /** tests */
-const t = [
-    { a: 2 }
-];
+const t = [{ a: 2 }];
 /** StrictUnion was removed because it doesn't work with object | string */
 const _oneOf = {
-    a: "a"
+    a: "a",
 };
 const _a = {
-    a: 2
+    a: 2,
 };
 const _r = {
     a: [2],
-    b: [221]
+    b: [221],
 };
 const _dd = {
     enum: [1],
-    type: "any"
+    type: "any",
 };
 const s = {
     type: {
@@ -33,26 +37,26 @@ const s = {
         c: { type: { c1: { type: "string" } } },
         arr: { arrayOfType: { d: "string" } },
         o: {
-            oneOfType: [
-                { z: { type: "integer" } },
-                { z1: { type: "integer" } }
-            ]
-        }
-    }
+            oneOfType: [{ z: { type: "integer" } }, { z1: { type: "integer" } }],
+        },
+    },
 }; // satisfies JSONB.JSONBSchema;
 const _ss = {
     a: true,
     arr: [{ d: "" }],
     c: {
-        c1: ""
+        c1: "",
     },
-    o: { z1: 23 }
+    o: { z1: 23 },
 };
 const getJSONSchemaObject = (rawType, rootInfo) => {
     const { type, arrayOf, arrayOfType, description, nullable, oneOf, oneOfType, title, record, ...t } = typeof rawType === "string" ? { type: rawType } : rawType;
     let result = {};
     const partialProps = {
-        ...((t.enum || t.allowedValues?.length && (typeof type !== "string" || !type.endsWith("[]"))) && { enum: t.allowedValues?.slice(0) ?? t.enum.slice(0) }),
+        ...((t.enum ||
+            (t.allowedValues?.length && (typeof type !== "string" || !type.endsWith("[]")))) && {
+            enum: t.allowedValues?.slice(0) ?? t.enum.slice(0),
+        }),
         ...(!!description && { description }),
         ...(!!title && { title }),
     };
@@ -65,9 +69,9 @@ const getJSONSchemaObject = (rawType, rootInfo) => {
             throw "Not expected";
         }
         if (arrayOf || arrayOfType || type?.endsWith("[]")) {
-            const arrayItems = (arrayOf || arrayOfType) ? (0, exports.getJSONSchemaObject)(arrayOf || { type: arrayOfType }) :
-                type?.startsWith("any") ? { type: undefined } :
-                    {
+            const arrayItems = arrayOf || arrayOfType ? (0, exports.getJSONSchemaObject)(arrayOf || { type: arrayOfType })
+                : type?.startsWith("any") ? { type: undefined }
+                    : {
                         type: type?.slice(0, -2),
                         ...(t.allowedValues && { enum: t.allowedValues.slice(0) }),
                     };
@@ -87,32 +91,35 @@ const getJSONSchemaObject = (rawType, rootInfo) => {
     else if ((0, util_1.isObject)(type)) {
         result = {
             type: "object",
-            required: (0, util_1.getKeys)(type).filter(k => {
+            required: (0, util_1.getKeys)(type).filter((k) => {
                 const t = type[k];
                 return typeof t === "string" || !t.optional;
             }),
             properties: (0, util_1.getObjectEntries)(type).reduce((a, [k, v]) => {
                 return {
                     ...a,
-                    [k]: (0, exports.getJSONSchemaObject)(v)
+                    [k]: (0, exports.getJSONSchemaObject)(v),
                 };
             }, {}),
         };
     }
     else if (oneOf || oneOfType) {
-        const _oneOf = oneOf || oneOfType.map(type => ({ type }));
+        const _oneOf = oneOf || oneOfType.map((type) => ({ type }));
         result = {
-            oneOf: _oneOf.map(t => (0, exports.getJSONSchemaObject)(t))
+            oneOf: _oneOf.map((t) => (0, exports.getJSONSchemaObject)(t)),
         };
     }
     else if (record) {
         result = {
             type: "object",
-            ...(record.values && !record.keysEnum && { additionalProperties: (0, exports.getJSONSchemaObject)(record.values) }),
-            ...(record.keysEnum && { properties: record.keysEnum.reduce((a, v) => ({
+            ...(record.values &&
+                !record.keysEnum && { additionalProperties: (0, exports.getJSONSchemaObject)(record.values) }),
+            ...(record.keysEnum && {
+                properties: record.keysEnum.reduce((a, v) => ({
                     ...a,
-                    [v]: !record.values ? { type: {} } : (0, exports.getJSONSchemaObject)(record.values)
-                }), {}) })
+                    [v]: !record.values ? { type: {} } : (0, exports.getJSONSchemaObject)(record.values),
+                }), {}),
+            }),
         };
     }
     if (nullable) {
@@ -125,13 +132,13 @@ const getJSONSchemaObject = (rawType, rootInfo) => {
         }
         else
             result = {
-                oneOf: [result, nullDef]
+                oneOf: [result, nullDef],
             };
     }
-    const rootSchema = !rootInfo ? undefined : {
-        "$id": rootInfo?.id,
-        "$schema": "https://json-schema.org/draft/2020-12/schema",
-    };
+    const rootSchema = !rootInfo ? undefined : ({
+        $id: rootInfo?.id,
+        $schema: "https://json-schema.org/draft/2020-12/schema",
+    });
     return {
         ...rootSchema,
         ...partialProps,

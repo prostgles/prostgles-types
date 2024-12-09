@@ -14,7 +14,7 @@ const pickKeys = (obj, keys = [], onlyIfDefined = true) => {
     }
     if (obj && keys.length) {
         let res = {};
-        keys.forEach(k => {
+        keys.forEach((k) => {
             if (onlyIfDefined && obj[k] === undefined) {
             }
             else {
@@ -27,11 +27,11 @@ const pickKeys = (obj, keys = [], onlyIfDefined = true) => {
 };
 exports.pickKeys = pickKeys;
 function omitKeys(obj, exclude) {
-    return (0, exports.pickKeys)(obj, getKeys(obj).filter(k => !exclude.includes(k)));
+    return (0, exports.pickKeys)(obj, getKeys(obj).filter((k) => !exclude.includes(k)));
 }
 exports.omitKeys = omitKeys;
 function filter(array, arrFilter) {
-    return array.filter(d => Object.entries(arrFilter).every(([k, v]) => d[k] === v));
+    return array.filter((d) => Object.entries(arrFilter).every(([k, v]) => d[k] === v));
 }
 exports.filter = filter;
 function find(array, arrFilter) {
@@ -39,70 +39,70 @@ function find(array, arrFilter) {
 }
 exports.find = find;
 function includes(array, elem) {
-    return array.some(v => v === elem);
+    return array.some((v) => v === elem);
 }
 exports.includes = includes;
 function stableStringify(data, opts) {
     if (!opts)
         opts = {};
-    if (typeof opts === 'function')
+    if (typeof opts === "function")
         opts = { cmp: opts };
-    var cycles = (typeof opts.cycles === 'boolean') ? opts.cycles : false;
-    var cmp = opts.cmp && (function (f) {
-        return function (node) {
-            return function (a, b) {
-                var aobj = { key: a, value: node[a] };
-                var bobj = { key: b, value: node[b] };
-                return f(aobj, bobj);
+    var cycles = typeof opts.cycles === "boolean" ? opts.cycles : false;
+    var cmp = opts.cmp &&
+        (function (f) {
+            return function (node) {
+                return function (a, b) {
+                    var aobj = { key: a, value: node[a] };
+                    var bobj = { key: b, value: node[b] };
+                    return f(aobj, bobj);
+                };
             };
-        };
-    })(opts.cmp);
+        })(opts.cmp);
     var seen = [];
     return (function stringify(node) {
-        if (node && node.toJSON && typeof node.toJSON === 'function') {
+        if (node && node.toJSON && typeof node.toJSON === "function") {
             node = node.toJSON();
         }
         if (node === undefined)
             return;
-        if (typeof node == 'number')
-            return isFinite(node) ? '' + node : 'null';
-        if (typeof node !== 'object')
+        if (typeof node == "number")
+            return isFinite(node) ? "" + node : "null";
+        if (typeof node !== "object")
             return JSON.stringify(node);
         var i, out;
         if (Array.isArray(node)) {
-            out = '[';
+            out = "[";
             for (i = 0; i < node.length; i++) {
                 if (i)
-                    out += ',';
-                out += stringify(node[i]) || 'null';
+                    out += ",";
+                out += stringify(node[i]) || "null";
             }
-            return out + ']';
+            return out + "]";
         }
         if (node === null)
-            return 'null';
+            return "null";
         if (seen.indexOf(node) !== -1) {
             if (cycles)
-                return JSON.stringify('__cycle__');
-            throw new TypeError('Converting circular structure to JSON');
+                return JSON.stringify("__cycle__");
+            throw new TypeError("Converting circular structure to JSON");
         }
         var seenIndex = seen.push(node) - 1;
         var keys = Object.keys(node).sort(cmp && cmp(node));
-        out = '';
+        out = "";
         for (i = 0; i < keys.length; i++) {
             var key = keys[i];
             var value = stringify(node[key]);
             if (!value)
                 continue;
             if (out)
-                out += ',';
-            out += JSON.stringify(key) + ':' + value;
+                out += ",";
+            out += JSON.stringify(key) + ":" + value;
         }
         seen.splice(seenIndex, 1);
-        return '{' + out + '}';
+        return "{" + out + "}";
     })(data);
 }
 exports.stableStringify = stableStringify;
-;
 function getTextPatch(oldStr, newStr) {
     /* Big change, no point getting diff */
     if (!oldStr || !newStr || !oldStr.trim().length || !newStr.trim().length)
@@ -113,7 +113,7 @@ function getTextPatch(oldStr, newStr) {
             from: 0,
             to: 0,
             text: "",
-            md5: (0, md5_1.md5)(newStr)
+            md5: (0, md5_1.md5)(newStr),
         };
     function findLastIdx(direction = 1) {
         let idx = direction < 1 ? -1 : 0, found = false;
@@ -132,7 +132,7 @@ function getTextPatch(oldStr, newStr) {
         from,
         to,
         text: newStr.slice(from, toNew),
-        md5: (0, md5_1.md5)(newStr)
+        md5: (0, md5_1.md5)(newStr),
     };
 }
 exports.getTextPatch = getTextPatch;
@@ -144,7 +144,7 @@ function unpatchText(original, patch) {
         return text;
     let res = original.slice(0, from) + text + original.slice(to);
     if (md5Hash && (0, md5_1.md5)(res) !== md5Hash)
-        throw "Patch text error: Could not match md5 hash: (original/result) \n" + original + "\n" + res;
+        throw ("Patch text error: Could not match md5 hash: (original/result) \n" + original + "\n" + res);
     return res;
 }
 exports.unpatchText = unpatchText;
@@ -171,15 +171,19 @@ class WAL {
             const { orderBy } = this.options;
             if (!orderBy || !a || !b)
                 return 0;
-            return orderBy.map(ob => {
+            return (orderBy
+                .map((ob) => {
                 /* TODO: add fullData to changed items + ensure orderBy is in select */
                 if (!(ob.fieldName in a) || !(ob.fieldName in b)) {
                     throw `Replication error: \n   some orderBy fields missing from data`;
                 }
                 let v1 = ob.asc ? a[ob.fieldName] : b[ob.fieldName], v2 = ob.asc ? b[ob.fieldName] : a[ob.fieldName];
-                let vNum = +v1 - +v2, vStr = v1 < v2 ? -1 : v1 == v2 ? 0 : 1;
-                return (ob.tsDataType === "number" && Number.isFinite(vNum)) ? vNum : vStr;
-            }).find(v => v) || 0;
+                let vNum = +v1 - +v2, vStr = v1 < v2 ? -1
+                    : v1 == v2 ? 0
+                        : 1;
+                return ob.tsDataType === "number" && Number.isFinite(vNum) ? vNum : vStr;
+            })
+                .find((v) => v) || 0);
         };
         /**
          * Used by server to avoid unnecessary data push to client.
@@ -207,7 +211,7 @@ class WAL {
         this.addData = (data) => {
             if (isEmpty(this.changed) && this.options.onSendStart)
                 this.options.onSendStart();
-            data.map(d => {
+            data.map((d) => {
                 var _a;
                 const { initial, current, delta } = { ...d };
                 if (!current)
@@ -217,11 +221,11 @@ class WAL {
                 (_a = this.changed)[idStr] ?? (_a[idStr] = { initial, current, delta });
                 this.changed[idStr].current = {
                     ...this.changed[idStr].current,
-                    ...current
+                    ...current,
                 };
                 this.changed[idStr].delta = {
                     ...this.changed[idStr].delta,
-                    ...delta
+                    ...delta,
                 };
             });
             this.sendItems();
@@ -230,9 +234,9 @@ class WAL {
         this.isSendingTimeout = undefined;
         this.willDeleteHistory = undefined;
         this.sendItems = async () => {
-            const { DEBUG_MODE, onSend, onSendEnd, batch_size, throttle, historyAgeSeconds = 2 } = this.options;
+            const { DEBUG_MODE, onSend, onSendEnd, batch_size, throttle, historyAgeSeconds = 2, } = this.options;
             // Sending data. stop here
-            if (this.isSendingTimeout || this.sending && !isEmpty(this.sending))
+            if (this.isSendingTimeout || (this.sending && !isEmpty(this.sending)))
                 return;
             // Nothing to send. stop here
             if (!this.changed || isEmpty(this.changed))
@@ -245,7 +249,7 @@ class WAL {
             Object.keys(this.changed)
                 .sort((a, b) => this.sort(this.changed[a].current, this.changed[b].current))
                 .slice(0, batch_size)
-                .map(key => {
+                .map((key) => {
                 let item = { ...this.changed[key] };
                 this.sending[key] = { ...item };
                 walBatch.push({ ...item });
@@ -253,9 +257,9 @@ class WAL {
                 batchObj[key] = { ...item.current };
                 delete this.changed[key];
             });
-            batchItems = walBatch.map(d => {
+            batchItems = walBatch.map((d) => {
                 let result = {};
-                Object.keys(d.current).map(k => {
+                Object.keys(d.current).map((k) => {
                     const oldVal = d.initial?.[k];
                     const newVal = d.current[k];
                     /** Send only id fields and delta */
@@ -311,12 +315,12 @@ class WAL {
             if (this.callbacks.length) {
                 const ids = Object.keys(this.sending);
                 this.callbacks.forEach((c, i) => {
-                    c.idStrs = c.idStrs.filter(id => ids.includes(id));
+                    c.idStrs = c.idStrs.filter((id) => ids.includes(id));
                     if (!c.idStrs.length) {
                         c.cb(error);
                     }
                 });
-                this.callbacks = this.callbacks.filter(cb => cb.idStrs.length);
+                this.callbacks = this.callbacks.filter((cb) => cb.idStrs.length);
             }
             this.sending = {};
             if (DEBUG_MODE) {
@@ -333,11 +337,10 @@ class WAL {
         this.options = { ...args };
         if (!this.options.orderBy) {
             const { synced_field, id_fields } = args;
-            this.options.orderBy = [synced_field, ...id_fields.sort()]
-                .map(fieldName => ({
+            this.options.orderBy = [synced_field, ...id_fields.sort()].map((fieldName) => ({
                 fieldName,
                 tsDataType: fieldName === synced_field ? "number" : "string",
-                asc: true
+                asc: true,
             }));
         }
     }
@@ -349,18 +352,21 @@ class WAL {
         return result;
     }
     getIdStr(d) {
-        return this.options.id_fields.sort().map(key => `${d[key] || ""}`).join(".");
+        return this.options.id_fields
+            .sort()
+            .map((key) => `${d[key] || ""}`)
+            .join(".");
     }
     getIdObj(d) {
         let res = {};
-        this.options.id_fields.sort().map(key => {
+        this.options.id_fields.sort().map((key) => {
             res[key] = d[key];
         });
         return res;
     }
     getDeltaObj(d) {
         let res = {};
-        Object.keys(d).map(key => {
+        Object.keys(d).map((key) => {
             if (!this.options.id_fields.includes(key)) {
                 res[key] = d[key];
             }
@@ -369,7 +375,6 @@ class WAL {
     }
 }
 exports.WAL = WAL;
-;
 function isEmpty(obj) {
     for (var v in obj)
         return false;
@@ -409,7 +414,9 @@ function isObject(obj) {
     return Boolean(obj && typeof obj === "object" && !Array.isArray(obj));
 }
 exports.isObject = isObject;
-function isDefined(v) { return v !== undefined && v !== null; }
+function isDefined(v) {
+    return v !== undefined && v !== null;
+}
 exports.isDefined = isDefined;
 function getKeys(o) {
     return Object.keys(o);
@@ -487,8 +494,7 @@ const getJoinHandlers = (tableName) => {
 };
 exports.getJoinHandlers = getJoinHandlers;
 const reverseJoinOn = (on) => {
-    return on.map(constraint => Object.fromEntries(Object.entries(constraint)
-        .map(([left, right]) => [right, left])));
+    return on.map((constraint) => Object.fromEntries(Object.entries(constraint).map(([left, right]) => [right, left])));
 };
 exports.reverseJoinOn = reverseJoinOn;
 /**
@@ -498,19 +504,19 @@ exports.reverseJoinOn = reverseJoinOn;
  * ]
  */
 const reverseParsedPath = (parsedPath, table) => {
-    const newPPath = [
-        { table, on: [{}] },
-        ...(parsedPath ?? [])
-    ];
-    return newPPath.map((pp, i) => {
+    const newPPath = [{ table, on: [{}] }, ...(parsedPath ?? [])];
+    return newPPath
+        .map((pp, i) => {
         const nextPath = newPPath[i + 1];
         if (!nextPath)
             return undefined;
         return {
             table: pp.table,
-            on: (0, exports.reverseJoinOn)(nextPath.on)
+            on: (0, exports.reverseJoinOn)(nextPath.on),
         };
-    }).filter(isDefined).reverse();
+    })
+        .filter(isDefined)
+        .reverse();
 };
 exports.reverseParsedPath = reverseParsedPath;
 //# sourceMappingURL=util.js.map

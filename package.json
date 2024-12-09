@@ -1,6 +1,6 @@
 {
   "name": "prostgles-types",
-  "version": "4.0.113",
+  "version": "4.0.114",
   "description": "",
   "main": "dist/index_umd.js",
   "types": "dist/index.d.ts",
@@ -30,6 +30,7 @@
   "homepage": "https://prostgles.com",
   "devDependencies": {
     "json-schema": "^0.4.0",
+    "prettier": "^3.4.2",
     "tsconfig-paths-webpack-plugin": "^4.1.0",
     "typescript": "^5.3.3",
     "webpack": "^5.96.1",

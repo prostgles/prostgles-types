@@ -1,74 +1,84 @@
-
 import * as AuthTypes from "./auth";
 import { FileColumnConfig } from "./files";
 import { AnyObject, ComplexFilter, FullFilter, FullFilterBasic, ValueOf } from "./filters";
 import type { UpsertDataToPGCast } from "./insertUpdateUtils";
 import { JSONB } from "./jsonb";
 export const _PG_strings = [
-  'bpchar','char','varchar','text','citext','uuid','bytea', 'time','timetz','interval','name', 
-  'cidr', 'inet', 'macaddr', 'macaddr8', "int4range", "int8range", "numrange",
-  'tsvector'
+  "bpchar",
+  "char",
+  "varchar",
+  "text",
+  "citext",
+  "uuid",
+  "bytea",
+  "time",
+  "timetz",
+  "interval",
+  "name",
+  "cidr",
+  "inet",
+  "macaddr",
+  "macaddr8",
+  "int4range",
+  "int8range",
+  "numrange",
+  "tsvector",
 ] as const;
-export const _PG_numbers_num = ['int2', 'int4', 'float4', 'float8', 'oid'] as const;
-export const _PG_numbers_str = ['int8', 'numeric', 'money'] as const;
-export const _PG_numbers = [
-  ..._PG_numbers_num,
-  ..._PG_numbers_str
-] as const;
-export const _PG_json = ['json', 'jsonb'] as const;
-export const _PG_bool = ['bool'] as const;
-export const _PG_date = ['date', 'timestamp', 'timestamptz'] as const;
-export const _PG_interval = ['interval'] as const;
-export const _PG_postgis = ['geometry', 'geography'] as const;
-export const _PG_geometric = [
-  "point", 
-  "line", 
-  "lseg", 
-  "box", 
-  "path",  
-  "polygon", 
-  "circle",
-] as const;
+export const _PG_numbers_num = ["int2", "int4", "float4", "float8", "oid"] as const;
+export const _PG_numbers_str = ["int8", "numeric", "money"] as const;
+export const _PG_numbers = [..._PG_numbers_num, ..._PG_numbers_str] as const;
+export const _PG_json = ["json", "jsonb"] as const;
+export const _PG_bool = ["bool"] as const;
+export const _PG_date = ["date", "timestamp", "timestamptz"] as const;
+export const _PG_interval = ["interval"] as const;
+export const _PG_postgis = ["geometry", "geography"] as const;
+export const _PG_geometric = ["point", "line", "lseg", "box", "path", "polygon", "circle"] as const;
 
-export type PG_COLUMN_UDT_DATA_TYPE = 
-    | typeof _PG_strings[number] 
-    | typeof _PG_numbers[number] 
-    | typeof _PG_geometric[number] 
-    | typeof _PG_json[number] 
-    | typeof _PG_bool[number] 
-    | typeof _PG_date[number] 
-    | typeof _PG_interval[number]
-    | typeof _PG_postgis[number];
-    
+export type PG_COLUMN_UDT_DATA_TYPE =
+  | (typeof _PG_strings)[number]
+  | (typeof _PG_numbers)[number]
+  | (typeof _PG_geometric)[number]
+  | (typeof _PG_json)[number]
+  | (typeof _PG_bool)[number]
+  | (typeof _PG_date)[number]
+  | (typeof _PG_interval)[number]
+  | (typeof _PG_postgis)[number];
+
 const TS_PG_PRIMITIVES = {
-  "string": [ ..._PG_strings, ..._PG_numbers_str, ..._PG_date, ..._PG_geometric, ..._PG_postgis, "lseg"],
-  "number": _PG_numbers_num,
-  "boolean": _PG_bool,
-  "any": [..._PG_json, ..._PG_interval], // consider as any
+  string: [
+    ..._PG_strings,
+    ..._PG_numbers_str,
+    ..._PG_date,
+    ..._PG_geometric,
+    ..._PG_postgis,
+    "lseg",
+  ],
+  number: _PG_numbers_num,
+  boolean: _PG_bool,
+  any: [..._PG_json, ..._PG_interval], // consider as any
 
-  /** Timestamps are kept in original string format to avoid filters failing 
+  /** Timestamps are kept in original string format to avoid filters failing
    * TODO: cast to dates if udt_name date/timestamp(0 - 3)
-  */
+   */
   // "Date": _PG_date,
 } as const;
 
 export const TS_PG_Types = {
   ...TS_PG_PRIMITIVES,
-  "number[]": TS_PG_PRIMITIVES.number.map(s => `_${s}` as const),
-  "boolean[]": TS_PG_PRIMITIVES.boolean.map(s => `_${s}` as const),
-  "string[]": TS_PG_PRIMITIVES.string.map(s => `_${s}` as const),
-  "any[]": TS_PG_PRIMITIVES.any.map(s => `_${s}` as const),
+  "number[]": TS_PG_PRIMITIVES.number.map((s) => `_${s}` as const),
+  "boolean[]": TS_PG_PRIMITIVES.boolean.map((s) => `_${s}` as const),
+  "string[]": TS_PG_PRIMITIVES.string.map((s) => `_${s}` as const),
+  "any[]": TS_PG_PRIMITIVES.any.map((s) => `_${s}` as const),
   // "Date[]": _PG_date.map(s => `_${s}` as const),
-    // "any": [],
+  // "any": [],
 } as const;
 export type TS_COLUMN_DATA_TYPES = keyof typeof TS_PG_Types;
-
 
 /**
  * Generated Typescript schema for the tables and views in the database
  * Example:
- * 
- * 
+ *
+ *
  * type DBSchema = {
  *    ..view_name: {
  *      is_view: boolean;
@@ -90,19 +100,19 @@ export type DBTableSchema = {
   delete?: boolean;
   /**
    * Used in update, insertm select and filters
-   * fields that are nullable or with a default value are be optional 
+   * fields that are nullable or with a default value are be optional
    */
   columns: AnyObject;
-}
-export type DBSchema = { 
-  [tov_name: string]: DBTableSchema
-}
+};
+export type DBSchema = {
+  [tov_name: string]: DBTableSchema;
+};
 
 export type ColumnInfo = {
   name: string;
 
   /**
-   * Column display name. Will be first non empty value from i18n data, comment, name 
+   * Column display name. Will be first non empty value from i18n data, comment, name
    */
   label: string;
 
@@ -154,7 +164,7 @@ export type ColumnInfo = {
   is_pkey: boolean;
 
   /**
-   * Foreign key constraint 
+   * Foreign key constraint
    * A column can reference multiple tables
    */
   references?: {
@@ -190,12 +200,9 @@ export type ColumnInfo = {
    * Used in SmartForm
    */
   file?: FileColumnConfig;
-
-}
-
+};
 
 export type ValidatedColumnInfo = ColumnInfo & {
-
   /**
    * TypeScript data type
    */
@@ -230,8 +237,7 @@ export type ValidatedColumnInfo = ColumnInfo & {
    * Can be used in the delete filter
    */
   delete: boolean;
-}
-
+};
 
 export type DBSchemaTable = {
   name: string;
@@ -242,7 +248,7 @@ export type DBSchemaTable = {
 /**
  * List of fields to include or exclude
  */
-export type FieldFilter<T extends AnyObject = AnyObject> = SelectTyped<T>
+export type FieldFilter<T extends AnyObject = AnyObject> = SelectTyped<T>;
 
 export type AscOrDesc = 1 | -1 | boolean;
 
@@ -255,36 +261,41 @@ export type AscOrDesc = 1 | -1 | boolean;
  * Array order is maintained
  * if nullEmpty is true then empty text will be replaced to null (so nulls sorting takes effect on it)
  */
-export type _OrderBy<T extends AnyObject> = 
+export type _OrderBy<T extends AnyObject> =
   | { [K in keyof Partial<T>]: AscOrDesc }
   | { [K in keyof Partial<T>]: AscOrDesc }[]
-  | { key: keyof T, asc?: AscOrDesc, nulls?: "last" | "first", nullEmpty?: boolean }[] 
+  | { key: keyof T; asc?: AscOrDesc; nulls?: "last" | "first"; nullEmpty?: boolean }[]
   | Array<keyof T>
-  | keyof T
-  ;
-  
-export type OrderBy<T extends AnyObject | void = void> = T extends AnyObject? _OrderBy<T> :  _OrderBy<AnyObject>;
+  | keyof T;
 
-type CommonSelect =  
-| "*"
-| ""
-| { "*" : 1 }
+export type OrderBy<T extends AnyObject | void = void> =
+  T extends AnyObject ? _OrderBy<T> : _OrderBy<AnyObject>;
 
-export type SelectTyped<T extends AnyObject> = 
-  | { [K in keyof Partial<T>]: 1 | true } 
-  | { [K in keyof Partial<T>]: 0 | false } 
+type CommonSelect = "*" | "" | { "*": 1 };
+
+export type SelectTyped<T extends AnyObject> =
+  | { [K in keyof Partial<T>]: 1 | true }
+  | { [K in keyof Partial<T>]: 0 | false }
   | (keyof T)[]
-  | CommonSelect
-;
+  | CommonSelect;
 
+export const JOIN_KEYS = ["$innerJoin", "$leftJoin"] as const;
+export const JOIN_PARAMS = [
+  "select",
+  "filter",
+  "$path",
+  "$condition",
+  "offset",
+  "limit",
+  "orderBy",
+] as const;
 
-export const JOIN_KEYS = ["$innerJoin", "$leftJoin"] as const; 
-export const JOIN_PARAMS = ["select", "filter", "$path", "$condition", "offset", "limit", "orderBy"] as const;
-
-export type JoinCondition = {
-  column: string;
-  rootColumn: string;
-} | ComplexFilter;
+export type JoinCondition =
+  | {
+      column: string;
+      rootColumn: string;
+    }
+  | ComplexFilter;
 
 export type JoinPath = {
   table: string;
@@ -295,9 +306,9 @@ export type JoinPath = {
    */
   on?: Record<string, string>[];
 };
-export type RawJoinPath = string | (JoinPath | string)[]
+export type RawJoinPath = string | (JoinPath | string)[];
 
-export type DetailedJoinSelect = Partial<Record<typeof JOIN_KEYS[number], RawJoinPath>> & {
+export type DetailedJoinSelect = Partial<Record<(typeof JOIN_KEYS)[number], RawJoinPath>> & {
   select: Select;
   filter?: FullFilter<void, void>;
   having?: FullFilter<void, void>;
@@ -305,26 +316,24 @@ export type DetailedJoinSelect = Partial<Record<typeof JOIN_KEYS[number], RawJoi
   limit?: number;
   orderBy?: OrderBy;
 } & (
-  { 
-    $condition?: undefined;
-  } | {
-    /**
-     * If present then will overwrite $path and any inferred joins
-     */
-    $condition?: JoinCondition[];
+    | {
+        $condition?: undefined;
+      }
+    | {
+        /**
+         * If present then will overwrite $path and any inferred joins
+         */
+        $condition?: JoinCondition[];
+      }
+  );
 
-  }
-);
+export type SimpleJoinSelect =
+  | "*"
+  /** Aliased Shorthand join: table_name: { ...select } */
+  | Record<string, 1 | "*" | true | FunctionSelect>
+  | Record<string, 0 | false>;
 
-export type SimpleJoinSelect = 
-| "*"
-/** Aliased Shorthand join: table_name: { ...select } */
-| Record<string, 1 | "*" | true | FunctionSelect> 
-| Record<string, 0 | false> 
-
-export type JoinSelect = 
-| SimpleJoinSelect
-| DetailedJoinSelect;
+export type JoinSelect = SimpleJoinSelect | DetailedJoinSelect;
 
 type FunctionShorthand = string;
 type FunctionFull = Record<string, any[] | readonly any[] | FunctionShorthand>;
@@ -336,29 +345,30 @@ type FunctionAliasedSelect = Record<string, FunctionFull>;
 
 type InclusiveSelect = true | 1 | FunctionSelect | JoinSelect;
 
-type SelectFuncs<T extends AnyObject = AnyObject, IsTyped = false> = (
-  | ({ [K in keyof Partial<T>]: InclusiveSelect } & Record<string, IsTyped extends true? FunctionFull : InclusiveSelect>) 
+type SelectFuncs<T extends AnyObject = AnyObject, IsTyped = false> =
+  | ({ [K in keyof Partial<T>]: InclusiveSelect } & Record<
+      string,
+      IsTyped extends true ? FunctionFull : InclusiveSelect
+    >)
   | FunctionAliasedSelect
   | { [K in keyof Partial<T>]: true | 1 | string }
   | { [K in keyof Partial<T>]: 0 | false }
   | CommonSelect
-  | (keyof Partial<T>)[]
-);
+  | (keyof Partial<T>)[];
 
 /** S param is needed to ensure the non typed select works fine */
-export type Select<T extends AnyObject | void = void, S extends DBSchema | void = void> = { t: T, s: S } extends { t: AnyObject, s: DBSchema } ? SelectFuncs<T & { $rowhash: string }, true> : SelectFuncs<AnyObject & { $rowhash: string }, false>;
+export type Select<T extends AnyObject | void = void, S extends DBSchema | void = void> =
+  {
+    t: T;
+    s: S;
+  } extends { t: AnyObject; s: DBSchema } ?
+    SelectFuncs<T & { $rowhash: string }, true>
+  : SelectFuncs<AnyObject & { $rowhash: string }, false>;
 
-export type SelectBasic = 
-  | { [key: string]: any } 
-  | {} 
-  | undefined 
-  | "" 
-  | "*" 
-  ;
+export type SelectBasic = { [key: string]: any } | {} | undefined | "" | "*";
 
 /* Simpler types */
 type CommonSelectParams = {
-
   /**
    * Max number of rows to return
    * - If undefined then 1000 will be applied as the default
@@ -384,42 +394,41 @@ type CommonSelectParams = {
    * - statement-no-rls: sql statement without row level security
    * - statement-where: sql statement where condition
    */
-  returnType?: 
-
-  /**
+  returnType?: /**
    * Will return the first row as an object. Will throw an error if more than a row is returned. Use limit: 1 to avoid error.
    */
   | "row"
 
-  /**
-    * Will return the first value from the selected field
-    */
-  | "value"
+    /**
+     * Will return the first value from the selected field
+     */
+    | "value"
 
-  /**
-    * Will return an array of values from the selected field. Similar to array_agg(field).
-    */
-  | "values"
+    /**
+     * Will return an array of values from the selected field. Similar to array_agg(field).
+     */
+    | "values"
 
-  /**
-    * Will return the sql statement. Requires publishRawSQL privileges if called by client
-    */
-  | "statement"
+    /**
+     * Will return the sql statement. Requires publishRawSQL privileges if called by client
+     */
+    | "statement"
 
-  /**
-    * Will return the sql statement excluding the user header. Requires publishRawSQL privileges if called by client
-    */
-  | "statement-no-rls"
+    /**
+     * Will return the sql statement excluding the user header. Requires publishRawSQL privileges if called by client
+     */
+    | "statement-no-rls"
 
-  /**
-    * Will return the sql statement where condition. Requires publishRawSQL privileges if called by client
-    */
-  | "statement-where"
+    /**
+     * Will return the sql statement where condition. Requires publishRawSQL privileges if called by client
+     */
+    | "statement-where";
+};
 
-} 
-
-export type SelectParams<T extends AnyObject | void = void, S extends DBSchema | void = void> = CommonSelectParams & {
-
+export type SelectParams<
+  T extends AnyObject | void = void,
+  S extends DBSchema | void = void,
+> = CommonSelectParams & {
   /**
    * Fields/expressions/linked data to select
    * - If empty then all fields will be selected
@@ -435,29 +444,31 @@ export type SelectParams<T extends AnyObject | void = void, S extends DBSchema |
    * Order by options
    * - If array then the order will be maintained
    */
-  orderBy?: OrderBy<S extends DBSchema? T : void>;
+  orderBy?: OrderBy<S extends DBSchema ? T : void>;
 
   /**
    * Filter applied after any aggregations (group by)
    */
   having?: FullFilter<T, S>;
-}
-export type SubscribeParams<T extends AnyObject | void = void, S extends DBSchema | void = void> = SelectParams<T, S> & {
+};
+export type SubscribeParams<
+  T extends AnyObject | void = void,
+  S extends DBSchema | void = void,
+> = SelectParams<T, S> & {
   /**
    * If true then the subscription will be throttled to the provided number of milliseconds
    */
   throttle?: number;
   throttleOpts?: {
-    /** 
-     * False by default. 
-     * If true then the first value will be emitted at the end of the interval. Instant otherwise 
+    /**
+     * False by default.
+     * If true then the first value will be emitted at the end of the interval. Instant otherwise
      * */
     skipFirst?: boolean;
   };
 };
 
 export type UpdateParams<T extends AnyObject | void = void, S extends DBSchema | void = void> = {
-
   /**
    * If defined will returns the specified fields of the updated record(s)
    */
@@ -470,11 +481,9 @@ export type UpdateParams<T extends AnyObject | void = void, S extends DBSchema |
 
   /* true by default. If false the update will fail if affecting more than one row */
   multi?: boolean;
-
 } & Pick<CommonSelectParams, "returnType">;
 
 export type InsertParams<T extends AnyObject | void = void, S extends DBSchema | void = void> = {
-
   /**
    * If defined will returns the specified fields of the updated record(s)
    */
@@ -501,7 +510,6 @@ export type DeleteParams<T extends AnyObject | void = void, S extends DBSchema |
 export type PartialLax<T = AnyObject> = Partial<T>;
 
 export type TableInfo = {
-
   /**
    * OID from the postgres database
    * Useful in handling renamed tables
@@ -517,14 +525,16 @@ export type TableInfo = {
    * Defined if this is the fileTable
    */
   isFileTable?: {
-    /** 
-     * Defined if direct inserts are disabled. 
+    /**
+     * Defined if direct inserts are disabled.
      * Only nested inserts through the specified tables/columns are allowed
      * */
-    allowedNestedInserts?: {
-      table: string;
-      column: string;
-    }[] | undefined;
+    allowedNestedInserts?:
+      | {
+          table: string;
+          column: string;
+        }[]
+      | undefined;
   };
 
   /**
@@ -545,101 +555,136 @@ export type TableInfo = {
    */
   dynamicRules?: {
     update?: boolean;
-  }
+  };
 
   /**
    * Additional table info provided through TableConfig
    */
   info?: {
     label?: string;
-  }
+  };
 
   /**
    * List of unique column indexes/constraints.
    * Column groups where at least a column is not allowed to be viewed (selected) are omitted.
    */
   uniqueColumnGroups: string[][] | undefined;
-}
+};
 
 export type OnError = (err: any) => void;
 
 type JoinedSelect = Record<string, Select>;
 export type SelectFunction = Record<string, any[]>;
-type ParseSelect<Select extends SelectParams<TD>["select"], TD extends AnyObject> = 
-(Select extends { "*": 1 }? Required<TD> : {})
-& {
-  [Key in keyof Omit<Select, "*">  & string]: Select[Key] extends 1? Required<TD>[Key] : 
-    Select[Key] extends SelectFunction? any : 
-    Select[Key] extends JoinedSelect? any[] : 
-    any;
-}
+type ParseSelect<
+  Select extends SelectParams<TD>["select"],
+  TD extends AnyObject,
+> = (Select extends { "*": 1 } ? Required<TD> : {}) & {
+  [Key in keyof Omit<Select, "*"> & string]: Select[Key] extends 1 ? Required<TD>[Key]
+  : Select[Key] extends SelectFunction ? any
+  : Select[Key] extends JoinedSelect ? any[]
+  : any;
+};
 
-type GetSelectDataType<S extends DBSchema | void, O extends SelectParams<TD, S>, TD extends AnyObject> = 
-  O extends { returnType: "value" }? any : 
-  O extends { returnType: "values"; select: Record<string, 1> }? ValueOf<Pick<Required<TD>, keyof O["select"]>> : 
-  O extends { returnType: "values" }? any : 
-  O extends { select: "*" }? Required<TD> : 
-  O extends { select: "" }? Record<string, never> : 
-  O extends { select: Record<string, 0> }? Omit<Required<TD>, keyof O["select"]> : 
-  O extends { select: Record<string, any> }? ParseSelect<O["select"], Required<TD>> : 
-  Required<TD>;
+type GetSelectDataType<
+  S extends DBSchema | void,
+  O extends SelectParams<TD, S>,
+  TD extends AnyObject,
+> =
+  O extends { returnType: "value" } ? any
+  : O extends { returnType: "values"; select: Record<string, 1> } ?
+    ValueOf<Pick<Required<TD>, keyof O["select"]>>
+  : O extends { returnType: "values" } ? any
+  : O extends { select: "*" } ? Required<TD>
+  : O extends { select: "" } ? Record<string, never>
+  : O extends { select: Record<string, 0> } ? Omit<Required<TD>, keyof O["select"]>
+  : O extends { select: Record<string, any> } ? ParseSelect<O["select"], Required<TD>>
+  : Required<TD>;
 
-export type GetSelectReturnType<S extends DBSchema | void, O extends SelectParams<TD, S>, TD extends AnyObject, isMulti extends boolean> = 
-  O extends { returnType: "statement" }? string : 
-  isMulti extends true? GetSelectDataType<S, O, TD>[] :
-  GetSelectDataType<S, O, TD>;
+export type GetSelectReturnType<
+  S extends DBSchema | void,
+  O extends SelectParams<TD, S>,
+  TD extends AnyObject,
+  isMulti extends boolean,
+> =
+  O extends { returnType: "statement" } ? string
+  : isMulti extends true ? GetSelectDataType<S, O, TD>[]
+  : GetSelectDataType<S, O, TD>;
 
-type GetReturningReturnType<O extends UpdateParams<TD, S>, TD extends AnyObject, S extends DBSchema | void = void> = 
-  O extends { returning: "*" }? Required<TD> : 
-  O extends { returning: "" }? Record<string, never> : 
-  O extends { returning: Record<string, 1> }? Pick<Required<TD>, keyof O["returning"]> : 
-  O extends { returning: Record<string, 0> }? Omit<Required<TD>, keyof O["returning"]> : 
-  void;
+type GetReturningReturnType<
+  O extends UpdateParams<TD, S>,
+  TD extends AnyObject,
+  S extends DBSchema | void = void,
+> =
+  O extends { returning: "*" } ? Required<TD>
+  : O extends { returning: "" } ? Record<string, never>
+  : O extends { returning: Record<string, 1> } ? Pick<Required<TD>, keyof O["returning"]>
+  : O extends { returning: Record<string, 0> } ? Omit<Required<TD>, keyof O["returning"]>
+  : void;
 
-export type GetUpdateReturnType<O extends UpdateParams<TD, S>, TD extends AnyObject, S extends DBSchema | void = void> = 
-  O extends { multi: false }? 
-    GetReturningReturnType<O, TD, S> : 
-    GetReturningReturnType<O, TD, S>[];
+export type GetUpdateReturnType<
+  O extends UpdateParams<TD, S>,
+  TD extends AnyObject,
+  S extends DBSchema | void = void,
+> =
+  O extends { multi: false } ? GetReturningReturnType<O, TD, S>
+  : GetReturningReturnType<O, TD, S>[];
 
-export type GetInsertReturnType<Data extends InsertData<AnyObject>, O extends UpdateParams<TD, S>, TD extends AnyObject, S extends DBSchema | void = void> = 
-  Data extends any[] | readonly any[]? 
-    GetReturningReturnType<O, TD, S>[] :
-    GetReturningReturnType<O, TD, S>;
+export type GetInsertReturnType<
+  Data extends InsertData<AnyObject>,
+  O extends UpdateParams<TD, S>,
+  TD extends AnyObject,
+  S extends DBSchema | void = void,
+> =
+  Data extends any[] | readonly any[] ? GetReturningReturnType<O, TD, S>[]
+  : GetReturningReturnType<O, TD, S>;
 
 export type SubscriptionHandler = {
   unsubscribe: () => Promise<any>;
   filter: FullFilter<void, void> | {};
-}
+};
 
-type GetColumns = (lang?: string, params?: { rule: "update", data: AnyObject, filter: AnyObject }) => Promise<ValidatedColumnInfo[]>;
+type GetColumns = (
+  lang?: string,
+  params?: { rule: "update"; data: AnyObject; filter: AnyObject }
+) => Promise<ValidatedColumnInfo[]>;
 
+/**
+ * Methods for interacting with a view
+ * - On client-side some methods are restricted (and undefined) based on publish rules on the server
+ */
 export type ViewHandler<TD extends AnyObject = AnyObject, S extends DBSchema | void = void> = {
   /**
    * Retrieves the table/view info
    */
-  getInfo?: (lang?: string) => Promise<TableInfo>;
+  getInfo: (lang?: string) => Promise<TableInfo>;
 
   /**
    * Retrieves columns metadata of the table/view
    */
-  getColumns?: GetColumns;
+  getColumns: GetColumns;
 
   /**
    * Retrieves a list of matching records from the view/table
    */
-  find: <P extends SelectParams<TD, S>>(filter?: FullFilter<TD, S>, selectParams?: P) => Promise<GetSelectReturnType<S, P, TD, true>>;
+  find: <P extends SelectParams<TD, S>>(
+    filter?: FullFilter<TD, S>,
+    selectParams?: P
+  ) => Promise<GetSelectReturnType<S, P, TD, true>>;
 
   /**
    * Retrieves a record from the view/table
    */
-  findOne: <P extends SelectParams<TD, S>>(filter?: FullFilter<TD, S>, selectParams?: P) => Promise<undefined | GetSelectReturnType<S, P, TD, false>>;
+  findOne: <P extends SelectParams<TD, S>>(
+    filter?: FullFilter<TD, S>,
+    selectParams?: P
+  ) => Promise<undefined | GetSelectReturnType<S, P, TD, false>>;
 
   /**
    * Retrieves a list of matching records from the view/table and subscribes to changes
    */
   subscribe: <P extends SubscribeParams<TD, S>>(
-    filter: FullFilter<TD, S>, 
-    params: P, 
+    filter: FullFilter<TD, S>,
+    params: P,
     onData: (items: GetSelectReturnType<S, P, TD, true>) => any,
     onError?: OnError
   ) => Promise<SubscriptionHandler>;
@@ -648,114 +693,163 @@ export type ViewHandler<TD extends AnyObject = AnyObject, S extends DBSchema | v
    * Retrieves first matching record from the view/table and subscribes to changes
    */
   subscribeOne: <P extends SubscribeParams<TD, S>>(
-    filter: FullFilter<TD, S>, 
-    params: P, 
-    onData: (item: GetSelectReturnType<S, P, TD, false> | undefined) => any, 
+    filter: FullFilter<TD, S>,
+    params: P,
+    onData: (item: GetSelectReturnType<S, P, TD, false> | undefined) => any,
     onError?: OnError
   ) => Promise<SubscriptionHandler>;
 
   /**
    * Returns the number of rows that match the filter
    */
-  count: <P extends SelectParams<TD, S>>(filter?: FullFilter<TD, S>, selectParams?: P) => Promise<number>;
+  count: <P extends SelectParams<TD, S>>(
+    filter?: FullFilter<TD, S>,
+    selectParams?: P
+  ) => Promise<number>;
 
   /**
    * Returns result size in bits
    */
-  size: <P extends SelectParams<TD, S>>(filter?: FullFilter<TD, S>, selectParams?: P) => Promise<string>;
-} 
+  size: <P extends SelectParams<TD, S>>(
+    filter?: FullFilter<TD, S>,
+    selectParams?: P
+  ) => Promise<string>;
+};
 
- 
 type UpsertDataToPGCastLax<T extends AnyObject> = PartialLax<UpsertDataToPGCast<T>>;
-type InsertData<T extends AnyObject> = UpsertDataToPGCast<T> | UpsertDataToPGCast<T>[]
+type InsertData<T extends AnyObject> = UpsertDataToPGCast<T> | UpsertDataToPGCast<T>[];
 
-export type TableHandler<TD extends AnyObject = AnyObject, S extends DBSchema | void = void> = ViewHandler<TD, S> & {
-
+/**
+ * Methods for interacting with a table
+ * - On client-side some methods are restricted (and undefined) based on publish rules on the server
+ */
+export type TableHandler<
+  TD extends AnyObject = AnyObject,
+  S extends DBSchema | void = void,
+> = ViewHandler<TD, S> & {
   /**
    * Updates a record in the table based on the specified filter criteria
    * - Use { multi: false } to ensure no more than one row is updated
    */
-  update: <P extends UpdateParams<TD, S>>(filter: FullFilter<TD, S>, newData: UpsertDataToPGCastLax<TD>, params?: P) => Promise<GetUpdateReturnType<P ,TD, S> | undefined>;
+  update: <P extends UpdateParams<TD, S>>(
+    filter: FullFilter<TD, S>,
+    newData: UpsertDataToPGCastLax<TD>,
+    params?: P
+  ) => Promise<GetUpdateReturnType<P, TD, S> | undefined>;
 
   /**
    * Updates multiple records in the table in a batch operation.
    * - Each item in the `data` array contains a filter and the corresponding data to update.
    */
-  updateBatch: <P extends UpdateParams<TD, S>>(data: [FullFilter<TD, S>, UpsertDataToPGCastLax<TD>][], params?: P) => Promise<GetUpdateReturnType<P ,TD, S> | void>;
+  updateBatch: <P extends UpdateParams<TD, S>>(
+    data: [FullFilter<TD, S>, UpsertDataToPGCastLax<TD>][],
+    params?: P
+  ) => Promise<GetUpdateReturnType<P, TD, S> | void>;
 
   /**
    * Inserts a new record into the table.
    */
-  insert: <P extends InsertParams<TD, S>, D extends InsertData<TD>>(data: D, params?: P) => Promise<GetInsertReturnType<D, P ,TD, S>>;
+  insert: <P extends InsertParams<TD, S>, D extends InsertData<TD>>(
+    data: D,
+    params?: P
+  ) => Promise<GetInsertReturnType<D, P, TD, S>>;
 
   /**
    * Inserts or updates a record in the table.
    * - If a record matching the `filter` exists, it updates the record.
    * - If no matching record exists, it inserts a new record.
    */
-  upsert: <P extends UpdateParams<TD, S>>(filter: FullFilter<TD, S>, newData: UpsertDataToPGCastLax<TD>, params?: P) => Promise<GetUpdateReturnType<P ,TD, S>>;
+  upsert: <P extends UpdateParams<TD, S>>(
+    filter: FullFilter<TD, S>,
+    newData: UpsertDataToPGCastLax<TD>,
+    params?: P
+  ) => Promise<GetUpdateReturnType<P, TD, S>>;
 
   /**
    * Deletes records from the table based on the specified filter criteria.
    * - If no filter is provided, all records may be deleted (use with caution).
    */
-  delete: <P extends DeleteParams<TD, S>>(filter?: FullFilter<TD, S>, params?: P) => Promise<GetUpdateReturnType<P ,TD, S> | undefined>;
-}
+  delete: <P extends DeleteParams<TD, S>>(
+    filter?: FullFilter<TD, S>,
+    params?: P
+  ) => Promise<GetUpdateReturnType<P, TD, S> | undefined>;
+};
 
-export type JoinMakerOptions<TT extends AnyObject = AnyObject> = SelectParams<TT> & { path?: RawJoinPath };
-export type JoinMaker<TT extends AnyObject = AnyObject, S extends DBSchema | void = void> = (filter?: FullFilter<TT, S>, select?: Select<TT>, options?: JoinMakerOptions<TT> ) => any;
-export type JoinMakerBasic = (filter?: FullFilterBasic, select?: SelectBasic, options?: SelectParams & { path?: RawJoinPath }) => any;
+export type JoinMakerOptions<TT extends AnyObject = AnyObject> = SelectParams<TT> & {
+  path?: RawJoinPath;
+};
+export type JoinMaker<TT extends AnyObject = AnyObject, S extends DBSchema | void = void> = (
+  filter?: FullFilter<TT, S>,
+  select?: Select<TT>,
+  options?: JoinMakerOptions<TT>
+) => any;
+export type JoinMakerBasic = (
+  filter?: FullFilterBasic,
+  select?: SelectBasic,
+  options?: SelectParams & { path?: RawJoinPath }
+) => any;
 
 export type TableJoin = {
   [key: string]: JoinMaker;
-}
+};
 export type TableJoinBasic = {
   [key: string]: JoinMakerBasic;
-}
+};
 
 export type DbJoinMaker = {
   innerJoin: TableJoin;
   leftJoin: TableJoin;
   innerJoinOne: TableJoin;
   leftJoinOne: TableJoin;
-} 
+};
 
 export type SQLResultInfo = {
-  command: "SELECT" | "UPDATE" | "DELETE" | "CREATE" | "ALTER" | "LISTEN" | "UNLISTEN" | "INSERT" | string;
+  command:
+    | "SELECT"
+    | "UPDATE"
+    | "DELETE"
+    | "CREATE"
+    | "ALTER"
+    | "LISTEN"
+    | "UNLISTEN"
+    | "INSERT"
+    | string;
   rowCount: number;
   duration: number;
-}
+};
 export type SQLResult<T extends SQLOptions["returnType"]> = SQLResultInfo & {
-  rows: (T extends "arrayMode"? any : AnyObject)[];
+  rows: (T extends "arrayMode" ? any : AnyObject)[];
   fields: {
     name: string;
     dataType: string;
     udt_name: PG_COLUMN_UDT_DATA_TYPE;
     tsDataType: TS_COLUMN_DATA_TYPES;
     tableID?: number;
-    tableName?: string; 
-    tableSchema?: string; 
+    tableName?: string;
+    tableSchema?: string;
     columnID?: number;
     columnName?: string;
   }[];
-}
+};
 export type DBEventHandles = {
   socketChannel: string;
   socketUnsubChannel: string;
-  addListener: (listener: (event: any) => void) => { removeListener: () => void; } 
+  addListener: (listener: (event: any) => void) => { removeListener: () => void };
 };
 
-export type SocketSQLStreamPacket = {
-  type: "data";
-  fields?: any[];
-  rows: any[];
-  ended?: boolean;
-  info?: SQLResultInfo;
-  processId: number;
-} | {
-  type: "error";
-  error: any;
-};
+export type SocketSQLStreamPacket =
+  | {
+      type: "data";
+      fields?: any[];
+      rows: any[];
+      ended?: boolean;
+      info?: SQLResultInfo;
+      processId: number;
+    }
+  | {
+      type: "error";
+      error: any;
+    };
 export type SocketSQLStreamServer = {
   channel: string;
   unsubChannel: string;
@@ -766,99 +860,124 @@ export type SocketSQLStreamHandlers = {
   stop: (terminate?: boolean) => Promise<void>;
 };
 export type SocketSQLStreamClient = SocketSQLStreamServer & {
-  start: (listener: (packet: SocketSQLStreamPacket) => void) => Promise<SocketSQLStreamHandlers>
+  start: (listener: (packet: SocketSQLStreamPacket) => void) => Promise<SocketSQLStreamHandlers>;
 };
 
-export type CheckForListen<T, O extends SQLOptions> = O["allowListen"] extends true? (DBEventHandles | T) : T;
+export type CheckForListen<T, O extends SQLOptions> =
+  O["allowListen"] extends true ? DBEventHandles | T : T;
 
 export type GetSQLReturnType<O extends SQLOptions> = CheckForListen<
-  (
-    O["returnType"] extends "row"? AnyObject | null :
-    O["returnType"] extends "rows"? AnyObject[] :
-    O["returnType"] extends "value"? any | null :
-    O["returnType"] extends "values"? any[] :
-    O["returnType"] extends "statement"? string :
-    O["returnType"] extends "noticeSubscription"? DBEventHandles :
-    O["returnType"] extends "stream"? SocketSQLStreamClient :
-    SQLResult<O["returnType"]>
-  )
-, O>;
+  O["returnType"] extends "row" ? AnyObject | null
+  : O["returnType"] extends "rows" ? AnyObject[]
+  : O["returnType"] extends "value" ? any | null
+  : O["returnType"] extends "values" ? any[]
+  : O["returnType"] extends "statement" ? string
+  : O["returnType"] extends "noticeSubscription" ? DBEventHandles
+  : O["returnType"] extends "stream" ? SocketSQLStreamClient
+  : SQLResult<O["returnType"]>,
+  O
+>;
 
-export type SQLHandler = 
-/**
- * 
- * @param query <string> query. e.g.: SELECT * FROM users;
- * @param params <any[] | object> query arguments to be escaped. e.g.: { name: 'dwadaw' }
- * @param options <object> { returnType: "statement" | "rows" | "noticeSubscription" }
- */
-<Opts extends SQLOptions>(
-  query: string, 
-  args?: AnyObject | any[], 
-  options?: Opts,
-  serverSideOptions?: {
-    socket: any
-  } | { 
-    httpReq: any;
-  }
-) => Promise<GetSQLReturnType<Opts>>
+export type SQLHandler =
+  /**
+   *
+   * @param query <string> query. e.g.: SELECT * FROM users;
+   * @param params <any[] | object> query arguments to be escaped. e.g.: { name: 'dwadaw' }
+   * @param options <object> { returnType: "statement" | "rows" | "noticeSubscription" }
+   */
+  <Opts extends SQLOptions>(
+    query: string,
+    args?: AnyObject | any[],
+    options?: Opts,
+    serverSideOptions?:
+      | {
+          socket: any;
+        }
+      | {
+          httpReq: any;
+        }
+  ) => Promise<GetSQLReturnType<Opts>>;
 
-type SelectMethods<T extends DBTableSchema> = T["select"] extends true? keyof Pick<TableHandler, "count" | "find" | "findOne" | "getColumns" | "getInfo" | "size" | "subscribe" | "subscribeOne"> : never;
-type UpdateMethods<T extends DBTableSchema> = T["update"] extends true? keyof Pick<TableHandler, "update" | "updateBatch"> : never;
-type InsertMethods<T extends DBTableSchema> = T["insert"] extends true? keyof Pick<TableHandler, "insert"> : never;
-type UpsertMethods<T extends DBTableSchema> = T["insert"] extends true? T["update"] extends true? keyof Pick<TableHandler, "upsert"> : never : never;
-type DeleteMethods<T extends DBTableSchema> = T["delete"] extends true? keyof Pick<TableHandler, "delete"> : never;
-// type SyncMethods<T extends DBTableSchema> = T["select"] extends true? T["is_view"] extends true?  keyof Pick<TableHandler, "sync"> : never : never;
-export type ValidatedMethods<T extends DBTableSchema> = 
-| SelectMethods<T> 
-| UpdateMethods<T>
-| InsertMethods<T>
-| UpsertMethods<T>
-| DeleteMethods<T>
+type SelectMethods<T extends DBTableSchema> =
+  T["select"] extends true ?
+    keyof Pick<
+      TableHandler,
+      | "count"
+      | "find"
+      | "findOne"
+      | "getColumns"
+      | "getInfo"
+      | "size"
+      | "subscribe"
+      | "subscribeOne"
+    >
+  : never;
+type UpdateMethods<T extends DBTableSchema> =
+  T["update"] extends true ? keyof Pick<TableHandler, "update" | "updateBatch"> : never;
+type InsertMethods<T extends DBTableSchema> =
+  T["insert"] extends true ? keyof Pick<TableHandler, "insert"> : never;
+type UpsertMethods<T extends DBTableSchema> =
+  T["insert"] extends true ?
+    T["update"] extends true ?
+      keyof Pick<TableHandler, "upsert">
+    : never
+  : never;
+type DeleteMethods<T extends DBTableSchema> =
+  T["delete"] extends true ? keyof Pick<TableHandler, "delete"> : never;
+
+export type ValidatedMethods<T extends DBTableSchema> =
+  | SelectMethods<T>
+  | UpdateMethods<T>
+  | InsertMethods<T>
+  | UpsertMethods<T>
+  | DeleteMethods<T>;
 // | SyncMethods<T>
 
-export type DBHandler<S = void> = (S extends DBSchema? {
-  [k in keyof S]: S[k]["is_view"] extends true ? 
-    ViewHandler<S[k]["columns"], S> : 
-    Pick<TableHandler<S[k]["columns"], S>, ValidatedMethods<S[k]>>
-} : {
-  [key: string]: Partial<TableHandler>;
-}) & DbJoinMaker & {
-  sql?: SQLHandler
-}
+export type DBHandler<S = void> = (S extends DBSchema ?
+  {
+    [k in keyof S]: S[k]["is_view"] extends true ? ViewHandler<S[k]["columns"], S>
+    : Pick<TableHandler<S[k]["columns"], S>, ValidatedMethods<S[k]>>;
+  }
+: {
+    [key: string]: Partial<TableHandler>;
+  }) &
+  DbJoinMaker & {
+    sql?: SQLHandler;
+  };
 
 export type DBNoticeConfig = {
   socketChannel: string;
   socketUnsubChannel: string;
-}
+};
 
 export type DBNotifConfig = DBNoticeConfig & {
   notifChannel: string;
-}
-
+};
 
 export type SQLOptions = {
   /**
    * Return type of the query
    */
-  returnType?: Required<SelectParams>["returnType"]
+  returnType?:
+    | Required<SelectParams>["returnType"]
     | "default-with-rollback"
-    | "statement" 
-    | "rows" 
-    | "noticeSubscription" 
-    | "arrayMode" 
+    | "statement"
+    | "rows"
+    | "noticeSubscription"
+    | "arrayMode"
     | "stream";
-  
+
   /**
    * If allowListen not specified and a LISTEN query is issued then expect error
    */
   allowListen?: boolean;
 
   /**
-   * Positive integer that works only with returnType="stream". 
-   * If provided then the query will be cancelled when the specified number of rows have been streamed 
+   * Positive integer that works only with returnType="stream".
+   * If provided then the query will be cancelled when the specified number of rows have been streamed
    */
   streamLimit?: number;
-  
+
   /**
    * If true then the connection will be persisted and used for subsequent queries
    */
@@ -880,25 +999,24 @@ export type SQLOptions = {
 export type SQLRequest = {
   query: string;
   params?: any | any[];
-  options?:  SQLOptions
-}
+  options?: SQLOptions;
+};
 
 export type NotifSubscription = {
   socketChannel: string;
   socketUnsubChannel: string;
   notifChannel: string;
-}
+};
 
 export type NoticeSubscription = {
   socketChannel: string;
   socketUnsubChannel: string;
-}
+};
 
 const preffix = "_psqlWS_.";
 export const CHANNELS = {
   SCHEMA_CHANGED: preffix + "schema-changed",
   SCHEMA: preffix + "schema",
-
 
   DEFAULT: preffix,
   SQL: `${preffix}sql`,
@@ -919,7 +1037,7 @@ export const CHANNELS = {
   CONNECTION: `${preffix}connection`,
 
   _preffix: preffix,
-}
+};
 
 export type SubscriptionChannels = {
   /** Used by server to emit data to client */
@@ -930,36 +1048,41 @@ export type SubscriptionChannels = {
 
   /** Used by client to stop subscription */
   channelNameUnsubscribe: string;
-}
+};
 
 export type AuthGuardLocation = {
-  href:     string;
-  origin:   string;
+  href: string;
+  origin: string;
   protocol: string;
-  host:     string;
+  host: string;
   hostname: string;
-  port:     string;
+  port: string;
   pathname: string;
-  search:   string;
-  hash:     string;
-}
+  search: string;
+  hash: string;
+};
 export type AuthGuardLocationResponse = {
   shouldReload: boolean;
-}
+};
 
 export const RULE_METHODS = {
-  "getColumns": ["getColumns"], 
-  "getInfo": ["getInfo"], 
-  "insert": ["insert", "upsert"], 
-  "update": ["update", "upsert", "updateBatch"], 
-  "select": ["findOne", "find", "count", "size"], 
-  "delete": ["delete", "remove"],
-  "sync": ["sync", "unsync"], 
-  "subscribe": ["unsubscribe", "subscribe", "subscribeOne"],  
-} as const
+  getColumns: ["getColumns"],
+  getInfo: ["getInfo"],
+  insert: ["insert", "upsert"],
+  update: ["update", "upsert", "updateBatch"],
+  select: ["findOne", "find", "count", "size"],
+  delete: ["delete", "remove"],
+  sync: ["sync", "unsync"],
+  subscribe: ["unsubscribe", "subscribe", "subscribeOne"],
+} as const;
 
-export type MethodKey = typeof RULE_METHODS[keyof typeof RULE_METHODS][number]
-export type TableSchemaForClient = Record<string, Partial<Record<MethodKey, (MethodKey extends "insert"? { allowedNestedInserts?: string[]; } : AnyObject)>>>;
+export type MethodKey = (typeof RULE_METHODS)[keyof typeof RULE_METHODS][number];
+export type TableSchemaForClient = Record<
+  string,
+  Partial<
+    Record<MethodKey, MethodKey extends "insert" ? { allowedNestedInserts?: string[] } : AnyObject>
+  >
+>;
 
 /* Schema */
 export type TableSchema = {
@@ -977,26 +1100,29 @@ export type TableSchema = {
     select: boolean;
     update: boolean;
     delete: boolean;
-  }
-}
+  };
+};
 
-export type MethodFunction = (...args: any) => (any | Promise<any>);
+export type MethodFunction = (...args: any) => any | Promise<any>;
 export type MethodFullDef = {
   input: Record<string, JSONB.JSONBSchema>;
   run: MethodFunction;
   output?: Record<string, JSONB.JSONBSchema>;
-} & ({
-  output?: undefined;
-  outputTable?: string;
-} | {
-  output?: Record<string, JSONB.JSONBSchema>;
-  outputTable?: undefined;
-});
+} & (
+  | {
+      output?: undefined;
+      outputTable?: string;
+    }
+  | {
+      output?: Record<string, JSONB.JSONBSchema>;
+      outputTable?: undefined;
+    }
+);
 export type Method = MethodFunction | MethodFullDef;
 
 export type MethodHandler = {
   [method_name: string]: Method;
-}
+};
 
 export type TableSchemaErrors = {
   [tableName: string]: {
@@ -1006,7 +1132,7 @@ export type TableSchemaErrors = {
   };
 };
 
-export type ClientSchema = { 
+export type ClientSchema = {
   rawSQL: boolean;
   joinTables: string[][];
   auth: AuthTypes.AuthSocketSchema | undefined;
@@ -1015,8 +1141,11 @@ export type ClientSchema = {
   tableSchemaErrors: TableSchemaErrors;
   tableSchema?: DBSchemaTable[];
   schema: TableSchemaForClient;
-  methods: (string | { name: string; description?: string; } & Pick<MethodFullDef, "input" | "output">)[];
-}
+  methods: (
+    | string
+    | ({ name: string; description?: string } & Pick<MethodFullDef, "input" | "output">)
+  )[];
+};
 
 export type ProstglesError = {
   message: string;
@@ -1028,130 +1157,132 @@ export type ProstglesError = {
   code_info?: string;
   detail?: string;
   columns?: string[];
-}
-
+};
 
 /**
  * Type tests
  */
- (( ) => {
-
-  type Fields =  { id: number; name: number; public: number; $rowhash: string; added_day: any }
-  const r:Fields = 1 as any
-  const sel1: Select = { id: 1, name: 1, public: 1, $rowhash: 1, added_day: { $day: []  } };
-  const sel2: Select<{ id: number; name: number; public: number; }> = { id: 1, name: 1, public: 1, $rowhash: 1, dsds: { d: [] } };
-  const sel3: Select<{ id: number; name: number; public: number; }> = ""
-  const sel4: Select<{ id: number; name: number; public: number; }> = "*"
+() => {
+  type Fields = { id: number; name: number; public: number; $rowhash: string; added_day: any };
+  const r: Fields = 1 as any;
+  const sel1: Select = { id: 1, name: 1, public: 1, $rowhash: 1, added_day: { $day: [] } };
+  const sel2: Select<{ id: number; name: number; public: number }> = {
+    id: 1,
+    name: 1,
+    public: 1,
+    $rowhash: 1,
+    dsds: { d: [] },
+  };
+  const sel3: Select<{ id: number; name: number; public: number }> = "";
+  const sel4: Select<{ id: number; name: number; public: number }> = "*";
   const sel12: Select = { id: 1, name: 1, public: 1, $rowhash: 1, dsds: { d: [] } };
-  const sel13: Select = ""
+  const sel13: Select = "";
   const sel14: Select = "*";
 
   const fRow: FullFilter<Fields, {}> = {
-    $rowhash: { "$in": [""] }
+    $rowhash: { $in: [""] },
   };
-  const emptyFilter: FullFilter<Fields, {}> = {
-  };
+  const emptyFilter: FullFilter<Fields, {}> = {};
 
   const sel32: Select = {
-    dwa: 1
-  }
-  
+    dwa: 1,
+  };
+
   const sel = {
     a: 1,
     $rowhash: 1,
-    dwadwA: { dwdwa: [5] }
-  } as const; 
-  
+    dwadwA: { dwdwa: [5] },
+  } as const;
+
   const sds: Select = sel;
   const sds01: Select = "";
   const sds02: Select = "*";
   const sds03: Select = {};
-  const sds2: Select<{a: number}> = sel;
-  
-  const s001: Select = { 
-    h: { "$ts_headline_simple": ["name", { plainto_tsquery: "abc81" }] },
-    hh: { "$ts_headline": ["name", "abc81"] } ,
+  const sds2: Select<{ a: number }> = sel;
+
+  const s001: Select = {
+    h: { $ts_headline_simple: ["name", { plainto_tsquery: "abc81" }] },
+    hh: { $ts_headline: ["name", "abc81"] },
     added: "$date_trunc_2hour",
-    addedY: { "$date_trunc_5minute": ["added"] },
-  }
-  
+    addedY: { $date_trunc_5minute: ["added"] },
+  };
+
   //@ts-expect-error
   const badSel: Select = {
     a: 1,
-    b: 0
+    b: 0,
   };
-  
+
   //@ts-expect-error
-  const badSel1: Select<{a: number}, {}> = {
+  const badSel1: Select<{ a: number }, {}> = {
     b: 1,
-    a: 1
+    a: 1,
   };
-  
-  const sds3: Select<{a: number}> = {
+
+  const sds3: Select<{ a: number }> = {
     // "*": 1,
     // a: "$funcName",
     a: { dwda: [] },
     $rowhashD: { dwda: [] },
     // dwadwa: 1, //{ dwa: []}
-  }
-
+  };
 
   const sel1d: Select = {
     dwada: 1,
     $rowhash: 1,
-    dwawd: { funcName: [12] }
-  }
-
-  const sel1d2: Select<AnyObject> = ["a"]
-
-  const deletePar: DeleteParams = {
-    returning: { id: 1, name: 1, public: 1 , $rowhash: 1, added_day: { "$day": ["added"] } }
-  }
-});
-
-/** More Type tests */
-(async () => {
-
-  type GSchema = {
-    tbl1: {
-      is_view: false,
-      columns: {
-        col1: string,
-        col2: string,
-      },
-      delete: true,
-      select: true,
-      insert: true,
-      update: true,
-    }
+    dwawd: { funcName: [12] },
   };
 
-  type TableDef = { h: number; b?: number; c?: number; }
-  const tableHandler: TableHandler<TableDef> = undefined as any; 
-  tableHandler.insert({ h: 1, c: 2, "b.$func": { dwa: [] } })
-    
-  type DBOFullyTyped<Schema = void> = Schema extends DBSchema ? {
-    [tov_name in keyof Schema]: Schema[tov_name]["is_view"] extends true ?
-    ViewHandler<Schema[tov_name]["columns"], Schema> :
-    TableHandler<Schema[tov_name]["columns"], Schema>
-  } : Record<string, ViewHandler | TableHandler>;
-  
+  const sel1d2: Select<AnyObject> = ["a"];
 
-  type TypedFFilter = FullFilter<GSchema["tbl1"]["columns"], GSchema>
+  const deletePar: DeleteParams = {
+    returning: { id: 1, name: 1, public: 1, $rowhash: 1, added_day: { $day: ["added"] } },
+  };
+};
+
+/** More Type tests */
+async () => {
+  type GSchema = {
+    tbl1: {
+      is_view: false;
+      columns: {
+        col1: string;
+        col2: string;
+      };
+      delete: true;
+      select: true;
+      insert: true;
+      update: true;
+    };
+  };
+
+  type TableDef = { h: number; b?: number; c?: number };
+  const tableHandler: TableHandler<TableDef> = undefined as any;
+  tableHandler.insert({ h: 1, c: 2, "b.$func": { dwa: [] } });
+
+  type DBOFullyTyped<Schema = void> =
+    Schema extends DBSchema ?
+      {
+        [tov_name in keyof Schema]: Schema[tov_name]["is_view"] extends true ?
+          ViewHandler<Schema[tov_name]["columns"], Schema>
+        : TableHandler<Schema[tov_name]["columns"], Schema>;
+      }
+    : Record<string, ViewHandler | TableHandler>;
+
+  type TypedFFilter = FullFilter<GSchema["tbl1"]["columns"], GSchema>;
   const schemaFFilter: TypedFFilter = { "col1.$eq": "dd" };
   const fullFilter: FullFilter<void, void> = schemaFFilter;
-  
+
   const ffFunc = (f: FullFilter<void, void>) => {};
-  ffFunc(schemaFFilter); 
-  
+  ffFunc(schemaFFilter);
+
   const dbo: DBOFullyTyped<GSchema> = 1 as any;
   const funcData = { funcName: [] };
   const noRow = await dbo.tbl1.update({}, { col1: "" });
-  //@ts-expect-error 
+  //@ts-expect-error
   noRow.length;
   //@ts-expect-error
   noRow.col1;
-
 
   const someData = await dbo.tbl1.find({}, { select: { col1: 1 }, orderBy: { col1: -1 } });
 
@@ -1169,68 +1300,64 @@ export type ProstglesError = {
   manyRows?.col1;
   manyRows?.at(0)?.col1;
 
-
   const noIRow = await dbo.tbl1.insert({ col1: "", col2: { $func: [] } });
-  //@ts-expect-error 
+  //@ts-expect-error
   noIRow.length;
   //@ts-expect-error
   noIRow.col1;
-  
+
   const irow = await dbo.tbl1.insert({ col1: "", col2: funcData }, { returning: "*" });
-  //@ts-expect-error 
+  //@ts-expect-error
   irow.length;
   irow.col1;
 
   const irowFunc = await dbo.tbl1.insert({ col1: funcData, col2: "" }, { returning: "*" });
 
   const irows = await dbo.tbl1.insert([{ col1: "", col2: "" }], { returning: "*" });
-  //@ts-expect-error 
+  //@ts-expect-error
   irows.col1;
   irows.length;
 
-  const filter: FullFilter<GSchema["tbl1"]["columns"], GSchema> = {  };
-  
+  const filter: FullFilter<GSchema["tbl1"]["columns"], GSchema> = {};
+
   const filterCheck = <F extends FullFilter<void, void> | undefined>(f: F) => {};
   filterCheck(filter);
-  
+
   const t: UpsertDataToPGCast<GSchema["tbl1"]["columns"]> = {} as any;
   const d: UpsertDataToPGCast<AnyObject> = t;
-  const fup = (a: UpsertDataToPGCast<AnyObject>) => {}
+  const fup = (a: UpsertDataToPGCast<AnyObject>) => {};
   fup(t);
 
   // const f = <A extends TableHandler["count"]>(a: A) => {};
   const f = (s: TableHandler) => {};
-  const th: TableHandler<GSchema["tbl1"]["columns"], GSchema> = {  } as any;
-  // f(th) 
+  const th: TableHandler<GSchema["tbl1"]["columns"], GSchema> = {} as any;
+  // f(th)
 
   const sp: SelectParams<GSchema["tbl1"]["columns"]> = { select: {} };
-  const sf = (sp: SelectParams) => {
-
-  }
+  const sf = (sp: SelectParams) => {};
   sf(sp);
   // const sub: TableHandler["count"] = dbo.tbl1.count
-  
+
   /**
    * Upsert data funcs
    */
-  const gdw: InsertData<{ a: number; z: number }> = {  
-    a: { dwa: [] }, 
-    z: { dwa: [] } 
-  }
-  const gdwn: InsertData<{ a: number; z: number }> = {  
-    a: 2, 
-    z: { dwa: [] } 
-  }
-  const gdw1: InsertData<{ a: number; z: number }> = {  a: 1, z: 2 }
-  const gdw1Opt: InsertData<{ a: number; z?: number }> = {  a: {}, z: 2 }
-  const gdw2: InsertData<{ a: number; z: number;  }> = { a: { dwa: [] } , z: { dwa: [] } }
+  const gdw: InsertData<{ a: number; z: number }> = {
+    a: { dwa: [] },
+    z: { dwa: [] },
+  };
+  const gdwn: InsertData<{ a: number; z: number }> = {
+    a: 2,
+    z: { dwa: [] },
+  };
+  const gdw1: InsertData<{ a: number; z: number }> = { a: 1, z: 2 };
+  const gdw1Opt: InsertData<{ a: number; z?: number }> = { a: {}, z: 2 };
+  const gdw2: InsertData<{ a: number; z: number }> = { a: { dwa: [] }, z: { dwa: [] } };
   //@ts-expect-error
-  const missingKey: InsertData<{ a: number; z: number;  }> = { z: 1, z: { dwa: [] } }
+  const missingKey: InsertData<{ a: number; z: number }> = { z: 1, z: { dwa: [] } };
   //@ts-expect-error
-  const missingKey2: InsertData<{ a: number; z: number;  }> = { z: 1 };
+  const missingKey2: InsertData<{ a: number; z: number }> = { z: 1 };
   // ra(schema);
-})
-
+};
 
 // import { md5 } from "./md5";
 // export { get, getTextPatch, unpatchText, isEmpty, WAL, WALConfig, asName } from "./util";
@@ -1239,6 +1366,14 @@ export { CONTENT_TYPE_TO_EXT } from "./files";
 export type { ALLOWED_CONTENT_TYPE, ALLOWED_EXTENSION, FileColumnConfig, FileType } from "./files";
 export * from "./filters";
 export * from "./jsonb";
-export type { ClientExpressData, ClientSyncHandles, ClientSyncInfo, ClientSyncPullResponse, SyncBatchParams, SyncConfig, onUpdatesParams } from "./replication";
+export type {
+  ClientExpressData,
+  ClientSyncHandles,
+  ClientSyncInfo,
+  ClientSyncPullResponse,
+  SyncBatchParams,
+  SyncConfig,
+  onUpdatesParams,
+} from "./replication";
 export * from "./util";
 export * from "./auth";

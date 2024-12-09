@@ -4,7 +4,7 @@ import { AnyObject } from "./filters";
 export declare const PrimitiveTypes: readonly ["boolean", "number", "integer", "string", "Date", "time", "timestamp", "any"];
 export declare const PrimitiveArrayTypes: ("number[]" | "boolean[]" | "string[]" | "any[]" | "time[]" | "timestamp[]" | "integer[]" | "Date[]")[];
 export declare const DATA_TYPES: readonly ["boolean", "number", "integer", "string", "Date", "time", "timestamp", "any", ...("number[]" | "boolean[]" | "string[]" | "any[]" | "time[]" | "timestamp[]" | "integer[]" | "Date[]")[]];
-type DataType = typeof DATA_TYPES[number];
+type DataType = (typeof DATA_TYPES)[number];
 export declare namespace JSONB {
     export type BaseOptions = {
         /**
@@ -20,7 +20,7 @@ export declare namespace JSONB {
     };
     export type Lookup = BaseOptions & {
         type?: "Lookup" | "Lookup[]";
-        lookup: ({
+        lookup: {
             type: "data"
             /**
              * This is used as edit-mode (to generate lookup of type data)
@@ -62,7 +62,7 @@ export declare namespace JSONB {
                 tsDataType?: string;
                 udt_name?: string;
             };
-        });
+        };
         allowedValues?: undefined;
         oneOf?: undefined;
         oneOfType?: undefined;
@@ -144,7 +144,7 @@ export declare namespace JSONB {
     } : T>;
     type GetWNullType<T extends FieldTypeObj | Omit<FieldTypeObj, "optional">> = T extends {
         nullable: true;
-    } ? (null | _GetType<T>) : _GetType<T>;
+    } ? null | _GetType<T> : _GetType<T>;
     type GetAllowedValues<T extends FieldTypeObj | Omit<FieldTypeObj, "optional">, TType> = T extends {
         allowedValues: readonly any[];
     } ? T["allowedValues"][number] : TType;
@@ -183,9 +183,9 @@ export declare namespace JSONB {
     } ? GetAllowedValues<T, string>[] : T extends {
         type: "any[]";
     } ? GetAllowedValues<T, any>[] : T extends {
-        "enum": readonly any[] | any[];
+        enum: readonly any[] | any[];
     } ? T["enum"][number] : T extends {
-        "record": RecordType["record"];
+        record: RecordType["record"];
     } ? Record<T["record"] extends {
         keysEnum: readonly string[];
     } ? T["record"]["keysEnum"][number] : string, T["record"] extends {
@@ -206,12 +206,12 @@ export declare namespace JSONB {
     export type JSONBSchema<T extends FieldTypeObj = FieldTypeObj> = Omit<T, "optional"> & {
         defaultValue?: any;
     };
-    export type GetObjectType<S extends ObjectSchema> = ({
+    export type GetObjectType<S extends ObjectSchema> = {
         [K in keyof S as IsOptional<S[K]> extends true ? K : never]?: GetType<S[K]>;
     } & {
         [K in keyof S as IsOptional<S[K]> extends true ? never : K]: GetType<S[K]>;
-    });
-    export type GetSchemaType<S extends JSONBSchema> = S["nullable"] extends true ? (null | GetType<S>) : GetType<S>;
+    };
+    export type GetSchemaType<S extends JSONBSchema> = S["nullable"] extends true ? null | GetType<S> : GetType<S>;
     export {};
 }
 export declare const getJSONSchemaObject: (rawType: JSONB.FieldType | JSONB.JSONBSchema, rootInfo?: {

@@ -266,6 +266,10 @@ export type Select<T extends AnyObject | void = void, S extends DBSchema | void 
 export type SelectBasic = {
     [key: string]: any;
 } | {} | undefined | "" | "*";
+/**
+ * Will return the first row as an object. Will throw an error if more than a row is returned. Use limit: 1 to avoid error.
+ */
+type ReturnTypeRow = "row";
 type CommonSelectParams = {
     /**
      * Max number of rows to return
@@ -290,7 +294,7 @@ type CommonSelectParams = {
      * - statement-no-rls: sql statement without row level security
      * - statement-where: sql statement where condition
      */
-    returnType?: "row"
+    returnType?: ReturnTypeRow
     /**
      * Will return the first value from the selected field
      */

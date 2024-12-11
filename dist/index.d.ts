@@ -478,11 +478,16 @@ export type SubscriptionHandler = {
     unsubscribe: () => Promise<any>;
     filter: FullFilter<void, void> | {};
 };
-type GetColumns = (lang?: string, params?: {
+/**
+ * Dynamic/filter based rules allow limit what columns can be updated based on the request data/filter
+ * This allows parameter allows identifying the columns that can be updated based on the request data
+ */
+type GetColumnsParams = {
     rule: "update";
     data: AnyObject;
     filter: AnyObject;
-}) => Promise<ValidatedColumnInfo[]>;
+};
+type GetColumns = (lang?: string, params?: GetColumnsParams) => Promise<ValidatedColumnInfo[]>;
 /**
  * Methods for interacting with a view
  * - On client-side some methods are restricted (and undefined) based on publish rules on the server
@@ -491,7 +496,14 @@ export type ViewHandler<TD extends AnyObject = AnyObject, S extends DBSchema | v
     /**
      * Retrieves the table/view info
      */
-    getInfo: (lang?: string) => Promise<TableInfo>;
+    getInfo: (
+    /**
+     * Language code for i18n data
+     * ```typescript
+     *   "en"
+     * ```
+     */
+    lang?: string) => Promise<TableInfo>;
     /**
      * Retrieves columns metadata of the table/view
      */

@@ -380,6 +380,7 @@ type CommonSelectParams = {
    * - On client publish rules can affect this behaviour: cannot request more than the maxLimit (if present)
    */
   limit?: number | null;
+
   /**
    * Number of rows to skip
    */
@@ -646,10 +647,17 @@ export type SubscriptionHandler = {
   filter: FullFilter<void, void> | {};
 };
 
-type GetColumns = (
-  lang?: string,
-  params?: { rule: "update"; data: AnyObject; filter: AnyObject }
-) => Promise<ValidatedColumnInfo[]>;
+/**
+ * Dynamic/filter based rules allow limit what columns can be updated based on the request data/filter
+ * This allows parameter allows identifying the columns that can be updated based on the request data
+ */
+type GetColumnsParams = {
+  rule: "update";
+  data: AnyObject;
+  filter: AnyObject;
+};
+
+type GetColumns = (lang?: string, params?: GetColumnsParams) => Promise<ValidatedColumnInfo[]>;
 
 /**
  * Methods for interacting with a view
@@ -659,7 +667,15 @@ export type ViewHandler<TD extends AnyObject = AnyObject, S extends DBSchema | v
   /**
    * Retrieves the table/view info
    */
-  getInfo: (lang?: string) => Promise<TableInfo>;
+  getInfo: (
+    /**
+     * Language code for i18n data
+     * ```typescript
+     *   "en"
+     * ```
+     */
+    lang?: string
+  ) => Promise<TableInfo>;
 
   /**
    * Retrieves columns metadata of the table/view

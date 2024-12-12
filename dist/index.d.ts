@@ -57,6 +57,11 @@ export type DBTableSchema = {
 export type DBSchema = {
     [tov_name: string]: DBTableSchema;
 };
+type ReferenceTable = {
+    ftable: string;
+    fcols: string[];
+    cols: string[];
+};
 export type ColumnInfo = {
     name: string;
     /**
@@ -104,11 +109,7 @@ export type ColumnInfo = {
      * Foreign key constraint
      * A column can reference multiple tables
      */
-    references?: {
-        ftable: string;
-        fcols: string[];
-        cols: string[];
-    }[];
+    references?: ReferenceTable[];
     /**
      * true if column has a default value
      * Used for excluding pkey from insert
@@ -383,6 +384,16 @@ export type DeleteParams<T extends AnyObject | void = void, S extends DBSchema |
     returning?: Select<T, S>;
 } & Pick<CommonSelectParams, "returnType">;
 export type PartialLax<T = AnyObject> = Partial<T>;
+type FileTableConfig = {
+    /**
+     * Defined if direct inserts are disabled.
+     * Only nested inserts through the specified tables/columns are allowed
+     * */
+    allowedNestedInserts?: {
+        table: string;
+        column: string;
+    }[] | undefined;
+};
 export type TableInfo = {
     /**
      * OID from the postgres database
@@ -396,23 +407,20 @@ export type TableInfo = {
     /**
      * Defined if this is the fileTable
      */
-    isFileTable?: {
-        /**
-         * Defined if direct inserts are disabled.
-         * Only nested inserts through the specified tables/columns are allowed
-         * */
-        allowedNestedInserts?: {
-            table: string;
-            column: string;
-        }[] | undefined;
-    };
+    isFileTable?: FileTableConfig;
     /**
      * True if fileTable is enabled and this table references the fileTable
+     * Used in UI
      */
     hasFiles?: boolean;
+    /**
+     * True if this is a view.
+     * Table methods (insert, update, delete) are undefined for views
+     */
     isView?: boolean;
     /**
      * Name of the fileTable (if enabled)
+     * Used in UI
      */
     fileTableName?: string;
     /**
@@ -498,10 +506,7 @@ export type ViewHandler<TD extends AnyObject = AnyObject, S extends DBSchema | v
      */
     getInfo: (
     /**
-     * Language code for i18n data
-     * ```typescript
-     *   "en"
-     * ```
+     * Language code for i18n data. "en" by default
      */
     lang?: string) => Promise<TableInfo>;
     /**
@@ -511,7 +516,15 @@ export type ViewHandler<TD extends AnyObject = AnyObject, S extends DBSchema | v
     /**
      * Retrieves a list of matching records from the view/table
      */
-    find: <P extends SelectParams<TD, S>>(filter?: FullFilter<TD, S>, selectParams?: P) => Promise<GetSelectReturnType<S, P, TD, true>>;
+    find: <P extends SelectParams<TD, S>>(
+    /**
+     * Filter to apply:
+     * - If undefined then all records will be returned
+     * - { "field": "value" }
+     * - { $or: [{ "field1": "value" }, { "field1": "value" }] }
+     * - { $existsJoined: { linkedTable: { "linkedTableField": "value" } } }
+     */
+    filter?: FullFilter<TD, S>, selectParams?: P) => Promise<GetSelectReturnType<S, P, TD, true>>;
     /**
      * Retrieves a record from the view/table
      */

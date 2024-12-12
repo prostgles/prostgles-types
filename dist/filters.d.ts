@@ -195,7 +195,7 @@ export type FilterItem<T extends AnyObject = AnyObject> = FilterForObject<T>;
 export type AnyObjIfVoid<T extends AnyObject | void> = T extends AnyObject ? T : AnyObject;
 /**
  * Group or simple filter
- * @example { $or: [ { id: 1 }, { status: 'live' } ] }
+ * - { $or: [{ id: 1 }, { status: 'live' }] }
  */
 export type FullFilter<T extends AnyObject | void, S extends DBSchema | void> = {
     $and: FullFilter<T, S>[];

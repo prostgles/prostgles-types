@@ -171,14 +171,14 @@ export type GeomFilter =
    * A's bounding box is contained by B's
    */
   | { "@": GeoBBox };
-  //  | { "|&>": GeoBBox }
-  //  | { "|>>": GeoBBox }
+//  | { "|&>": GeoBBox }
+//  | { "|>>": GeoBBox }
 
-  /**
-   * A's bounding box contains B's.
-   */
-  //  | { "~": GeoBBox }
-  //  | { "~=": GeoBBox }
+/**
+ * A's bounding box contains B's.
+ */
+//  | { "~": GeoBBox }
+//  | { "~=": GeoBBox }
 export const GeomFilterKeys = [
   "~",
   "~=",
@@ -337,7 +337,7 @@ export type AnyObjIfVoid<T extends AnyObject | void> = T extends AnyObject ? T :
 
 /**
  * Group or simple filter
- * @example { $or: [ { id: 1 }, { status: 'live' } ] }
+ * - { $or: [{ id: 1 }, { status: 'live' }] }
  */
 export type FullFilter<T extends AnyObject | void, S extends DBSchema | void> =
   | { $and: FullFilter<T, S>[] }

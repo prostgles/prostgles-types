@@ -125,7 +125,7 @@ export type ColumnInfo = {
   /**
    * Column description (if provided)
    */
-  comment: string;
+  comment: string | undefined;
 
   /**
    * Ordinal position of the column within the table (count starts at 1)
@@ -133,7 +133,8 @@ export type ColumnInfo = {
   ordinal_position: number;
 
   /**
-   * True if column is nullable. A not-null constraint is one way a column can be known not nullable, but there may be others.
+   * True if column is nullable
+   *
    */
   is_nullable: boolean;
 
@@ -150,22 +151,24 @@ export type ColumnInfo = {
   data_type: string;
 
   /**
-   * Postgres raw data types. values starting with underscore means it's an array of that data type
+   * Postgres data type name.
+   * Array types start with an underscore
    */
   udt_name: PG_COLUMN_UDT_DATA_TYPE;
 
   /**
    * Element data type
    */
-  element_type: string;
+  element_type: string | undefined;
 
   /**
-   * Element raw data type
+   * Element data type name
    */
-  element_udt_name: string;
+  element_udt_name: string | undefined;
 
   /**
-   * PRIMARY KEY constraint on column. A table can have more then one PK
+   * PRIMARY KEY constraint on column.
+   * A table can have a multi column primary key
    */
   is_pkey: boolean;
 
@@ -194,6 +197,10 @@ export type ColumnInfo = {
   max?: string | number;
   hint?: string;
 
+  /**
+   * JSONB schema (a simplified version of json schema) for the column (if defined in the tableConfig)
+   * A check constraint will use this schema for runtime data validation and apropriate TS types will be generated
+   */
   jsonbSchema?: JSONB.JSONBSchema;
 
   /**
@@ -212,31 +219,37 @@ export type ValidatedColumnInfo = ColumnInfo & {
 
   /**
    * Can be viewed/selected
+   * Based on access rules and postgres policies
    */
   select: boolean;
 
   /**
    * Can be ordered by
+   * Based on access rules
    */
   orderBy: boolean;
 
   /**
    * Can be filtered by
+   * Based on access rules
    */
   filter: boolean;
 
   /**
    * Can be inserted
+   * Based on access rules and postgres policies
    */
   insert: boolean;
 
   /**
    * Can be updated
+   * Based on access rules and postgres policies
    */
   update: boolean;
 
   /**
    * Can be used in the delete filter
+   * Based on access rules
    */
   delete: boolean;
 };
@@ -255,8 +268,7 @@ export type FieldFilter<T extends AnyObject = AnyObject> = SelectTyped<T>;
 export type AscOrDesc = 1 | -1 | boolean;
 
 /**
- * @example
- * { product_name: -1 } -> SORT BY product_name DESC
+ * `{ product_name: -1 }` -> SORT BY product_name DESC
  * [{ field_name: (1 | -1 | boolean) }]
  * true | 1 -> ascending
  * false | -1 -> descending
@@ -377,8 +389,7 @@ type ReturnTypeRow = "row";
 /* Simpler types */
 type CommonSelectParams = {
   /**
-   * Max number of rows to return
-   * - If undefined then 1000 will be applied as the default
+   * Max number of rows to return. Defaults to 1000
    * - On client publish rules can affect this behaviour: cannot request more than the maxLimit (if present)
    */
   limit?: number | null;
@@ -395,12 +406,12 @@ type CommonSelectParams = {
 
   /**
    * Result data structure/type:
-   * - row: the first row as an object
-   * - value: the first value from of first field
-   * - values: array of values from the selected field
-   * - statement: sql statement
-   * - statement-no-rls: sql statement without row level security
-   * - statement-where: sql statement where condition
+   * - **row**: the first row as an object
+   * - **value**: the first value from of first field
+   * - **values**: array of values from the selected field
+   * - **statement**: sql statement
+   * - **statement-no-rls**: sql statement without row level security
+   * - **statement-where**: sql statement where condition
    */
   returnType?:
     | ReturnTypeRow
@@ -437,18 +448,19 @@ export type SelectParams<
 > = CommonSelectParams & {
   /**
    * Fields/expressions/linked data to select
-   * - If empty then all fields will be selected
-   * - If "*" then all fields will be selected
-   * - If { field: 0 } then all fields except the specified field will be selected
-   * - If { field: 1 } then only the specified field will be selected
-   * - If { field: { funcName: [args] } } then the field will be selected with the specified function applied
-   * - If { field: { nestedTable: { field: 1 } } } then the field will be selected with the nested table fields
+   * - `"*"` or empty will return all fields
+   * - `{ field: 0 }` - all fields except the specified field will be selected
+   * - `{ field: 1 }` - only the specified field will be selected
+   * - `{ field: { $funcName: [args] } }` - the field will be selected with the specified function applied
+   * - `{ field: 1, referencedTable: "*" }` - field together with all fields from referencedTable will be selected
+   * - `{ linkedData: { referencedTable: { field: 1 } } }` - linkedData will contain the linked/joined records from referencedTable
    */
   select?: Select<T, S>;
 
   /**
    * Order by options
-   * - If array then the order will be maintained
+   * - Order is maintained in arrays
+   * - `[{ key: "field", asc: true, nulls: "last" }]`
    */
   orderBy?: OrderBy<S extends DBSchema ? T : void>;
 
@@ -585,7 +597,11 @@ export type TableInfo = {
   uniqueColumnGroups: string[][] | undefined;
 };
 
-export type OnError = (err: any) => void;
+/**
+ * Error handler that may fire due to schema changes or other post subscribe issues
+ * Column or filter issues are thrown during the subscribe call
+ */
+export type SubscribeOnError = (err: any) => void;
 
 type JoinedSelect = Record<string, Select>;
 export type SelectFunction = Record<string, any[]>;
@@ -664,10 +680,20 @@ export type SubscriptionHandler = {
 type GetColumnsParams = {
   rule: "update";
   data: AnyObject;
-  filter: AnyObject;
+  filter: FullFilter<void, void>;
 };
 
 type GetColumns = (lang?: string, params?: GetColumnsParams) => Promise<ValidatedColumnInfo[]>;
+
+/**
+ * Callback fired once after subscribing and then every time the data matching the filter changes
+ */
+type SubscribeCallback<ItemsDataType> = (items: ItemsDataType) => void | Promise<void>;
+
+/**
+ * Callback fired once after subscribing and then every time the data matching the filter changes
+ */
+type SubscribeOneCallback<ItemDataType> = (item: ItemDataType) => void | Promise<void>;
 
 /**
  * Methods for interacting with a view
@@ -694,10 +720,14 @@ export type ViewHandler<TD extends AnyObject = AnyObject, S extends DBSchema | v
    */
   find: <P extends SelectParams<TD, S>>(
     /**
-     * Filter to apply:
-     * - If undefined then all records will be returned
+     * Filter to apply. Undefined will return all records
      * - { "field": "value" }
-     * - { $or: [{ "field1": "value" }, { "field1": "value" }] }
+     * - { "field": { $in: ["value", "value2"] } }
+     * - { $or: [
+     *      { "field1": "value" },
+     *      { "field2": "value" }
+     *     ]
+     *   }
      * - { $existsJoined: { linkedTable: { "linkedTableField": "value" } } }
      */
     filter?: FullFilter<TD, S>,
@@ -718,8 +748,9 @@ export type ViewHandler<TD extends AnyObject = AnyObject, S extends DBSchema | v
   subscribe: <P extends SubscribeParams<TD, S>>(
     filter: FullFilter<TD, S>,
     params: P,
-    onData: (items: GetSelectReturnType<S, P, TD, true>) => any,
-    onError?: OnError
+    onData: SubscribeCallback<GetSelectReturnType<S, P, TD, true>>,
+    // onData: (items: GetSelectReturnType<S, P, TD, true>) => any,
+    onError?: SubscribeOnError
   ) => Promise<SubscriptionHandler>;
 
   /**
@@ -728,8 +759,9 @@ export type ViewHandler<TD extends AnyObject = AnyObject, S extends DBSchema | v
   subscribeOne: <P extends SubscribeParams<TD, S>>(
     filter: FullFilter<TD, S>,
     params: P,
-    onData: (item: GetSelectReturnType<S, P, TD, false> | undefined) => any,
-    onError?: OnError
+    // onData: (item: GetSelectReturnType<S, P, TD, false> | undefined) => any,
+    onData: SubscribeOneCallback<GetSelectReturnType<S, P, TD, false> | undefined>,
+    onError?: SubscribeOnError
   ) => Promise<SubscriptionHandler>;
 
   /**

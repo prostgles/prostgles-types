@@ -121,14 +121,13 @@ export declare const ComplexFilterComparisonKeys: readonly ["$ilike", "$like", "
 export declare const COMPLEX_FILTER_KEY: "$filter";
 /**
  * Complex filter that allows applying functions to columns
- * @example:
- *  {
+ *  `{
  *    $filter: [
  *      { $funcName: [...args] },
  *      operand,
  *      value | funcFilter
  *    ]
- *  }
+ *  }`
  */
 export type ComplexFilter = Record<typeof COMPLEX_FILTER_KEY, [
     {
@@ -194,8 +193,17 @@ export type ExistsFilter<S = void> = Partial<{
 export type FilterItem<T extends AnyObject = AnyObject> = FilterForObject<T>;
 export type AnyObjIfVoid<T extends AnyObject | void> = T extends AnyObject ? T : AnyObject;
 /**
- * Group or simple filter
- * - { $or: [{ id: 1 }, { status: 'live' }] }
+ * Data filter
+ * - `{ status: 'live' }`
+ * - `{ $or: [{ id: 1 }, { status: 'live' }] }`
+ * - `{ $existsJoined: { referencedTable: { id: 1 } } }`
+ * - `{
+ *      $filter: [
+ *        { $age: ["created_at"] },
+ *        "<",
+ *        '1 year'
+ *      ]
+ *   }`
  */
 export type FullFilter<T extends AnyObject | void, S extends DBSchema | void> = {
     $and: FullFilter<T, S>[];

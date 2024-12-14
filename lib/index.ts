@@ -651,7 +651,12 @@ type GetReturningReturnType<
   : O extends { returning: Record<string, 0> } ? Omit<Required<TD>, keyof O["returning"]>
   : void;
 
-export type GetUpdateReturnType<
+/**
+ *
+ * Nothing is returned by default.
+ * `returning` must be specified to return the updated records.
+ */
+export type UpdateReturnType<
   O extends UpdateParams<TD, S>,
   TD extends AnyObject,
   S extends DBSchema | void = void,
@@ -659,7 +664,13 @@ export type GetUpdateReturnType<
   O extends { multi: false } ? GetReturningReturnType<O, TD, S>
   : GetReturningReturnType<O, TD, S>[];
 
-export type GetInsertReturnType<
+/**
+ * Nothing is returned by default.
+ * `returning` must be specified to return the updated records.
+ * If an array of records is inserted then an array of records will be returned
+ * otherwise a single record will be returned.
+ */
+export type InsertReturnType<
   Data extends InsertData<AnyObject>,
   O extends UpdateParams<TD, S>,
   TD extends AnyObject,
@@ -674,16 +685,28 @@ export type SubscriptionHandler = {
 };
 
 /**
- * Dynamic/filter based rules allow limit what columns can be updated based on the request data/filter
- * This allows parameter allows identifying the columns that can be updated based on the request data
+ * Dynamic/filter based rules (dynamicFields) allow specifying which columns can be updated based on the target record.
+ * Useful when the same user can update different fields based on the record state.
  */
 type GetColumnsParams = {
+  /**
+   * Only "update" is supported at the moment
+   */
   rule: "update";
-  data: AnyObject;
+
+  /**
+   * Filter specifying which records are to be updated
+   */
   filter: FullFilter<void, void>;
 };
 
-type GetColumns = (lang?: string, params?: GetColumnsParams) => Promise<ValidatedColumnInfo[]>;
+type GetColumns = (
+  /**
+   * Language code for i18n data. "en" by default
+   */
+  lang?: string,
+  params?: GetColumnsParams
+) => Promise<ValidatedColumnInfo[]>;
 
 /**
  * Callback fired once after subscribing and then every time the data matching the filter changes
@@ -800,7 +823,7 @@ export type TableHandler<
     filter: FullFilter<TD, S>,
     newData: UpsertDataToPGCastLax<TD>,
     params?: P
-  ) => Promise<GetUpdateReturnType<P, TD, S> | undefined>;
+  ) => Promise<UpdateReturnType<P, TD, S> | undefined>;
 
   /**
    * Updates multiple records in the table in a batch operation.
@@ -809,7 +832,7 @@ export type TableHandler<
   updateBatch: <P extends UpdateParams<TD, S>>(
     data: [FullFilter<TD, S>, UpsertDataToPGCastLax<TD>][],
     params?: P
-  ) => Promise<GetUpdateReturnType<P, TD, S> | void>;
+  ) => Promise<UpdateReturnType<P, TD, S> | void>;
 
   /**
    * Inserts a new record into the table.
@@ -817,7 +840,7 @@ export type TableHandler<
   insert: <P extends InsertParams<TD, S>, D extends InsertData<TD>>(
     data: D,
     params?: P
-  ) => Promise<GetInsertReturnType<D, P, TD, S>>;
+  ) => Promise<InsertReturnType<D, P, TD, S>>;
 
   /**
    * Inserts or updates a record in the table.
@@ -828,7 +851,7 @@ export type TableHandler<
     filter: FullFilter<TD, S>,
     newData: UpsertDataToPGCastLax<TD>,
     params?: P
-  ) => Promise<GetUpdateReturnType<P, TD, S>>;
+  ) => Promise<UpdateReturnType<P, TD, S>>;
 
   /**
    * Deletes records from the table based on the specified filter criteria.
@@ -837,7 +860,7 @@ export type TableHandler<
   delete: <P extends DeleteParams<TD, S>>(
     filter?: FullFilter<TD, S>,
     params?: P
-  ) => Promise<GetUpdateReturnType<P, TD, S> | undefined>;
+  ) => Promise<UpdateReturnType<P, TD, S> | undefined>;
 };
 
 export type JoinMakerOptions<TT extends AnyObject = AnyObject> = SelectParams<TT> & {

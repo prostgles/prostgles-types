@@ -152,8 +152,11 @@ type StringFilter<Field extends string, DataType extends any> = BasicFilter<Fiel
 }>);
 export type ValueOf<T> = T[keyof T];
 /**
- * Equality filter used for sync
- * Multiple columns are combined with AND
+ * Filter used for data synchronization, where all specified columns must match the given values.
+ *
+ * Columns are combined using an AND condition.
+ *
+ * Example: `{ department: 'd1', name: 'abc' }` would match records where department is 'd1' AND name is 'abc'.
  */
 export type EqualityFilter<T extends AnyObject> = {
     [K in keyof Partial<T>]: CastFromTSToPG<T[K]>;

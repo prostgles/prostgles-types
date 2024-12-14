@@ -466,7 +466,7 @@ type ParseSelect<Select extends SelectParams<TD>["select"], TD extends AnyObject
 } ? Required<TD> : {}) & {
     [Key in keyof Omit<Select, "*"> & string]: Select[Key] extends 1 ? Required<TD>[Key] : Select[Key] extends SelectFunction ? any : Select[Key] extends JoinedSelect ? any[] : any;
 };
-type GetSelectDataType<S extends DBSchema | void, O extends SelectParams<TD, S>, TD extends AnyObject> = O extends {
+type SelectDataType<S extends DBSchema | void, O extends SelectParams<TD, S>, TD extends AnyObject> = O extends {
     returnType: "value";
 } ? any : O extends {
     returnType: "values";
@@ -482,9 +482,9 @@ type GetSelectDataType<S extends DBSchema | void, O extends SelectParams<TD, S>,
 } ? Omit<Required<TD>, keyof O["select"]> : O extends {
     select: Record<string, any>;
 } ? ParseSelect<O["select"], Required<TD>> : Required<TD>;
-export type GetSelectReturnType<S extends DBSchema | void, O extends SelectParams<TD, S>, TD extends AnyObject, isMulti extends boolean> = O extends {
+export type SelectReturnType<S extends DBSchema | void, O extends SelectParams<TD, S>, TD extends AnyObject, isMulti extends boolean> = O extends {
     returnType: "statement";
-} ? string : isMulti extends true ? GetSelectDataType<S, O, TD>[] : GetSelectDataType<S, O, TD>;
+} ? string : isMulti extends true ? SelectDataType<S, O, TD>[] : SelectDataType<S, O, TD>;
 type GetReturningReturnType<O extends UpdateParams<TD, S>, TD extends AnyObject, S extends DBSchema | void = void> = O extends {
     returning: "*";
 } ? Required<TD> : O extends {
@@ -572,19 +572,19 @@ export type ViewHandler<TD extends AnyObject = AnyObject, S extends DBSchema | v
      *   }
      * - { $existsJoined: { linkedTable: { "linkedTableField": "value" } } }
      */
-    filter?: FullFilter<TD, S>, selectParams?: P) => Promise<GetSelectReturnType<S, P, TD, true>>;
+    filter?: FullFilter<TD, S>, selectParams?: P) => Promise<SelectReturnType<S, P, TD, true>>;
     /**
      * Retrieves a record from the view/table
      */
-    findOne: <P extends SelectParams<TD, S>>(filter?: FullFilter<TD, S>, selectParams?: P) => Promise<undefined | GetSelectReturnType<S, P, TD, false>>;
+    findOne: <P extends SelectParams<TD, S>>(filter?: FullFilter<TD, S>, selectParams?: P) => Promise<undefined | SelectReturnType<S, P, TD, false>>;
     /**
      * Retrieves a list of matching records from the view/table and subscribes to changes
      */
-    subscribe: <P extends SubscribeParams<TD, S>>(filter: FullFilter<TD, S>, params: P, onData: SubscribeCallback<GetSelectReturnType<S, P, TD, true>>, onError?: SubscribeOnError) => Promise<SubscriptionHandler>;
+    subscribe: <P extends SubscribeParams<TD, S>>(filter: FullFilter<TD, S>, params: P, onData: SubscribeCallback<SelectReturnType<S, P, TD, true>>, onError?: SubscribeOnError) => Promise<SubscriptionHandler>;
     /**
      * Retrieves first matching record from the view/table and subscribes to changes
      */
-    subscribeOne: <P extends SubscribeParams<TD, S>>(filter: FullFilter<TD, S>, params: P, onData: SubscribeOneCallback<GetSelectReturnType<S, P, TD, false> | undefined>, onError?: SubscribeOnError) => Promise<SubscriptionHandler>;
+    subscribeOne: <P extends SubscribeParams<TD, S>>(filter: FullFilter<TD, S>, params: P, onData: SubscribeOneCallback<SelectReturnType<S, P, TD, false> | undefined>, onError?: SubscribeOnError) => Promise<SubscriptionHandler>;
     /**
      * Returns the number of rows that match the filter
      */

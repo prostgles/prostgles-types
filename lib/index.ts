@@ -615,7 +615,7 @@ type ParseSelect<
   : any;
 };
 
-type GetSelectDataType<
+type SelectDataType<
   S extends DBSchema | void,
   O extends SelectParams<TD, S>,
   TD extends AnyObject,
@@ -630,15 +630,15 @@ type GetSelectDataType<
   : O extends { select: Record<string, any> } ? ParseSelect<O["select"], Required<TD>>
   : Required<TD>;
 
-export type GetSelectReturnType<
+export type SelectReturnType<
   S extends DBSchema | void,
   O extends SelectParams<TD, S>,
   TD extends AnyObject,
   isMulti extends boolean,
 > =
   O extends { returnType: "statement" } ? string
-  : isMulti extends true ? GetSelectDataType<S, O, TD>[]
-  : GetSelectDataType<S, O, TD>;
+  : isMulti extends true ? SelectDataType<S, O, TD>[]
+  : SelectDataType<S, O, TD>;
 
 type GetReturningReturnType<
   O extends UpdateParams<TD, S>,
@@ -755,7 +755,7 @@ export type ViewHandler<TD extends AnyObject = AnyObject, S extends DBSchema | v
      */
     filter?: FullFilter<TD, S>,
     selectParams?: P
-  ) => Promise<GetSelectReturnType<S, P, TD, true>>;
+  ) => Promise<SelectReturnType<S, P, TD, true>>;
 
   /**
    * Retrieves a record from the view/table
@@ -763,7 +763,7 @@ export type ViewHandler<TD extends AnyObject = AnyObject, S extends DBSchema | v
   findOne: <P extends SelectParams<TD, S>>(
     filter?: FullFilter<TD, S>,
     selectParams?: P
-  ) => Promise<undefined | GetSelectReturnType<S, P, TD, false>>;
+  ) => Promise<undefined | SelectReturnType<S, P, TD, false>>;
 
   /**
    * Retrieves a list of matching records from the view/table and subscribes to changes
@@ -771,8 +771,7 @@ export type ViewHandler<TD extends AnyObject = AnyObject, S extends DBSchema | v
   subscribe: <P extends SubscribeParams<TD, S>>(
     filter: FullFilter<TD, S>,
     params: P,
-    onData: SubscribeCallback<GetSelectReturnType<S, P, TD, true>>,
-    // onData: (items: GetSelectReturnType<S, P, TD, true>) => any,
+    onData: SubscribeCallback<SelectReturnType<S, P, TD, true>>,
     onError?: SubscribeOnError
   ) => Promise<SubscriptionHandler>;
 
@@ -782,8 +781,7 @@ export type ViewHandler<TD extends AnyObject = AnyObject, S extends DBSchema | v
   subscribeOne: <P extends SubscribeParams<TD, S>>(
     filter: FullFilter<TD, S>,
     params: P,
-    // onData: (item: GetSelectReturnType<S, P, TD, false> | undefined) => any,
-    onData: SubscribeOneCallback<GetSelectReturnType<S, P, TD, false> | undefined>,
+    onData: SubscribeOneCallback<SelectReturnType<S, P, TD, false> | undefined>,
     onError?: SubscribeOnError
   ) => Promise<SubscriptionHandler>;
 

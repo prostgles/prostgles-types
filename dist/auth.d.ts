@@ -39,4 +39,75 @@ export type AuthSocketSchema = {
      */
     pathGuard?: boolean;
 };
+export type EmailRegisterResponse = {
+    success: true;
+    code: "must-confirm-email";
+    message?: string;
+} | {
+    success: true;
+    code: "magic-link-sent";
+    message?: string;
+} | {
+    success: true;
+    code: "already-registered-but-did-not-confirm-email";
+    message?: string;
+} | {
+    success: false;
+    code: "rate-limit-exceeded";
+    message?: string;
+} | {
+    success: false;
+    code: "something-went-wrong";
+    message?: string;
+} | {
+    success: false;
+    code: "weak-password";
+    message?: string;
+};
+export type EmailLoginResponse = {
+    success: true;
+    code?: undefined;
+    message?: string;
+    redirect_url?: string;
+} | {
+    success: false;
+    code: "must-confirm-email";
+    message?: string;
+} | {
+    success: false;
+    code: "expired-magic-link";
+    message?: string;
+} | {
+    success: false;
+    code: "totp-token-missing";
+    message?: string;
+} | {
+    success: false;
+    code: "provider-issue";
+    message?: string;
+} | {
+    success: false;
+    code: "no-match";
+    message?: string;
+} | {
+    success: false;
+    code: "inactive-account";
+    message?: string;
+} | {
+    success: false;
+    code: "invalid-totp-recovery-code";
+    message?: string;
+} | {
+    success: false;
+    code: "invalid-totp-code";
+    message?: string;
+} | {
+    success: false;
+    code: "something-went-wrong";
+    message?: string;
+} | {
+    success: false;
+    code: "rate-limit-exceeded";
+    message?: string;
+};
 //# sourceMappingURL=auth.d.ts.map

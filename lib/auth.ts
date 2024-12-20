@@ -50,6 +50,10 @@ export type AuthSocketSchema = {
    */
   pathGuard?: boolean;
 };
+
+type Failure<Code extends string> = { success: false; code: Code; message?: string };
+type Success<Code extends string> = { success: true; code: Code; message?: string };
+
 export declare namespace AuthRequest {
   export type LoginData = {
     /**
@@ -57,7 +61,7 @@ export declare namespace AuthRequest {
      */
     username: string;
     /**
-     * Undefined if loginType is withMagicLink
+     * Undefined if loginType must be withMagicLink
      */
     password?: string;
     remember_me?: boolean;
@@ -68,54 +72,44 @@ export declare namespace AuthRequest {
   export type RegisterData = Pick<LoginData, "username" | "password">;
 }
 
-export type CommonAuthFailure =
-  | { success: false; code: "server-error"; message?: string }
-  | { success: false; code: "rate-limit-exceeded"; message?: string }
-  | { success: false; code: "something-went-wrong"; message?: string };
+export type CommonAuthFailure = Failure<
+  "server-error" | "rate-limit-exceeded" | "something-went-wrong"
+>;
 
 export type AuthFailure =
   | CommonAuthFailure
   | { success: false; code: "no-match"; message?: string }
   | { success: false; code: "inactive-account"; message?: string };
 
-export type AuthSuccess = {
-  success: true;
-  code?: undefined;
-  message?: string;
-};
-
-export type OAuthRegisterFailure =
-  | CommonAuthFailure
-  | { success: false; code: "provider-issue"; message?: string };
-
 export declare namespace AuthResponse {
-  export type MagicLinkAuthSuccess = { success: true; code: "magic-link-sent"; message?: string };
-  export type MagicLinkAuthFailure =
-    | AuthFailure
-    | { success: false; code: "expired-magic-link"; message?: string };
+  export type AuthSuccess = {
+    success: true;
+    code?: undefined;
+    message?: string;
+  };
+
+  export type MagicLinkAuthSuccess = AuthSuccess;
+  export type MagicLinkAuthFailure = AuthFailure | Failure<"expired-magic-link">;
 
   export type OAuthRegisterSuccess = AuthSuccess;
-  export type OAuthRegisterFailure =
-    | CommonAuthFailure
-    | { success: false; code: "provider-issue"; message?: string };
+  export type OAuthRegisterFailure = CommonAuthFailure | Failure<"provider-issue">;
 
   export type PasswordLoginSuccess = AuthSuccess;
   export type PasswordLoginFailure =
     | AuthFailure
-    | { success: false; code: "totp-token-missing"; message?: string }
-    | { success: false; code: "username-missing"; message?: string }
-    | { success: false; code: "password-missing"; message?: string }
-    | { success: false; code: "invalid-totp-recovery-code"; message?: string }
-    | { success: false; code: "invalid-totp-code"; message?: string }
-    | { success: false; code: "email-not-confirmed"; message?: string };
+    | Failure<
+        | "totp-token-missing"
+        | "username-missing"
+        | "password-missing"
+        | "invalid-totp-recovery-code"
+        | "invalid-totp-code"
+        | "email-not-confirmed"
+      >;
 
-  export type PasswordRegisterSuccess =
-    | { success: true; code: "email-verification-code-sent"; message?: string }
-    | { success: true; code: "already-registered-but-did-not-confirm-email"; message?: string };
+  export type PasswordRegisterSuccess = Success<
+    "email-verification-code-sent" | "already-registered-but-did-not-confirm-email"
+  >;
   export type PasswordRegisterFailure =
     | CommonAuthFailure
-    | { success: false; code: "weak-password"; message?: string }
-    | { success: false; code: "username-missing"; message?: string }
-    | { success: false; code: "password-missing"; message?: string }
-    | { success: false; code: "inactive-account"; message?: string };
+    | Failure<"weak-password" | "username-missing" | "password-missing" | "inactive-account">;
 }

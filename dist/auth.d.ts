@@ -4,8 +4,11 @@ export type UserLike = {
     type: string;
     [key: string]: any;
 };
-export type EmailAuthType = "withPassword" | "withMagicLink";
-export type EmailSignupType = "withPassword" | "withMagicLink";
+/**
+ * - withPassword: email and password required
+ * - withMagicLink: email required
+ */
+export type AuthType = "withPassword" | "withMagicLink";
 /**
  * Auth object sent from server to client
  */
@@ -25,12 +28,12 @@ export type AuthSocketSchema = {
     /**
      * Email login methods enabled on the server
      */
-    loginType: EmailAuthType | undefined;
+    loginType: AuthType | undefined;
     /**
      * Email registration methods enabled on the server
      */
     register: {
-        type: EmailSignupType;
+        type: AuthType;
         url: string;
     } | undefined;
     /**
@@ -39,9 +42,37 @@ export type AuthSocketSchema = {
      */
     pathGuard?: boolean;
 };
-export type EmailRegisterResponse = {
+export type CommonAuthFailure = {
+    success: false;
+    code: "rate-limit-exceeded";
+    message?: string;
+} | {
+    success: false;
+    code: "something-went-wrong";
+    message?: string;
+};
+export type AuthFailure = CommonAuthFailure | {
+    success: false;
+    code: "no-match";
+    message?: string;
+} | {
+    success: false;
+    code: "inactive-account";
+    message?: string;
+};
+export type MagicLinkAuthFailure = AuthFailure | {
+    success: false;
+    code: "expired-magic-link";
+    message?: string;
+};
+export type AuthSuccess = {
     success: true;
-    code: "must-confirm-email";
+    code?: undefined;
+    message?: string;
+};
+export type RegisterSuccess = {
+    success: true;
+    code: "email-verification-code-sent";
     message?: string;
 } | {
     success: true;
@@ -51,47 +82,14 @@ export type EmailRegisterResponse = {
     success: true;
     code: "already-registered-but-did-not-confirm-email";
     message?: string;
-} | {
-    success: false;
-    code: "rate-limit-exceeded";
-    message?: string;
-} | {
-    success: false;
-    code: "something-went-wrong";
-    message?: string;
-} | {
+};
+export type RegisterFailure = CommonAuthFailure | {
     success: false;
     code: "weak-password";
-    message?: string;
-};
-export type EmailLoginResponse = {
-    success: true;
-    code?: undefined;
-    message?: string;
-    redirect_url?: string;
-} | {
-    success: false;
-    code: "must-confirm-email";
-    message?: string;
-} | {
-    success: false;
-    code: "expired-magic-link";
     message?: string;
 } | {
     success: false;
     code: "totp-token-missing";
-    message?: string;
-} | {
-    success: false;
-    code: "provider-issue";
-    message?: string;
-} | {
-    success: false;
-    code: "no-match";
-    message?: string;
-} | {
-    success: false;
-    code: "inactive-account";
     message?: string;
 } | {
     success: false;
@@ -103,11 +101,25 @@ export type EmailLoginResponse = {
     message?: string;
 } | {
     success: false;
-    code: "something-went-wrong";
+    code: "provider-issue";
     message?: string;
-} | {
+};
+export type PasswordAuthFailure = CommonAuthFailure | {
     success: false;
-    code: "rate-limit-exceeded";
+    code: "email-not-confirmed";
     message?: string;
+};
+export type LoginData = {
+    /**
+     * Email or username
+     */
+    username: string;
+    /**
+     * Undefined if loginType is withMagicLink
+     */
+    password?: string;
+    remember_me?: boolean;
+    totp_token?: string;
+    totp_recovery_code?: string;
 };
 //# sourceMappingURL=auth.d.ts.map

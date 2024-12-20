@@ -85,7 +85,7 @@ export type RegisterFailure =
   | { success: false; code: "provider-issue"; message?: string };
 
 export type PasswordAuthFailure =
-  | CommonAuthFailure
+  | AuthFailure
   | { success: false; code: "email-not-confirmed"; message?: string };
 
 export type LoginData = {

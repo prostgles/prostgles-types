@@ -104,7 +104,7 @@ export type RegisterFailure = CommonAuthFailure | {
     code: "provider-issue";
     message?: string;
 };
-export type PasswordAuthFailure = CommonAuthFailure | {
+export type PasswordAuthFailure = AuthFailure | {
     success: false;
     code: "email-not-confirmed";
     message?: string;

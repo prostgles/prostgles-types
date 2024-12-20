@@ -61,32 +61,15 @@ export type AuthFailure =
   | { success: false; code: "no-match"; message?: string }
   | { success: false; code: "inactive-account"; message?: string };
 
-export type MagicLinkAuthFailure =
-  | AuthFailure
-  | { success: false; code: "expired-magic-link"; message?: string };
-
 export type AuthSuccess = {
   success: true;
   code?: undefined;
   message?: string;
 };
 
-export type RegisterSuccess =
-  | { success: true; code: "email-verification-code-sent"; message?: string }
-  | { success: true; code: "magic-link-sent"; message?: string }
-  | { success: true; code: "already-registered-but-did-not-confirm-email"; message?: string };
-
-export type RegisterFailure =
+export type OAuthRegisterFailure =
   | CommonAuthFailure
-  | { success: false; code: "weak-password"; message?: string }
-  | { success: false; code: "totp-token-missing"; message?: string }
-  | { success: false; code: "invalid-totp-recovery-code"; message?: string }
-  | { success: false; code: "invalid-totp-code"; message?: string }
   | { success: false; code: "provider-issue"; message?: string };
-
-export type PasswordAuthFailure =
-  | AuthFailure
-  | { success: false; code: "email-not-confirmed"; message?: string };
 
 export type LoginData = {
   /**
@@ -101,3 +84,31 @@ export type LoginData = {
   totp_token?: string;
   totp_recovery_code?: string;
 };
+
+export declare namespace AuthResponse {
+  export type MagicLinkAuthSuccess = { success: true; code: "magic-link-sent"; message?: string };
+  export type MagicLinkAuthFailure =
+    | AuthFailure
+    | { success: false; code: "expired-magic-link"; message?: string };
+
+  export type OAuthRegisterSuccess = AuthSuccess;
+  export type OAuthRegisterFailure =
+    | CommonAuthFailure
+    | { success: false; code: "provider-issue"; message?: string };
+
+  export type PasswordLoginSuccess = AuthSuccess;
+  export type PasswordLoginFailure =
+    | AuthFailure
+    | { success: false; code: "totp-token-missing"; message?: string }
+    | { success: false; code: "invalid-totp-recovery-code"; message?: string }
+    | { success: false; code: "invalid-totp-code"; message?: string }
+    | { success: false; code: "email-not-confirmed"; message?: string };
+
+  export type PasswordRegisterSuccess =
+    | { success: true; code: "email-verification-code-sent"; message?: string }
+    | { success: true; code: "already-registered-but-did-not-confirm-email"; message?: string };
+  export type PasswordRegisterFailure =
+    | CommonAuthFailure
+    | { success: false; code: "weak-password"; message?: string }
+    | { success: false; code: "inactive-account"; message?: string };
+}

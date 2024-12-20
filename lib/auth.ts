@@ -99,8 +99,12 @@ export declare namespace AuthResponse {
     | AuthFailure
     | Failure<
         | "totp-token-missing"
+        | "invalid-username"
         | "username-missing"
         | "password-missing"
+        | "invalid-password"
+        | "is-from-OAuth"
+        | "is-from-magic-link"
         | "invalid-totp-recovery-code"
         | "invalid-totp-code"
         | "email-not-confirmed"
@@ -111,5 +115,11 @@ export declare namespace AuthResponse {
   >;
   export type PasswordRegisterFailure =
     | CommonAuthFailure
-    | Failure<"weak-password" | "username-missing" | "password-missing" | "inactive-account">;
+    | Failure<
+        | "weak-password"
+        | "user-already-registered"
+        | "username-missing"
+        | "password-missing"
+        | "inactive-account"
+      >;
 }

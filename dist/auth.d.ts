@@ -88,9 +88,9 @@ export declare namespace AuthResponse {
     type OAuthRegisterSuccess = AuthSuccess;
     type OAuthRegisterFailure = CommonAuthFailure | Failure<"provider-issue">;
     type PasswordLoginSuccess = AuthSuccess;
-    type PasswordLoginFailure = AuthFailure | Failure<"totp-token-missing" | "username-missing" | "password-missing" | "invalid-totp-recovery-code" | "invalid-totp-code" | "email-not-confirmed">;
+    type PasswordLoginFailure = AuthFailure | Failure<"totp-token-missing" | "invalid-username" | "username-missing" | "password-missing" | "invalid-password" | "is-from-OAuth" | "is-from-magic-link" | "invalid-totp-recovery-code" | "invalid-totp-code" | "email-not-confirmed">;
     type PasswordRegisterSuccess = Success<"email-verification-code-sent" | "already-registered-but-did-not-confirm-email">;
-    type PasswordRegisterFailure = CommonAuthFailure | Failure<"weak-password" | "username-missing" | "password-missing" | "inactive-account">;
+    type PasswordRegisterFailure = CommonAuthFailure | Failure<"weak-password" | "user-already-registered" | "username-missing" | "password-missing" | "inactive-account">;
 }
 export {};
 //# sourceMappingURL=auth.d.ts.map

@@ -59,6 +59,10 @@ export declare namespace AuthRequest {
 }
 export type CommonAuthFailure = {
     success: false;
+    code: "server-error";
+    message?: string;
+} | {
+    success: false;
     code: "rate-limit-exceeded";
     message?: string;
 } | {

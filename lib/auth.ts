@@ -30,8 +30,7 @@ export type AuthSocketSchema = {
   user: UserLike | undefined;
 
   /**
-   * Identity providers enabled on the server
-   * if undefined, the server does not support social login
+   * Identity providers enabled and configured on the server.
    */
   providers: Partial<Record<IdentityProvider, { url: string }>> | undefined;
 
@@ -51,6 +50,23 @@ export type AuthSocketSchema = {
    */
   pathGuard?: boolean;
 };
+export declare namespace AuthRequest {
+  export type LoginData = {
+    /**
+     * Email or username
+     */
+    username: string;
+    /**
+     * Undefined if loginType is withMagicLink
+     */
+    password?: string;
+    remember_me?: boolean;
+    totp_token?: string;
+    totp_recovery_code?: string;
+  };
+
+  export type RegisterData = Pick<LoginData, "username" | "password">;
+}
 
 export type CommonAuthFailure =
   | { success: false; code: "rate-limit-exceeded"; message?: string }
@@ -71,20 +87,6 @@ export type OAuthRegisterFailure =
   | CommonAuthFailure
   | { success: false; code: "provider-issue"; message?: string };
 
-export type LoginData = {
-  /**
-   * Email or username
-   */
-  username: string;
-  /**
-   * Undefined if loginType is withMagicLink
-   */
-  password?: string;
-  remember_me?: boolean;
-  totp_token?: string;
-  totp_recovery_code?: string;
-};
-
 export declare namespace AuthResponse {
   export type MagicLinkAuthSuccess = { success: true; code: "magic-link-sent"; message?: string };
   export type MagicLinkAuthFailure =
@@ -100,6 +102,8 @@ export declare namespace AuthResponse {
   export type PasswordLoginFailure =
     | AuthFailure
     | { success: false; code: "totp-token-missing"; message?: string }
+    | { success: false; code: "username-missing"; message?: string }
+    | { success: false; code: "password-missing"; message?: string }
     | { success: false; code: "invalid-totp-recovery-code"; message?: string }
     | { success: false; code: "invalid-totp-code"; message?: string }
     | { success: false; code: "email-not-confirmed"; message?: string };
@@ -110,5 +114,7 @@ export declare namespace AuthResponse {
   export type PasswordRegisterFailure =
     | CommonAuthFailure
     | { success: false; code: "weak-password"; message?: string }
+    | { success: false; code: "username-missing"; message?: string }
+    | { success: false; code: "password-missing"; message?: string }
     | { success: false; code: "inactive-account"; message?: string };
 }

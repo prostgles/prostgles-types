@@ -19,8 +19,7 @@ export type AuthSocketSchema = {
      */
     user: UserLike | undefined;
     /**
-     * Identity providers enabled on the server
-     * if undefined, the server does not support social login
+     * Identity providers enabled and configured on the server.
      */
     providers: Partial<Record<IdentityProvider, {
         url: string;
@@ -42,6 +41,22 @@ export type AuthSocketSchema = {
      */
     pathGuard?: boolean;
 };
+export declare namespace AuthRequest {
+    type LoginData = {
+        /**
+         * Email or username
+         */
+        username: string;
+        /**
+         * Undefined if loginType is withMagicLink
+         */
+        password?: string;
+        remember_me?: boolean;
+        totp_token?: string;
+        totp_recovery_code?: string;
+    };
+    type RegisterData = Pick<LoginData, "username" | "password">;
+}
 export type CommonAuthFailure = {
     success: false;
     code: "rate-limit-exceeded";
@@ -70,19 +85,6 @@ export type OAuthRegisterFailure = CommonAuthFailure | {
     code: "provider-issue";
     message?: string;
 };
-export type LoginData = {
-    /**
-     * Email or username
-     */
-    username: string;
-    /**
-     * Undefined if loginType is withMagicLink
-     */
-    password?: string;
-    remember_me?: boolean;
-    totp_token?: string;
-    totp_recovery_code?: string;
-};
 export declare namespace AuthResponse {
     type MagicLinkAuthSuccess = {
         success: true;
@@ -104,6 +106,14 @@ export declare namespace AuthResponse {
     type PasswordLoginFailure = AuthFailure | {
         success: false;
         code: "totp-token-missing";
+        message?: string;
+    } | {
+        success: false;
+        code: "username-missing";
+        message?: string;
+    } | {
+        success: false;
+        code: "password-missing";
         message?: string;
     } | {
         success: false;
@@ -130,6 +140,14 @@ export declare namespace AuthResponse {
     type PasswordRegisterFailure = CommonAuthFailure | {
         success: false;
         code: "weak-password";
+        message?: string;
+    } | {
+        success: false;
+        code: "username-missing";
+        message?: string;
+    } | {
+        success: false;
+        code: "password-missing";
         message?: string;
     } | {
         success: false;

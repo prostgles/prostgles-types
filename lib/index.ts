@@ -971,10 +971,11 @@ export type SQLHandler =
    * @param params <any[] | object> query arguments to be escaped. e.g.: { name: 'dwadaw' }
    * @param options <object> { returnType: "statement" | "rows" | "noticeSubscription" }
    */
-  <Opts extends SQLOptions>(
+  <Opts extends SQLOptions, ServerSideOptions = void>(
     query: string,
     args?: AnyObject | any[],
-    options?: Opts
+    options?: Opts,
+    serverSideOptions?: ServerSideOptions
   ) => Promise<GetSQLReturnType<Opts>>;
 
 type SelectMethods<T extends DBTableSchema> =

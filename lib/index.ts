@@ -974,14 +974,7 @@ export type SQLHandler =
   <Opts extends SQLOptions>(
     query: string,
     args?: AnyObject | any[],
-    options?: Opts,
-    serverSideOptions?:
-      | {
-          socket: any;
-        }
-      | {
-          httpReq: any;
-        }
+    options?: Opts
   ) => Promise<GetSQLReturnType<Opts>>;
 
 type SelectMethods<T extends DBTableSchema> =

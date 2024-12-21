@@ -704,11 +704,7 @@ export type SQLHandler =
  * @param params <any[] | object> query arguments to be escaped. e.g.: { name: 'dwadaw' }
  * @param options <object> { returnType: "statement" | "rows" | "noticeSubscription" }
  */
-<Opts extends SQLOptions>(query: string, args?: AnyObject | any[], options?: Opts, serverSideOptions?: {
-    socket: any;
-} | {
-    httpReq: any;
-}) => Promise<GetSQLReturnType<Opts>>;
+<Opts extends SQLOptions>(query: string, args?: AnyObject | any[], options?: Opts) => Promise<GetSQLReturnType<Opts>>;
 type SelectMethods<T extends DBTableSchema> = T["select"] extends true ? keyof Pick<TableHandler, "count" | "find" | "findOne" | "getColumns" | "getInfo" | "size" | "subscribe" | "subscribeOne"> : never;
 type UpdateMethods<T extends DBTableSchema> = T["update"] extends true ? keyof Pick<TableHandler, "update" | "updateBatch"> : never;
 type InsertMethods<T extends DBTableSchema> = T["insert"] extends true ? keyof Pick<TableHandler, "insert"> : never;

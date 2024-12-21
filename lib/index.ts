@@ -964,14 +964,14 @@ export type GetSQLReturnType<O extends SQLOptions> = CheckForListen<
   O
 >;
 
-export type SQLHandler =
+export type SQLHandler<ServerSideOptions = void> =
   /**
    *
    * @param query <string> query. e.g.: SELECT * FROM users;
    * @param params <any[] | object> query arguments to be escaped. e.g.: { name: 'dwadaw' }
    * @param options <object> { returnType: "statement" | "rows" | "noticeSubscription" }
    */
-  <Opts extends SQLOptions, ServerSideOptions = void>(
+  <Opts extends SQLOptions>(
     query: string,
     args?: AnyObject | any[],
     options?: Opts,

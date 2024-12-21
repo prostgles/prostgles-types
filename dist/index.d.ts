@@ -697,14 +697,14 @@ export type SocketSQLStreamClient = SocketSQLStreamServer & {
 };
 export type CheckForListen<T, O extends SQLOptions> = O["allowListen"] extends true ? DBEventHandles | T : T;
 export type GetSQLReturnType<O extends SQLOptions> = CheckForListen<O["returnType"] extends "row" ? AnyObject | null : O["returnType"] extends "rows" ? AnyObject[] : O["returnType"] extends "value" ? any | null : O["returnType"] extends "values" ? any[] : O["returnType"] extends "statement" ? string : O["returnType"] extends "noticeSubscription" ? DBEventHandles : O["returnType"] extends "stream" ? SocketSQLStreamClient : SQLResult<O["returnType"]>, O>;
-export type SQLHandler = 
+export type SQLHandler<ServerSideOptions = void> = 
 /**
  *
  * @param query <string> query. e.g.: SELECT * FROM users;
  * @param params <any[] | object> query arguments to be escaped. e.g.: { name: 'dwadaw' }
  * @param options <object> { returnType: "statement" | "rows" | "noticeSubscription" }
  */
-<Opts extends SQLOptions, ServerSideOptions = void>(query: string, args?: AnyObject | any[], options?: Opts, serverSideOptions?: ServerSideOptions) => Promise<GetSQLReturnType<Opts>>;
+<Opts extends SQLOptions>(query: string, args?: AnyObject | any[], options?: Opts, serverSideOptions?: ServerSideOptions) => Promise<GetSQLReturnType<Opts>>;
 type SelectMethods<T extends DBTableSchema> = T["select"] extends true ? keyof Pick<TableHandler, "count" | "find" | "findOne" | "getColumns" | "getInfo" | "size" | "subscribe" | "subscribeOne"> : never;
 type UpdateMethods<T extends DBTableSchema> = T["update"] extends true ? keyof Pick<TableHandler, "update" | "updateBatch"> : never;
 type InsertMethods<T extends DBTableSchema> = T["insert"] extends true ? keyof Pick<TableHandler, "insert"> : never;

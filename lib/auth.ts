@@ -76,11 +76,6 @@ export type CommonAuthFailure = Failure<
   "server-error" | "rate-limit-exceeded" | "something-went-wrong"
 >;
 
-export type AuthFailure =
-  | CommonAuthFailure
-  | { success: false; code: "no-match"; message?: string }
-  | { success: false; code: "inactive-account"; message?: string };
-
 export declare namespace AuthResponse {
   export type AuthSuccess = {
     success: true;
@@ -88,8 +83,15 @@ export declare namespace AuthResponse {
     message?: string;
   };
 
+  export type AuthFailure =
+    | CommonAuthFailure
+    | { success: false; code: "no-match"; message?: string }
+    | { success: false; code: "inactive-account"; message?: string };
+
   export type MagicLinkAuthSuccess = AuthSuccess;
-  export type MagicLinkAuthFailure = AuthFailure | Failure<"expired-magic-link">;
+  export type MagicLinkAuthFailure =
+    | AuthFailure
+    | Failure<"expired-magic-link" | "invalid-magic-link" | "used-magic-link">;
 
   export type OAuthRegisterSuccess = AuthSuccess;
   export type OAuthRegisterFailure = CommonAuthFailure | Failure<"provider-issue">;
@@ -120,6 +122,8 @@ export declare namespace AuthResponse {
         | "user-already-registered"
         | "username-missing"
         | "password-missing"
+        | "invalid-email-confirmation-code"
+        | "expired-email-confirmation-code"
         | "inactive-account"
       >;
 }

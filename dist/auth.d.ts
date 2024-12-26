@@ -68,29 +68,29 @@ export declare namespace AuthRequest {
     type RegisterData = Pick<LoginData, "username" | "password">;
 }
 export type CommonAuthFailure = Failure<"server-error" | "rate-limit-exceeded" | "something-went-wrong">;
-export type AuthFailure = CommonAuthFailure | {
-    success: false;
-    code: "no-match";
-    message?: string;
-} | {
-    success: false;
-    code: "inactive-account";
-    message?: string;
-};
 export declare namespace AuthResponse {
     type AuthSuccess = {
         success: true;
         code?: undefined;
         message?: string;
     };
+    type AuthFailure = CommonAuthFailure | {
+        success: false;
+        code: "no-match";
+        message?: string;
+    } | {
+        success: false;
+        code: "inactive-account";
+        message?: string;
+    };
     type MagicLinkAuthSuccess = AuthSuccess;
-    type MagicLinkAuthFailure = AuthFailure | Failure<"expired-magic-link">;
+    type MagicLinkAuthFailure = AuthFailure | Failure<"expired-magic-link" | "invalid-magic-link" | "used-magic-link">;
     type OAuthRegisterSuccess = AuthSuccess;
     type OAuthRegisterFailure = CommonAuthFailure | Failure<"provider-issue">;
     type PasswordLoginSuccess = AuthSuccess;
     type PasswordLoginFailure = AuthFailure | Failure<"totp-token-missing" | "invalid-username" | "username-missing" | "password-missing" | "invalid-password" | "is-from-OAuth" | "is-from-magic-link" | "invalid-totp-recovery-code" | "invalid-totp-code" | "email-not-confirmed">;
     type PasswordRegisterSuccess = Success<"email-verification-code-sent" | "already-registered-but-did-not-confirm-email">;
-    type PasswordRegisterFailure = CommonAuthFailure | Failure<"weak-password" | "user-already-registered" | "username-missing" | "password-missing" | "inactive-account">;
+    type PasswordRegisterFailure = CommonAuthFailure | Failure<"weak-password" | "user-already-registered" | "username-missing" | "password-missing" | "invalid-email-confirmation-code" | "expired-email-confirmation-code" | "inactive-account">;
 }
 export {};
 //# sourceMappingURL=auth.d.ts.map

@@ -5,10 +5,9 @@ export type UserLike = {
     [key: string]: any;
 };
 /**
- * - withPassword: email and password required
- * - withMagicLink: email required
+ * Used to hint to the client which login mode is available
  */
-export type AuthType = "withPassword" | "withMagicLink";
+export type LocalLoginMode = "email" | "email+password";
 /**
  * Auth object sent from server to client
  */
@@ -27,12 +26,12 @@ export type AuthSocketSchema = {
     /**
      * Email login methods enabled on the server
      */
-    loginType: AuthType | undefined;
+    loginType: LocalLoginMode | undefined;
     /**
      * Email registration methods enabled on the server
      */
-    register: {
-        type: AuthType;
+    signupWithEmailAndPassword: {
+        minPasswordLength: number;
         url: string;
     } | undefined;
     /**

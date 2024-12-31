@@ -111,9 +111,6 @@ export declare namespace AuthResponse {
         | "email-not-confirmed"
       >;
 
-  export type PasswordRegisterSuccess = Success<
-    "email-verification-code-sent" | "already-registered-but-did-not-confirm-email"
-  >;
   export type PasswordRegisterFailure =
     | CommonAuthFailure
     | Failure<
@@ -125,4 +122,9 @@ export declare namespace AuthResponse {
         | "expired-email-confirmation-code"
         | "inactive-account"
       >;
+  export type PasswordRegisterSuccess = Success<
+    "email-verification-code-sent" | "already-registered-but-did-not-confirm-email"
+  >;
+  export type PasswordRegisterEmailConfirmationFailure = AuthFailure;
+  export type PasswordRegisterEmailConfirmationSuccess = Success<"email-verified">;
 }

@@ -87,7 +87,11 @@ export declare namespace AuthResponse {
     | { success: false; code: "no-match"; message?: string }
     | { success: false; code: "inactive-account"; message?: string };
 
-  export type MagicLinkAuthSuccess = AuthSuccess;
+  export type MagicLinkAuthSuccess = {
+    success: true;
+    code: "magic-link-sent";
+    message?: string;
+  };
   export type MagicLinkAuthFailure =
     | AuthFailure
     | Failure<"expired-magic-link" | "invalid-magic-link" | "used-magic-link">;

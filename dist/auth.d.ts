@@ -82,7 +82,11 @@ export declare namespace AuthResponse {
         code: "inactive-account";
         message?: string;
     };
-    type MagicLinkAuthSuccess = AuthSuccess;
+    type MagicLinkAuthSuccess = {
+        success: true;
+        code: "magic-link-sent";
+        message?: string;
+    };
     type MagicLinkAuthFailure = AuthFailure | Failure<"expired-magic-link" | "invalid-magic-link" | "used-magic-link">;
     type OAuthRegisterSuccess = AuthSuccess;
     type OAuthRegisterFailure = CommonAuthFailure | Failure<"provider-issue">;

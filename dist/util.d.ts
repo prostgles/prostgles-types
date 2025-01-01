@@ -161,5 +161,6 @@ export declare const reverseParsedPath: (parsedPath: ParsedJoinPath[], table: st
         [k: string]: string;
     }[];
 }[];
+export declare const isEqual: (x: any, y: any) => boolean;
 export {};
 //# sourceMappingURL=util.d.ts.map

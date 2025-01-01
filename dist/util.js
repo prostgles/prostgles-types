@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.reverseParsedPath = exports.reverseJoinOn = exports.getJoinHandlers = exports.tryCatchV2 = exports.tryCatch = exports.getKeys = exports.isDefined = exports.isObject = exports.getObjectEntries = exports.get = exports.isEmpty = exports.WAL = exports.unpatchText = exports.getTextPatch = exports.stableStringify = exports.includes = exports.find = exports.filter = exports.omitKeys = exports.pickKeys = exports.asName = void 0;
+exports.isEqual = exports.reverseParsedPath = exports.reverseJoinOn = exports.getJoinHandlers = exports.tryCatchV2 = exports.tryCatch = exports.getKeys = exports.isDefined = exports.isObject = exports.getObjectEntries = exports.get = exports.isEmpty = exports.WAL = exports.unpatchText = exports.getTextPatch = exports.stableStringify = exports.includes = exports.find = exports.filter = exports.omitKeys = exports.pickKeys = exports.asName = void 0;
 const md5_1 = require("./md5");
 function asName(str) {
     if (str === null || str === undefined || !str.toString || !str.toString())
@@ -519,4 +519,28 @@ const reverseParsedPath = (parsedPath, table) => {
         .reverse();
 };
 exports.reverseParsedPath = reverseParsedPath;
+const isEqual = function (x, y) {
+    if (x === y) {
+        return true;
+    }
+    else if (typeof x == "object" && x != null && typeof y == "object" && y != null) {
+        if (Object.keys(x).length != Object.keys(y).length) {
+            return false;
+        }
+        for (const prop in x) {
+            if (y.hasOwnProperty(prop)) {
+                if (!(0, exports.isEqual)(x[prop], y[prop])) {
+                    return false;
+                }
+            }
+            else
+                return false;
+        }
+        return true;
+    }
+    else {
+        return false;
+    }
+};
+exports.isEqual = isEqual;
 //# sourceMappingURL=util.js.map

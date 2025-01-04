@@ -139,6 +139,9 @@ export declare namespace AuthResponse {
   export type PasswordRegisterSuccess = Success<
     "email-verification-code-sent" | "already-registered-but-did-not-confirm-email"
   >;
-  export type PasswordRegisterEmailConfirmationFailure = AuthFailure;
+  export type CodeVerificationFailure =
+    | AuthFailure
+    | Failure<"invalid-otp-code" | "expired-otp-code">;
+  export type PasswordRegisterEmailConfirmationFailure = CodeVerificationFailure;
   export type PasswordRegisterEmailConfirmationSuccess = Success<"email-verified">;
 }

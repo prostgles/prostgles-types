@@ -100,7 +100,8 @@ export declare namespace AuthResponse {
     type PasswordLoginFailure = AuthFailure | Failure<"totp-token-missing" | "invalid-username" | "username-missing" | "password-missing" | "invalid-password" | "is-from-OAuth" | "is-from-magic-link" | "invalid-totp-recovery-code" | "invalid-totp-code" | "email-not-confirmed">;
     type PasswordRegisterFailure = CommonAuthFailure | Failure<"weak-password" | "user-already-registered" | "username-missing" | "password-missing" | "invalid-email-confirmation-code" | "expired-email-confirmation-code" | "inactive-account">;
     type PasswordRegisterSuccess = Success<"email-verification-code-sent" | "already-registered-but-did-not-confirm-email">;
-    type PasswordRegisterEmailConfirmationFailure = AuthFailure;
+    type CodeVerificationFailure = AuthFailure | Failure<"invalid-otp-code" | "expired-otp-code">;
+    type PasswordRegisterEmailConfirmationFailure = CodeVerificationFailure;
     type PasswordRegisterEmailConfirmationSuccess = Success<"email-verified">;
 }
 export {};

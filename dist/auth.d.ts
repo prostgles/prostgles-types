@@ -41,6 +41,10 @@ export type AuthSocketSchema = {
      *  on each connect/reconnect the client pathname is checked and page reloaded if it's not a public page and the client is not logged in
      */
     pathGuard?: boolean;
+    /**
+     * Account signup method if the client sid points to a user account
+     */
+    preferredLogin: "email" | IdentityProvider | undefined;
 };
 type Failure<Code extends string> = {
     success: false;

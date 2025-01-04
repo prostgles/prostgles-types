@@ -32,7 +32,11 @@ export type AuthSocketSchema = {
   /**
    * Identity providers enabled and configured on the server.
    */
-  providers: Partial<Record<IdentityProvider, { url: string }>> | undefined;
+  providers:
+    | Partial<
+        Record<IdentityProvider, { url: string; displayName?: string; displayIconPath?: string }>
+      >
+    | undefined;
 
   /**
    * Email login methods enabled on the server

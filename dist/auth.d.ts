@@ -1,4 +1,4 @@
-export type IdentityProvider = "google" | "microsoft" | "github" | "apple" | "facebook" | "twitter" | "linkedin";
+export type IdentityProvider = "google" | "microsoft" | "github" | "apple" | "facebook" | "twitter" | "linkedin" | "customOAuth";
 export type UserLike = {
     id: string;
     type: string;

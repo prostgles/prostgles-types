@@ -5,7 +5,8 @@ export type IdentityProvider =
   | "apple"
   | "facebook"
   | "twitter"
-  | "linkedin";
+  | "linkedin"
+  | "customOAuth";
 
 export type UserLike = {
   id: string;

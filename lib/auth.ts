@@ -116,6 +116,7 @@ export declare namespace AuthResponse {
         | "totp-token-missing"
         | "invalid-username"
         | "username-missing"
+        | "invalid-email"
         | "password-missing"
         | "invalid-password"
         | "is-from-OAuth"

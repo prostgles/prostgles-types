@@ -99,7 +99,7 @@ export declare namespace AuthResponse {
 
   export type MagicLinkAuthSuccess = {
     success: true;
-    code: "magic-link-sent";
+    code: "email-verification-code-sent" | "magic-link-sent";
     message?: string;
   };
   export type MagicLinkAuthFailure =

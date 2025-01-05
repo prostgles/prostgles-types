@@ -90,7 +90,7 @@ export declare namespace AuthResponse {
     };
     type MagicLinkAuthSuccess = {
         success: true;
-        code: "magic-link-sent";
+        code: "email-verification-code-sent" | "magic-link-sent";
         message?: string;
     };
     type MagicLinkAuthFailure = AuthFailure | Failure<"expired-magic-link" | "invalid-magic-link" | "used-magic-link">;

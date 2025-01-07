@@ -90,6 +90,10 @@ export declare namespace AuthResponse {
     success: true;
     code?: undefined;
     message?: string;
+    /**
+     * If returnToken=true was in the request, the token is returned
+     */
+    token?: string;
   };
 
   export type AuthFailure =

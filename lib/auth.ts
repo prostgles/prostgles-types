@@ -57,7 +57,7 @@ export type AuthSocketSchema = {
   /**
    * Account signup method if the client sid points to a user account
    */
-  preferredLogin: "email" | IdentityProvider | undefined;
+  preferredLogin: LocalLoginMode | IdentityProvider | undefined;
 };
 
 type Failure<Code extends string> = { success: false; code: Code; message?: string };

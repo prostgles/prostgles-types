@@ -451,14 +451,14 @@ const tryCatchV2 = (func) => {
         if (dataOrResult instanceof Promise) {
             return new Promise(async (resolve, reject) => {
                 const result = await dataOrResult
-                    .then((data) => ({ data, hasError: false }))
+                    .then((data) => ({ data }))
                     .catch((error) => {
                     return {
                         error,
                         hasError: true,
                     };
                 });
-                (result.hasError ? reject : resolve)({
+                resolve({
                     ...result,
                     duration: Date.now() - startTime,
                 });
@@ -470,7 +470,6 @@ const tryCatchV2 = (func) => {
         };
     }
     catch (error) {
-        console.error(error);
         return {
             error,
             hasError: true,

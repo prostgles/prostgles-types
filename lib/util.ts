@@ -590,11 +590,17 @@ export const tryCatchV2 = <T>(
     const dataOrResult = func();
     if (dataOrResult instanceof Promise) {
       return new Promise(async (resolve, reject) => {
-        const duration = Date.now() - startTime;
-        const data = await dataOrResult;
-        resolve({
-          data,
-          duration,
+        const result = await dataOrResult
+          .then((data) => ({ data, hasError: false }))
+          .catch((error) => {
+            return {
+              error,
+              hasError: true,
+            };
+          });
+        (result.hasError ? reject : resolve)({
+          ...result,
+          duration: Date.now() - startTime,
         });
       }) as any;
     }

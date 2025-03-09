@@ -892,10 +892,7 @@ type ColumnInfoForNestedInsert = Pick<ColumnInfo, "name" | "references" | "is_pk
 export declare const getPossibleNestedInsert: (column: ColumnInfoForNestedInsert, schema: {
     name: string;
     columns: ColumnInfoForNestedInsert[];
-}[], silent?: boolean) => {
-    ref: ReferenceTable;
-    fcolInfo: ColumnInfoForNestedInsert;
-} | undefined;
+}[], silent?: boolean) => ReferenceTable | undefined;
 export { CONTENT_TYPE_TO_EXT } from "./files";
 export type { ALLOWED_CONTENT_TYPE, ALLOWED_EXTENSION, FileColumnConfig, FileType } from "./files";
 export * from "./filters";

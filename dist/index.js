@@ -135,11 +135,11 @@ const getPossibleNestedInsert = (column, schema, silent = true) => {
         .filter(util_1.isDefined);
     const [singleColRef, ...otherSingleColRefs] = singleColRefs ?? [];
     if (!otherSingleColRefs.length) {
-        return singleColRef;
+        return singleColRef?.ref;
     }
     const [pkeyRef, ...otherPkeyRefs] = singleColRefs.filter((r) => r.fcolInfo.is_pkey);
     if (!otherPkeyRefs.length)
-        return pkeyRef;
+        return pkeyRef?.ref;
     if (silent)
         return;
     throw [

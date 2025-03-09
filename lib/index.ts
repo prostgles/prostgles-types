@@ -1240,9 +1240,10 @@ export type ProstglesError = {
   columns?: string[];
 };
 
+type ColumnInfoForNestedInsert = Pick<ColumnInfo, "name" | "references" | "is_pkey">;
 export const getPossibleNestedInsert = (
-  column: ColumnInfo,
-  schema: { name: string; columns: ColumnInfo[] }[],
+  column: ColumnInfoForNestedInsert,
+  schema: { name: string; columns: ColumnInfoForNestedInsert[] }[],
   silent = true
 ) => {
   const refs = column.references ?? [];

@@ -691,3 +691,15 @@ export const isEqual = function (x: any, y: any) {
     return false;
   }
 };
+
+type FilterMatch<T, U> = T extends U ? T : undefined;
+
+export const extractTypeUtil = <T extends AnyObject, U extends Partial<T>>(
+  obj: T,
+  objSubType: U
+): FilterMatch<T, U> => {
+  if (Object.entries(objSubType).every(([k, v]) => obj[k] === v)) {
+    return obj as FilterMatch<T, U>;
+  }
+  return undefined as FilterMatch<T, U>;
+};

@@ -888,6 +888,13 @@ export type ProstglesError = {
     detail?: string;
     columns?: string[];
 };
+export declare const getPossibleNestedInsert: (column: ColumnInfo, schema: {
+    name: string;
+    columns: ColumnInfo[];
+}[], silent?: boolean) => {
+    ref: ReferenceTable;
+    fcolInfo: ColumnInfo;
+} | undefined;
 export { CONTENT_TYPE_TO_EXT } from "./files";
 export type { ALLOWED_CONTENT_TYPE, ALLOWED_EXTENSION, FileColumnConfig, FileType } from "./files";
 export * from "./filters";

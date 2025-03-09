@@ -3,6 +3,7 @@ import { FileColumnConfig } from "./files";
 import { AnyObject, ComplexFilter, FullFilter, FullFilterBasic, ValueOf } from "./filters";
 import type { UpsertDataToPGCast } from "./insertUpdateUtils";
 import { JSONB } from "./jsonb";
+import { isDefined } from "./util";
 export const _PG_strings = [
   "bpchar",
   "char",
@@ -1237,6 +1238,42 @@ export type ProstglesError = {
   code_info?: string;
   detail?: string;
   columns?: string[];
+};
+
+export const getPossibleNestedInsert = (
+  column: ColumnInfo,
+  schema: { name: string; columns: ColumnInfo[] }[],
+  silent = true
+) => {
+  const refs = column.references ?? [];
+
+  /** Only single col references allowed */
+  const singleColRefs = refs
+    .map((ref) => {
+      const { ftable, fcols } = ref;
+      const ftableInfo = schema.find((s) => s.name === ftable);
+      if (!ftableInfo) return;
+      if (fcols.length !== 1) return;
+      const fcolInfo = ftableInfo.columns.find((c) => c.name === fcols[0]);
+      if (!fcolInfo) return;
+      return {
+        ref,
+        fcolInfo,
+      };
+    })
+    .filter(isDefined);
+  const [singleColRef, ...otherSingleColRefs] = singleColRefs ?? [];
+  if (!otherSingleColRefs.length) {
+    return singleColRef;
+  }
+  const [pkeyRef, ...otherPkeyRefs] = singleColRefs.filter((r) => r.fcolInfo.is_pkey);
+  if (!otherPkeyRefs.length) return pkeyRef;
+
+  if (silent) return;
+  throw [
+    "Cannot do a nested insert on column that references multiple tables.",
+    "Expecting only one reference to a single primary key fcol",
+  ].join("\n");
 };
 
 /**

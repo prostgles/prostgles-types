@@ -162,5 +162,7 @@ export declare const reverseParsedPath: (parsedPath: ParsedJoinPath[], table: st
     }[];
 }[];
 export declare const isEqual: (x: any, y: any) => boolean;
+type FilterMatch<T, U> = T extends U ? T : undefined;
+export declare const extractTypeUtil: <T extends AnyObject, U extends Partial<T>>(obj: T, objSubType: U) => FilterMatch<T, U>;
 export {};
 //# sourceMappingURL=util.d.ts.map

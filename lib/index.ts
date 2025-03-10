@@ -595,13 +595,13 @@ export type TableInfo = {
    * List of unique column indexes/constraints.
    * Column groups where at least a column is not allowed to be viewed (selected) are omitted.
    */
-  uniqueColumnGroups: string[][] | undefined;
+  uniqueColumnGroups?: string[][];
 
   /**
    * Controlled through the publish.table_name.insert config
    * If defined then any insert on this table must also contain nested inserts for the specified tables that reference this table
    */
-  requiredNestedInserts: RequiredNestedInsert[] | undefined;
+  requiredNestedInserts?: RequiredNestedInsert[];
 };
 
 type RequiredNestedInsert = {

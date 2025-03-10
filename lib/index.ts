@@ -596,6 +596,18 @@ export type TableInfo = {
    * Column groups where at least a column is not allowed to be viewed (selected) are omitted.
    */
   uniqueColumnGroups: string[][] | undefined;
+
+  /**
+   * Controlled through the publish.table_name.insert config
+   * If defined then any insert on this table must also contain nested inserts for the specified tables that reference this table
+   */
+  requiredNestedInserts: RequiredNestedInsert[] | undefined;
+};
+
+type RequiredNestedInsert = {
+  ftable: string;
+  minRows?: number;
+  maxRows?: number;
 };
 
 /**

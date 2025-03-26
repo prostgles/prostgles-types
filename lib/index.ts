@@ -205,7 +205,7 @@ export type ColumnInfo = {
   jsonbSchema?: JSONB.JSONBSchema;
 
   /**
-   * If degined then this column is referencing the file table
+   * If defined then this column is referencing the file table
    * Extracted from FileTable config
    * Used in SmartForm
    */

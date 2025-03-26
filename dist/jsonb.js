@@ -49,6 +49,20 @@ const _ss = {
     },
     o: { z1: 23 },
 };
+const getJSONSchemaType = (rawType) => {
+    if (!rawType)
+        return;
+    const type = rawType.endsWith("[]") ? rawType.slice(0, -2) : rawType;
+    return {
+        type: type === "integer" ? "integer"
+            : type === "boolean" ? "boolean"
+                : type === "number" ? "number"
+                    : type === "any" ? undefined
+                        : type === "Lookup" ? undefined
+                            : "string",
+        isArray: rawType.endsWith("[]"),
+    };
+};
 const getJSONSchemaObject = (rawType, rootInfo) => {
     const { type, arrayOf, arrayOfType, description, nullable, oneOf, oneOfType, title, record, ...t } = typeof rawType === "string" ? { type: rawType } : rawType;
     let result = {};
@@ -61,7 +75,11 @@ const getJSONSchemaObject = (rawType, rootInfo) => {
         ...(!!title && { title }),
     };
     if (t.enum?.length) {
-        partialProps.type = typeof t.enum[0];
+        const firstElemType = typeof t.enum[0];
+        partialProps.type =
+            firstElemType === "number" ? "number"
+                : firstElemType === "boolean" ? "boolean"
+                    : "string";
     }
     if (typeof type === "string" || arrayOf || arrayOfType) {
         /** ARRAY */
@@ -71,10 +89,10 @@ const getJSONSchemaObject = (rawType, rootInfo) => {
         if (arrayOf || arrayOfType || type?.endsWith("[]")) {
             const arrayItems = arrayOf || arrayOfType ? (0, exports.getJSONSchemaObject)(arrayOf || { type: arrayOfType })
                 : type?.startsWith("any") ? { type: undefined }
-                    : {
-                        type: type?.slice(0, -2),
+                    : ({
+                        type: getJSONSchemaType(type)?.type,
                         ...(t.allowedValues && { enum: t.allowedValues.slice(0) }),
-                    };
+                    });
             result = {
                 type: "array",
                 items: arrayItems,
@@ -83,7 +101,7 @@ const getJSONSchemaObject = (rawType, rootInfo) => {
         }
         else {
             result = {
-                type: type,
+                type: getJSONSchemaType(type)?.type,
             };
         }
         /** OBJECT */

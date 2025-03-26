@@ -1,6 +1,6 @@
-import { getKeys, getObjectEntries, isObject, StrictUnion } from "./util";
-import type { JSONSchema7, JSONSchema7TypeName } from "json-schema";
+import type { JSONSchema7, JSONSchema7Definition, JSONSchema7TypeName } from "json-schema";
 import { AnyObject } from "./filters";
+import { getKeys, getObjectEntries, isObject, StrictUnion } from "./util";
 
 export const PrimitiveTypes = [
   "boolean",
@@ -274,6 +274,25 @@ const _ss: JSONB.GetType<typeof s> = {
   o: { z1: 23 },
 };
 
+const getJSONSchemaType = (
+  rawType: JSONB.BasicType["type"] | JSONB.Lookup["type"] | undefined
+): { type: JSONSchema7TypeName | undefined; isArray: boolean } | undefined => {
+  if (!rawType) return;
+  const type: (typeof PrimitiveTypes)[number] | "Lookup" =
+    rawType.endsWith("[]") ? (rawType.slice(0, -2) as any) : rawType;
+
+  return {
+    type:
+      type === "integer" ? "integer"
+      : type === "boolean" ? "boolean"
+      : type === "number" ? "number"
+      : type === "any" ? undefined
+      : type === "Lookup" ? undefined
+      : "string",
+    isArray: rawType.endsWith("[]"),
+  };
+};
+
 export const getJSONSchemaObject = (
   rawType: JSONB.FieldType | JSONB.JSONBSchema,
   rootInfo?: { id: string }
@@ -302,7 +321,11 @@ export const getJSONSchemaObject = (
   };
 
   if (t.enum?.length) {
-    partialProps.type = typeof t.enum[0]! as any;
+    const firstElemType = typeof t.enum[0];
+    partialProps.type =
+      firstElemType === "number" ? "number"
+      : firstElemType === "boolean" ? "boolean"
+      : "string";
   }
 
   if (typeof type === "string" || arrayOf || arrayOfType) {
@@ -314,10 +337,10 @@ export const getJSONSchemaObject = (
       const arrayItems =
         arrayOf || arrayOfType ? getJSONSchemaObject(arrayOf || { type: arrayOfType })
         : type?.startsWith("any") ? { type: undefined }
-        : {
-            type: type?.slice(0, -2) as JSONSchema7TypeName,
+        : ({
+            type: getJSONSchemaType(type)?.type,
             ...(t.allowedValues && { enum: t.allowedValues.slice(0) }),
-          };
+          } satisfies JSONSchema7Definition);
       result = {
         type: "array",
         items: arrayItems,
@@ -326,7 +349,7 @@ export const getJSONSchemaObject = (
       /** PRIMITIVES */
     } else {
       result = {
-        type: type as JSONSchema7TypeName,
+        type: getJSONSchemaType(type)?.type,
       };
     }
 

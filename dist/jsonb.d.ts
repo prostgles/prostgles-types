@@ -1,6 +1,6 @@
-import { StrictUnion } from "./util";
 import type { JSONSchema7 } from "json-schema";
 import { AnyObject } from "./filters";
+import { StrictUnion } from "./util";
 export declare const PrimitiveTypes: readonly ["boolean", "number", "integer", "string", "Date", "time", "timestamp", "any"];
 export declare const PrimitiveArrayTypes: ("number[]" | "boolean[]" | "string[]" | "any[]" | "time[]" | "timestamp[]" | "integer[]" | "Date[]")[];
 export declare const DATA_TYPES: readonly ["boolean", "number", "integer", "string", "Date", "time", "timestamp", "any", ...("number[]" | "boolean[]" | "string[]" | "any[]" | "time[]" | "timestamp[]" | "integer[]" | "Date[]")[]];

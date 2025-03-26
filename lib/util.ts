@@ -583,8 +583,8 @@ type TryCatchResult<T> =
   | { data?: undefined; hasError: true; error: unknown; duration: number };
 
 export const tryCatchV2 = <T>(
-  func: () => T | Promise<T>
-): T extends Promise<T> ? Promise<TryCatchResult<Awaited<T>>> : TryCatchResult<T> => {
+  func: () => T
+): T extends Promise<any> ? Promise<TryCatchResult<Awaited<T>>> : TryCatchResult<T> => {
   const startTime = Date.now();
   try {
     const dataOrResult = func();

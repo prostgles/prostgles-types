@@ -115,29 +115,26 @@ exports.RULE_METHODS = {
 };
 const getPossibleNestedInsert = (column, schema, silent = true) => {
     const refs = column.references ?? [];
-    /** Only single col references allowed */
-    const singleColRefs = refs
+    const colRefs = refs
         .map((ref) => {
         const { ftable, fcols } = ref;
         const ftableInfo = schema.find((s) => s.name === ftable);
         if (!ftableInfo)
             return;
-        if (fcols.length !== 1)
-            return;
-        const fcolInfo = ftableInfo.columns.find((c) => c.name === fcols[0]);
-        if (!fcolInfo)
+        const fcolsInfo = ftableInfo.columns.filter((c) => fcols.includes(c.name));
+        if (!fcolsInfo.length)
             return;
         return {
             ref,
-            fcolInfo,
+            fcolsInfo,
         };
     })
         .filter(util_1.isDefined);
-    const [singleColRef, ...otherSingleColRefs] = singleColRefs ?? [];
+    const [firstColRef, ...otherSingleColRefs] = colRefs ?? [];
     if (!otherSingleColRefs.length) {
-        return singleColRef?.ref;
+        return firstColRef?.ref;
     }
-    const [pkeyRef, ...otherPkeyRefs] = singleColRefs.filter((r) => r.fcolInfo.is_pkey);
+    const [pkeyRef, ...otherPkeyRefs] = colRefs.filter((r) => r.fcolsInfo.some((fcolInfo) => fcolInfo.is_pkey));
     if (!otherPkeyRefs.length)
         return pkeyRef?.ref;
     if (silent)

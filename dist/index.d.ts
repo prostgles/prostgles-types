@@ -187,6 +187,12 @@ export type DBSchemaTable = {
  */
 export type FieldFilter<T extends AnyObject = AnyObject> = SelectTyped<T>;
 export type AscOrDesc = 1 | -1 | boolean;
+export type OrderByDetailed<T> = {
+    key: keyof T;
+    asc?: AscOrDesc;
+    nulls?: "last" | "first";
+    nullEmpty?: boolean;
+};
 /**
  * `{ product_name: -1 }` -> SORT BY product_name DESC
  * [{ field_name: (1 | -1 | boolean) }]
@@ -195,17 +201,12 @@ export type AscOrDesc = 1 | -1 | boolean;
  * Array order is maintained
  * if nullEmpty is true then empty text will be replaced to null (so nulls sorting takes effect on it)
  */
-export type _OrderBy<T extends AnyObject> = {
+export type OrderByTyped<T extends AnyObject> = {
     [K in keyof Partial<T>]: AscOrDesc;
 } | {
     [K in keyof Partial<T>]: AscOrDesc;
-}[] | {
-    key: keyof T;
-    asc?: AscOrDesc;
-    nulls?: "last" | "first";
-    nullEmpty?: boolean;
-}[] | Array<keyof T> | keyof T;
-export type OrderBy<T extends AnyObject | void = void> = T extends AnyObject ? _OrderBy<T> : _OrderBy<AnyObject>;
+}[] | OrderByDetailed<T> | OrderByDetailed<T>[] | Array<keyof T> | keyof T;
+export type OrderBy<T extends AnyObject | void = void> = T extends AnyObject ? OrderByTyped<T> : OrderByTyped<AnyObject>;
 type CommonSelect = "*" | "" | {
     "*": 1;
 };

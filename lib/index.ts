@@ -270,9 +270,9 @@ export type AscOrDesc = 1 | -1 | boolean;
 
 export type OrderByDetailed<T> = {
   key: keyof T;
-  asc?: AscOrDesc;
-  nulls?: "last" | "first";
-  nullEmpty?: boolean;
+  asc?: AscOrDesc | null;
+  nulls?: "last" | "first" | null;
+  nullEmpty?: boolean | null;
 };
 
 /**

@@ -189,9 +189,9 @@ export type FieldFilter<T extends AnyObject = AnyObject> = SelectTyped<T>;
 export type AscOrDesc = 1 | -1 | boolean;
 export type OrderByDetailed<T> = {
     key: keyof T;
-    asc?: AscOrDesc;
-    nulls?: "last" | "first";
-    nullEmpty?: boolean;
+    asc?: AscOrDesc | null;
+    nulls?: "last" | "first" | null;
+    nullEmpty?: boolean | null;
 };
 /**
  * `{ product_name: -1 }` -> SORT BY product_name DESC

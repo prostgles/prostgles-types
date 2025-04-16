@@ -670,26 +670,49 @@ export const reverseParsedPath = (parsedPath: ParsedJoinPath[], table: string) =
     .reverse();
 };
 
-export const isEqual = function (x: any, y: any) {
+/**
+ * Compare two objects for equality
+ * Returns false if any circular references are detected
+ */
+export const isEqual = function (x: any, y: any, seen = new WeakSet()): boolean {
   if (x === y) {
     return true;
-  } else if (typeof x == "object" && x != null && typeof y == "object" && y != null) {
-    if (Object.keys(x).length != Object.keys(y).length) {
+  }
+
+  if (typeof x !== typeof y) {
+    return false;
+  }
+
+  if (typeof x === "object" && x !== null && typeof y === "object" && y !== null) {
+    const xKeys = Object.keys(x);
+    if (xKeys.length !== Object.keys(y).length) {
       return false;
     }
 
-    for (const prop in x) {
-      if (y.hasOwnProperty(prop)) {
-        if (!isEqual(x[prop], y[prop])) {
+    if (seen.has(x) || seen.has(y)) {
+      console.warn("Circular reference detected in isEqual", x, y, seen);
+      return false;
+    }
+    seen.add(x);
+    seen.add(y);
+
+    for (const key of xKeys) {
+      if (key in y) {
+        //.hasOwnProperty(prop)
+        const xProp = x[key];
+        const yProp = y[key];
+        if (!isEqual(xProp, yProp, seen)) {
           return false;
         }
-      } else return false;
+      } else {
+        return false;
+      }
     }
 
     return true;
-  } else {
-    return false;
   }
+
+  return false;
 };
 
 type FilterMatch<T, U> = T extends U ? T : undefined;

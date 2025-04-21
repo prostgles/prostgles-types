@@ -138,7 +138,7 @@ type TryCatchResult<T> = {
     error: unknown;
     duration: number;
 };
-export declare const tryCatchV2: <T>(func: () => T) => T extends Promise<any> ? Promise<TryCatchResult<Awaited<T>>> : TryCatchResult<T>;
+export declare const tryCatchV2: <T>(func: () => T) => T extends Promise<infer R> ? Promise<TryCatchResult<Awaited<R>>> : TryCatchResult<T>;
 export declare const getJoinHandlers: (tableName: string) => {
     innerJoin: JoinMaker;
     leftJoin: JoinMaker;

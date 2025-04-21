@@ -584,7 +584,8 @@ type TryCatchResult<T> =
 
 export const tryCatchV2 = <T>(
   func: () => T
-): T extends Promise<any> ? Promise<TryCatchResult<Awaited<T>>> : TryCatchResult<T> => {
+): T extends Promise<infer R> ? Promise<TryCatchResult<Awaited<Promise<R>>>>
+: TryCatchResult<T> => {
   const startTime = Date.now();
   try {
     const dataOrResult = func();

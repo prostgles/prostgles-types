@@ -353,7 +353,11 @@ export type SelectParams<T extends AnyObject | void = void, S extends DBSchema |
 };
 export type SubscribeParams<T extends AnyObject | void = void, S extends DBSchema | void = void> = SelectParams<T, S> & {
     /**
-     * If true then the subscription will be throttled to the provided number of milliseconds
+     * If true then the first value will not be emitted
+     * */
+    skipFirst?: boolean;
+    /**
+     * If provided then the subscription will be throttled to the provided number of milliseconds
      */
     throttle?: number;
     throttleOpts?: {

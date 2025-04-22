@@ -478,6 +478,9 @@ export type SelectParams<
    */
   having?: FullFilter<T, S>;
 };
+
+type SubscribeActions = "insert" | "delete" | "update";
+
 export type SubscribeParams<
   T extends AnyObject | void = void,
   S extends DBSchema | void = void,
@@ -486,6 +489,12 @@ export type SubscribeParams<
    * If true then the first value will not be emitted
    * */
   skipFirst?: boolean;
+
+  /**
+   * Controls which actions will trigger the subscription.
+   * If not provided then all actions will be triggered
+   */
+  actions?: Partial<Record<SubscribeActions, true> | Record<SubscribeActions, false>>;
 
   /**
    * If provided then the subscription will be throttled to the provided number of milliseconds

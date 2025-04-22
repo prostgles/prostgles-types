@@ -352,7 +352,7 @@ export type SelectParams<T extends AnyObject | void = void, S extends DBSchema |
     having?: FullFilter<T, S>;
 };
 type SubscribeActions = "insert" | "delete" | "update";
-export type SubscribeParams<T extends AnyObject | void = void, S extends DBSchema | void = void> = SelectParams<T, S> & {
+export type SubscribeOptions = {
     /**
      * If true then the first value will not be emitted
      * */
@@ -374,6 +374,7 @@ export type SubscribeParams<T extends AnyObject | void = void, S extends DBSchem
         skipFirst?: boolean;
     };
 };
+export type SubscribeParams<T extends AnyObject | void = void, S extends DBSchema | void = void> = SelectParams<T, S> & SubscribeOptions;
 export type UpdateParams<T extends AnyObject | void = void, S extends DBSchema | void = void> = {
     /**
      * If defined will returns the specified fields of the updated record(s)

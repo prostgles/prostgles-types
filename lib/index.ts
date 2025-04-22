@@ -481,10 +481,7 @@ export type SelectParams<
 
 type SubscribeActions = "insert" | "delete" | "update";
 
-export type SubscribeParams<
-  T extends AnyObject | void = void,
-  S extends DBSchema | void = void,
-> = SelectParams<T, S> & {
+export type SubscribeOptions = {
   /**
    * If true then the first value will not be emitted
    * */
@@ -508,6 +505,11 @@ export type SubscribeParams<
     skipFirst?: boolean;
   };
 };
+
+export type SubscribeParams<
+  T extends AnyObject | void = void,
+  S extends DBSchema | void = void,
+> = SelectParams<T, S> & SubscribeOptions;
 
 export type UpdateParams<T extends AnyObject | void = void, S extends DBSchema | void = void> = {
   /**

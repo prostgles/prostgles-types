@@ -54,13 +54,13 @@ export function find<T extends AnyObject, ArrFilter extends Partial<T>>(
 }
 export function includes<T>(
   array: T[] | readonly T[],
-  elem:
-    | T
-    | null
-    | undefined
-    | (T extends string ? string
-      : T extends number ? number
-      : never)
+  elem: any
+  // | T
+  // | null
+  // | undefined
+  // | (T extends string ? string
+  //   : T extends number ? number
+  //   : never)
 ): elem is T {
   return array.some((v) => v === elem);
 }

@@ -38,7 +38,14 @@ function find(array, arrFilter) {
     return filter(array, arrFilter)[0];
 }
 exports.find = find;
-function includes(array, elem) {
+function includes(array, elem
+// | T
+// | null
+// | undefined
+// | (T extends string ? string
+//   : T extends number ? number
+//   : never)
+) {
     return array.some((v) => v === elem);
 }
 exports.includes = includes;

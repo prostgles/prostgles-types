@@ -1,4 +1,4 @@
-import { tryCatchV2, isEqual } from "./util";
+import { tryCatchV2, isEqual, includes } from "./util";
 import { describe, test } from "node:test";
 import { strict as assert } from "assert";
 
@@ -64,5 +64,21 @@ describe("Utils tests", () => {
     assert.equal(isEqual(dd, ee), false);
     assert.equal(isEqual([{ a: { b: { c: 1 } } }], [{ a: { b: { c: 2 } } }]), false);
     assert.equal(isEqual([{ a: { b: { c: 1 } } }], [{ a: { b: { c: 1 } } }]), true);
+  });
+  test("includes types", () => {
+    const arr = ["1", "2", "3", null, undefined] as const;
+
+    const d: "0" | "1" = "1";
+    if (includes(arr, d)) {
+      d satisfies "1";
+    }
+    const d2: number | string = 1;
+    if (includes(arr, d2)) {
+      d2 satisfies 1;
+    }
+    const d23: any = 1;
+    if (includes(arr, d23)) {
+      d23 satisfies (typeof arr)[number];
+    }
   });
 });

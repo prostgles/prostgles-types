@@ -52,10 +52,16 @@ export function find<T extends AnyObject, ArrFilter extends Partial<T>>(
 ): T | undefined {
   return filter(array, arrFilter)[0];
 }
-export function includes<Arr extends any[] | readonly any[], Elem extends Arr[number]>(
-  array: Arr,
-  elem: Elem
-): boolean {
+export function includes<T>(
+  array: T[] | readonly T[],
+  elem:
+    | T
+    | null
+    | undefined
+    | (T extends string ? string
+      : T extends number ? number
+      : never)
+): elem is T {
   return array.some((v) => v === elem);
 }
 

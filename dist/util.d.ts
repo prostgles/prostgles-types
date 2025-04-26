@@ -1,4 +1,3 @@
-/// <reference types="node" />
 import { AnyObject, JoinMaker, JoinPath, TS_COLUMN_DATA_TYPES } from ".";
 export declare function asName(str: string): string;
 export declare const pickKeys: <T extends AnyObject, Include extends keyof T>(obj: T, keys?: Include[], onlyIfDefined?: boolean) => Pick<T, Include>;
@@ -119,7 +118,7 @@ export type StrictUnion<T> = StrictUnionHelper<T, T>;
  * use tryCatchV2 instead
  */
 export declare const tryCatch: <T extends AnyObject>(func: () => T | Promise<T>) => Promise<(T & {
-    hasError?: false | undefined;
+    hasError?: false;
     error?: undefined;
     duration: number;
 }) | (Partial<Record<keyof T, undefined>> & {
@@ -138,7 +137,7 @@ type TryCatchResult<T> = {
     error: unknown;
     duration: number;
 };
-export declare const tryCatchV2: <T>(func: () => T) => T extends Promise<infer R> ? Promise<TryCatchResult<Awaited<R>>> : TryCatchResult<T>;
+export declare const tryCatchV2: <T>(func: () => T) => T extends Promise<infer R> ? Promise<TryCatchResult<Awaited<Promise<R>>>> : TryCatchResult<T>;
 export declare const getJoinHandlers: (tableName: string) => {
     innerJoin: JoinMaker;
     leftJoin: JoinMaker;

@@ -717,7 +717,7 @@ export type InsertReturnType<
   : GetReturningReturnType<O, TD, S>;
 
 export type SubscriptionHandler = {
-  unsubscribe: () => Promise<any>;
+  unsubscribe: () => Promise<void>;
   filter: FullFilter<void, void> | {};
 };
 

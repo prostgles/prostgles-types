@@ -532,7 +532,7 @@ export type UpdateReturnType<O extends UpdateParams<TD, S>, TD extends AnyObject
  */
 export type InsertReturnType<Data extends InsertData<AnyObject>, O extends UpdateParams<TD, S>, TD extends AnyObject, S extends DBSchema | void = void> = Data extends any[] | readonly any[] ? GetReturningReturnType<O, TD, S>[] : GetReturningReturnType<O, TD, S>;
 export type SubscriptionHandler = {
-    unsubscribe: () => Promise<any>;
+    unsubscribe: () => Promise<void>;
     filter: FullFilter<void, void> | {};
 };
 /**

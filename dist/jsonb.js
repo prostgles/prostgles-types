@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getJSONBSchemaAsJSONSchema = exports.getJSONSchemaObject = exports.DATA_TYPES = exports.PrimitiveArrayTypes = exports.PrimitiveTypes = void 0;
+exports.getJSONSchemaObject = exports.DATA_TYPES = exports.PrimitiveArrayTypes = exports.PrimitiveTypes = void 0;
+exports.getJSONBSchemaAsJSONSchema = getJSONBSchemaAsJSONSchema;
 const util_1 = require("./util");
 exports.PrimitiveTypes = [
     "boolean",
@@ -89,10 +90,10 @@ const getJSONSchemaObject = (rawType, rootInfo) => {
         if (arrayOf || arrayOfType || type?.endsWith("[]")) {
             const arrayItems = arrayOf || arrayOfType ? (0, exports.getJSONSchemaObject)(arrayOf || { type: arrayOfType })
                 : type?.startsWith("any") ? { type: undefined }
-                    : ({
+                    : {
                         type: getJSONSchemaType(type)?.type,
                         ...(t.allowedValues && { enum: t.allowedValues.slice(0) }),
-                    });
+                    };
             result = {
                 type: "array",
                 items: arrayItems,
@@ -167,5 +168,4 @@ exports.getJSONSchemaObject = getJSONSchemaObject;
 function getJSONBSchemaAsJSONSchema(tableName, colName, schema) {
     return (0, exports.getJSONSchemaObject)(schema, { id: `${tableName}.${colName}` });
 }
-exports.getJSONBSchemaAsJSONSchema = getJSONBSchemaAsJSONSchema;
 //# sourceMappingURL=jsonb.js.map

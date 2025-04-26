@@ -1,13 +1,25 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.extractTypeUtil = exports.isEqual = exports.reverseParsedPath = exports.reverseJoinOn = exports.getJoinHandlers = exports.tryCatchV2 = exports.tryCatch = exports.getKeys = exports.isDefined = exports.isObject = exports.getObjectEntries = exports.get = exports.isEmpty = exports.WAL = exports.unpatchText = exports.getTextPatch = exports.stableStringify = exports.includes = exports.find = exports.filter = exports.omitKeys = exports.pickKeys = exports.asName = void 0;
+exports.extractTypeUtil = exports.isEqual = exports.reverseParsedPath = exports.reverseJoinOn = exports.getJoinHandlers = exports.tryCatchV2 = exports.tryCatch = exports.getObjectEntries = exports.WAL = exports.pickKeys = void 0;
+exports.asName = asName;
+exports.omitKeys = omitKeys;
+exports.filter = filter;
+exports.find = find;
+exports.includes = includes;
+exports.stableStringify = stableStringify;
+exports.getTextPatch = getTextPatch;
+exports.unpatchText = unpatchText;
+exports.isEmpty = isEmpty;
+exports.get = get;
+exports.isObject = isObject;
+exports.isDefined = isDefined;
+exports.getKeys = getKeys;
 const md5_1 = require("./md5");
 function asName(str) {
     if (str === null || str === undefined || !str.toString || !str.toString())
         throw "Expecting a non empty string";
     return `"${str.toString().replace(/"/g, `""`)}"`;
 }
-exports.asName = asName;
 const pickKeys = (obj, keys = [], onlyIfDefined = true) => {
     if (!keys.length) {
         return {};
@@ -29,15 +41,12 @@ exports.pickKeys = pickKeys;
 function omitKeys(obj, exclude) {
     return (0, exports.pickKeys)(obj, getKeys(obj).filter((k) => !exclude.includes(k)));
 }
-exports.omitKeys = omitKeys;
 function filter(array, arrFilter) {
     return array.filter((d) => Object.entries(arrFilter).every(([k, v]) => d[k] === v));
 }
-exports.filter = filter;
 function find(array, arrFilter) {
     return filter(array, arrFilter)[0];
 }
-exports.find = find;
 function includes(array, elem
 // | T
 // | null
@@ -48,7 +57,6 @@ function includes(array, elem
 ) {
     return array.some((v) => v === elem);
 }
-exports.includes = includes;
 function stableStringify(data, opts) {
     if (!opts)
         opts = {};
@@ -109,7 +117,6 @@ function stableStringify(data, opts) {
         return "{" + out + "}";
     })(data);
 }
-exports.stableStringify = stableStringify;
 function getTextPatch(oldStr, newStr) {
     /* Big change, no point getting diff */
     if (!oldStr || !newStr || !oldStr.trim().length || !newStr.trim().length)
@@ -142,7 +149,6 @@ function getTextPatch(oldStr, newStr) {
         md5: (0, md5_1.md5)(newStr),
     };
 }
-exports.getTextPatch = getTextPatch;
 function unpatchText(original, patch) {
     if (!patch || typeof patch === "string")
         return patch;
@@ -154,7 +160,6 @@ function unpatchText(original, patch) {
         throw ("Patch text error: Could not match md5 hash: (original/result) \n" + original + "\n" + res);
     return res;
 }
-exports.unpatchText = unpatchText;
 /**
  * Used to throttle and combine updates sent to server
  * This allows a high rate of optimistic updates on the client
@@ -387,7 +392,6 @@ function isEmpty(obj) {
         return false;
     return true;
 }
-exports.isEmpty = isEmpty;
 /* Get nested property from an object */
 function get(obj, propertyPath) {
     let p = propertyPath, o = obj;
@@ -404,7 +408,6 @@ function get(obj, propertyPath) {
         }
     }, o);
 }
-exports.get = get;
 const getObjectEntries = (obj) => {
     return Object.entries(obj);
 };
@@ -420,15 +423,12 @@ function areEqual(a, b) {
 function isObject(obj) {
     return Boolean(obj && typeof obj === "object" && !Array.isArray(obj));
 }
-exports.isObject = isObject;
 function isDefined(v) {
     return v !== undefined && v !== null;
 }
-exports.isDefined = isDefined;
 function getKeys(o) {
     return Object.keys(o);
 }
-exports.getKeys = getKeys;
 /**
  * @deprecated
  * use tryCatchV2 instead

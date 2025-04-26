@@ -141,6 +141,10 @@ describe("type tests", () => {
         const row = await sqlHandler("SELECT 1", {}, { returnType: "row" });
         row?.dhawjpeojfgrdfhoeisj;
 
+        /** TODO */
+        // const typedRow = await sqlHandler<{ a: number }>("SELECT 1", {}, { returnType: "row" });
+        // typedRow?.rows[0]?.split satisfies number | undefined;
+
         const rows = await sqlHandler("SELECT 1", {}, { returnType: "rows" });
         rows.flatMap;
 

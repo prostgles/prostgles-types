@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.md5 = exports.md5cycle = void 0;
+exports.md5cycle = md5cycle;
+exports.md5 = md5;
 // @ts-ignore
 function md5cycle(x, k) {
     var a = x[0], b = x[1], c = x[2], d = x[3];
@@ -73,7 +74,6 @@ function md5cycle(x, k) {
     x[2] = add32(c, x[2]);
     x[3] = add32(d, x[3]);
 }
-exports.md5cycle = md5cycle;
 // @ts-ignore
 function cmn(q, a, b, x, s, t) {
     a = add32(add32(a, q), add32(x, t));
@@ -160,7 +160,6 @@ function hex(x) {
 function md5(s) {
     return hex(md51(s));
 }
-exports.md5 = md5;
 /* this function is much faster,
 so if possible we use it. Some IEs
 are the only ones I know of that

@@ -11,12 +11,12 @@ export type LocalLoginMode = "email" | "email+password";
 /**
  * Auth object sent from server to client
  */
-export type AuthSocketSchema = {
+export type AuthSocketSchema<U extends UserLike = UserLike> = {
     /**
      * User data as returned from server auth.getClientUser
      * if undefined, the client is not logged in
      */
-    user: UserLike | undefined;
+    user: U | undefined;
     /**
      * Identity providers enabled and configured on the server.
      */

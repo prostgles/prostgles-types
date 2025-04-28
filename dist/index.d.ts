@@ -892,7 +892,7 @@ export type ClientSchema = {
     version: any;
     err?: string;
     tableSchemaErrors: TableSchemaErrors;
-    tableSchema?: DBSchemaTable[];
+    tableSchema: DBSchemaTable[];
     schema: TableSchemaForClient;
     methods: (string | ({
         name: string;

@@ -492,6 +492,11 @@ export type SubscribeOptions = {
    * If not provided then all actions will be triggered
    */
   actions?: Partial<Record<SubscribeActions, true> | Record<SubscribeActions, false>>;
+  /**
+   * If true then the subscription will be triggered without first checking if selected column values have changed
+   * @default false
+   */
+  skipChangedColumnsCheck?: boolean;
 
   /**
    * If provided then the subscription will be throttled to the provided number of milliseconds

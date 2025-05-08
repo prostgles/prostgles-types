@@ -535,7 +535,7 @@ function areEqual(a: any, b: any) {
 export function isObject(obj: any | undefined): obj is Record<string, any> {
   return Boolean(obj && typeof obj === "object" && !Array.isArray(obj));
 }
-export function isDefined<T>(v: T | undefined | void): v is T {
+export function isDefined<T>(v: T | undefined | void | null): v is NonNullable<T> {
   return v !== undefined && v !== null;
 }
 

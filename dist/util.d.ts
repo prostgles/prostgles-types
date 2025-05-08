@@ -100,7 +100,7 @@ export declare function isEmpty(obj?: any): boolean;
 export declare function get(obj: any, propertyPath: string | string[]): any;
 export declare const getObjectEntries: <T extends Record<string, any>>(obj: T) => [keyof T, T[keyof T]][];
 export declare function isObject(obj: any | undefined): obj is Record<string, any>;
-export declare function isDefined<T>(v: T | undefined | void): v is T;
+export declare function isDefined<T>(v: T | undefined | void | null): v is NonNullable<T>;
 export declare function getKeys<T extends AnyObject>(o: T): Array<keyof T>;
 export type Explode<T> = keyof T extends infer K ? K extends unknown ? {
     [I in keyof T]: I extends K ? T[I] : never;

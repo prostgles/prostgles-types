@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.extractTypeUtil = exports.isEqual = exports.reverseParsedPath = exports.reverseJoinOn = exports.getJoinHandlers = exports.tryCatchV2 = exports.tryCatch = exports.getObjectEntries = exports.WAL = exports.pickKeys = void 0;
+exports.getSerialisableError = exports.safeStringify = exports.extractTypeUtil = exports.isEqual = exports.reverseParsedPath = exports.reverseJoinOn = exports.getJoinHandlers = exports.tryCatchV2 = exports.tryCatch = exports.getObjectEntries = exports.WAL = exports.pickKeys = void 0;
 exports.asName = asName;
 exports.omitKeys = omitKeys;
 exports.filter = filter;
@@ -578,4 +578,45 @@ const extractTypeUtil = (obj, objSubType) => {
     return undefined;
 };
 exports.extractTypeUtil = extractTypeUtil;
+const safeStringify = (obj) => {
+    const seen = new WeakSet();
+    return JSON.stringify(obj, (key, value) => {
+        if (typeof value === "object" && value !== null) {
+            if (seen.has(value)) {
+                return "[Circular]";
+            }
+            seen.add(value);
+        }
+        return value;
+    });
+};
+exports.safeStringify = safeStringify;
+const getSerialisableError = (rawError, includeStack = false) => {
+    if (rawError === null || rawError === undefined) {
+        return rawError;
+    }
+    if (typeof rawError === "string" ||
+        typeof rawError === "boolean" ||
+        typeof rawError === "bigint" ||
+        typeof rawError === "undefined" ||
+        typeof rawError === "number") {
+        return rawError;
+    }
+    if (rawError instanceof Error) {
+        const errorObj = Object.getOwnPropertyNames(rawError).reduce((acc, key) => ({
+            ...acc,
+            [key]: rawError[key],
+        }), {});
+        const result = JSON.parse((0, exports.safeStringify)(errorObj));
+        if (!includeStack) {
+            return omitKeys(result, ["stack"]);
+        }
+        return result;
+    }
+    if (Array.isArray(rawError)) {
+        return rawError.map((item) => (0, exports.getSerialisableError)(item, includeStack));
+    }
+    return rawError;
+};
+exports.getSerialisableError = getSerialisableError;
 //# sourceMappingURL=util.js.map

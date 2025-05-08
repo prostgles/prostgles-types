@@ -733,3 +733,53 @@ export const extractTypeUtil = <T extends AnyObject, U extends Partial<T>>(
   }
   return undefined as FilterMatch<T, U>;
 };
+
+export const safeStringify = (obj: AnyObject) => {
+  const seen = new WeakSet();
+  return JSON.stringify(obj, (key, value: any) => {
+    if (typeof value === "object" && value !== null) {
+      if (seen.has(value)) {
+        return "[Circular]";
+      }
+      seen.add(value);
+    }
+    return value;
+  });
+};
+export const getSerialisableError = (
+  rawError: any,
+  includeStack = false
+): AnyObject | any[] | string | number | bigint | boolean | undefined | null => {
+  if (rawError === null || rawError === undefined) {
+    return rawError;
+  }
+  if (
+    typeof rawError === "string" ||
+    typeof rawError === "boolean" ||
+    typeof rawError === "bigint" ||
+    typeof rawError === "undefined" ||
+    typeof rawError === "number"
+  ) {
+    return rawError;
+  }
+  if (rawError instanceof Error) {
+    const errorObj = Object.getOwnPropertyNames(rawError).reduce(
+      (acc, key) => ({
+        ...acc,
+        [key]: (rawError as AnyObject)[key],
+      }),
+      {} as AnyObject
+    );
+    const result = JSON.parse(safeStringify(errorObj));
+    if (!includeStack) {
+      return omitKeys(result, ["stack"]);
+    }
+    return result;
+  }
+
+  if (Array.isArray(rawError)) {
+    return rawError.map((item) => getSerialisableError(item, includeStack));
+  }
+
+  return rawError;
+};

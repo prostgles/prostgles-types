@@ -294,7 +294,7 @@ export type OrderByTyped<T extends AnyObject> =
 export type OrderBy<T extends AnyObject | void = void> =
   T extends AnyObject ? OrderByTyped<T> : OrderByTyped<AnyObject>;
 
-type CommonSelect = "*" | "" | { "*": 1 };
+export type CommonSelect = "*" | "" | { "*": 1 };
 
 export type SelectTyped<T extends AnyObject> =
   | { [K in keyof Partial<T>]: 1 | true }
@@ -845,7 +845,7 @@ export type ViewHandler<TD extends AnyObject = AnyObject, S extends DBSchema | v
 };
 
 type UpsertDataToPGCastLax<T extends AnyObject> = PartialLax<UpsertDataToPGCast<T>>;
-type InsertData<T extends AnyObject> = UpsertDataToPGCast<T> | UpsertDataToPGCast<T>[];
+export type InsertData<T extends AnyObject> = UpsertDataToPGCast<T> | UpsertDataToPGCast<T>[];
 
 /**
  * Methods for interacting with a table
@@ -941,6 +941,7 @@ export type SQLResultInfo = {
     | "LISTEN"
     | "UNLISTEN"
     | "INSERT"
+    | undefined
     | string;
   rowCount: number;
   duration: number;

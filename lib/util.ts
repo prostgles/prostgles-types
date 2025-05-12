@@ -697,7 +697,7 @@ export const isEqual = function (x: any, y: any, seen = new WeakSet()): boolean 
     }
 
     if (seen.has(x) || seen.has(y)) {
-      console.warn("Circular reference detected in isEqual", x, y, seen);
+      console.trace("Circular reference detected in isEqual", x, y, seen);
       return false;
     }
     seen.add(x);

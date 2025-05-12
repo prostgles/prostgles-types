@@ -168,7 +168,7 @@ describe("type tests", () => {
         }
       }
 
-      const db: DBHandler<{
+      const db = {} as DBHandler<{
         table1: {
           select: true;
           insert: true;
@@ -183,7 +183,7 @@ describe("type tests", () => {
           update: true;
           columns: { c1: string; c2?: number };
         };
-      }> = 1 as any;
+      }>;
       // const v = await db.sql<{ c: string }>(``)
       const s: SelectTyped<{ a: number; c: string }> = { a: 1 };
 
@@ -209,6 +209,11 @@ describe("type tests", () => {
       db.table12.update;
 
       db.table1.find;
+
+      const data = await db.view1.findOne({}, { select: { c1: 1, view1: { id: 1 } } });
+
+      data?.c1 satisfies string | undefined;
+      data?.view1 satisfies { c1: string; c2: number } | undefined;
 
       const result = await db.table2.update({}, { c1: "" }, { returning: "*" });
       result?.at(0)?.c2 ?? 0 + 2;

@@ -207,7 +207,7 @@ export type OrderByTyped<T extends AnyObject> = {
     [K in keyof Partial<T>]: AscOrDesc;
 }[] | OrderByDetailed<T> | OrderByDetailed<T>[] | Array<keyof T> | keyof T;
 export type OrderBy<T extends AnyObject | void = void> = T extends AnyObject ? OrderByTyped<T> : OrderByTyped<AnyObject>;
-type CommonSelect = "*" | "" | {
+export type CommonSelect = "*" | "" | {
     "*": 1;
 };
 export type SelectTyped<T extends AnyObject> = {
@@ -622,7 +622,7 @@ export type ViewHandler<TD extends AnyObject = AnyObject, S extends DBSchema | v
     size: <P extends SelectParams<TD, S>>(filter?: FullFilter<TD, S>, selectParams?: P) => Promise<string>;
 };
 type UpsertDataToPGCastLax<T extends AnyObject> = PartialLax<UpsertDataToPGCast<T>>;
-type InsertData<T extends AnyObject> = UpsertDataToPGCast<T> | UpsertDataToPGCast<T>[];
+export type InsertData<T extends AnyObject> = UpsertDataToPGCast<T> | UpsertDataToPGCast<T>[];
 /**
  * Methods for interacting with a table
  * - On client-side some methods are restricted (and undefined) based on publish rules on the server
@@ -674,7 +674,7 @@ export type DbJoinMaker = {
     leftJoinOne: TableJoin;
 };
 export type SQLResultInfo = {
-    command: "SELECT" | "UPDATE" | "DELETE" | "CREATE" | "ALTER" | "LISTEN" | "UNLISTEN" | "INSERT" | string;
+    command: "SELECT" | "UPDATE" | "DELETE" | "CREATE" | "ALTER" | "LISTEN" | "UNLISTEN" | "INSERT" | undefined | string;
     rowCount: number;
     duration: number;
 };

@@ -749,7 +749,7 @@ export const safeStringify = (obj: AnyObject) => {
 export const getSerialisableError = (
   rawError: any,
   includeStack = false
-): AnyObject | any[] | string | number | bigint | boolean | undefined | null => {
+): AnyObject | any[] | string | undefined | null => {
   if (rawError === null || rawError === undefined) {
     return rawError;
   }
@@ -760,7 +760,7 @@ export const getSerialisableError = (
     typeof rawError === "undefined" ||
     typeof rawError === "number"
   ) {
-    return rawError;
+    return rawError?.toString();
   }
   if (rawError instanceof Error) {
     const errorObj = Object.getOwnPropertyNames(rawError).reduce(

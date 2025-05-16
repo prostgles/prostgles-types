@@ -600,7 +600,7 @@ const getSerialisableError = (rawError, includeStack = false) => {
         typeof rawError === "bigint" ||
         typeof rawError === "undefined" ||
         typeof rawError === "number") {
-        return rawError;
+        return rawError?.toString();
     }
     if (rawError instanceof Error) {
         const errorObj = Object.getOwnPropertyNames(rawError).reduce((acc, key) => ({

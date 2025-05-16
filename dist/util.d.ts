@@ -168,6 +168,6 @@ export declare const isEqual: (x: any, y: any, seen?: WeakSet<object>) => boolea
 type FilterMatch<T, U> = T extends U ? T : undefined;
 export declare const extractTypeUtil: <T extends AnyObject, U extends Partial<T>>(obj: T, objSubType: U) => FilterMatch<T, U>;
 export declare const safeStringify: (obj: AnyObject) => string;
-export declare const getSerialisableError: (rawError: any, includeStack?: boolean) => AnyObject | any[] | string | number | bigint | boolean | undefined | null;
+export declare const getSerialisableError: (rawError: any, includeStack?: boolean) => AnyObject | any[] | string | undefined | null;
 export {};
 //# sourceMappingURL=util.d.ts.map

@@ -88,7 +88,7 @@ const getPropertyValidationError = (
   }
 
   if (fieldType.enum) {
-    const otherOptions = [];
+    const otherOptions: any[] = [];
     if (fieldType.nullable) otherOptions.push(null);
     if (fieldType.optional) otherOptions.push(undefined);
     // err += `one of: ${JSON.stringify([...fieldType.enum, ...otherOptions]).slice(1, -1)}`;

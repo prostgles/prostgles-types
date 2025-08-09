@@ -2,7 +2,7 @@ import * as AuthTypes from "./auth";
 import { FileColumnConfig } from "./files";
 import { AnyObject, ComplexFilter, FullFilter, FullFilterBasic, ValueOf } from "./filters";
 import type { UpsertDataToPGCast } from "./insertUpdateUtils";
-import { JSONB } from "./jsonb";
+import { JSONB } from "./JSONBSchemaValidation/JSONBSchema";
 export declare const _PG_strings: readonly ["bpchar", "char", "varchar", "text", "citext", "uuid", "bytea", "time", "timetz", "interval", "name", "cidr", "inet", "macaddr", "macaddr8", "int4range", "int8range", "numrange", "tsvector"];
 export declare const _PG_numbers_num: readonly ["int2", "int4", "float4", "float8", "oid"];
 export declare const _PG_numbers_str: readonly ["int8", "numeric", "money"];
@@ -25,6 +25,7 @@ export declare const TS_PG_Types: {
     readonly any: readonly ["json", "jsonb", "interval"];
 };
 export type TS_COLUMN_DATA_TYPES = keyof typeof TS_PG_Types;
+export declare const postgresToTsType: (udt_data_type: PG_COLUMN_UDT_DATA_TYPE) => keyof typeof TS_PG_Types;
 /**
  * Generated Typescript schema for the tables and views in the database
  * Example:
@@ -923,8 +924,10 @@ export declare const getPossibleNestedInsert: (column: ColumnInfoForNestedInsert
 export { CONTENT_TYPE_TO_EXT } from "./files";
 export type { ALLOWED_CONTENT_TYPE, ALLOWED_EXTENSION, FileColumnConfig, FileType } from "./files";
 export * from "./filters";
-export * from "./jsonb";
+export * from "./JSONBSchemaValidation/JSONBSchema";
 export type { ClientExpressData, ClientSyncHandles, ClientSyncInfo, ClientSyncPullResponse, SyncBatchParams, SyncConfig, onUpdatesParams, } from "./replication";
 export * from "./util";
 export * from "./auth";
+export * from "./JSONBSchemaValidation/JSONBSchemaValidation";
+export * from "./JSONBSchemaValidation/getJSONBSchemaTSTypes";
 //# sourceMappingURL=index.d.ts.map

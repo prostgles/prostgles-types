@@ -1,13 +1,13 @@
 {
   "name": "prostgles-types",
-  "version": "4.0.172",
+  "version": "4.0.173",
   "description": "",
   "main": "dist/index_umd.js",
   "types": "dist/index.d.ts",
   "directories": {},
   "scripts": {
     "start": "tsc --watch",
-    "test": "npm run build && node --test dist/*.spec.js",
+    "test": "npm run build && node --test dist/*.spec.js dist/**/*.spec.js",
     "build": "npm i && rm -rf ./dist/* && tsc && webpack --config webpack.prod.js",
     "pushpublish": "npm version patch --git-tag-version false && git push && npm publish"
   },

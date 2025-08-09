@@ -10,7 +10,7 @@ export function asName(str: string) {
 
 export const pickKeys = <T extends AnyObject, Include extends keyof T>(
   obj: T,
-  keys: Include[] = [],
+  keys: Include[] | readonly Include[] = [],
   onlyIfDefined = true
 ): Pick<T, Include> => {
   if (!keys.length) {
@@ -34,9 +34,11 @@ export function omitKeys<T extends AnyObject, Exclude extends keyof T>(
   obj: T,
   exclude: Exclude[]
 ): Omit<T, Exclude> {
+  //@ts-ignore
   return pickKeys(
     obj,
-    getKeys(obj).filter((k) => !exclude.includes(k as any))
+    //@ts-ignore
+    getKeys(obj).filter((k) => !exclude.includes(k))
   );
 }
 
@@ -539,8 +541,8 @@ export function isDefined<T>(v: T | undefined | void | null): v is NonNullable<T
   return v !== undefined && v !== null;
 }
 
-export function getKeys<T extends AnyObject>(o: T): Array<keyof T> {
-  return Object.keys(o) as any;
+export function getKeys<T extends Record<string, unknown>>(o: T): (keyof T & string)[] {
+  return Object.keys(o) as unknown as (keyof T & string)[];
 }
 
 export type Explode<T> =

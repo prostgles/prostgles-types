@@ -1,4 +1,4 @@
-import { getJSONBSchemaAsJSONSchema, getJSONSchemaObject } from "./jsonb";
+import { getJSONBSchemaAsJSONSchema, getJSONSchemaObject, type JSONB } from "./JSONBSchema";
 import { strict as assert } from "assert";
 import { describe, test } from "node:test";
 
@@ -25,6 +25,28 @@ describe("jsonb to json schema conversion", async () => {
         },
       },
     });
+  });
+
+  test("types", () => {
+    const createContainerSchema = {
+      type: {
+        files: {
+          arrayOfType: {
+            name: { type: "string" },
+            content: {
+              type: "string",
+            },
+          },
+        },
+      },
+    } as const satisfies JSONB.JSONBSchema;
+
+    type CreateContainerParams = JSONB.GetSchemaType<typeof createContainerSchema>;
+    // Type instantiation is excessively deep and possibly infinite.ts(2589)
+    const dockerFile = ({ files: [] } as unknown as CreateContainerParams).files.find(
+      ({ name }) => name === "Dockerfile"
+    );
+    dockerFile?.content.charAt(0); // should not error
   });
 
   test("complex", () => {

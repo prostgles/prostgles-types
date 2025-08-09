@@ -1,6 +1,6 @@
 import { AnyObject, JoinMaker, JoinPath, TS_COLUMN_DATA_TYPES } from ".";
 export declare function asName(str: string): string;
-export declare const pickKeys: <T extends AnyObject, Include extends keyof T>(obj: T, keys?: Include[], onlyIfDefined?: boolean) => Pick<T, Include>;
+export declare const pickKeys: <T extends AnyObject, Include extends keyof T>(obj: T, keys?: Include[] | readonly Include[], onlyIfDefined?: boolean) => Pick<T, Include>;
 export declare function omitKeys<T extends AnyObject, Exclude extends keyof T>(obj: T, exclude: Exclude[]): Omit<T, Exclude>;
 export declare function filter<T extends AnyObject, ArrFilter extends Partial<T>>(array: T[], arrFilter: ArrFilter): T[];
 export declare function find<T extends AnyObject, ArrFilter extends Partial<T>>(array: T[], arrFilter: ArrFilter): T | undefined;
@@ -101,7 +101,7 @@ export declare function get(obj: any, propertyPath: string | string[]): any;
 export declare const getObjectEntries: <T extends Record<string, any>>(obj: T) => [keyof T, T[keyof T]][];
 export declare function isObject(obj: any | undefined): obj is Record<string, any>;
 export declare function isDefined<T>(v: T | undefined | void | null): v is NonNullable<T>;
-export declare function getKeys<T extends AnyObject>(o: T): Array<keyof T>;
+export declare function getKeys<T extends Record<string, unknown>>(o: T): (keyof T & string)[];
 export type Explode<T> = keyof T extends infer K ? K extends unknown ? {
     [I in keyof T]: I extends K ? T[I] : never;
 } : never : never;

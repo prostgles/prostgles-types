@@ -14,7 +14,7 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CONTENT_TYPE_TO_EXT = exports.getPossibleNestedInsert = exports.RULE_METHODS = exports.CHANNELS = exports.JOIN_PARAMS = exports.JOIN_KEYS = exports.TS_PG_Types = exports._PG_geometric = exports._PG_postgis = exports._PG_interval = exports._PG_date = exports._PG_bool = exports._PG_json = exports._PG_numbers = exports._PG_numbers_str = exports._PG_numbers_num = exports._PG_strings = void 0;
+exports.CONTENT_TYPE_TO_EXT = exports.getPossibleNestedInsert = exports.RULE_METHODS = exports.CHANNELS = exports.JOIN_PARAMS = exports.JOIN_KEYS = exports.postgresToTsType = exports.TS_PG_Types = exports._PG_geometric = exports._PG_postgis = exports._PG_interval = exports._PG_date = exports._PG_bool = exports._PG_json = exports._PG_numbers = exports._PG_numbers_str = exports._PG_numbers_num = exports._PG_strings = void 0;
 const util_1 = require("./util");
 exports._PG_strings = [
     "bpchar",
@@ -72,6 +72,12 @@ exports.TS_PG_Types = {
     // "Date[]": _PG_date.map(s => `_${s}` as const),
     // "any": [],
 };
+const postgresToTsType = (udt_data_type) => {
+    return ((0, util_1.getKeys)(exports.TS_PG_Types).find((k) => {
+        return (0, util_1.includes)(exports.TS_PG_Types[k], udt_data_type);
+    }) ?? "any");
+};
+exports.postgresToTsType = postgresToTsType;
 exports.JOIN_KEYS = ["$innerJoin", "$leftJoin"];
 exports.JOIN_PARAMS = [
     "select",
@@ -295,7 +301,9 @@ async () => {
 var files_1 = require("./files");
 Object.defineProperty(exports, "CONTENT_TYPE_TO_EXT", { enumerable: true, get: function () { return files_1.CONTENT_TYPE_TO_EXT; } });
 __exportStar(require("./filters"), exports);
-__exportStar(require("./jsonb"), exports);
+__exportStar(require("./JSONBSchemaValidation/JSONBSchema"), exports);
 __exportStar(require("./util"), exports);
 __exportStar(require("./auth"), exports);
+__exportStar(require("./JSONBSchemaValidation/JSONBSchemaValidation"), exports);
+__exportStar(require("./JSONBSchemaValidation/getJSONBSchemaTSTypes"), exports);
 //# sourceMappingURL=index.js.map

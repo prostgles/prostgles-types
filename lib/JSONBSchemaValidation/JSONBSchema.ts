@@ -1,7 +1,6 @@
 import type { JSONSchema7, JSONSchema7Definition, JSONSchema7TypeName } from "json-schema";
-import { AnyObject } from "./filters";
-import { getKeys, getObjectEntries, isObject, StrictUnion } from "./util";
-
+import { AnyObject } from "../filters";
+import { getKeys, getObjectEntries, isObject, StrictUnion } from "../util";
 export const PrimitiveTypes = [
   "boolean",
   "number",
@@ -174,37 +173,92 @@ export namespace JSONB {
   type GetAllowedValues<T extends FieldTypeObj | Omit<FieldTypeObj, "optional">, TType> =
     T extends { allowedValues: readonly any[] } ? T["allowedValues"][number] : TType;
 
+  // type _GetType<T extends FieldTypeObj | Omit<FieldTypeObj, "optional">> =
+  //   T extends { type: ObjectSchema } ? GetObjectType<T["type"]>
+  //   : T extends { type: "number" } ? GetAllowedValues<T, number>
+  //   : T extends { type: "boolean" } ? GetAllowedValues<T, boolean>
+  //   : T extends { type: "integer" } ? GetAllowedValues<T, number>
+  //   : T extends { type: "string" } ? GetAllowedValues<T, string>
+  //   : T extends { type: "time" } ? GetAllowedValues<T, string>
+  //   : T extends { type: "timestamp" } ? GetAllowedValues<T, string>
+  //   : T extends { type: "Date" } ? GetAllowedValues<T, string>
+  //   : T extends { type: "any" } ? GetAllowedValues<T, any>
+  //   : T extends { type: "number[]" } ? GetAllowedValues<T, number>[]
+  //   : T extends { type: "boolean[]" } ? GetAllowedValues<T, boolean>[]
+  //   : T extends { type: "integer[]" } ? GetAllowedValues<T, number>[]
+  //   : T extends { type: "time[]" } ? GetAllowedValues<T, string>[]
+  //   : T extends { type: "timestamp[]" } ? GetAllowedValues<T, string>[]
+  //   : T extends { type: "Date[]" } ? GetAllowedValues<T, string>[]
+  //   : T extends { type: "string[]" } ? GetAllowedValues<T, string>[]
+  //   : T extends { type: "any[]" } ? GetAllowedValues<T, any>[]
+  //   : T extends { enum: readonly any[] | any[] } ? T["enum"][number]
+  //   : T extends { record: RecordType["record"] } ?
+  //     Record<
+  //       T["record"] extends { keysEnum: readonly string[] } ? T["record"]["keysEnum"][number]
+  //       : string,
+  //       T["record"] extends { values: FieldType } ? GetType<T["record"]["values"]> : any
+  //     >
+  //   : T extends { oneOf: readonly FieldType[] | FieldType[] } ? GetType<T["oneOf"][number]>
+  //   : T extends { oneOfType: readonly ObjectSchema[] | ObjectSchema[] } ?
+  //     GetObjectType<T["oneOfType"][number]>
+  //   : T extends { arrayOf: FieldType } ? GetType<T["arrayOf"]>[]
+  //   : T extends { arrayOfType: ObjectSchema } ? GetObjectType<T["arrayOfType"]>[]
+  //   : any;
+
   type _GetType<T extends FieldTypeObj | Omit<FieldTypeObj, "optional">> =
-    T extends { type: ObjectSchema } ? GetObjectType<T["type"]>
-    : T extends { type: "number" } ? GetAllowedValues<T, number>
-    : T extends { type: "boolean" } ? GetAllowedValues<T, boolean>
-    : T extends { type: "integer" } ? GetAllowedValues<T, number>
-    : T extends { type: "string" } ? GetAllowedValues<T, string>
-    : T extends { type: "time" } ? GetAllowedValues<T, string>
-    : T extends { type: "timestamp" } ? GetAllowedValues<T, string>
-    : T extends { type: "Date" } ? GetAllowedValues<T, string>
-    : T extends { type: "any" } ? GetAllowedValues<T, any>
-    : T extends { type: "number[]" } ? GetAllowedValues<T, number>[]
-    : T extends { type: "boolean[]" } ? GetAllowedValues<T, boolean>[]
-    : T extends { type: "integer[]" } ? GetAllowedValues<T, number>[]
-    : T extends { type: "time[]" } ? GetAllowedValues<T, string>[]
-    : T extends { type: "timestamp[]" } ? GetAllowedValues<T, string>[]
-    : T extends { type: "Date[]" } ? GetAllowedValues<T, string>[]
-    : T extends { type: "string[]" } ? GetAllowedValues<T, string>[]
-    : T extends { type: "any[]" } ? GetAllowedValues<T, any>[]
-    : T extends { enum: readonly any[] | any[] } ? T["enum"][number]
-    : T extends { record: RecordType["record"] } ?
-      Record<
-        T["record"] extends { keysEnum: readonly string[] } ? T["record"]["keysEnum"][number]
-        : string,
-        T["record"] extends { values: FieldType } ? GetType<T["record"]["values"]> : any
-      >
-    : T extends { oneOf: readonly FieldType[] | FieldType[] } ? GetType<T["oneOf"][number]>
-    : T extends { oneOfType: readonly ObjectSchema[] | ObjectSchema[] } ?
-      GetObjectType<T["oneOfType"][number]>
-    : T extends { arrayOf: FieldType } ? GetType<T["arrayOf"]>[]
-    : T extends { arrayOfType: ObjectSchema } ? GetObjectType<T["arrayOfType"]>[]
+    // Handle objects first (most common case)
+    T extends { type: infer U } ?
+      U extends ObjectSchema ? GetObjectType<U>
+      : U extends DataType ? GetPrimitiveType<T, U>
+      : never
+    : // Handle other patterns
+    T extends { enum: readonly any[] } ? T["enum"][number]
+    : T extends { arrayOfType: infer U } ?
+      U extends ObjectSchema ?
+        GetObjectType<U>[]
+      : never
+    : T extends { arrayOf: infer U } ?
+      U extends FieldType ?
+        GetType<U>[]
+      : never
+    : T extends { oneOf: readonly (infer U)[] } ?
+      U extends FieldType ?
+        GetType<U>
+      : never
+    : T extends { oneOfType: readonly (infer U)[] } ?
+      U extends ObjectSchema ?
+        GetObjectType<U>
+      : never
+    : T extends { record: infer R } ?
+      R extends RecordType["record"] ?
+        Record<
+          R extends { keysEnum: readonly string[] } ? R["keysEnum"][number] : string,
+          R extends { values: infer V } ?
+            V extends FieldType ?
+              GetType<V>
+            : any
+          : any
+        >
+      : never
     : any;
+
+  type GetPrimitiveType<
+    T extends JSONB.FieldTypeObj | Omit<JSONB.FieldTypeObj, "optional">,
+    U extends DataType,
+  > =
+    U extends "number" ? GetAllowedValues<T, number>
+    : U extends "boolean" ? GetAllowedValues<T, boolean>
+    : U extends "integer" ? GetAllowedValues<T, number>
+    : U extends "string" ? GetAllowedValues<T, string>
+    : U extends "time" | "timestamp" | "Date" ? GetAllowedValues<T, string>
+    : U extends "any" ? GetAllowedValues<T, any>
+    : U extends `${infer P}[]` ?
+      P extends "number" | "integer" ? GetAllowedValues<T, number>[]
+      : P extends "boolean" ? GetAllowedValues<T, boolean>[]
+      : P extends "string" | "time" | "timestamp" | "Date" ? GetAllowedValues<T, string>[]
+      : P extends "any" ? GetAllowedValues<T, any>[]
+      : never
+    : never;
 
   type IsOptional<F extends FieldType> =
     F extends DataType ? false
@@ -212,7 +266,7 @@ export namespace JSONB {
     : false;
 
   type ObjectSchema = Record<string, FieldType>;
-  export type JSONBSchema<T extends FieldTypeObj = FieldTypeObj> = Omit<T, "optional"> & {
+  export type JSONBSchema = Omit<FieldTypeObj, "optional"> & {
     defaultValue?: any;
   };
 
@@ -221,6 +275,9 @@ export namespace JSONB {
   } & {
     [K in keyof S as IsOptional<S[K]> extends true ? never : K]: GetType<S[K]>;
   };
+  // export type GetObjectType<S extends ObjectSchema> = {
+  //   [K in keyof S]: S[K] extends { optional: true } ? GetType<S[K]> | undefined : GetType<S[K]>;
+  // };
   export type GetSchemaType<S extends JSONBSchema> =
     S["nullable"] extends true ? null | GetType<S> : GetType<S>;
 }

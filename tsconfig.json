@@ -21,7 +21,7 @@
     "declarationMap": true,
     "isolatedModules": true,
     "ignoreDeprecations": "5.0", 
-    "skipDefaultLibCheck": true,
+    "skipDefaultLibCheck": true, 
     "noUncheckedIndexedAccess": true
   },
   "exclude": [

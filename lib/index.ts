@@ -2,8 +2,8 @@ import * as AuthTypes from "./auth";
 import { FileColumnConfig } from "./files";
 import { AnyObject, ComplexFilter, FullFilter, FullFilterBasic, ValueOf } from "./filters";
 import type { UpsertDataToPGCast } from "./insertUpdateUtils";
-import { JSONB } from "./jsonb";
-import { isDefined } from "./util";
+import { JSONB } from "./JSONBSchemaValidation/JSONBSchema";
+import { getKeys, includes, isDefined } from "./util";
 export const _PG_strings = [
   "bpchar",
   "char",
@@ -74,6 +74,16 @@ export const TS_PG_Types = {
   // "any": [],
 } as const;
 export type TS_COLUMN_DATA_TYPES = keyof typeof TS_PG_Types;
+
+export const postgresToTsType = (
+  udt_data_type: PG_COLUMN_UDT_DATA_TYPE
+): keyof typeof TS_PG_Types => {
+  return (
+    getKeys(TS_PG_Types).find((k) => {
+      return includes(TS_PG_Types[k], udt_data_type);
+    }) ?? "any"
+  );
+};
 
 /**
  * Generated Typescript schema for the tables and views in the database
@@ -1527,7 +1537,7 @@ async () => {
 export { CONTENT_TYPE_TO_EXT } from "./files";
 export type { ALLOWED_CONTENT_TYPE, ALLOWED_EXTENSION, FileColumnConfig, FileType } from "./files";
 export * from "./filters";
-export * from "./jsonb";
+export * from "./JSONBSchemaValidation/JSONBSchema";
 export type {
   ClientExpressData,
   ClientSyncHandles,
@@ -1539,3 +1549,5 @@ export type {
 } from "./replication";
 export * from "./util";
 export * from "./auth";
+export * from "./JSONBSchemaValidation/JSONBSchemaValidation";
+export * from "./JSONBSchemaValidation/getJSONBSchemaTSTypes";

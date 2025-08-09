@@ -39,7 +39,10 @@ const pickKeys = (obj, keys = [], onlyIfDefined = true) => {
 };
 exports.pickKeys = pickKeys;
 function omitKeys(obj, exclude) {
-    return (0, exports.pickKeys)(obj, getKeys(obj).filter((k) => !exclude.includes(k)));
+    //@ts-ignore
+    return (0, exports.pickKeys)(obj, 
+    //@ts-ignore
+    getKeys(obj).filter((k) => !exclude.includes(k)));
 }
 function filter(array, arrFilter) {
     return array.filter((d) => Object.entries(arrFilter).every(([k, v]) => d[k] === v));

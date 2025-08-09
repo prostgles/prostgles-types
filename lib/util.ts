@@ -534,14 +534,14 @@ function areEqual(a: any, b: any) {
   return JSON.stringify(a) === JSON.stringify(b);
 }
 
-export function isObject(obj: any | undefined): obj is Record<string, any> {
+export function isObject(obj: any | undefined): obj is Record<string, unknown> {
   return Boolean(obj && typeof obj === "object" && !Array.isArray(obj));
 }
 export function isDefined<T>(v: T | undefined | void | null): v is NonNullable<T> {
   return v !== undefined && v !== null;
 }
 
-export function getKeys<T extends Record<string, unknown>>(o: T): (keyof T & string)[] {
+export function getKeys<T extends Record<string, unknown> | unknown[]>(o: T): (keyof T & string)[] {
   return Object.keys(o) as unknown as (keyof T & string)[];
 }
 

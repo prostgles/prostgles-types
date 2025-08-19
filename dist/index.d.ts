@@ -124,6 +124,15 @@ export type ColumnInfo = {
      */
     column_default?: any;
     /**
+     * @example: "character varying(255)"
+     */
+    character_maximum_length?: number | null;
+    /**
+     * @example: "numeric(10,2)" precision,scale
+     */
+    numeric_precision?: number | null;
+    numeric_scale?: number | null;
+    /**
      * Extracted from tableConfig
      * Used in SmartForm
      */

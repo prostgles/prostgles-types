@@ -101,7 +101,7 @@ const getPropertyValidationError = (
     fieldType.arrayOf ?? (fieldType.arrayOfType ? { type: fieldType.arrayOfType } : undefined);
   if (arrayOf) {
     if (!Array.isArray(value)) {
-      return err + " to be an array";
+      return err + " an array";
     }
     const error = value
       .map((element, i) => {

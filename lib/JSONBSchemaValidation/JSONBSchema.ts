@@ -81,9 +81,22 @@ export namespace JSONB {
     enum?: undefined;
   };
 
+  /**
+   * Provide more info for allowed values
+   */
+  type AllowedValueInfo = {
+    value: any;
+    label: string;
+    subLabel?: string;
+    /**
+     * URL of the icon
+     */
+    icon?: string;
+  };
+
   export type BasicType = BaseOptions & {
     type: DataType;
-    allowedValues?: readonly any[] | any[];
+    allowedValues?: readonly any[] | any[] | readonly AllowedValueInfo[] | AllowedValueInfo[];
     oneOf?: undefined;
     oneOfType?: undefined;
     arrayOf?: undefined;

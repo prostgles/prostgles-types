@@ -4,7 +4,7 @@
     "baseUrl": ".",
     "target": "es2020",
     "lib": [
-      "es2022"
+      "es2022", "DOM"
     ],
     "strict": true,
     "strictNullChecks": true,

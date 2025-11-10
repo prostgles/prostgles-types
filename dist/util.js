@@ -605,6 +605,14 @@ const getSerialisableError = (rawError, includeStack = false) => {
         typeof rawError === "number") {
         return rawError?.toString();
     }
+    if (rawError instanceof DOMException) {
+        return {
+            name: rawError.name,
+            message: rawError.message,
+            code: rawError.code,
+            ...(includeStack ? { stack: rawError.stack } : {}),
+        };
+    }
     if (rawError instanceof Error) {
         const errorObj = Object.getOwnPropertyNames(rawError).reduce((acc, key) => ({
             ...acc,

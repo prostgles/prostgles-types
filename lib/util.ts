@@ -764,6 +764,15 @@ export const getSerialisableError = (
   ) {
     return rawError?.toString();
   }
+
+  if (rawError instanceof DOMException) {
+    return {
+      name: rawError.name,
+      message: rawError.message,
+      code: rawError.code,
+      ...(includeStack ? { stack: rawError.stack } : {}),
+    };
+  }
   if (rawError instanceof Error) {
     const errorObj = Object.getOwnPropertyNames(rawError).reduce(
       (acc, key) => ({

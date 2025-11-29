@@ -1,6 +1,6 @@
 {
   "name": "prostgles-types",
-  "version": "4.0.180",
+  "version": "4.0.181",
   "description": "",
   "main": "dist/index_umd.js",
   "types": "dist/index.d.ts",
@@ -9,6 +9,7 @@
     "start": "tsc --watch",
     "test": "npm run build && node --test dist/*.spec.js dist/**/*.spec.js",
     "build": "npm i && rm -rf ./dist/* && tsc && webpack --config webpack.prod.js",
+    "prebuild": "tsc --noEmit -p tsconfig.browser.json",
     "pushpublish": "npm version patch --git-tag-version false && git push && npm publish"
   },
   "repository": {

@@ -45,11 +45,6 @@ const isEqualWithSeen = (
       return false;
     }
 
-    // (Node.js)
-    if (Buffer.isBuffer(x) && Buffer.isBuffer(y)) {
-      return x.length === y.length && x.equals(y as Uint8Array<ArrayBufferLike>);
-    }
-
     if (ArrayBuffer.isView(x) && ArrayBuffer.isView(y)) {
       if (x.byteLength !== y.byteLength) return false;
       const xView = new Uint8Array(x.buffer, x.byteOffset, x.byteLength);

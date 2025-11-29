@@ -939,4 +939,5 @@ export * from "./util";
 export * from "./auth";
 export * from "./JSONBSchemaValidation/JSONBSchemaValidation";
 export * from "./JSONBSchemaValidation/getJSONBSchemaTSTypes";
+export * from "./utilFuncs/index";
 //# sourceMappingURL=index.d.ts.map

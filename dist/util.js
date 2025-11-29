@@ -1,11 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getSerialisableError = exports.safeStringify = exports.extractTypeUtil = exports.isEqual = exports.reverseParsedPath = exports.reverseJoinOn = exports.getJoinHandlers = exports.tryCatchV2 = exports.tryCatch = exports.getObjectEntries = exports.WAL = exports.pickKeys = void 0;
+exports.getSerialisableError = exports.safeStringify = exports.extractTypeUtil = exports.reverseParsedPath = exports.reverseJoinOn = exports.getJoinHandlers = exports.tryCatch = exports.getObjectEntries = exports.WAL = exports.pickKeys = void 0;
 exports.asName = asName;
 exports.omitKeys = omitKeys;
 exports.filter = filter;
 exports.find = find;
-exports.includes = includes;
 exports.stableStringify = stableStringify;
 exports.getTextPatch = getTextPatch;
 exports.unpatchText = unpatchText;
@@ -49,16 +48,6 @@ function filter(array, arrFilter) {
 }
 function find(array, arrFilter) {
     return filter(array, arrFilter)[0];
-}
-function includes(array, elem
-// | T
-// | null
-// | undefined
-// | (T extends string ? string
-//   : T extends number ? number
-//   : never)
-) {
-    return array.some((v) => v === elem);
 }
 function stableStringify(data, opts) {
     if (!opts)
@@ -454,40 +443,6 @@ const tryCatch = async (func) => {
     }
 };
 exports.tryCatch = tryCatch;
-const tryCatchV2 = (func) => {
-    const startTime = Date.now();
-    try {
-        const dataOrResult = func();
-        if (dataOrResult instanceof Promise) {
-            return new Promise(async (resolve, reject) => {
-                const result = await dataOrResult
-                    .then((data) => ({ data }))
-                    .catch((error) => {
-                    return {
-                        error,
-                        hasError: true,
-                    };
-                });
-                resolve({
-                    ...result,
-                    duration: Date.now() - startTime,
-                });
-            });
-        }
-        return {
-            data: dataOrResult,
-            duration: Date.now() - startTime,
-        };
-    }
-    catch (error) {
-        return {
-            error,
-            hasError: true,
-            duration: Date.now() - startTime,
-        };
-    }
-};
-exports.tryCatchV2 = tryCatchV2;
 const getJoinHandlers = (tableName) => {
     const getJoinFunc = (isLeft, expectsOne) => {
         return (filter, select, options = {}) => {
@@ -534,46 +489,6 @@ const reverseParsedPath = (parsedPath, table) => {
         .reverse();
 };
 exports.reverseParsedPath = reverseParsedPath;
-/**
- * Compare two objects for equality
- * Returns false if any circular references are detected
- */
-const isEqual = function (x, y, seen = new WeakSet()) {
-    if (x === y) {
-        return true;
-    }
-    if (typeof x !== typeof y) {
-        return false;
-    }
-    if (typeof x === "object" && x !== null && typeof y === "object" && y !== null) {
-        const xKeys = Object.keys(x);
-        if (xKeys.length !== Object.keys(y).length) {
-            return false;
-        }
-        if (seen.has(x) || seen.has(y)) {
-            console.trace("Circular reference detected in isEqual", x, y, seen);
-            return false;
-        }
-        seen.add(x);
-        seen.add(y);
-        for (const key of xKeys) {
-            if (key in y) {
-                //.hasOwnProperty(prop)
-                const xProp = x[key];
-                const yProp = y[key];
-                if (!(0, exports.isEqual)(xProp, yProp, seen)) {
-                    return false;
-                }
-            }
-            else {
-                return false;
-            }
-        }
-        return true;
-    }
-    return false;
-};
-exports.isEqual = isEqual;
 const extractTypeUtil = (obj, objSubType) => {
     if (Object.entries(objSubType).every(([k, v]) => obj[k] === v)) {
         return obj;

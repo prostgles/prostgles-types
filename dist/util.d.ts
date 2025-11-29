@@ -4,7 +4,6 @@ export declare const pickKeys: <T extends AnyObject, Include extends keyof T>(ob
 export declare function omitKeys<T extends AnyObject, Exclude extends keyof T>(obj: T, exclude: Exclude[]): Omit<T, Exclude>;
 export declare function filter<T extends AnyObject, ArrFilter extends Partial<T>>(array: T[], arrFilter: ArrFilter): T[];
 export declare function find<T extends AnyObject, ArrFilter extends Partial<T>>(array: T[], arrFilter: ArrFilter): T | undefined;
-export declare function includes<T>(array: T[] | readonly T[], elem: any): elem is T;
 export declare function stableStringify(data: AnyObject, opts: any): string | undefined;
 export type TextPatch = {
     from: number;
@@ -126,18 +125,6 @@ export declare const tryCatch: <T extends AnyObject>(func: () => T | Promise<T>)
     error: unknown;
     duration: number;
 })>;
-type TryCatchResult<T> = {
-    data: T;
-    hasError?: false;
-    error?: undefined;
-    duration: number;
-} | {
-    data?: undefined;
-    hasError: true;
-    error: unknown;
-    duration: number;
-};
-export declare const tryCatchV2: <T>(func: () => T) => T extends Promise<infer R> ? Promise<TryCatchResult<Awaited<Promise<R>>>> : TryCatchResult<T>;
 export declare const getJoinHandlers: (tableName: string) => {
     innerJoin: JoinMaker;
     leftJoin: JoinMaker;
@@ -160,11 +147,6 @@ export declare const reverseParsedPath: (parsedPath: ParsedJoinPath[], table: st
         [k: string]: string;
     }[];
 }[];
-/**
- * Compare two objects for equality
- * Returns false if any circular references are detected
- */
-export declare const isEqual: (x: any, y: any, seen?: WeakSet<object>) => boolean;
 type FilterMatch<T, U> = T extends U ? T : undefined;
 export declare const extractTypeUtil: <T extends AnyObject, U extends Partial<T>>(obj: T, objSubType: U) => FilterMatch<T, U>;
 export declare const safeStringify: (obj: AnyObject) => string;

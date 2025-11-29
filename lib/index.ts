@@ -3,7 +3,8 @@ import { FileColumnConfig } from "./files";
 import { AnyObject, ComplexFilter, FullFilter, FullFilterBasic, ValueOf } from "./filters";
 import type { UpsertDataToPGCast } from "./insertUpdateUtils";
 import { JSONB } from "./JSONBSchemaValidation/JSONBSchema";
-import { getKeys, includes, isDefined } from "./util";
+import { getKeys, isDefined } from "./util";
+import { includes } from "./utilFuncs/includes";
 export const _PG_strings = [
   "bpchar",
   "char",
@@ -1562,3 +1563,4 @@ export * from "./util";
 export * from "./auth";
 export * from "./JSONBSchemaValidation/JSONBSchemaValidation";
 export * from "./JSONBSchemaValidation/getJSONBSchemaTSTypes";
+export * from "./utilFuncs/index";

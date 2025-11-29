@@ -54,18 +54,6 @@ export function find<T extends AnyObject, ArrFilter extends Partial<T>>(
 ): T | undefined {
   return filter(array, arrFilter)[0];
 }
-export function includes<T>(
-  array: T[] | readonly T[],
-  elem: any
-  // | T
-  // | null
-  // | undefined
-  // | (T extends string ? string
-  //   : T extends number ? number
-  //   : never)
-): elem is T {
-  return array.some((v) => v === elem);
-}
 
 export function stableStringify(data: AnyObject, opts: any) {
   if (!opts) opts = {};
@@ -586,46 +574,6 @@ export const tryCatch = async <T extends AnyObject>(
   }
 };
 
-type TryCatchResult<T> =
-  | { data: T; hasError?: false; error?: undefined; duration: number }
-  | { data?: undefined; hasError: true; error: unknown; duration: number };
-
-export const tryCatchV2 = <T>(
-  func: () => T
-): T extends Promise<infer R> ? Promise<TryCatchResult<Awaited<Promise<R>>>>
-: TryCatchResult<T> => {
-  const startTime = Date.now();
-  try {
-    const dataOrResult = func();
-    if (dataOrResult instanceof Promise) {
-      return new Promise(async (resolve, reject) => {
-        const result = await dataOrResult
-          .then((data) => ({ data }))
-          .catch((error) => {
-            return {
-              error,
-              hasError: true,
-            };
-          });
-        resolve({
-          ...result,
-          duration: Date.now() - startTime,
-        });
-      }) as any;
-    }
-    return {
-      data: dataOrResult,
-      duration: Date.now() - startTime,
-    } as any;
-  } catch (error) {
-    return {
-      error,
-      hasError: true,
-      duration: Date.now() - startTime,
-    } as any;
-  }
-};
-
 export const getJoinHandlers = (tableName: string) => {
   const getJoinFunc = (isLeft: boolean, expectsOne: boolean): JoinMaker => {
     return (
@@ -677,51 +625,6 @@ export const reverseParsedPath = (parsedPath: ParsedJoinPath[], table: string) =
     })
     .filter(isDefined)
     .reverse();
-};
-
-/**
- * Compare two objects for equality
- * Returns false if any circular references are detected
- */
-export const isEqual = function (x: any, y: any, seen = new WeakSet()): boolean {
-  if (x === y) {
-    return true;
-  }
-
-  if (typeof x !== typeof y) {
-    return false;
-  }
-
-  if (typeof x === "object" && x !== null && typeof y === "object" && y !== null) {
-    const xKeys = Object.keys(x);
-    if (xKeys.length !== Object.keys(y).length) {
-      return false;
-    }
-
-    if (seen.has(x) || seen.has(y)) {
-      console.trace("Circular reference detected in isEqual", x, y, seen);
-      return false;
-    }
-    seen.add(x);
-    seen.add(y);
-
-    for (const key of xKeys) {
-      if (key in y) {
-        //.hasOwnProperty(prop)
-        const xProp = x[key];
-        const yProp = y[key];
-        if (!isEqual(xProp, yProp, seen)) {
-          return false;
-        }
-      } else {
-        return false;
-      }
-    }
-
-    return true;
-  }
-
-  return false;
 };
 
 type FilterMatch<T, U> = T extends U ? T : undefined;

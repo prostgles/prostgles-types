@@ -538,21 +538,6 @@ export type SubscribeParams<
   S extends DBSchema | void = void,
 > = SelectParams<T, S> & SubscribeOptions;
 
-export type UpdateParams<T extends AnyObject | void = void, S extends DBSchema | void = void> = {
-  /**
-   * If defined will returns the specified fields of the updated record(s)
-   */
-  returning?: Select<T, S>;
-  /**
-   * Used for sync.
-   * If true then only valid and allowed fields will be updated
-   */
-  removeDisallowedFields?: boolean;
-
-  /* true by default. If false the update will fail if affecting more than one row */
-  multi?: boolean;
-} & Pick<CommonSelectParams, "returnType">;
-
 export type InsertParams<T extends AnyObject | void = void, S extends DBSchema | void = void> = {
   /**
    * If defined will returns the specified fields of the updated record(s)
@@ -703,6 +688,21 @@ export type SelectReturnType<
   O extends { returnType: "statement" } ? string
   : isMulti extends true ? SelectDataType<S, O, TD>[]
   : SelectDataType<S, O, TD>;
+
+export type UpdateParams<T extends AnyObject | void = void, S extends DBSchema | void = void> = {
+  /**
+   * If defined will returns the specified fields of the updated record(s)
+   */
+  returning?: Select<T, S>;
+  /**
+   * Used for sync.
+   * If true then only valid and allowed fields will be updated
+   */
+  removeDisallowedFields?: boolean;
+
+  /* true by default. If false the update will fail if affecting more than one row */
+  multi?: boolean;
+} & Pick<CommonSelectParams, "returnType">;
 
 type GetReturningReturnType<
   O extends UpdateParams<TD, S>,

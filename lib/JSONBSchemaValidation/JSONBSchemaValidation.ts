@@ -242,6 +242,17 @@ export const getJSONBObjectSchemaValidationError = <S extends JSONB.ObjectType["
   }
   return { data: obj as JSONB.GetObjectType<S> };
 };
+
+export const getJSONBSchemaValidationError = <S extends JSONB.FieldType>(
+  schema: S,
+  obj: any
+): { error: string; data?: undefined } | { error?: undefined; data: JSONB.GetType<S> } => {
+  const error = getPropertyValidationError(obj, schema);
+  if (error) {
+    return { error };
+  }
+  return { data: obj as JSONB.GetType<S> };
+};
 export const validateJSONBObjectAgainstSchema = <S extends JSONB.ObjectType["type"]>(
   schema: S,
   obj: any,

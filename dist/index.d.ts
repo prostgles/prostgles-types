@@ -390,18 +390,6 @@ export type SubscribeOptions = {
     };
 };
 export type SubscribeParams<T extends AnyObject | void = void, S extends DBSchema | void = void> = SelectParams<T, S> & SubscribeOptions;
-export type UpdateParams<T extends AnyObject | void = void, S extends DBSchema | void = void> = {
-    /**
-     * If defined will returns the specified fields of the updated record(s)
-     */
-    returning?: Select<T, S>;
-    /**
-     * Used for sync.
-     * If true then only valid and allowed fields will be updated
-     */
-    removeDisallowedFields?: boolean;
-    multi?: boolean;
-} & Pick<CommonSelectParams, "returnType">;
 export type InsertParams<T extends AnyObject | void = void, S extends DBSchema | void = void> = {
     /**
      * If defined will returns the specified fields of the updated record(s)
@@ -522,6 +510,18 @@ type SelectDataType<S extends DBSchema | void, O extends SelectParams<TD, S>, TD
 export type SelectReturnType<S extends DBSchema | void, O extends SelectParams<TD, S>, TD extends AnyObject, isMulti extends boolean> = O extends {
     returnType: "statement";
 } ? string : isMulti extends true ? SelectDataType<S, O, TD>[] : SelectDataType<S, O, TD>;
+export type UpdateParams<T extends AnyObject | void = void, S extends DBSchema | void = void> = {
+    /**
+     * If defined will returns the specified fields of the updated record(s)
+     */
+    returning?: Select<T, S>;
+    /**
+     * Used for sync.
+     * If true then only valid and allowed fields will be updated
+     */
+    removeDisallowedFields?: boolean;
+    multi?: boolean;
+} & Pick<CommonSelectParams, "returnType">;
 type GetReturningReturnType<O extends UpdateParams<TD, S>, TD extends AnyObject, S extends DBSchema | void = void> = O extends {
     returning: "*";
 } ? Required<TD> : O extends {

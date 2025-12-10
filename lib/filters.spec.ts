@@ -1,4 +1,13 @@
-import type { EqualityFilter, FilterItem, FullFilter } from "./filters";
+import type {
+  CompareFilter,
+  EqualityFilter,
+  FilterDataType,
+  FilterForObject,
+  FilterItem,
+  FullFilter,
+  NormalFilter,
+  TextFilter,
+} from "./filters";
 import { strict as assert } from "assert";
 import { describe, test } from "node:test";
 
@@ -10,6 +19,14 @@ describe("filters", async () => {
       id?: number;
       name?: string | null;
       z: "a" | "b" | "c";
+    };
+
+    const fok1: NormalFilter<RR> = {
+      z: { $in: ["a", "b"] },
+    };
+
+    const d: CompareFilter<RR["z"]> = {
+      $in: ["a", "b"],
     };
 
     const _f: FilterItem<RR> = {

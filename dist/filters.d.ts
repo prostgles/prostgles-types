@@ -72,15 +72,6 @@ export declare const TextFilterKeys: readonly ["$ilike", "$like", "$nilike", "$n
 export declare const TextFilterFTSKeys: readonly ["@@", "@>", "<@", "$contains", "$containedBy"];
 export declare const TextFilter_FullTextSearchFilterKeys: readonly ["to_tsquery", "plainto_tsquery", "phraseto_tsquery", "websearch_to_tsquery"];
 export type FullTextSearchFilter = ExactlyOne<Record<(typeof TextFilter_FullTextSearchFilterKeys)[number], string[]>>;
-/**
- * Example: col_name: { $gt: 2 }
- */
-export type CompareFilter<T extends AllowedTSType = string> = 
-/**
- * column value equals provided value
- */
-T | ExactlyOne<Record<(typeof CompareFilterKeys)[number], T>> | ExactlyOne<Record<(typeof CompareInFilterKeys)[number], T[]>> | ExactlyOne<Record<(typeof BetweenFilterKeys)[number], [T, T]>>;
-export type TextFilter<T> = CompareFilter<T> | ExactlyOne<Record<(typeof TextFilterKeys)[number], string>> | ExactlyOne<Record<(typeof TextFilterFTSKeys)[number], FullTextSearchFilter>>;
 export declare const ArrayFilterOperands: readonly ["@>", "<@", "=", "$eq", "$contains", "$containedBy", "&&", "$overlaps"];
 export type ArrayFilter<T extends AllowedTSType[]> = Record<(typeof ArrayFilterOperands)[number], T> | ExactlyOne<Record<(typeof ArrayFilterOperands)[number], T>>;
 /**
@@ -162,6 +153,15 @@ export type EqualityFilter<T extends AnyObject> = {
     [K in keyof Partial<T>]: CastFromTSToPG<T[K]>;
 };
 /**
+ * Example: col_name: { $gt: 2 }
+ */
+export type CompareFilter<T extends AllowedTSType> = 
+/**
+ * column value equals provided value
+ */
+T | ExactlyOne<Record<(typeof CompareFilterKeys)[number], T>> | ExactlyOne<Record<(typeof CompareInFilterKeys)[number], T[]>> | ExactlyOne<Record<(typeof BetweenFilterKeys)[number], [T, T]>>;
+export type TextFilter<T> = ExactlyOne<Record<(typeof TextFilterKeys)[number], string>> | ExactlyOne<Record<(typeof TextFilterFTSKeys)[number], FullTextSearchFilter>>;
+/**
  * Filter operators for each PG data type
  */
 export type FilterDataType<T extends AllowedTSType> = T extends string ? TextFilter<T> : T extends number ? CompareFilter<CastFromTSToPG<T>> : T extends boolean ? CompareFilter<CastFromTSToPG<T>> : T extends Date ? CompareFilter<CastFromTSToPG<T>> : T extends any[] ? ArrayFilter<T> : CompareFilter<T> | TextFilter<T> | GeomFilter;
@@ -170,8 +170,8 @@ export type FilterDataType<T extends AllowedTSType> = T extends string ? TextFil
  * Multiple columns are combined with AND
  * @example: { colName: { $operator: ["value"] } }
  * */
-type NormalFilter<T> = {
-    [K in keyof Partial<T>]: FilterDataType<T[K]>;
+export type NormalFilter<T> = {
+    [K in keyof Partial<T>]: CompareFilter<T[K]> | FilterDataType<T[K]>;
 } & Partial<ComplexFilter>;
 /**
  * Filters with shorthand notation for autocomplete convenience

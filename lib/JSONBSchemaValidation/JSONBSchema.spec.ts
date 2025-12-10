@@ -165,4 +165,59 @@ describe("jsonb to json schema conversion", async () => {
       }
     );
   });
+
+  test("type checks", () => {
+    /** tests */
+    const t: JSONB.GetType<{ arrayOfType: { a: "number" } }> = [{ a: 2 }];
+
+    /** StrictUnion was removed because it doesn't work with object | string */
+    const _oneOf: JSONB.GetType<{
+      nullable: true;
+      oneOf: [
+        { enum: ["n"] },
+        { type: { a: "number" } },
+        { type: { a: { type: "string"; allowedValues: ["a"] } } },
+      ];
+    }> = {
+      a: "a",
+    };
+
+    //@ts-expect-error
+    if (_oneOf.a !== "n") {
+    }
+
+    const _a: JSONB.GetType<{ type: { a: "number" } }> = {
+      a: 2,
+    };
+
+    const _r: JSONB.GetType<{ record: { keysEnum: ["a", "b"]; values: "integer[]" } }> = {
+      a: [2],
+      b: [221],
+    };
+
+    const _dd: JSONB.JSONBSchema = {
+      enum: [1],
+      type: "any",
+    };
+
+    const s = {
+      type: {
+        a: { type: "boolean" },
+        c: { type: { c1: { type: "string" } } },
+        arr: { arrayOfType: { d: "string" } },
+        o: {
+          oneOfType: [{ z: { type: "integer" } }, { z1: { type: "integer" } }],
+        },
+      },
+    } as const; // satisfies JSONB.JSONBSchema;
+
+    const _ss: JSONB.GetType<typeof s> = {
+      a: true,
+      arr: [{ d: "" }],
+      c: {
+        c1: "",
+      },
+      o: { z1: 23 },
+    };
+  });
 });

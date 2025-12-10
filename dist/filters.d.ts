@@ -80,7 +80,7 @@ export type CompareFilter<T extends AllowedTSType = string> =
  * column value equals provided value
  */
 T | ExactlyOne<Record<(typeof CompareFilterKeys)[number], T>> | ExactlyOne<Record<(typeof CompareInFilterKeys)[number], T[]>> | ExactlyOne<Record<(typeof BetweenFilterKeys)[number], [T, T]>>;
-export type TextFilter = CompareFilter<string> | ExactlyOne<Record<(typeof TextFilterKeys)[number], string>> | ExactlyOne<Record<(typeof TextFilterFTSKeys)[number], FullTextSearchFilter>>;
+export type TextFilter<T> = CompareFilter<T> | ExactlyOne<Record<(typeof TextFilterKeys)[number], string>> | ExactlyOne<Record<(typeof TextFilterFTSKeys)[number], FullTextSearchFilter>>;
 export declare const ArrayFilterOperands: readonly ["@>", "<@", "=", "$eq", "$contains", "$containedBy", "&&", "$overlaps"];
 export type ArrayFilter<T extends AllowedTSType[]> = Record<(typeof ArrayFilterOperands)[number], T> | ExactlyOne<Record<(typeof ArrayFilterOperands)[number], T>>;
 /**
@@ -164,7 +164,7 @@ export type EqualityFilter<T extends AnyObject> = {
 /**
  * Filter operators for each PG data type
  */
-export type FilterDataType<T extends AllowedTSType> = T extends string ? TextFilter : T extends number ? CompareFilter<CastFromTSToPG<T>> : T extends boolean ? CompareFilter<CastFromTSToPG<T>> : T extends Date ? CompareFilter<CastFromTSToPG<T>> : T extends any[] ? ArrayFilter<T> : CompareFilter<T> | TextFilter | GeomFilter;
+export type FilterDataType<T extends AllowedTSType> = T extends string ? TextFilter<T> : T extends number ? CompareFilter<CastFromTSToPG<T>> : T extends boolean ? CompareFilter<CastFromTSToPG<T>> : T extends Date ? CompareFilter<CastFromTSToPG<T>> : T extends any[] ? ArrayFilter<T> : CompareFilter<T> | TextFilter<T> | GeomFilter;
 /**
  * Column filter with operators
  * Multiple columns are combined with AND

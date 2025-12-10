@@ -120,8 +120,8 @@ export type CompareFilter<T extends AllowedTSType = string> =
   | ExactlyOne<Record<(typeof CompareInFilterKeys)[number], T[]>>
   | ExactlyOne<Record<(typeof BetweenFilterKeys)[number], [T, T]>>;
 
-export type TextFilter =
-  | CompareFilter<string>
+export type TextFilter<T> =
+  | CompareFilter<T>
   | ExactlyOne<Record<(typeof TextFilterKeys)[number], string>>
   | ExactlyOne<Record<(typeof TextFilterFTSKeys)[number], FullTextSearchFilter>>;
 
@@ -284,12 +284,12 @@ export type EqualityFilter<T extends AnyObject> = {
  * Filter operators for each PG data type
  */
 export type FilterDataType<T extends AllowedTSType> =
-  T extends string ? TextFilter
+  T extends string ? TextFilter<T>
   : T extends number ? CompareFilter<CastFromTSToPG<T>>
   : T extends boolean ? CompareFilter<CastFromTSToPG<T>>
   : T extends Date ? CompareFilter<CastFromTSToPG<T>>
   : T extends any[] ? ArrayFilter<T>
-  : CompareFilter<T> | TextFilter | GeomFilter;
+  : CompareFilter<T> | TextFilter<T> | GeomFilter;
 
 /**
  * Column filter with operators
@@ -362,26 +362,4 @@ export type FullFilter<T extends AnyObject | void, S extends DBSchema | void> =
  */
 export type FullFilterBasic<T = { [key: string]: any }> = {
   [key in keyof Partial<T> & { [key: string]: any }]: any;
-};
-
-/** Type checks */
-type RR = {
-  h?: string[];
-  id?: number;
-  name?: string | null;
-};
-
-const _f: FilterItem<RR> = {
-  "h.$eq": ["2"],
-};
-const forcedFilter: FullFilter<RR, {}> = {
-  // "h.$eq": ["2"]
-  $and: [{ "h.$eq": [] }, { h: { $containedBy: [] } }],
-};
-const _f2: FilterItem<RR> = {
-  $filter: [{ $funcName: ["colname", "opts"] }, ">", 2],
-};
-
-const _d: EqualityFilter<{ a: number; b: string }> = {
-  a: 2,
 };

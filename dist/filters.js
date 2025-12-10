@@ -140,17 +140,4 @@ exports.ComplexFilterComparisonKeys = [
     ...exports.CompareInFilterKeys,
 ];
 exports.COMPLEX_FILTER_KEY = "$filter";
-const _f = {
-    "h.$eq": ["2"],
-};
-const forcedFilter = {
-    // "h.$eq": ["2"]
-    $and: [{ "h.$eq": [] }, { h: { $containedBy: [] } }],
-};
-const _f2 = {
-    $filter: [{ $funcName: ["colname", "opts"] }, ">", 2],
-};
-const _d = {
-    a: 2,
-};
 //# sourceMappingURL=filters.js.map

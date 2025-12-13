@@ -430,4 +430,23 @@ void describe("JSONBValidation", async () => {
     const result = getJSONBObjectSchemaValidationError(schema, input, "test");
     assert.ok(result.error?.includes("extra properties"));
   });
+
+  await test("allow extra properties option", () => {
+    const schema = {
+      name: { type: "string" },
+      prefs: {
+        type: { theme: "string" },
+      },
+    } as const;
+    const input = {
+      name: "john",
+      isAdmin: true,
+      prefs: { theme: "dark", extra: 123 },
+    };
+
+    const result = getJSONBObjectSchemaValidationError(schema, input, "test", false, {
+      allowExtraProperties: true,
+    });
+    assert.deepStrictEqual(result, { data: input });
+  });
 });

@@ -1,6 +1,10 @@
 import type { JSONB } from "./JSONBSchema";
-import { getKeys, getObjectEntries, isDefined, isEmpty, isObject } from "../util";
+import { getKeys, isDefined, isEmpty, isObject } from "../util";
 import { safeGetKeys, safeGetProperty, safeHasOwn } from "./utils";
+
+type ValidationOptsions = {
+  allowExtraProperties?: boolean;
+};
 
 export const getFieldTypeObj = (rawFieldType: JSONB.FieldType): JSONB.FieldTypeObj => {
   if (typeof rawFieldType === "string") return { type: rawFieldType };
@@ -55,7 +59,8 @@ const getValidator = (type: Extract<DataType, string>) => {
 const getPropertyValidationError = (
   value: any,
   rawFieldType: JSONB.FieldType,
-  path: string[] = []
+  path: string[] = [],
+  opts: ValidationOptsions | undefined
 ): string | undefined => {
   const err = `${path.join(".")} is of invalid type. Expecting ${getTypeDescription(rawFieldType).replaceAll("\n", "")}`;
   const fieldType = getFieldTypeObj(rawFieldType);
@@ -77,21 +82,25 @@ const getPropertyValidationError = (
         if (!propIsOptional && !safeHasOwn(value, subKey)) {
           return `${[...path, subKey].join(".")} is missing but required`;
         }
-        const error = getPropertyValidationError(safeGetProperty(value, subKey), subSchema, [
-          ...path,
-          subKey,
-        ]);
+        const error = getPropertyValidationError(
+          safeGetProperty(value, subKey),
+          subSchema,
+          [...path, subKey],
+          opts
+        );
         if (error !== undefined) {
           return error;
         }
       }
 
-      /** Check for extra properties */
-      const valueKeys = safeGetKeys(value);
-      const schemaKeys = safeGetKeys(type);
-      const extraKeys = valueKeys.filter((key) => !schemaKeys.includes(key));
-      if (extraKeys.length) {
-        return `${path.join(".")} has extra properties: ${extraKeys.join(", ")}`;
+      if (!opts?.allowExtraProperties) {
+        /** Check for extra properties */
+        const valueKeys = safeGetKeys(value);
+        const schemaKeys = safeGetKeys(type);
+        const extraKeys = valueKeys.filter((key) => !schemaKeys.includes(key));
+        if (extraKeys.length) {
+          return `${path.join(".")} has extra properties: ${extraKeys.join(", ")}`;
+        }
       }
 
       return;
@@ -123,7 +132,7 @@ const getPropertyValidationError = (
     }
     const error = value
       .map((element, i) => {
-        return getPropertyValidationError(element, arrayOf, [...path, `${i}`]);
+        return getPropertyValidationError(element, arrayOf, [...path, `${i}`], opts);
       })
       .filter(isDefined)[0];
     if (error !== undefined) {
@@ -139,7 +148,7 @@ const getPropertyValidationError = (
     }
     let firstError: string | undefined;
     const validMember = oneOf.find((member) => {
-      const error = getPropertyValidationError(value, member, path);
+      const error = getPropertyValidationError(value, member, path, opts);
       firstError ??= error;
       return error === undefined;
     });
@@ -168,7 +177,12 @@ const getPropertyValidationError = (
     if (valuesSchema) {
       for (const propKey of safeGetKeys(value)) {
         const propValue = safeGetProperty(value, propKey);
-        const valError = getPropertyValidationError(propValue, valuesSchema, [...path, propKey]);
+        const valError = getPropertyValidationError(
+          propValue,
+          valuesSchema,
+          [...path, propKey],
+          opts
+        );
         if (valError !== undefined) {
           return `${valError}`;
         }
@@ -230,13 +244,14 @@ export const getJSONBObjectSchemaValidationError = <S extends JSONB.ObjectType["
   schema: S,
   obj: any,
   objName = "input",
-  optional = false
+  optional = false,
+  opts?: ValidationOptsions
 ): { error: string; data?: undefined } | { error?: undefined; data: JSONB.GetObjectType<S> } => {
   if (obj === undefined && !optional) return { error: `Expecting ${objName} to be defined` };
   if (!isObject(obj)) {
     return { error: `Expecting ${objName} to be an object` };
   }
-  const error = getPropertyValidationError(obj, { type: schema }, []);
+  const error = getPropertyValidationError(obj, { type: schema }, [], opts);
   if (error) {
     return { error };
   }
@@ -245,9 +260,10 @@ export const getJSONBObjectSchemaValidationError = <S extends JSONB.ObjectType["
 
 export const getJSONBSchemaValidationError = <S extends JSONB.FieldType>(
   schema: S,
-  obj: any
+  obj: any,
+  opts?: ValidationOptsions
 ): { error: string; data?: undefined } | { error?: undefined; data: JSONB.GetType<S> } => {
-  const error = getPropertyValidationError(obj, schema);
+  const error = getPropertyValidationError(obj, schema, undefined, opts);
   if (error) {
     return { error };
   }

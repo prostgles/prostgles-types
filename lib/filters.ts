@@ -276,8 +276,7 @@ export type CompareFilter<T extends AllowedTSType> =
   | ExactlyOne<Record<(typeof CompareInFilterKeys)[number], T[]>>
   | ExactlyOne<Record<(typeof BetweenFilterKeys)[number], [T, T]>>;
 
-export type TextFilter<T> =
-  // | CompareFilter<T>
+export type TextFilter =
   | ExactlyOne<Record<(typeof TextFilterKeys)[number], string>>
   | ExactlyOne<Record<(typeof TextFilterFTSKeys)[number], FullTextSearchFilter>>;
 
@@ -285,12 +284,12 @@ export type TextFilter<T> =
  * Filter operators for each PG data type
  */
 export type FilterDataType<T extends AllowedTSType> =
-  T extends string ? TextFilter<T>
+  T extends string ? TextFilter
   : T extends number ? CompareFilter<CastFromTSToPG<T>>
   : T extends boolean ? CompareFilter<CastFromTSToPG<T>>
   : T extends Date ? CompareFilter<CastFromTSToPG<T>>
   : T extends any[] ? ArrayFilter<T>
-  : CompareFilter<T> | TextFilter<T> | GeomFilter;
+  : CompareFilter<T> | TextFilter | GeomFilter;
 
 /**
  * Column filter with operators

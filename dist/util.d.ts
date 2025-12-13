@@ -96,6 +96,7 @@ export declare class WAL {
     private sendItems;
 }
 export declare function isEmpty(obj?: any): boolean;
+export declare const isNotEmpty: <T extends Record<string, unknown>>(obj?: T | null | undefined) => obj is T;
 export declare function get(obj: any, propertyPath: string | string[]): any;
 export declare const getObjectEntries: <T extends Record<string, any>>(obj: T) => [keyof T, T[keyof T]][];
 export declare function isObject(obj: any | undefined): obj is Record<string, any>;

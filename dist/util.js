@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getSerialisableError = exports.safeStringify = exports.extractTypeUtil = exports.reverseParsedPath = exports.reverseJoinOn = exports.getJoinHandlers = exports.tryCatch = exports.getObjectEntries = exports.WAL = exports.pickKeys = void 0;
+exports.getSerialisableError = exports.safeStringify = exports.extractTypeUtil = exports.reverseParsedPath = exports.reverseJoinOn = exports.getJoinHandlers = exports.tryCatch = exports.getObjectEntries = exports.isNotEmpty = exports.WAL = exports.pickKeys = void 0;
 exports.asName = asName;
 exports.omitKeys = omitKeys;
 exports.filter = filter;
@@ -384,6 +384,8 @@ function isEmpty(obj) {
         return false;
     return true;
 }
+const isNotEmpty = (obj) => !isEmpty(obj);
+exports.isNotEmpty = isNotEmpty;
 /* Get nested property from an object */
 function get(obj, propertyPath) {
     let p = propertyPath, o = obj;

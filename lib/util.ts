@@ -492,6 +492,10 @@ export function isEmpty(obj?: any): boolean {
   return true;
 }
 
+export const isNotEmpty = <T extends Record<string, unknown>>(
+  obj?: T | null | undefined
+): obj is T => !isEmpty(obj);
+
 /* Get nested property from an object */
 export function get(obj: any, propertyPath: string | string[]): any {
   let p = propertyPath,

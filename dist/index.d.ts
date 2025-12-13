@@ -400,7 +400,10 @@ export type InsertParams<T extends AnyObject | void = void, S extends DBSchema |
      * - DoNothing: will ignore the error and do nothing
      * - DoUpdate: will update all non primary key columns of the conflicting row
      */
-    onConflict?: "DoNothing" | "DoUpdate";
+    onConflict?: "DoNothing" | "DoUpdate" | {
+        action: "DoNothing" | "DoUpdate";
+        conflictColumns: string[];
+    };
     /**
      * Used for sync.
      * If true then only valid and allowed fields will be inserted

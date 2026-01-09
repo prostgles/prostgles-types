@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getSerialisableError = exports.safeStringify = exports.extractTypeUtil = exports.reverseParsedPath = exports.reverseJoinOn = exports.getJoinHandlers = exports.tryCatch = exports.getObjectEntries = exports.isNotEmpty = exports.WAL = exports.pickKeys = void 0;
+exports.getProperty = exports.getSerialisableError = exports.safeStringify = exports.extractTypeUtil = exports.reverseParsedPath = exports.reverseJoinOn = exports.getJoinHandlers = exports.tryCatch = exports.getObjectEntries = exports.isNotEmpty = exports.WAL = exports.pickKeys = void 0;
 exports.asName = asName;
 exports.omitKeys = omitKeys;
 exports.filter = filter;
@@ -547,4 +547,10 @@ const getSerialisableError = (rawError, includeStack = false) => {
     return rawError;
 };
 exports.getSerialisableError = getSerialisableError;
+const getProperty = (obj, key) => {
+    if (!Object.keys(obj).includes(key))
+        return undefined;
+    return obj[key];
+};
+exports.getProperty = getProperty;
 //# sourceMappingURL=util.js.map

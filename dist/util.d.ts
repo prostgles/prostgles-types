@@ -152,5 +152,6 @@ type FilterMatch<T, U> = T extends U ? T : undefined;
 export declare const extractTypeUtil: <T extends AnyObject, U extends Partial<T>>(obj: T, objSubType: U) => FilterMatch<T, U>;
 export declare const safeStringify: (obj: AnyObject) => string;
 export declare const getSerialisableError: (rawError: any, includeStack?: boolean) => AnyObject | any[] | string | undefined | null;
+export declare const getProperty: <T extends object, K extends string>(obj: T, key: K | string) => K extends keyof T ? T[K] : K extends string ? T[keyof T] | undefined : undefined;
 export {};
 //# sourceMappingURL=util.d.ts.map

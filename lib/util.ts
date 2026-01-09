@@ -701,3 +701,13 @@ export const getSerialisableError = (
 
   return rawError;
 };
+
+export const getProperty = <T extends object, K extends string>(
+  obj: T,
+  key: K | string
+): K extends keyof T ? T[K]
+: K extends string ? T[keyof T] | undefined
+: undefined => {
+  if (!Object.keys(obj).includes(key)) return undefined as K extends keyof T ? T[K] : undefined;
+  return obj[key as keyof T] as K extends keyof T ? T[K] : undefined;
+};

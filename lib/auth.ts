@@ -81,6 +81,8 @@ export declare namespace AuthRequest {
   };
 
   export type RegisterData = Pick<LoginData, "username" | "password">;
+
+  export type ConfirmEmailData = { email: string; code: string };
 }
 
 export type CommonAuthFailure = Failure<

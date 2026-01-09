@@ -76,6 +76,10 @@ export declare namespace AuthRequest {
         totp_recovery_code?: string;
     };
     type RegisterData = Pick<LoginData, "username" | "password">;
+    type ConfirmEmailData = {
+        email: string;
+        code: string;
+    };
 }
 export type CommonAuthFailure = Failure<"server-error" | "rate-limit-exceeded" | "something-went-wrong">;
 export declare namespace AuthResponse {

@@ -28,13 +28,18 @@ export type AuthSocketSchema<U extends UserLike = UserLike> = {
     /**
      * Email login methods enabled on the server
      */
-    loginType: LocalLoginMode | undefined;
+    login: {
+        mode: LocalLoginMode;
+        loginRoute: string;
+        logoutRoute: string;
+    } | undefined;
     /**
      * Email registration methods enabled on the server
      */
     signupWithEmailAndPassword: {
         minPasswordLength: number;
         url: string;
+        emailConfirmationRoute: string;
     } | undefined;
     /**
      * If server auth publicRoutes is set up and AuthGuard is not explicitly disabled ( disableSocketAuthGuard: true ):

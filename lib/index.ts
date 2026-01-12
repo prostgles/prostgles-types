@@ -1270,7 +1270,7 @@ export type ClientServerFunction = {
   input?: Record<string, JSONB.FieldType>;
   output?: JSONB.FieldType;
   description?: string;
-  run: (args?: Record<string, unknown>) => MaybePromise<unknown>;
+  run: (args?: Record<string, unknown>) => Promise<unknown>;
 };
 
 export const defineServerFunction = <

@@ -1266,6 +1266,13 @@ export type ServerFunctionDefinition<
   run: (args: JSONBObjectTypeIfDefined<TInput>, context: Context) => MaybePromise<unknown>;
 };
 
+export type ClientServerFunction = {
+  input?: Record<string, JSONB.FieldType>;
+  output?: JSONB.FieldType;
+  description?: string;
+  run: (args?: Record<string, unknown>) => MaybePromise<unknown>;
+};
+
 export const defineServerFunction = <
   Context,
   TInput extends Record<string, JSONB.FieldType>,
@@ -1274,8 +1281,8 @@ export const defineServerFunction = <
   args: ServerFunctionDefinition<Context, TInput>
 ) => args;
 
-export type MethodHandler = {
-  [method_name: string]: ServerFunctionDefinition;
+export type ServerFunctionHandler = {
+  [name: string]: ClientServerFunction;
 };
 
 export type SocketFunctionCall = {

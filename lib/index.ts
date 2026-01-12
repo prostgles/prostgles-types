@@ -1254,11 +1254,9 @@ type MaybePromise<T> = T | Promise<T>;
 export type JSONBObjectTypeIfDefined<T extends Record<string, JSONB.FieldType> | undefined> =
   T extends Record<string, JSONB.FieldType> ? JSONB.GetObjectType<T> : never;
 
-export type MethodFunction = (...args: any) => any | Promise<any>;
-
 export type ServerFunctionDefinition<
   Context = never,
-  TInput extends Record<string, JSONB.FieldType> = never,
+  TInput extends Record<string, JSONB.FieldType> | undefined = Record<string, JSONB.FieldType>,
   /** TODO: add output validation. It was removed due: Type instantiation is excessively deep and possibly infinite */
   // TOutput extends JSONB.FieldType = never,
 > = {
@@ -1275,10 +1273,13 @@ export const defineServerFunction = <
   args: ServerFunctionDefinition<Context, TInput>
 ) => args;
 
-export type Method = MethodFunction | ServerFunctionDefinition;
-
 export type MethodHandler = {
-  [method_name: string]: Method;
+  [method_name: string]: ServerFunctionDefinition;
+};
+
+export type SocketFunctionCall = {
+  name: string;
+  input: unknown;
 };
 
 export type TableSchemaErrors = {

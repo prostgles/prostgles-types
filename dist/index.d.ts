@@ -882,16 +882,18 @@ export type TableSchema = {
 };
 type MaybePromise<T> = T | Promise<T>;
 export type JSONBObjectTypeIfDefined<T extends Record<string, JSONB.FieldType> | undefined> = T extends Record<string, JSONB.FieldType> ? JSONB.GetObjectType<T> : never;
-export type MethodFunction = (...args: any) => any | Promise<any>;
-export type ServerFunctionDefinition<Context = never, TInput extends Record<string, JSONB.FieldType> = never> = {
+export type ServerFunctionDefinition<Context = never, TInput extends Record<string, JSONB.FieldType> | undefined = Record<string, JSONB.FieldType>> = {
     input?: TInput;
     output?: JSONB.FieldType;
     run: (args: JSONBObjectTypeIfDefined<TInput>, context: Context) => MaybePromise<unknown>;
 };
 export declare const defineServerFunction: <Context, TInput extends Record<string, JSONB.FieldType>, TOutput extends JSONB.FieldType>(args: ServerFunctionDefinition<Context, TInput>) => ServerFunctionDefinition<Context, TInput>;
-export type Method = MethodFunction | ServerFunctionDefinition;
 export type MethodHandler = {
-    [method_name: string]: Method;
+    [method_name: string]: ServerFunctionDefinition;
+};
+export type SocketFunctionCall = {
+    name: string;
+    input: unknown;
 };
 export type TableSchemaErrors = {
     [tableName: string]: {

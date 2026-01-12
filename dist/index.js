@@ -14,7 +14,7 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CONTENT_TYPE_TO_EXT = exports.getPossibleNestedInsert = exports.RULE_METHODS = exports.CHANNELS = exports.JOIN_PARAMS = exports.JOIN_KEYS = exports.postgresToTsType = exports.TS_PG_Types = exports._PG_geometric = exports._PG_postgis = exports._PG_interval = exports._PG_date = exports._PG_bool = exports._PG_json = exports._PG_numbers = exports._PG_numbers_str = exports._PG_numbers_num = exports._PG_strings = void 0;
+exports.CONTENT_TYPE_TO_EXT = exports.getPossibleNestedInsert = exports.defineServerFunction = exports.RULE_METHODS = exports.CHANNELS = exports.JOIN_PARAMS = exports.JOIN_KEYS = exports.postgresToTsType = exports.TS_PG_Types = exports._PG_geometric = exports._PG_postgis = exports._PG_interval = exports._PG_date = exports._PG_bool = exports._PG_json = exports._PG_numbers = exports._PG_numbers_str = exports._PG_numbers_num = exports._PG_strings = void 0;
 const util_1 = require("./util");
 const includes_1 = require("./utilFuncs/includes");
 exports._PG_strings = [
@@ -120,6 +120,8 @@ exports.RULE_METHODS = {
     sync: ["sync", "unsync"],
     subscribe: ["unsubscribe", "subscribe", "subscribeOne"],
 };
+const defineServerFunction = (args) => args;
+exports.defineServerFunction = defineServerFunction;
 const getPossibleNestedInsert = (column, schema, silent = true) => {
     const refs = column.references ?? [];
     const colRefs = refs
@@ -299,13 +301,13 @@ async () => {
 // import { md5 } from "./md5";
 // export { get, getTextPatch, unpatchText, isEmpty, WAL, WALConfig, asName } from "./util";
 // export type { WALItem, BasicOrderBy, WALItemsObj, WALConfig, TextPatch, SyncTableInfo } from "./util";
+__exportStar(require("./auth"), exports);
 var files_1 = require("./files");
 Object.defineProperty(exports, "CONTENT_TYPE_TO_EXT", { enumerable: true, get: function () { return files_1.CONTENT_TYPE_TO_EXT; } });
 __exportStar(require("./filters"), exports);
-__exportStar(require("./JSONBSchemaValidation/JSONBSchema"), exports);
-__exportStar(require("./util"), exports);
-__exportStar(require("./auth"), exports);
-__exportStar(require("./JSONBSchemaValidation/JSONBSchemaValidation"), exports);
 __exportStar(require("./JSONBSchemaValidation/getJSONBSchemaTSTypes"), exports);
+__exportStar(require("./JSONBSchemaValidation/JSONBSchema"), exports);
+__exportStar(require("./JSONBSchemaValidation/JSONBSchemaValidation"), exports);
+__exportStar(require("./util"), exports);
 __exportStar(require("./utilFuncs/index"), exports);
 //# sourceMappingURL=index.js.map

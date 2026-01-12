@@ -79,6 +79,7 @@ export namespace JSONB {
     arrayOf?: undefined;
     arrayOfType?: undefined;
     enum?: undefined;
+    record?: undefined;
   };
 
   /**
@@ -102,6 +103,8 @@ export namespace JSONB {
     arrayOf?: undefined;
     arrayOfType?: undefined;
     enum?: undefined;
+    record?: undefined;
+    lookup?: undefined;
   };
 
   export type ObjectType = BaseOptions & {
@@ -112,16 +115,20 @@ export namespace JSONB {
     arrayOf?: undefined;
     arrayOfType?: undefined;
     enum?: undefined;
+    record?: undefined;
+    lookup?: undefined;
   };
 
   export type EnumType = BaseOptions & {
-    type?: undefined;
     enum: readonly any[];
+    type?: undefined;
     oneOf?: undefined;
     oneOfType?: undefined;
     arrayOf?: undefined;
     arrayOfType?: undefined;
     allowedValues?: undefined;
+    record?: undefined;
+    lookup?: undefined;
   };
 
   export type OneOf = BaseOptions & {
@@ -130,6 +137,8 @@ export namespace JSONB {
     arrayOfType?: undefined;
     allowedValues?: undefined;
     enum?: undefined;
+    record?: undefined;
+    lookup?: undefined;
   } & (
       | {
           oneOf?: undefined;
@@ -146,6 +155,8 @@ export namespace JSONB {
     oneOf?: undefined;
     oneOfType?: undefined;
     enum?: undefined;
+    record?: undefined;
+    lookup?: undefined;
   } & (
       | {
           arrayOf?: undefined;
@@ -165,6 +176,7 @@ export namespace JSONB {
     arrayOf?: undefined;
     arrayOfType?: undefined;
     enum?: undefined;
+    lookup?: undefined;
     record: {
       keysEnum?: readonly string[];
       values?: FieldType;
@@ -172,9 +184,14 @@ export namespace JSONB {
     };
   };
 
-  export type FieldTypeObj = StrictUnion<
-    BasicType | ObjectType | EnumType | OneOf | ArrayOf | RecordType | Lookup
-  >;
+  export type FieldTypeObj =
+    | BasicType
+    | ObjectType
+    | EnumType
+    | OneOf
+    | ArrayOf
+    | RecordType
+    | Lookup;
 
   export type FieldType = DataType | FieldTypeObj;
 
@@ -227,16 +244,14 @@ export namespace JSONB {
     T extends JSONB.FieldTypeObj | Omit<JSONB.FieldTypeObj, "optional">,
     U extends DataType,
   > =
-    U extends "number" ? GetAllowedValues<T, number>
+    U extends "number" | "integer" ? GetAllowedValues<T, number>
+    : U extends "string" | "time" | "timestamp" | "Date" ? GetAllowedValues<T, string>
     : U extends "boolean" ? GetAllowedValues<T, boolean>
-    : U extends "integer" ? GetAllowedValues<T, number>
-    : U extends "string" ? GetAllowedValues<T, string>
-    : U extends "time" | "timestamp" | "Date" ? GetAllowedValues<T, string>
     : U extends "any" ? GetAllowedValues<T, any>
     : U extends `${infer P}[]` ?
       P extends "number" | "integer" ? GetAllowedValues<T, number>[]
-      : P extends "boolean" ? GetAllowedValues<T, boolean>[]
       : P extends "string" | "time" | "timestamp" | "Date" ? GetAllowedValues<T, string>[]
+      : P extends "boolean" ? GetAllowedValues<T, boolean>[]
       : P extends "any" ? GetAllowedValues<T, any>[]
       : never
     : never;
@@ -261,6 +276,9 @@ export namespace JSONB {
   // };
   export type GetSchemaType<S extends JSONBSchema> =
     S["nullable"] extends true ? null | GetType<S> : GetType<S>;
+
+  export type GetTypeIfDefined<Schema extends FieldType | undefined> =
+    Schema extends FieldType ? GetType<Schema> : never;
 }
 
 const getJSONSchemaType = (

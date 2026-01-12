@@ -1250,23 +1250,32 @@ export type TableSchema = {
     delete: boolean;
   };
 };
+type MaybePromise<T> = T | Promise<T>;
+export type JSONBObjectTypeIfDefined<T extends Record<string, JSONB.FieldType> | undefined> =
+  T extends Record<string, JSONB.FieldType> ? JSONB.GetObjectType<T> : never;
 
 export type MethodFunction = (...args: any) => any | Promise<any>;
-export type MethodFullDef = {
-  input: Record<string, JSONB.FieldType>;
-  run: MethodFunction;
-  output?: Record<string, JSONB.FieldType>;
-} & (
-  | {
-      output?: undefined;
-      outputTable?: string;
-    }
-  | {
-      output?: Record<string, JSONB.FieldType>;
-      outputTable?: undefined;
-    }
-);
-export type Method = MethodFunction | MethodFullDef;
+
+export type ServerFunctionDefinition<
+  Context = never,
+  TInput extends Record<string, JSONB.FieldType> = never,
+  /** TODO: add output validation. It was removed due: Type instantiation is excessively deep and possibly infinite */
+  // TOutput extends JSONB.FieldType = never,
+> = {
+  input?: TInput;
+  output?: JSONB.FieldType;
+  run: (args: JSONBObjectTypeIfDefined<TInput>, context: Context) => MaybePromise<unknown>;
+};
+
+export const defineServerFunction = <
+  Context,
+  TInput extends Record<string, JSONB.FieldType>,
+  TOutput extends JSONB.FieldType,
+>(
+  args: ServerFunctionDefinition<Context, TInput>
+) => args;
+
+export type Method = MethodFunction | ServerFunctionDefinition;
 
 export type MethodHandler = {
   [method_name: string]: Method;
@@ -1291,7 +1300,7 @@ export type ClientSchema = {
   schema: TableSchemaForClient;
   methods: (
     | string
-    | ({ name: string; description?: string } & Pick<MethodFullDef, "input" | "output">)
+    | ({ name: string; description?: string } & Pick<ServerFunctionDefinition, "input" | "output">)
   )[];
 };
 
@@ -1549,21 +1558,21 @@ async () => {
 // import { md5 } from "./md5";
 // export { get, getTextPatch, unpatchText, isEmpty, WAL, WALConfig, asName } from "./util";
 // export type { WALItem, BasicOrderBy, WALItemsObj, WALConfig, TextPatch, SyncTableInfo } from "./util";
+export * from "./auth";
 export { CONTENT_TYPE_TO_EXT } from "./files";
 export type { ALLOWED_CONTENT_TYPE, ALLOWED_EXTENSION, FileColumnConfig, FileType } from "./files";
 export * from "./filters";
+export * from "./JSONBSchemaValidation/getJSONBSchemaTSTypes";
 export * from "./JSONBSchemaValidation/JSONBSchema";
+export * from "./JSONBSchemaValidation/JSONBSchemaValidation";
 export type {
   ClientExpressData,
   ClientSyncHandles,
   ClientSyncInfo,
   ClientSyncPullResponse,
+  onUpdatesParams,
   SyncBatchParams,
   SyncConfig,
-  onUpdatesParams,
 } from "./replication";
 export * from "./util";
-export * from "./auth";
-export * from "./JSONBSchemaValidation/JSONBSchemaValidation";
-export * from "./JSONBSchemaValidation/getJSONBSchemaTSTypes";
 export * from "./utilFuncs/index";

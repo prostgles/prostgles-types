@@ -1,5 +1,6 @@
 import { getTextPatch, TextPatch, unpatchText, WAL } from "./util";
 import { strict as assert } from "assert";
+import { defineServerFunction } from "./index";
 import { describe, test } from "node:test";
 
 describe("util func tests", () => {
@@ -65,6 +66,16 @@ describe("util func tests", () => {
         { current: { a: "e", b: "ebb", c: "1" } },
         { current: { a: "z", b: "bbb", c: "1" } },
       ]);
+    });
+  });
+
+  test("Type test", async () => {
+    defineServerFunction({
+      input: { a: "number", b: "string" },
+      run: (args) => {
+        args.a + 5;
+        // return;
+      },
     });
   });
 });

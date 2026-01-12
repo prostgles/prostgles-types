@@ -1250,21 +1250,9 @@ export type TableSchema = {
     delete: boolean;
   };
 };
-type MaybePromise<T> = T | Promise<T>;
+export type MaybePromise<T> = T | Promise<T>;
 export type JSONBObjectTypeIfDefined<T extends Record<string, JSONB.FieldType> | undefined> =
   T extends Record<string, JSONB.FieldType> ? JSONB.GetObjectType<T> : never;
-
-export type ServerFunctionDefinition<
-  Context = never,
-  TInput extends Record<string, JSONB.FieldType> | undefined = Record<string, JSONB.FieldType>,
-  /** TODO: add output validation. It was removed due: Type instantiation is excessively deep and possibly infinite */
-  // TOutput extends JSONB.FieldType = never,
-> = {
-  input?: TInput;
-  output?: JSONB.FieldType;
-  description?: string;
-  run: (args: JSONBObjectTypeIfDefined<TInput>, context: Context) => MaybePromise<unknown>;
-};
 
 export type ClientServerFunction = {
   input?: Record<string, JSONB.FieldType>;
@@ -1272,14 +1260,6 @@ export type ClientServerFunction = {
   description?: string;
   run: (args?: Record<string, unknown>) => Promise<unknown>;
 };
-
-export const defineServerFunction = <
-  Context,
-  TInput extends Record<string, JSONB.FieldType>,
-  TOutput extends JSONB.FieldType,
->(
-  args: ServerFunctionDefinition<Context, TInput>
-) => args as unknown as ClientServerFunction;
 
 export type ServerFunctionHandler = {
   [name: string]: ClientServerFunction;

@@ -880,21 +880,14 @@ export type TableSchema = {
         delete: boolean;
     };
 };
-type MaybePromise<T> = T | Promise<T>;
+export type MaybePromise<T> = T | Promise<T>;
 export type JSONBObjectTypeIfDefined<T extends Record<string, JSONB.FieldType> | undefined> = T extends Record<string, JSONB.FieldType> ? JSONB.GetObjectType<T> : never;
-export type ServerFunctionDefinition<Context = never, TInput extends Record<string, JSONB.FieldType> | undefined = Record<string, JSONB.FieldType>> = {
-    input?: TInput;
-    output?: JSONB.FieldType;
-    description?: string;
-    run: (args: JSONBObjectTypeIfDefined<TInput>, context: Context) => MaybePromise<unknown>;
-};
 export type ClientServerFunction = {
     input?: Record<string, JSONB.FieldType>;
     output?: JSONB.FieldType;
     description?: string;
     run: (args?: Record<string, unknown>) => Promise<unknown>;
 };
-export declare const defineServerFunction: <Context, TInput extends Record<string, JSONB.FieldType>, TOutput extends JSONB.FieldType>(args: ServerFunctionDefinition<Context, TInput>) => ClientServerFunction;
 export type ServerFunctionHandler = {
     [name: string]: ClientServerFunction;
 };

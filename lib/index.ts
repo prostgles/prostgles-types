@@ -1253,16 +1253,16 @@ export type TableSchema = {
 
 export type MethodFunction = (...args: any) => any | Promise<any>;
 export type MethodFullDef = {
-  input: Record<string, JSONB.JSONBSchema>;
+  input: Record<string, JSONB.FieldType>;
   run: MethodFunction;
-  output?: Record<string, JSONB.JSONBSchema>;
+  output?: Record<string, JSONB.FieldType>;
 } & (
   | {
       output?: undefined;
       outputTable?: string;
     }
   | {
-      output?: Record<string, JSONB.JSONBSchema>;
+      output?: Record<string, JSONB.FieldType>;
       outputTable?: undefined;
     }
 );

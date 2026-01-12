@@ -885,6 +885,7 @@ export type JSONBObjectTypeIfDefined<T extends Record<string, JSONB.FieldType> |
 export type ServerFunctionDefinition<Context = never, TInput extends Record<string, JSONB.FieldType> | undefined = Record<string, JSONB.FieldType>> = {
     input?: TInput;
     output?: JSONB.FieldType;
+    description?: string;
     run: (args: JSONBObjectTypeIfDefined<TInput>, context: Context) => MaybePromise<unknown>;
 };
 export declare const defineServerFunction: <Context, TInput extends Record<string, JSONB.FieldType>, TOutput extends JSONB.FieldType>(args: ServerFunctionDefinition<Context, TInput>) => ServerFunctionDefinition<Context, TInput>;

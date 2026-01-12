@@ -1262,6 +1262,7 @@ export type ServerFunctionDefinition<
 > = {
   input?: TInput;
   output?: JSONB.FieldType;
+  description?: string;
   run: (args: JSONBObjectTypeIfDefined<TInput>, context: Context) => MaybePromise<unknown>;
 };
 

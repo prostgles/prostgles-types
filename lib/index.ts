@@ -1279,7 +1279,7 @@ export const defineServerFunction = <
   TOutput extends JSONB.FieldType,
 >(
   args: ServerFunctionDefinition<Context, TInput>
-) => args;
+) => args as unknown as ClientServerFunction;
 
 export type ServerFunctionHandler = {
   [name: string]: ClientServerFunction;

@@ -894,7 +894,7 @@ export type ClientServerFunction = {
     description?: string;
     run: (args?: Record<string, unknown>) => Promise<unknown>;
 };
-export declare const defineServerFunction: <Context, TInput extends Record<string, JSONB.FieldType>, TOutput extends JSONB.FieldType>(args: ServerFunctionDefinition<Context, TInput>) => ServerFunctionDefinition<Context, TInput>;
+export declare const defineServerFunction: <Context, TInput extends Record<string, JSONB.FieldType>, TOutput extends JSONB.FieldType>(args: ServerFunctionDefinition<Context, TInput>) => ClientServerFunction;
 export type ServerFunctionHandler = {
     [name: string]: ClientServerFunction;
 };

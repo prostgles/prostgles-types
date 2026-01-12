@@ -1299,10 +1299,12 @@ export type ClientSchema = {
   tableSchemaErrors: TableSchemaErrors;
   tableSchema: DBSchemaTable[];
   schema: TableSchemaForClient;
-  methods: (
-    | string
-    | ({ name: string; description?: string } & Pick<ServerFunctionDefinition, "input" | "output">)
-  )[];
+  methods: {
+    name: string;
+    description?: string;
+    input?: Record<string, JSONB.FieldType> | undefined;
+    output?: JSONB.FieldType | undefined;
+  }[];
 };
 
 export type ProstglesError = {

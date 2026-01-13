@@ -29,7 +29,15 @@ const PRIMITIVE_VALIDATORS: Record<NonArrayTypes, (val: any) => boolean> = {
   Lookup: () => {
     throw new Error("Lookup type is not supported for validation");
   },
-  Blob: (val): val is Blob => val instanceof Blob,
+  Blob: (val): val is Blob => {
+    return (
+      val instanceof Blob ||
+      //@ts-ignore
+      (typeof Buffer !== "undefined" && val instanceof Buffer) ||
+      //@ts-ignore
+      (typeof ArrayBuffer !== "undefined" && val instanceof ArrayBuffer)
+    );
+  },
 };
 const PRIMITIVE_VALIDATORS_KEYS = getKeys(PRIMITIVE_VALIDATORS);
 const getElementType = <T extends DataType>(type: T): undefined | ElementType<T> => {

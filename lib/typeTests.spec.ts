@@ -73,6 +73,15 @@ describe("type tests", () => {
         const query = await tableHandler.find?.({ h: 2 }, { returnType: "statement" });
         query.toUpperCase();
 
+        // /** TODO: Sort by computed funnc */
+        // tableHandler.find?.(
+        //   { h: 2 },
+        //   {
+        //     select: { b: 1, computed: { $max: ["b"] } },
+        //     orderBy: { key: "b", asc: false },
+        //   }
+        // );
+
         //@ts-expect-error
         row.b;
 

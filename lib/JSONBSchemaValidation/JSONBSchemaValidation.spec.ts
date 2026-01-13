@@ -449,4 +449,26 @@ void describe("JSONBValidation", async () => {
     });
     assert.deepStrictEqual(result, { data: input });
   });
+
+  await test("Test blob", () => {
+    const schema = {
+      file: { type: "Blob" },
+    } as const;
+
+    const validInput = {
+      file: new Blob(["test"], { type: "text/plain" }),
+    };
+
+    const invalidInput = {
+      file: `new File([], "foo.txt", { type: "text/plain" })`,
+    };
+
+    const resultValid = getJSONBObjectSchemaValidationError(schema, validInput, "test");
+    assert.deepStrictEqual(resultValid, { data: validInput });
+
+    const resultInvalid = getJSONBObjectSchemaValidationError(schema, invalidInput, "test");
+    assert.deepStrictEqual(resultInvalid, {
+      error: "file is of invalid type. Expecting Blob",
+    });
+  });
 });

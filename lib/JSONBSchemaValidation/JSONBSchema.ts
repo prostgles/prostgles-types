@@ -9,7 +9,9 @@ export const PrimitiveTypes = [
   "Date",
   "time",
   "timestamp",
+  "Blob",
   "any",
+  "unknown",
 ] as const;
 export const PrimitiveArrayTypes = PrimitiveTypes.map((v) => `${v}[]` as `${typeof v}[]`);
 export const DATA_TYPES = [...PrimitiveTypes, ...PrimitiveArrayTypes] as const;
@@ -18,11 +20,11 @@ type DataType = (typeof DATA_TYPES)[number];
 export namespace JSONB {
   export type BaseOptions = {
     /**
-     * False by default
+     * If true then field is optional
      */
     optional?: boolean;
     /**
-     * False by default
+     * If true then value can be null
      */
     nullable?: boolean;
     description?: string;
@@ -263,7 +265,7 @@ export namespace JSONB {
 
   type ObjectSchema = Record<string, FieldType>;
   export type JSONBSchema = Omit<FieldTypeObj, "optional"> & {
-    defaultValue?: any;
+    defaultValue?: unknown;
   };
 
   export type GetObjectType<S extends ObjectSchema> = {
@@ -271,9 +273,6 @@ export namespace JSONB {
   } & {
     [K in keyof S as IsOptional<S[K]> extends true ? never : K]: GetType<S[K]>;
   };
-  // export type GetObjectType<S extends ObjectSchema> = {
-  //   [K in keyof S]: S[K] extends { optional: true } ? GetType<S[K]> | undefined : GetType<S[K]>;
-  // };
   export type GetSchemaType<S extends JSONBSchema> =
     S["nullable"] extends true ? null | GetType<S> : GetType<S>;
 

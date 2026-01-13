@@ -24,10 +24,12 @@ const PRIMITIVE_VALIDATORS: Record<NonArrayTypes, (val: any) => boolean> = {
   time: (val) => typeof val === "string",
   timestamp: (val) => typeof val === "string",
   any: (val) => typeof val !== "function" && typeof val !== "symbol",
+  unknown: (val) => typeof val !== "function" && typeof val !== "symbol",
   Date: (val) => typeof val === "string",
   Lookup: () => {
     throw new Error("Lookup type is not supported for validation");
   },
+  Blob: (val): val is Blob => val instanceof Blob,
 };
 const PRIMITIVE_VALIDATORS_KEYS = getKeys(PRIMITIVE_VALIDATORS);
 const getElementType = <T extends DataType>(type: T): undefined | ElementType<T> => {

@@ -1,6 +1,7 @@
-import { getJSONBSchemaAsJSONSchema, getJSONSchemaObject, type JSONB } from "./JSONBSchema";
 import { strict as assert } from "assert";
 import { describe, test } from "node:test";
+import { type JSONB } from "./JSONBSchema";
+import { getJSONBSchemaAsJSONSchema, getJSONSchemaObject } from "./getJSONBSchemaAsJSONSchema";
 
 describe("jsonb to json schema conversion", async () => {
   test("array allowedValues", () => {

@@ -1,6 +1,5 @@
-import type { JSONSchema7, JSONSchema7Definition, JSONSchema7TypeName } from "json-schema";
 import { AnyObject } from "../filters";
-import { getKeys, getObjectEntries, isObject, type PartialByKeys, type Simplify } from "../util";
+import { type PartialByKeys, type Simplify } from "../util";
 export const PrimitiveTypes = [
   "boolean",
   "number",
@@ -217,35 +216,36 @@ export namespace JSONB {
     unknown: unknown;
     Blob: Blob;
   };
-  type GetPrimitiveType<
-    T extends JSONB.FieldTypeObj | Omit<JSONB.FieldTypeObj, "optional">,
-    U extends DataType,
-  > =
-    U extends keyof PrimitiveTypeMap ? GetAllowedValues<T, PrimitiveTypeMap[U]>
-    : U extends `${infer P}[]` ?
-      P extends keyof PrimitiveTypeMap ?
-        GetAllowedValues<T, PrimitiveTypeMap[P][]>
-      : never
-    : never;
-
-  // OLD
+  /** New */
   // type GetPrimitiveType<
   //   T extends JSONB.FieldTypeObj | Omit<JSONB.FieldTypeObj, "optional">,
   //   U extends DataType,
   // > =
-  //   U extends "number" | "integer" ? GetAllowedValues<T, number>
-  //   : U extends "string" | "time" | "timestamp" | "Date" ? GetAllowedValues<T, string>
-  //   : U extends "boolean" ? GetAllowedValues<T, boolean>
-  //   : U extends "any" ? GetAllowedValues<T, any>
-  //   : U extends "unknown" ? GetAllowedValues<T, unknown>
-  //   : U extends "Blob" ? GetAllowedValues<T, Blob>
+  //   U extends keyof PrimitiveTypeMap ? GetAllowedValues<T, PrimitiveTypeMap[U]>
   //   : U extends `${infer P}[]` ?
-  //     P extends "number" | "integer" ? GetAllowedValues<T, number>[]
-  //     : P extends "string" | "time" | "timestamp" | "Date" ? GetAllowedValues<T, string>[]
-  //     : P extends "boolean" ? GetAllowedValues<T, boolean>[]
-  //     : P extends "any" ? GetAllowedValues<T, any>[]
+  //     P extends keyof PrimitiveTypeMap ?
+  //       GetAllowedValues<T, PrimitiveTypeMap[P][]>
   //     : never
   //   : never;
+
+  /* OLD */
+  type GetPrimitiveType<
+    T extends JSONB.FieldTypeObj | Omit<JSONB.FieldTypeObj, "optional">,
+    U extends DataType,
+  > =
+    U extends "number" | "integer" ? GetAllowedValues<T, number>
+    : U extends "string" | "time" | "timestamp" | "Date" ? GetAllowedValues<T, string>
+    : U extends "boolean" ? GetAllowedValues<T, boolean>
+    : U extends "any" ? GetAllowedValues<T, any>
+    : U extends "unknown" ? GetAllowedValues<T, unknown>
+    : U extends "Blob" ? GetAllowedValues<T, Blob>
+    : U extends `${infer P}[]` ?
+      P extends "number" | "integer" ? GetAllowedValues<T, number>[]
+      : P extends "string" | "time" | "timestamp" | "Date" ? GetAllowedValues<T, string>[]
+      : P extends "boolean" ? GetAllowedValues<T, boolean>[]
+      : P extends "any" ? GetAllowedValues<T, any>[]
+      : never
+    : never;
 
   type _GetType<T extends FieldTypeObj | Omit<FieldTypeObj, "optional">> =
     // Handle objects first (most common case)
@@ -295,175 +295,23 @@ export namespace JSONB {
   };
 
   /** OLD */
-  // export type GetObjectType<S extends ObjectSchema> = {
-  //   [K in keyof S as IsOptional<S[K]> extends true ? K : never]?: GetType<S[K]>;
-  // } & {
-  //   [K in keyof S as IsOptional<S[K]> extends true ? never : K]: GetType<S[K]>;
-  // };
+  export type GetObjectType<S extends ObjectSchema> = {
+    [K in keyof S as IsOptional<S[K]> extends true ? K : never]?: GetType<S[K]>;
+  } & {
+    [K in keyof S as IsOptional<S[K]> extends true ? never : K]: GetType<S[K]>;
+  };
 
-  /* Single-pass object type construction */
-  type OptionalKeys<S extends ObjectSchema> = {
-    [K in keyof S]: S[K] extends { optional: true } ? K : never;
-  }[keyof S];
-  export type GetObjectType<S extends ObjectSchema> = Simplify<
-    PartialByKeys<{ [K in keyof S]: GetType<S[K]> }, OptionalKeys<S>>
-  >;
+  /* NEW Single-pass object type construction */
+  // type OptionalKeys<S extends ObjectSchema> = {
+  //   [K in keyof S]: S[K] extends { optional: true } ? K : never;
+  // }[keyof S];
+  // export type GetObjectType<S extends ObjectSchema> = Simplify<
+  //   PartialByKeys<{ [K in keyof S]: GetType<S[K]> }, OptionalKeys<S>>
+  // >;
 
   export type GetSchemaType<S extends JSONBSchema> =
     S["nullable"] extends true ? null | GetType<S> : GetType<S>;
 
   export type GetTypeIfDefined<Schema extends FieldType | undefined> =
     Schema extends FieldType ? GetType<Schema> : never;
-}
-
-const getJSONSchemaType = (
-  rawType: JSONB.BasicType["type"] | JSONB.Lookup["type"] | undefined
-): { type: JSONSchema7TypeName | undefined; isArray: boolean } | undefined => {
-  if (!rawType) return;
-  const type: (typeof PrimitiveTypes)[number] | "Lookup" =
-    rawType.endsWith("[]") ? (rawType.slice(0, -2) as any) : rawType;
-
-  return {
-    type:
-      type === "integer" ? "integer"
-      : type === "boolean" ? "boolean"
-      : type === "number" ? "number"
-      : type === "any" ? undefined
-      : type === "unknown" ? undefined
-      : type === "Lookup" ? undefined
-      : "string",
-    isArray: rawType.endsWith("[]"),
-  };
-};
-
-export const getJSONSchemaObject = (
-  rawType: JSONB.FieldType | JSONB.JSONBSchema,
-  rootInfo?: { id: string }
-): JSONSchema7 => {
-  const {
-    type,
-    arrayOf,
-    arrayOfType,
-    description,
-    nullable,
-    oneOf,
-    oneOfType,
-    title,
-    record,
-    ...t
-  } = typeof rawType === "string" ? ({ type: rawType } as JSONB.FieldTypeObj) : rawType;
-
-  let result: JSONSchema7 = {};
-  const partialProps: Partial<JSONSchema7> = {
-    ...((t.enum ||
-      (t.allowedValues?.length && (typeof type !== "string" || !type.endsWith("[]")))) && {
-      enum: t.allowedValues?.slice(0) ?? t.enum!.slice(0),
-    }),
-    ...(!!description && { description }),
-    ...(!!title && { title }),
-  };
-
-  if (t.enum?.length) {
-    const firstElemType = typeof t.enum[0];
-    partialProps.type =
-      firstElemType === "number" ? "number"
-      : firstElemType === "boolean" ? "boolean"
-      : "string";
-  }
-
-  if (typeof type === "string" || arrayOf || arrayOfType) {
-    /** ARRAY */
-    if (type && typeof type !== "string") {
-      throw "Not expected";
-    }
-    if (arrayOf || arrayOfType || type?.endsWith("[]")) {
-      const arrayItems =
-        arrayOf || arrayOfType ? getJSONSchemaObject(arrayOf || { type: arrayOfType })
-        : type?.startsWith("any") ? { type: undefined }
-        : ({
-            type: getJSONSchemaType(type)?.type,
-            ...(t.allowedValues && { enum: t.allowedValues.slice(0) }),
-          } satisfies JSONSchema7Definition);
-      result = {
-        type: "array",
-        items: arrayItems,
-      };
-
-      /** PRIMITIVES */
-    } else {
-      result = {
-        type: getJSONSchemaType(type)?.type,
-      };
-    }
-
-    /** OBJECT */
-  } else if (isObject(type)) {
-    result = {
-      type: "object",
-      required: getKeys(type).filter((k) => {
-        const t = type[k]!;
-        return typeof t === "string" || !t.optional;
-      }),
-      properties: getObjectEntries(type).reduce((a, [k, v]) => {
-        return {
-          ...a,
-          [k]: getJSONSchemaObject(v),
-        };
-      }, {}),
-    };
-  } else if (oneOf || oneOfType) {
-    const _oneOf = oneOf || oneOfType!.map((type) => ({ type }));
-    result = {
-      oneOf: _oneOf.map((t) => getJSONSchemaObject(t)),
-    };
-  } else if (record) {
-    result = {
-      type: "object",
-      ...(record.values &&
-        !record.keysEnum && { additionalProperties: getJSONSchemaObject(record.values) }),
-      ...(record.keysEnum && {
-        properties: record.keysEnum.reduce(
-          (a, v) => ({
-            ...a,
-            [v]: !record.values ? { type: {} } : getJSONSchemaObject(record.values),
-          }),
-          {}
-        ),
-      }),
-    };
-  }
-
-  if (nullable) {
-    const nullDef = { type: "null" } as const;
-    if (result.oneOf) {
-      result.oneOf.push(nullDef);
-    } else if (result.enum && !result.enum.includes(null)) {
-      result.enum.push(null);
-    } else
-      result = {
-        oneOf: [result, nullDef],
-      };
-  }
-
-  const rootSchema: JSONSchema7 | undefined =
-    !rootInfo ? undefined : (
-      {
-        $id: rootInfo?.id,
-        $schema: "https://json-schema.org/draft/2020-12/schema",
-      }
-    );
-
-  return {
-    ...rootSchema,
-    ...partialProps,
-    ...result,
-  };
-};
-
-export function getJSONBSchemaAsJSONSchema(
-  tableName: string,
-  colName: string,
-  schema: JSONB.JSONBSchema
-): JSONSchema7 {
-  return getJSONSchemaObject(schema, { id: `${tableName}.${colName}` });
 }

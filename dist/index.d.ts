@@ -939,6 +939,7 @@ export { CONTENT_TYPE_TO_EXT } from "./files";
 export type { ALLOWED_CONTENT_TYPE, ALLOWED_EXTENSION, FileColumnConfig, FileType } from "./files";
 export * from "./filters";
 export * from "./JSONBSchemaValidation/getJSONBSchemaTSTypes";
+export * from "./JSONBSchemaValidation/getJSONBSchemaAsJSONSchema";
 export * from "./JSONBSchemaValidation/JSONBSchema";
 export * from "./JSONBSchemaValidation/JSONBSchemaValidation";
 export type { ClientExpressData, ClientSyncHandles, ClientSyncInfo, ClientSyncPullResponse, onUpdatesParams, SyncBatchParams, SyncConfig, } from "./replication";

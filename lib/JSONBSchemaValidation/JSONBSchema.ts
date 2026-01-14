@@ -1,6 +1,6 @@
 import type { JSONSchema7, JSONSchema7Definition, JSONSchema7TypeName } from "json-schema";
 import { AnyObject } from "../filters";
-import { getKeys, getObjectEntries, isObject, StrictUnion } from "../util";
+import { getKeys, getObjectEntries, isObject, type PartialByKeys, type Simplify } from "../util";
 export const PrimitiveTypes = [
   "boolean",
   "number",
@@ -205,6 +205,48 @@ export namespace JSONB {
   type GetAllowedValues<T extends FieldTypeObj | Omit<FieldTypeObj, "optional">, TType> =
     T extends { allowedValues: readonly any[] } ? T["allowedValues"][number] : TType;
 
+  type PrimitiveTypeMap = {
+    number: number;
+    integer: number;
+    string: string;
+    time: string;
+    timestamp: string;
+    Date: string;
+    boolean: boolean;
+    any: any;
+    unknown: unknown;
+    Blob: Blob;
+  };
+  type GetPrimitiveType<
+    T extends JSONB.FieldTypeObj | Omit<JSONB.FieldTypeObj, "optional">,
+    U extends DataType,
+  > =
+    U extends keyof PrimitiveTypeMap ? GetAllowedValues<T, PrimitiveTypeMap[U]>
+    : U extends `${infer P}[]` ?
+      P extends keyof PrimitiveTypeMap ?
+        GetAllowedValues<T, PrimitiveTypeMap[P][]>
+      : never
+    : never;
+
+  // OLD
+  // type GetPrimitiveType<
+  //   T extends JSONB.FieldTypeObj | Omit<JSONB.FieldTypeObj, "optional">,
+  //   U extends DataType,
+  // > =
+  //   U extends "number" | "integer" ? GetAllowedValues<T, number>
+  //   : U extends "string" | "time" | "timestamp" | "Date" ? GetAllowedValues<T, string>
+  //   : U extends "boolean" ? GetAllowedValues<T, boolean>
+  //   : U extends "any" ? GetAllowedValues<T, any>
+  //   : U extends "unknown" ? GetAllowedValues<T, unknown>
+  //   : U extends "Blob" ? GetAllowedValues<T, Blob>
+  //   : U extends `${infer P}[]` ?
+  //     P extends "number" | "integer" ? GetAllowedValues<T, number>[]
+  //     : P extends "string" | "time" | "timestamp" | "Date" ? GetAllowedValues<T, string>[]
+  //     : P extends "boolean" ? GetAllowedValues<T, boolean>[]
+  //     : P extends "any" ? GetAllowedValues<T, any>[]
+  //     : never
+  //   : never;
+
   type _GetType<T extends FieldTypeObj | Omit<FieldTypeObj, "optional">> =
     // Handle objects first (most common case)
     T extends { type: infer U } ?
@@ -242,22 +284,6 @@ export namespace JSONB {
       : never
     : any;
 
-  type GetPrimitiveType<
-    T extends JSONB.FieldTypeObj | Omit<JSONB.FieldTypeObj, "optional">,
-    U extends DataType,
-  > =
-    U extends "number" | "integer" ? GetAllowedValues<T, number>
-    : U extends "string" | "time" | "timestamp" | "Date" ? GetAllowedValues<T, string>
-    : U extends "boolean" ? GetAllowedValues<T, boolean>
-    : U extends "any" ? GetAllowedValues<T, any>
-    : U extends `${infer P}[]` ?
-      P extends "number" | "integer" ? GetAllowedValues<T, number>[]
-      : P extends "string" | "time" | "timestamp" | "Date" ? GetAllowedValues<T, string>[]
-      : P extends "boolean" ? GetAllowedValues<T, boolean>[]
-      : P extends "any" ? GetAllowedValues<T, any>[]
-      : never
-    : never;
-
   type IsOptional<F extends FieldType> =
     F extends DataType ? false
     : F extends { optional: true } ? true
@@ -268,11 +294,21 @@ export namespace JSONB {
     defaultValue?: unknown;
   };
 
-  export type GetObjectType<S extends ObjectSchema> = {
-    [K in keyof S as IsOptional<S[K]> extends true ? K : never]?: GetType<S[K]>;
-  } & {
-    [K in keyof S as IsOptional<S[K]> extends true ? never : K]: GetType<S[K]>;
-  };
+  /** OLD */
+  // export type GetObjectType<S extends ObjectSchema> = {
+  //   [K in keyof S as IsOptional<S[K]> extends true ? K : never]?: GetType<S[K]>;
+  // } & {
+  //   [K in keyof S as IsOptional<S[K]> extends true ? never : K]: GetType<S[K]>;
+  // };
+
+  /* Single-pass object type construction */
+  type OptionalKeys<S extends ObjectSchema> = {
+    [K in keyof S]: S[K] extends { optional: true } ? K : never;
+  }[keyof S];
+  export type GetObjectType<S extends ObjectSchema> = Simplify<
+    PartialByKeys<{ [K in keyof S]: GetType<S[K]> }, OptionalKeys<S>>
+  >;
+
   export type GetSchemaType<S extends JSONBSchema> =
     S["nullable"] extends true ? null | GetType<S> : GetType<S>;
 
@@ -293,6 +329,7 @@ const getJSONSchemaType = (
       : type === "boolean" ? "boolean"
       : type === "number" ? "number"
       : type === "any" ? undefined
+      : type === "unknown" ? undefined
       : type === "Lookup" ? undefined
       : "string",
     isArray: rawType.endsWith("[]"),

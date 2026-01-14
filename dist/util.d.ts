@@ -113,6 +113,10 @@ export type ExactlyOne<T> = AtMostOne<T> & AtLeastOne<T>;
 type UnionKeys<T> = T extends T ? keyof T : never;
 type StrictUnionHelper<T, TAll> = T extends any ? T & Partial<Record<Exclude<UnionKeys<TAll>, keyof T>, never>> : never;
 export type StrictUnion<T> = StrictUnionHelper<T, T>;
+export type PartialByKeys<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
+export type Simplify<T> = {
+    [K in keyof T]: T[K];
+} & {};
 /**
  * @deprecated
  * use tryCatchV2 instead

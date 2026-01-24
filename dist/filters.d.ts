@@ -67,7 +67,7 @@ export declare const JsonbOperands: {
         readonly Example: "'{\"a\":[1,2,3,4,5]}'::jsonb @@ '$.a[*] > 2'";
     };
 };
-export declare const JsonbFilterKeys: ("@@" | "@>" | "<@" | "?" | "?|" | "?&" | "||" | "-" | "#-" | "@?")[];
+export declare const JsonbFilterKeys: ("@>" | "<@" | "?" | "?|" | "?&" | "||" | "-" | "#-" | "@?" | "@@")[];
 export declare const TextFilterKeys: readonly ["$ilike", "$like", "$nilike", "$nlike"];
 export declare const TextFilterFTSKeys: readonly ["@@", "@>", "<@", "$contains", "$containedBy"];
 export declare const TextFilter_FullTextSearchFilterKeys: readonly ["to_tsquery", "plainto_tsquery", "phraseto_tsquery", "websearch_to_tsquery"];
@@ -108,7 +108,7 @@ export type AnyObject = Record<string, any>;
 export type CastFromTSToPG<T extends AllowedTSType> = T extends number ? T | string : T extends string ? T | number | Date : T extends boolean ? T | string : T extends Date ? T | string : T;
 export declare const EXISTS_KEYS: readonly ["$exists", "$notExists", "$existsJoined", "$notExistsJoined"];
 export type EXISTS_KEY = (typeof EXISTS_KEYS)[number];
-export declare const ComplexFilterComparisonKeys: readonly ["$ilike", "$like", "$nilike", "$nlike", ...("@@" | "@>" | "<@" | "?" | "?|" | "?&" | "||" | "-" | "#-" | "@?")[], "=", "$eq", "<>", ">", "<", ">=", "<=", "$eq", "$ne", "$gt", "$gte", "$lt", "$lte", "$isDistinctFrom", "$isNotDistinctFrom", "$between", "$notBetween", "$in", "$nin"];
+export declare const ComplexFilterComparisonKeys: readonly ["$ilike", "$like", "$nilike", "$nlike", ...("@>" | "<@" | "?" | "?|" | "?&" | "||" | "-" | "#-" | "@?" | "@@")[], "=", "$eq", "<>", ">", "<", ">=", "<=", "$eq", "$ne", "$gt", "$gte", "$lt", "$lte", "$isDistinctFrom", "$isNotDistinctFrom", "$between", "$notBetween", "$in", "$nin"];
 export declare const COMPLEX_FILTER_KEY: "$filter";
 /**
  * Complex filter that allows applying functions to columns

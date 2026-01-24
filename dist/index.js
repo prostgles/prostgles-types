@@ -152,15 +152,13 @@ const getPossibleNestedInsert = (column, schema, silent = true) => {
     ].join("\n");
 };
 exports.getPossibleNestedInsert = getPossibleNestedInsert;
-// import { md5 } from "./md5";
-// export { get, getTextPatch, unpatchText, isEmpty, WAL, WALConfig, asName } from "./util";
-// export type { WALItem, BasicOrderBy, WALItemsObj, WALConfig, TextPatch, SyncTableInfo } from "./util";
 __exportStar(require("./auth"), exports);
 var files_1 = require("./files");
 Object.defineProperty(exports, "CONTENT_TYPE_TO_EXT", { enumerable: true, get: function () { return files_1.CONTENT_TYPE_TO_EXT; } });
 __exportStar(require("./filters"), exports);
-__exportStar(require("./JSONBSchemaValidation/getJSONBSchemaTSTypes"), exports);
+__exportStar(require("./joinHelpers"), exports);
 __exportStar(require("./JSONBSchemaValidation/getJSONBSchemaAsJSONSchema"), exports);
+__exportStar(require("./JSONBSchemaValidation/getJSONBSchemaTSTypes"), exports);
 __exportStar(require("./JSONBSchemaValidation/JSONBSchema"), exports);
 __exportStar(require("./JSONBSchemaValidation/JSONBSchemaValidation"), exports);
 __exportStar(require("./util"), exports);

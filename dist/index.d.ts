@@ -1,6 +1,6 @@
 import * as AuthTypes from "./auth";
 import { FileColumnConfig } from "./files";
-import { AnyObject, ComplexFilter, FullFilter, FullFilterBasic, ValueOf } from "./filters";
+import { AnyObject, ComplexFilter, FullFilter, ValueOf } from "./filters";
 import type { UpsertDataToPGCast } from "./insertUpdateUtils";
 import { JSONB } from "./JSONBSchemaValidation/JSONBSchema";
 export declare const _PG_strings: readonly ["bpchar", "char", "varchar", "text", "citext", "uuid", "bytea", "time", "timetz", "interval", "name", "cidr", "inet", "macaddr", "macaddr8", "int4range", "int8range", "numrange", "tsvector"];
@@ -670,22 +670,7 @@ export type TableHandler<TD extends AnyObject = AnyObject, S extends DBSchema | 
 export type JoinMakerOptions<TT extends AnyObject = AnyObject> = SelectParams<TT> & {
     path?: RawJoinPath;
 };
-export type JoinMaker<TT extends AnyObject = AnyObject, S extends DBSchema | void = void> = (filter?: FullFilter<TT, S>, select?: Select<TT>, options?: JoinMakerOptions<TT>) => any;
-export type JoinMakerBasic = (filter?: FullFilterBasic, select?: SelectBasic, options?: SelectParams & {
-    path?: RawJoinPath;
-}) => any;
-export type TableJoin = {
-    [key: string]: JoinMaker;
-};
-export type TableJoinBasic = {
-    [key: string]: JoinMakerBasic;
-};
-export type DbJoinMaker = {
-    innerJoin: TableJoin;
-    leftJoin: TableJoin;
-    innerJoinOne: TableJoin;
-    leftJoinOne: TableJoin;
-};
+export type JoinMaker<TT extends AnyObject = AnyObject, S extends DBSchema | void = void> = (tableName: string, filter?: FullFilter<TT, S>, select?: Select<TT>, options?: JoinMakerOptions<TT>) => any;
 export type SQLResultInfo = {
     command: "SELECT" | "UPDATE" | "DELETE" | "CREATE" | "ALTER" | "LISTEN" | "UNLISTEN" | "INSERT" | undefined | string;
     rowCount: number;
@@ -755,7 +740,7 @@ export type DBHandler<S = void> = (S extends DBSchema ? {
     [k in keyof S]: S[k]["is_view"] extends true ? ViewHandler<S[k]["columns"], S> : Pick<TableHandler<S[k]["columns"], S>, ValidatedMethods<S[k]>>;
 } : {
     [key: string]: Partial<TableHandler>;
-}) & DbJoinMaker & {
+}) & {
     sql?: SQLHandler;
 };
 export type DBNoticeConfig = {
@@ -938,8 +923,9 @@ export * from "./auth";
 export { CONTENT_TYPE_TO_EXT } from "./files";
 export type { ALLOWED_CONTENT_TYPE, ALLOWED_EXTENSION, FileColumnConfig, FileType } from "./files";
 export * from "./filters";
-export * from "./JSONBSchemaValidation/getJSONBSchemaTSTypes";
+export * from "./joinHelpers";
 export * from "./JSONBSchemaValidation/getJSONBSchemaAsJSONSchema";
+export * from "./JSONBSchemaValidation/getJSONBSchemaTSTypes";
 export * from "./JSONBSchemaValidation/JSONBSchema";
 export * from "./JSONBSchemaValidation/JSONBSchemaValidation";
 export type { ClientExpressData, ClientSyncHandles, ClientSyncInfo, ClientSyncPullResponse, onUpdatesParams, SyncBatchParams, SyncConfig, } from "./replication";

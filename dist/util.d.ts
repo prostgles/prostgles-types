@@ -1,4 +1,4 @@
-import { AnyObject, JoinMaker, JoinPath, TS_COLUMN_DATA_TYPES } from ".";
+import { AnyObject, JoinPath, TS_COLUMN_DATA_TYPES } from ".";
 export declare function asName(str: string): string;
 export declare const pickKeys: <T extends AnyObject, Include extends keyof T>(obj: T, keys?: Include[] | readonly Include[], onlyIfDefined?: boolean) => Pick<T, Include>;
 export declare function omitKeys<T extends AnyObject, Exclude extends keyof T>(obj: T, exclude: Exclude[]): Omit<T, Exclude>;
@@ -130,12 +130,6 @@ export declare const tryCatch: <T extends AnyObject>(func: () => T | Promise<T>)
     error: unknown;
     duration: number;
 })>;
-export declare const getJoinHandlers: (tableName: string) => {
-    innerJoin: JoinMaker;
-    leftJoin: JoinMaker;
-    innerJoinOne: JoinMaker;
-    leftJoinOne: JoinMaker;
-};
 export type ParsedJoinPath = Required<JoinPath>;
 export declare const reverseJoinOn: (on: ParsedJoinPath["on"]) => {
     [k: string]: string;

@@ -1,4 +1,4 @@
-import { AnyObject, JoinMaker, JoinPath, TS_COLUMN_DATA_TYPES } from ".";
+import { AnyObject, JoinPath, TS_COLUMN_DATA_TYPES } from ".";
 import { md5 } from "./md5";
 
 export function asName(str: string) {
@@ -11,7 +11,7 @@ export function asName(str: string) {
 export const pickKeys = <T extends AnyObject, Include extends keyof T>(
   obj: T,
   keys: Include[] | readonly Include[] = [],
-  onlyIfDefined = true
+  onlyIfDefined = true,
 ): Pick<T, Include> => {
   if (!keys.length) {
     return {} as T;
@@ -32,25 +32,25 @@ export const pickKeys = <T extends AnyObject, Include extends keyof T>(
 
 export function omitKeys<T extends AnyObject, Exclude extends keyof T>(
   obj: T,
-  exclude: Exclude[]
+  exclude: Exclude[],
 ): Omit<T, Exclude> {
   //@ts-ignore
   return pickKeys(
     obj,
     //@ts-ignore
-    getKeys(obj).filter((k) => !exclude.includes(k))
+    getKeys(obj).filter((k) => !exclude.includes(k)),
   );
 }
 
 export function filter<T extends AnyObject, ArrFilter extends Partial<T>>(
   array: T[],
-  arrFilter: ArrFilter
+  arrFilter: ArrFilter,
 ): T[] {
   return array.filter((d) => Object.entries(arrFilter).every(([k, v]) => d[k] === v));
 }
 export function find<T extends AnyObject, ArrFilter extends Partial<T>>(
   array: T[],
-  arrFilter: ArrFilter
+  arrFilter: ArrFilter,
 ): T | undefined {
   return filter(array, arrFilter)[0];
 }
@@ -493,7 +493,7 @@ export function isEmpty(obj?: any): boolean {
 }
 
 export const isNotEmpty = <T extends Record<string, unknown>>(
-  obj?: T | null | undefined
+  obj?: T | null | undefined,
 ): obj is T => !isEmpty(obj);
 
 /* Get nested property from an object */
@@ -513,7 +513,7 @@ export function get(obj: any, propertyPath: string | string[]): any {
 }
 
 export const getObjectEntries = <T extends Record<string, any>>(
-  obj: T
+  obj: T,
 ): [keyof T, T[keyof T]][] => {
   return Object.entries(obj) as [keyof T, T[keyof T]][];
 };
@@ -560,7 +560,7 @@ export type Simplify<T> = { [K in keyof T]: T[K] } & {};
  * use tryCatchV2 instead
  */
 export const tryCatch = async <T extends AnyObject>(
-  func: () => T | Promise<T>
+  func: () => T | Promise<T>,
 ): Promise<
   | (T & { hasError?: false; error?: undefined; duration: number })
   | (Partial<Record<keyof T, undefined>> & { hasError: true; error: unknown; duration: number })
@@ -581,35 +581,10 @@ export const tryCatch = async <T extends AnyObject>(
   }
 };
 
-export const getJoinHandlers = (tableName: string) => {
-  const getJoinFunc = (isLeft: boolean, expectsOne: boolean): JoinMaker => {
-    return (
-      filter: Parameters<JoinMaker<AnyObject>>[0],
-      select: Parameters<JoinMaker<AnyObject>>[1],
-      options: Parameters<JoinMaker<AnyObject>>[2] = {}
-    ) => {
-      // return makeJoin(isLeft, filter, select, expectsOne? { ...options, limit: 1 } : options);
-      return {
-        [isLeft ? "$leftJoin" : "$innerJoin"]: options.path ?? tableName,
-        filter,
-        ...omitKeys(options, ["path", "select"]),
-        select,
-      };
-    };
-  };
-
-  return {
-    innerJoin: getJoinFunc(false, false),
-    leftJoin: getJoinFunc(true, false),
-    innerJoinOne: getJoinFunc(false, true),
-    leftJoinOne: getJoinFunc(true, true),
-  };
-};
-
 export type ParsedJoinPath = Required<JoinPath>;
 export const reverseJoinOn = (on: ParsedJoinPath["on"]) => {
   return on.map((constraint) =>
-    Object.fromEntries(Object.entries(constraint).map(([left, right]) => [right, left]))
+    Object.fromEntries(Object.entries(constraint).map(([left, right]) => [right, left])),
   );
 };
 
@@ -638,7 +613,7 @@ type FilterMatch<T, U> = T extends U ? T : undefined;
 
 export const extractTypeUtil = <T extends AnyObject, U extends Partial<T>>(
   obj: T,
-  objSubType: U
+  objSubType: U,
 ): FilterMatch<T, U> => {
   if (Object.entries(objSubType).every(([k, v]) => obj[k] === v)) {
     return obj as FilterMatch<T, U>;
@@ -660,7 +635,7 @@ export const safeStringify = (obj: AnyObject) => {
 };
 export const getSerialisableError = (
   rawError: any,
-  includeStack = false
+  includeStack = false,
 ): AnyObject | any[] | string | undefined | null => {
   if (rawError === null || rawError === undefined) {
     return rawError;
@@ -689,7 +664,7 @@ export const getSerialisableError = (
         ...acc,
         [key]: (rawError as AnyObject)[key],
       }),
-      {} as AnyObject
+      {} as AnyObject,
     );
     const result = JSON.parse(safeStringify(errorObj));
     if (!includeStack) {
@@ -707,7 +682,7 @@ export const getSerialisableError = (
 
 export const getProperty = <T extends object, K extends string>(
   obj: T,
-  key: K | string
+  key: K | string,
 ): K extends keyof T ? T[K]
 : K extends string ? T[keyof T] | undefined
 : undefined => {

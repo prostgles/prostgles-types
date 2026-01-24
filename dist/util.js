@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getProperty = exports.getSerialisableError = exports.safeStringify = exports.extractTypeUtil = exports.reverseParsedPath = exports.reverseJoinOn = exports.getJoinHandlers = exports.tryCatch = exports.getObjectEntries = exports.isNotEmpty = exports.WAL = exports.pickKeys = void 0;
+exports.getProperty = exports.getSerialisableError = exports.safeStringify = exports.extractTypeUtil = exports.reverseParsedPath = exports.reverseJoinOn = exports.tryCatch = exports.getObjectEntries = exports.isNotEmpty = exports.WAL = exports.pickKeys = void 0;
 exports.asName = asName;
 exports.omitKeys = omitKeys;
 exports.filter = filter;
@@ -445,26 +445,6 @@ const tryCatch = async (func) => {
     }
 };
 exports.tryCatch = tryCatch;
-const getJoinHandlers = (tableName) => {
-    const getJoinFunc = (isLeft, expectsOne) => {
-        return (filter, select, options = {}) => {
-            // return makeJoin(isLeft, filter, select, expectsOne? { ...options, limit: 1 } : options);
-            return {
-                [isLeft ? "$leftJoin" : "$innerJoin"]: options.path ?? tableName,
-                filter,
-                ...omitKeys(options, ["path", "select"]),
-                select,
-            };
-        };
-    };
-    return {
-        innerJoin: getJoinFunc(false, false),
-        leftJoin: getJoinFunc(true, false),
-        innerJoinOne: getJoinFunc(false, true),
-        leftJoinOne: getJoinFunc(true, true),
-    };
-};
-exports.getJoinHandlers = getJoinHandlers;
 const reverseJoinOn = (on) => {
     return on.map((constraint) => Object.fromEntries(Object.entries(constraint).map(([left, right]) => [right, left])));
 };

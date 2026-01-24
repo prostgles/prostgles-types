@@ -1,8 +1,7 @@
 import * as AuthTypes from "./auth";
 import { FileColumnConfig } from "./files";
-import { AnyObject, ComplexFilter, FullFilter, FullFilterBasic, ValueOf } from "./filters";
+import { AnyObject, ComplexFilter, FullFilter, ValueOf } from "./filters";
 import type { UpsertDataToPGCast } from "./insertUpdateUtils";
-import { getJSONBSchemaAsJSONSchema } from "./JSONBSchemaValidation/getJSONBSchemaAsJSONSchema";
 import { JSONB } from "./JSONBSchemaValidation/JSONBSchema";
 import { getKeys, isDefined } from "./util";
 import { includes } from "./utilFuncs/includes";
@@ -78,7 +77,7 @@ export const TS_PG_Types = {
 export type TS_COLUMN_DATA_TYPES = keyof typeof TS_PG_Types;
 
 export const postgresToTsType = (
-  udt_data_type: PG_COLUMN_UDT_DATA_TYPE
+  udt_data_type: PG_COLUMN_UDT_DATA_TYPE,
 ): keyof typeof TS_PG_Types => {
   return (
     getKeys(TS_PG_Types).find((k) => {
@@ -773,7 +772,7 @@ type GetColumns = (
    * Language code for i18n data. "en" by default
    */
   lang?: string,
-  params?: GetColumnsParams
+  params?: GetColumnsParams,
 ) => Promise<ValidatedColumnInfo[]>;
 
 /**
@@ -798,7 +797,7 @@ export type ViewHandler<TD extends AnyObject = AnyObject, S extends DBSchema | v
     /**
      * Language code for i18n data. "en" by default
      */
-    lang?: string
+    lang?: string,
   ) => Promise<TableInfo>;
 
   /**
@@ -822,7 +821,7 @@ export type ViewHandler<TD extends AnyObject = AnyObject, S extends DBSchema | v
      * - { $existsJoined: { linkedTable: { "linkedTableField": "value" } } }
      */
     filter?: FullFilter<TD, S>,
-    selectParams?: P
+    selectParams?: P,
   ) => Promise<SelectReturnType<S, P, TD, true>>;
 
   /**
@@ -830,7 +829,7 @@ export type ViewHandler<TD extends AnyObject = AnyObject, S extends DBSchema | v
    */
   findOne: <P extends SelectParams<TD, S>>(
     filter?: FullFilter<TD, S>,
-    selectParams?: P
+    selectParams?: P,
   ) => Promise<undefined | SelectReturnType<S, P, TD, false>>;
 
   /**
@@ -840,7 +839,7 @@ export type ViewHandler<TD extends AnyObject = AnyObject, S extends DBSchema | v
     filter: FullFilter<TD, S>,
     params: P,
     onData: SubscribeCallback<SelectReturnType<S, P, TD, true>>,
-    onError?: SubscribeOnError
+    onError?: SubscribeOnError,
   ) => Promise<SubscriptionHandler>;
 
   /**
@@ -850,7 +849,7 @@ export type ViewHandler<TD extends AnyObject = AnyObject, S extends DBSchema | v
     filter: FullFilter<TD, S>,
     params: P,
     onData: SubscribeOneCallback<SelectReturnType<S, P, TD, false> | undefined>,
-    onError?: SubscribeOnError
+    onError?: SubscribeOnError,
   ) => Promise<SubscriptionHandler>;
 
   /**
@@ -858,7 +857,7 @@ export type ViewHandler<TD extends AnyObject = AnyObject, S extends DBSchema | v
    */
   count: <P extends SelectParams<TD, S>>(
     filter?: FullFilter<TD, S>,
-    selectParams?: P
+    selectParams?: P,
   ) => Promise<number>;
 
   /**
@@ -866,7 +865,7 @@ export type ViewHandler<TD extends AnyObject = AnyObject, S extends DBSchema | v
    */
   size: <P extends SelectParams<TD, S>>(
     filter?: FullFilter<TD, S>,
-    selectParams?: P
+    selectParams?: P,
   ) => Promise<string>;
 };
 
@@ -888,7 +887,7 @@ export type TableHandler<
   update: <P extends UpdateParams<TD, S>>(
     filter: FullFilter<TD, S>,
     newData: UpsertDataToPGCastLax<TD>,
-    params?: P
+    params?: P,
   ) => Promise<UpdateReturnType<P, TD, S> | undefined>;
 
   /**
@@ -897,7 +896,7 @@ export type TableHandler<
    */
   updateBatch: <P extends UpdateParams<TD, S>>(
     data: [FullFilter<TD, S>, UpsertDataToPGCastLax<TD>][],
-    params?: P
+    params?: P,
   ) => Promise<UpdateReturnType<P, TD, S> | void>;
 
   /**
@@ -905,7 +904,7 @@ export type TableHandler<
    */
   insert: <P extends InsertParams<TD, S>, D extends InsertData<TD>>(
     data: D,
-    params?: P
+    params?: P,
   ) => Promise<InsertReturnType<D, P, TD, S>>;
 
   /**
@@ -916,7 +915,7 @@ export type TableHandler<
   upsert: <P extends UpdateParams<TD, S>>(
     filter: FullFilter<TD, S>,
     newData: UpsertDataToPGCastLax<TD>,
-    params?: P
+    params?: P,
   ) => Promise<UpdateReturnType<P, TD, S>>;
 
   /**
@@ -925,37 +924,20 @@ export type TableHandler<
    */
   delete: <P extends DeleteParams<TD, S>>(
     filter?: FullFilter<TD, S>,
-    params?: P
+    params?: P,
   ) => Promise<UpdateReturnType<P, TD, S> | undefined>;
 };
 
 export type JoinMakerOptions<TT extends AnyObject = AnyObject> = SelectParams<TT> & {
   path?: RawJoinPath;
 };
+
 export type JoinMaker<TT extends AnyObject = AnyObject, S extends DBSchema | void = void> = (
+  tableName: string,
   filter?: FullFilter<TT, S>,
   select?: Select<TT>,
-  options?: JoinMakerOptions<TT>
+  options?: JoinMakerOptions<TT>,
 ) => any;
-export type JoinMakerBasic = (
-  filter?: FullFilterBasic,
-  select?: SelectBasic,
-  options?: SelectParams & { path?: RawJoinPath }
-) => any;
-
-export type TableJoin = {
-  [key: string]: JoinMaker;
-};
-export type TableJoinBasic = {
-  [key: string]: JoinMakerBasic;
-};
-
-export type DbJoinMaker = {
-  innerJoin: TableJoin;
-  leftJoin: TableJoin;
-  innerJoinOne: TableJoin;
-  leftJoinOne: TableJoin;
-};
 
 export type SQLResultInfo = {
   command:
@@ -1044,7 +1026,7 @@ export type SQLHandler<ServerSideOptions = void> =
     query: string,
     args?: AnyObject | any[],
     options?: Opts,
-    serverSideOptions?: ServerSideOptions
+    serverSideOptions?: ServerSideOptions,
   ) => Promise<GetSQLReturnType<Opts>>;
 
 type SelectMethods<T extends DBTableSchema> =
@@ -1089,10 +1071,9 @@ export type DBHandler<S = void> = (S extends DBSchema ?
   }
 : {
     [key: string]: Partial<TableHandler>;
-  }) &
-  DbJoinMaker & {
-    sql?: SQLHandler;
-  };
+  }) & {
+  sql?: SQLHandler;
+};
 
 export type DBNoticeConfig = {
   socketChannel: string;
@@ -1312,7 +1293,7 @@ type ColumnInfoForNestedInsert = Pick<ColumnInfo, "name" | "references" | "is_pk
 export const getPossibleNestedInsert = (
   column: ColumnInfoForNestedInsert,
   schema: { name: string; columns: ColumnInfoForNestedInsert[] }[],
-  silent = true
+  silent = true,
 ) => {
   const refs = column.references ?? [];
 
@@ -1336,7 +1317,7 @@ export const getPossibleNestedInsert = (
     return firstColRef?.ref;
   }
   const [pkeyRef, ...otherPkeyRefs] = colRefs.filter((r) =>
-    r.fcolsInfo.some((fcolInfo) => fcolInfo.is_pkey)
+    r.fcolsInfo.some((fcolInfo) => fcolInfo.is_pkey),
   );
   if (!otherPkeyRefs.length) return pkeyRef?.ref;
 
@@ -1347,15 +1328,13 @@ export const getPossibleNestedInsert = (
   ].join("\n");
 };
 
-// import { md5 } from "./md5";
-// export { get, getTextPatch, unpatchText, isEmpty, WAL, WALConfig, asName } from "./util";
-// export type { WALItem, BasicOrderBy, WALItemsObj, WALConfig, TextPatch, SyncTableInfo } from "./util";
 export * from "./auth";
 export { CONTENT_TYPE_TO_EXT } from "./files";
 export type { ALLOWED_CONTENT_TYPE, ALLOWED_EXTENSION, FileColumnConfig, FileType } from "./files";
 export * from "./filters";
-export * from "./JSONBSchemaValidation/getJSONBSchemaTSTypes";
+export * from "./joinHelpers";
 export * from "./JSONBSchemaValidation/getJSONBSchemaAsJSONSchema";
+export * from "./JSONBSchemaValidation/getJSONBSchemaTSTypes";
 export * from "./JSONBSchemaValidation/JSONBSchema";
 export * from "./JSONBSchemaValidation/JSONBSchemaValidation";
 export type {

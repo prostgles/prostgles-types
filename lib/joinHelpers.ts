@@ -1,4 +1,4 @@
-import type { AnyObject, JoinMaker } from "lib";
+import type { AnyObject, JoinMaker } from "./index";
 import { omitKeys } from "./util";
 
 const getJoinFunc = (joinType: "$leftJoin" | "$innerJoin" = "$leftJoin") => {

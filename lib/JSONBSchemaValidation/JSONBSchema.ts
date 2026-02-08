@@ -146,7 +146,7 @@ export namespace JSONB {
           oneOfType: readonly ObjectSchema[];
         }
       | {
-          oneOf: FieldType[];
+          oneOf: readonly FieldType[];
           oneOfType?: undefined;
         }
     );

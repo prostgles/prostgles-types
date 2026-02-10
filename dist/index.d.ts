@@ -482,11 +482,6 @@ type RequiredNestedInsert = {
     minRows?: number;
     maxRows?: number;
 };
-/**
- * Error handler that may fire due to schema changes or other post subscribe issues
- * Column or filter issues are thrown during the subscribe call
- */
-export type SubscribeOnError = (err: any) => void;
 type JoinedSelect = Record<string, Select>;
 export type SelectFunction = Record<string, any[]>;
 type ParseSelect<Select extends SelectParams<TD>["select"], TD extends AnyObject> = (Select extends {
@@ -575,7 +570,12 @@ lang?: string, params?: GetColumnsParams) => Promise<ValidatedColumnInfo[]>;
 /**
  * Callback fired once after subscribing and then every time the data matching the filter changes
  */
-type SubscribeCallback<ItemsDataType> = (items: ItemsDataType) => void | Promise<void>;
+type SubscribeCallback<ItemsDataType> = (items: ItemsDataType, 
+/**
+ * Error due to schema changes or other post subscribe issues
+ * Column or filter issues are thrown during the subscribe call
+ */
+error?: unknown) => void | Promise<void>;
 /**
  * Callback fired once after subscribing and then every time the data matching the filter changes
  */
@@ -620,11 +620,11 @@ export type ViewHandler<TD extends AnyObject = AnyObject, S extends DBSchema | v
     /**
      * Retrieves a list of matching records from the view/table and subscribes to changes
      */
-    subscribe: <P extends SubscribeParams<TD, S>>(filter: FullFilter<TD, S>, params: P, onData: SubscribeCallback<SelectReturnType<S, P, TD, true>>, onError?: SubscribeOnError) => Promise<SubscriptionHandler>;
+    subscribe: <P extends SubscribeParams<TD, S>>(filter: FullFilter<TD, S>, params: P, onData: SubscribeCallback<SelectReturnType<S, P, TD, true>>) => Promise<SubscriptionHandler>;
     /**
      * Retrieves first matching record from the view/table and subscribes to changes
      */
-    subscribeOne: <P extends SubscribeParams<TD, S>>(filter: FullFilter<TD, S>, params: P, onData: SubscribeOneCallback<SelectReturnType<S, P, TD, false> | undefined>, onError?: SubscribeOnError) => Promise<SubscriptionHandler>;
+    subscribeOne: <P extends SubscribeParams<TD, S>>(filter: FullFilter<TD, S>, params: P, onData: SubscribeOneCallback<SelectReturnType<S, P, TD, false> | undefined>) => Promise<SubscriptionHandler>;
     /**
      * Returns the number of rows that match the filter
      */

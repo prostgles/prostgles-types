@@ -649,12 +649,6 @@ type RequiredNestedInsert = {
   maxRows?: number;
 };
 
-/**
- * Error handler that may fire due to schema changes or other post subscribe issues
- * Column or filter issues are thrown during the subscribe call
- */
-export type SubscribeOnError = (err: any) => void;
-
 type JoinedSelect = Record<string, Select>;
 export type SelectFunction = Record<string, any[]>;
 type ParseSelect<
@@ -778,7 +772,14 @@ type GetColumns = (
 /**
  * Callback fired once after subscribing and then every time the data matching the filter changes
  */
-type SubscribeCallback<ItemsDataType> = (items: ItemsDataType) => void | Promise<void>;
+type SubscribeCallback<ItemsDataType> = (
+  items: ItemsDataType,
+  /**
+   * Error due to schema changes or other post subscribe issues
+   * Column or filter issues are thrown during the subscribe call
+   */
+  error?: unknown,
+) => void | Promise<void>;
 
 /**
  * Callback fired once after subscribing and then every time the data matching the filter changes
@@ -839,7 +840,6 @@ export type ViewHandler<TD extends AnyObject = AnyObject, S extends DBSchema | v
     filter: FullFilter<TD, S>,
     params: P,
     onData: SubscribeCallback<SelectReturnType<S, P, TD, true>>,
-    onError?: SubscribeOnError,
   ) => Promise<SubscriptionHandler>;
 
   /**
@@ -849,7 +849,6 @@ export type ViewHandler<TD extends AnyObject = AnyObject, S extends DBSchema | v
     filter: FullFilter<TD, S>,
     params: P,
     onData: SubscribeOneCallback<SelectReturnType<S, P, TD, false> | undefined>,
-    onError?: SubscribeOnError,
   ) => Promise<SubscriptionHandler>;
 
   /**

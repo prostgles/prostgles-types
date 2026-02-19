@@ -14,6 +14,17 @@ describe("isEqual tests", () => {
     assert.equal(isEqual(a, d), false);
   });
 
+  test("circular arrays - different instances", () => {
+    const a: any[] = [];
+    a.push(a);
+
+    const b: any[] = [];
+    b.push(b);
+
+    // This will recurse forever / stack overflow
+    assert.equal(isEqual(a, b), false);
+  });
+
   test("isEqual", () => {
     const a = { a: 1, b: 2 };
     const b = { a: 1, b: 2 };

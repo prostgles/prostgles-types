@@ -14,6 +14,28 @@ describe("isEqual tests", () => {
     assert.equal(isEqual(a, d), false);
   });
 
+  test("circular false positive on duplicated sibling properties", () => {
+    const x = { a: {} };
+    //@ts-expect-error
+    x.b = x.a;
+
+    const y = { a: {} };
+    //@ts-expect-error
+    y.b = y.a;
+    assert.equal(isEqual(x, y), false); // false due to circular reference, not just shared reference
+    assert.throws(
+      () => {
+        assert.equal(isEqual(x, y, "error"), false);
+      },
+      {
+        message: "Circular reference detected in isEqual",
+        name: "Error",
+      },
+    );
+
+    assert.equal(isEqual({}, {}), true);
+  });
+
   test("circular arrays - different instances", () => {
     const a: any[] = [];
     a.push(a);
@@ -21,7 +43,7 @@ describe("isEqual tests", () => {
     const b: any[] = [];
     b.push(b);
 
-    // This will recurse forever / stack overflow
+    // Should not stack overflow
     assert.equal(isEqual(a, b), false);
   });
 

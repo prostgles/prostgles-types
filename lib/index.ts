@@ -734,7 +734,10 @@ export type UpdateParams<T extends AnyObject | void = void, S extends DBSchema |
    */
   removeDisallowedFields?: boolean;
 
-  /* true by default. If false the update will fail if affecting more than one row */
+  /**
+   * true by default.
+   * When set to false the update will throw an error if more than one row is updated (but the update will commit).
+   * */
   multi?: boolean;
 } & Pick<CommonSelectParams, "returnType">;
 

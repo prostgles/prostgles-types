@@ -237,14 +237,15 @@ export namespace JSONB {
     : U extends "string" | "time" | "timestamp" | "Date" ? GetAllowedValues<T, string>
     : U extends "boolean" ? GetAllowedValues<T, boolean>
     : U extends "any" ? GetAllowedValues<T, any>
-    : U extends "unknown" ? GetAllowedValues<T, unknown>
     : U extends "Blob" ? GetAllowedValues<T, Blob>
     : U extends `${infer P}[]` ?
       P extends "number" | "integer" ? GetAllowedValues<T, number>[]
       : P extends "string" | "time" | "timestamp" | "Date" ? GetAllowedValues<T, string>[]
       : P extends "boolean" ? GetAllowedValues<T, boolean>[]
       : P extends "any" ? GetAllowedValues<T, any>[]
+      : P extends "unknown" ? GetAllowedValues<T, unknown>[]
       : never
+    : U extends "unknown" ? GetAllowedValues<T, unknown>
     : never;
 
   type _GetType<T extends FieldTypeObj | Omit<FieldTypeObj, "optional">> =

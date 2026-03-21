@@ -4,7 +4,7 @@ import { getObjectEntries, isObject } from "../util";
 import { safeGetKeys } from "./utils";
 
 const getJSONSchemaType = (
-  rawType: JSONB.BasicType["type"] | JSONB.Lookup["type"] | undefined
+  rawType: JSONB.BasicType["type"] | JSONB.Lookup["type"] | undefined,
 ): { type: JSONSchema7TypeName | undefined; isArray: boolean } | undefined => {
   if (!rawType) return;
   const type: (typeof PrimitiveTypes)[number] | "Lookup" =
@@ -25,7 +25,7 @@ const getJSONSchemaType = (
 
 export const getJSONSchemaObject = (
   rawType: JSONB.FieldType | JSONB.JSONBSchema,
-  rootInfo?: { id: string }
+  rootInfo?: { id: string },
 ): JSONSchema7 => {
   const {
     type,
@@ -114,7 +114,7 @@ export const getJSONSchemaObject = (
             ...a,
             [v]: !record.values ? { type: {} } : getJSONSchemaObject(record.values),
           }),
-          {}
+          {},
         ),
       }),
     };
@@ -150,7 +150,7 @@ export const getJSONSchemaObject = (
 export function getJSONBSchemaAsJSONSchema(
   tableName: string,
   colName: string,
-  schema: JSONB.JSONBSchema
+  schema: JSONB.JSONBSchema,
 ): JSONSchema7 {
   return getJSONSchemaObject(schema, { id: `${tableName}.${colName}` });
 }

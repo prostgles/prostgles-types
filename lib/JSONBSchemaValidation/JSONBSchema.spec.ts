@@ -45,7 +45,7 @@ describe("jsonb to json schema conversion", async () => {
     type CreateContainerParams = JSONB.GetSchemaType<typeof createContainerSchema>;
     // Type instantiation is excessively deep and possibly infinite.ts(2589)
     const dockerFile = ({ files: [] } as unknown as CreateContainerParams).files.find(
-      ({ name }) => name === "Dockerfile"
+      ({ name }) => name === "Dockerfile",
     );
     dockerFile?.content.charAt(0); // should not error
   });
@@ -163,7 +163,7 @@ describe("jsonb to json schema conversion", async () => {
           { type: "null" },
         ],
         // title: 'status'
-      }
+      },
     );
   });
 
@@ -209,6 +209,8 @@ describe("jsonb to json schema conversion", async () => {
         o: {
           oneOfType: [{ z: { type: "integer" } }, { z1: { type: "integer" } }],
         },
+        blbArr: "Blob[]",
+        f: "FileLike",
       },
     } as const; // satisfies JSONB.JSONBSchema;
 
@@ -219,6 +221,17 @@ describe("jsonb to json schema conversion", async () => {
         c1: "",
       },
       o: { z1: 23 },
+      blbArr: [
+        new Blob(),
+        new Blob(),
+        //@ts-expect-error
+        1,
+      ],
+      f: {
+        name: "file",
+        type: "text/plain",
+        data: new Blob(),
+      },
     };
   });
 

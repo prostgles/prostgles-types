@@ -1,17 +1,67 @@
 import { AnyObject } from "../filters";
-import { type PartialByKeys, type Simplify } from "../util";
-export const PrimitiveTypes = [
-  "boolean",
-  "number",
-  "integer",
-  "string",
-  "Date",
-  "time",
-  "timestamp",
-  "Blob",
-  "any",
-  "unknown",
-] as const;
+import { getKeys } from "../util";
+
+export type PrimitiveTypeMap = {
+  number: number;
+  integer: number;
+  string: string;
+  time: string;
+  timestamp: string;
+  Date: string;
+  boolean: boolean;
+  any: any;
+  unknown: unknown;
+  Blob: Blob;
+  FileLike: {
+    name: string;
+    type: string;
+    data: Blob;
+  };
+};
+
+/**
+ * Provide more info for allowed values
+ */
+type AllowedValueInfo = {
+  value: any;
+  label: string;
+  subLabel?: string;
+  /**
+   * URL of the icon
+   */
+  icon?: string;
+};
+
+export type PrimitiveOptions = {
+  allowedValues?: readonly any[] | any[] | readonly AllowedValueInfo[] | AllowedValueInfo[];
+  /**
+   * Optional MIME types that can be used with Blob or FileLike types.
+   * @example
+   * { "image/png": 1, "image/jpeg": 1 }
+   */
+  mimeTypes?: Record<string, 1>;
+};
+
+export const PrimitiveTypesObj = {
+  boolean: 1,
+  number: 1,
+  integer: 1,
+  string: 1,
+  Date: 1,
+  time: 1,
+  timestamp: 1,
+  Blob: 1,
+  FileLike: 1,
+  any: 1,
+  unknown: 1,
+} as const satisfies Record<keyof PrimitiveTypeMap, 1>;
+
+export const PrimitiveTypes = getKeys(PrimitiveTypesObj);
+
+/**
+ * Instantiations:  49914
+ */
+
 export const PrimitiveArrayTypes = PrimitiveTypes.map((v) => `${v}[]` as `${typeof v}[]`);
 export const DATA_TYPES = [...PrimitiveTypes, ...PrimitiveArrayTypes] as const;
 type DataType = (typeof DATA_TYPES)[number];
@@ -83,34 +133,22 @@ export namespace JSONB {
     record?: undefined;
   };
 
-  /**
-   * Provide more info for allowed values
-   */
-  type AllowedValueInfo = {
-    value: any;
-    label: string;
-    subLabel?: string;
-    /**
-     * URL of the icon
-     */
-    icon?: string;
-  };
-
-  export type BasicType = BaseOptions & {
-    type: DataType;
-    allowedValues?: readonly any[] | any[] | readonly AllowedValueInfo[] | AllowedValueInfo[];
-    oneOf?: undefined;
-    oneOfType?: undefined;
-    arrayOf?: undefined;
-    arrayOfType?: undefined;
-    enum?: undefined;
-    record?: undefined;
-    lookup?: undefined;
-  };
+  export type BasicType = BaseOptions &
+    PrimitiveOptions & {
+      type: DataType;
+      oneOf?: undefined;
+      oneOfType?: undefined;
+      arrayOf?: undefined;
+      arrayOfType?: undefined;
+      enum?: undefined;
+      record?: undefined;
+      lookup?: undefined;
+    };
 
   export type ObjectType = BaseOptions & {
     type: ObjectSchema;
     allowedValues?: undefined;
+    mimeTypes?: undefined;
     oneOf?: undefined;
     oneOfType?: undefined;
     arrayOf?: undefined;
@@ -128,6 +166,7 @@ export namespace JSONB {
     arrayOf?: undefined;
     arrayOfType?: undefined;
     allowedValues?: undefined;
+    mimeTypes?: undefined;
     record?: undefined;
     lookup?: undefined;
   };
@@ -137,6 +176,7 @@ export namespace JSONB {
     arrayOf?: undefined;
     arrayOfType?: undefined;
     allowedValues?: undefined;
+    mimeTypes?: undefined;
     enum?: undefined;
     record?: undefined;
     lookup?: undefined;
@@ -153,6 +193,7 @@ export namespace JSONB {
   export type ArrayOf = BaseOptions & {
     type?: undefined;
     allowedValues?: undefined;
+    mimeTypes?: undefined;
     oneOf?: undefined;
     oneOfType?: undefined;
     enum?: undefined;
@@ -172,6 +213,7 @@ export namespace JSONB {
   export type RecordType = BaseOptions & {
     type?: undefined;
     allowedValues?: undefined;
+    mimeTypes?: undefined;
     oneOf?: undefined;
     oneOfType?: undefined;
     arrayOf?: undefined;
@@ -195,67 +237,42 @@ export namespace JSONB {
     | Lookup;
 
   export type FieldType = DataType | FieldTypeObj;
+  type ObjectSchema = Record<string, FieldType>;
 
-  export type GetType<T extends FieldType | Omit<FieldTypeObj, "optional">> = GetWNullType<
-    T extends DataType ? { type: T } : T
-  >;
-  type GetWNullType<T extends FieldTypeObj | Omit<FieldTypeObj, "optional">> =
-    T extends { nullable: true } ? null | _GetType<T> : _GetType<T>;
+  type NormalizeField<T extends FieldType | Omit<FieldTypeObj, "optional">> =
+    T extends DataType ? { type: T } : T;
+
   type GetAllowedValues<T extends FieldTypeObj | Omit<FieldTypeObj, "optional">, TType> =
     T extends { allowedValues: readonly any[] } ? T["allowedValues"][number] : TType;
 
-  type PrimitiveTypeMap = {
-    number: number;
-    integer: number;
-    string: string;
-    time: string;
-    timestamp: string;
-    Date: string;
-    boolean: boolean;
-    any: any;
-    unknown: unknown;
-    Blob: Blob;
-  };
-  /** New */
-  // type GetPrimitiveType<
-  //   T extends JSONB.FieldTypeObj | Omit<JSONB.FieldTypeObj, "optional">,
-  //   U extends DataType,
-  // > =
-  //   U extends keyof PrimitiveTypeMap ? GetAllowedValues<T, PrimitiveTypeMap[U]>
-  //   : U extends `${infer P}[]` ?
-  //     P extends keyof PrimitiveTypeMap ?
-  //       GetAllowedValues<T, PrimitiveTypeMap[P][]>
-  //     : never
-  //   : never;
-
-  /* OLD */
-  type GetPrimitiveType<
-    T extends JSONB.FieldTypeObj | Omit<JSONB.FieldTypeObj, "optional">,
-    U extends DataType,
-  > =
-    U extends "number" | "integer" ? GetAllowedValues<T, number>
-    : U extends "string" | "time" | "timestamp" | "Date" ? GetAllowedValues<T, string>
-    : U extends "boolean" ? GetAllowedValues<T, boolean>
-    : U extends "any" ? GetAllowedValues<T, any>
-    : U extends "Blob" ? GetAllowedValues<T, Blob>
-    : U extends `${infer P}[]` ?
-      P extends "number" | "integer" ? GetAllowedValues<T, number>[]
-      : P extends "string" | "time" | "timestamp" | "Date" ? GetAllowedValues<T, string>[]
-      : P extends "boolean" ? GetAllowedValues<T, boolean>[]
-      : P extends "any" ? GetAllowedValues<T, any>[]
-      : P extends "unknown" ? GetAllowedValues<T, unknown>[]
+  type PrimitiveValue<U extends DataType> =
+    U extends `${infer P}[]` ?
+      P extends keyof PrimitiveTypeMap ?
+        PrimitiveTypeMap[P][]
       : never
-    : U extends "unknown" ? GetAllowedValues<T, unknown>
+    : U extends keyof PrimitiveTypeMap ? PrimitiveTypeMap[U]
     : never;
 
-  type _GetType<T extends FieldTypeObj | Omit<FieldTypeObj, "optional">> =
-    // Handle objects first (most common case)
+  type GetPrimitiveType<
+    T extends FieldTypeObj | Omit<FieldTypeObj, "optional">,
+    U extends DataType,
+  > = GetAllowedValues<T, PrimitiveValue<U>>;
+
+  type ResolveRecord<R extends RecordType["record"]> = Record<
+    R extends { keysEnum: readonly string[] } ? R["keysEnum"][number] : string,
+    R extends { values: infer V } ?
+      V extends FieldType ?
+        GetType<V>
+      : any
+    : any
+  >;
+
+  type ResolveField<T extends FieldTypeObj | Omit<FieldTypeObj, "optional">> =
     T extends { type: infer U } ?
-      U extends ObjectSchema ? GetObjectType<U>
-      : U extends DataType ? GetPrimitiveType<T, U>
+      U extends DataType ? GetPrimitiveType<T, U>
+      : U extends ObjectSchema ? GetObjectType<U>
       : never
-    : // Handle other patterns
-    T extends { enum: readonly any[] } ? T["enum"][number]
+    : T extends { enum: readonly any[] } ? T["enum"][number]
     : T extends { arrayOfType: infer U } ?
       U extends ObjectSchema ?
         GetObjectType<U>[]
@@ -274,41 +291,37 @@ export namespace JSONB {
       : never
     : T extends { record: infer R } ?
       R extends RecordType["record"] ?
-        Record<
-          R extends { keysEnum: readonly string[] } ? R["keysEnum"][number] : string,
-          R extends { values: infer V } ?
-            V extends FieldType ?
-              GetType<V>
-            : any
-          : any
-        >
+        ResolveRecord<R>
       : never
     : any;
+
+  type GetWNullType<T extends FieldTypeObj | Omit<FieldTypeObj, "optional">> =
+    T extends { nullable: true } ? null | ResolveField<T> : ResolveField<T>;
+
+  export type GetType<T extends FieldType | Omit<FieldTypeObj, "optional">> = GetWNullType<
+    NormalizeField<T>
+  >;
 
   type IsOptional<F extends FieldType> =
     F extends DataType ? false
     : F extends { optional: true } ? true
     : false;
 
-  type ObjectSchema = Record<string, FieldType>;
+  type OptionalKeys<S extends ObjectSchema> = {
+    [K in keyof S]-?: IsOptional<S[K]> extends true ? K : never;
+  }[keyof S];
+
+  type RequiredKeys<S extends ObjectSchema> = Exclude<keyof S, OptionalKeys<S>>;
+
+  export type GetObjectType<S extends ObjectSchema> = {
+    [K in RequiredKeys<S>]: GetType<S[K]>;
+  } & {
+    [K in OptionalKeys<S>]?: GetType<S[K]>;
+  };
+
   export type JSONBSchema = Omit<FieldTypeObj, "optional"> & {
     defaultValue?: unknown;
   };
-
-  /** OLD */
-  export type GetObjectType<S extends ObjectSchema> = {
-    [K in keyof S as IsOptional<S[K]> extends true ? K : never]?: GetType<S[K]>;
-  } & {
-    [K in keyof S as IsOptional<S[K]> extends true ? never : K]: GetType<S[K]>;
-  };
-
-  /* NEW Single-pass object type construction */
-  // type OptionalKeys<S extends ObjectSchema> = {
-  //   [K in keyof S]: S[K] extends { optional: true } ? K : never;
-  // }[keyof S];
-  // export type GetObjectType<S extends ObjectSchema> = Simplify<
-  //   PartialByKeys<{ [K in keyof S]: GetType<S[K]> }, OptionalKeys<S>>
-  // >;
 
   export type GetSchemaType<S extends JSONBSchema> =
     S["nullable"] extends true ? null | GetType<S> : GetType<S>;

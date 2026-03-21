@@ -1,6 +1,7 @@
-import type { JSONB } from "./JSONBSchema";
+import type { JSONB, PrimitiveTypeMap } from "./JSONBSchema";
 import { getKeys, isDefined, isEmpty, isObject } from "../util";
 import { safeGetKeys, safeGetProperty, safeHasOwn } from "./utils";
+import { includes } from "../utilFuncs/includes";
 
 type ValidationOptsions = {
   allowExtraProperties?: boolean;
@@ -12,51 +13,86 @@ export const getFieldTypeObj = (rawFieldType: JSONB.FieldType): JSONB.FieldTypeO
   return rawFieldType;
 };
 
+const isBlob = (val: unknown): val is Blob => {
+  return (
+    val instanceof Blob ||
+    //@ts-ignore
+    (typeof Buffer !== "undefined" && val instanceof Buffer) ||
+    //@ts-ignore
+    (typeof ArrayBuffer !== "undefined" && val instanceof ArrayBuffer)
+  );
+};
+
 type DataType = JSONB.FieldTypeObj["type"];
 type ElementType<T extends DataType> = T extends `${infer E}[]` ? E : never;
 type ArrayTypes = Extract<DataType, `${string}[]`>;
 type NonArrayTypes = Extract<Exclude<DataType, ArrayTypes>, string>;
-const PRIMITIVE_VALIDATORS: Record<NonArrayTypes, (val: any) => boolean> = {
+const PRIMITIVE_VALIDATORS: {
+  [K in NonArrayTypes]: (
+    val: any,
+    /**
+     * TODO: tidy schema types
+     */
+    schema: JSONB.BasicType | JSONB.ObjectType | JSONB.Lookup,
+  ) => boolean;
+  // removed for performance
+  // ) => val is K extends keyof PrimitiveTypeMap ? PrimitiveTypeMap[K] : unknown;
+} = {
   string: (val) => typeof val === "string",
-  number: (val) => typeof val === "number" && Number.isFinite(val),
-  integer: (val) => typeof val === "number" && Number.isInteger(val),
-  boolean: (val) => typeof val === "boolean",
+  number: (val): val is number => typeof val === "number" && Number.isFinite(val),
+  integer: (val): val is number => typeof val === "number" && Number.isInteger(val),
+  boolean: (val): val is boolean => typeof val === "boolean",
   time: (val) => typeof val === "string",
   timestamp: (val) => typeof val === "string",
-  any: (val) => typeof val !== "function" && typeof val !== "symbol",
-  unknown: (val) => typeof val !== "function" && typeof val !== "symbol",
+  any: (val): val is any => typeof val !== "function" && typeof val !== "symbol",
+  unknown: (val): val is unknown => typeof val !== "function" && typeof val !== "symbol",
   Date: (val) => typeof val === "string",
-  Lookup: () => {
+  Lookup: (val): val is unknown => {
     throw new Error("Lookup type is not supported for validation");
   },
-  Blob: (val): val is Blob => {
-    return (
-      val instanceof Blob ||
-      //@ts-ignore
-      (typeof Buffer !== "undefined" && val instanceof Buffer) ||
-      //@ts-ignore
-      (typeof ArrayBuffer !== "undefined" && val instanceof ArrayBuffer)
-    );
+  Blob: isBlob,
+  FileLike: (val, s): val is PrimitiveTypeMap["FileLike"] => {
+    if (s.type !== "FileLike") {
+      throw new Error("FileLike type must have type 'FileLike'");
+    }
+    const validStructure =
+      isObject(val) &&
+      typeof val.name === "string" &&
+      typeof val.type === "string" &&
+      isBlob(val.data);
+    if (validStructure && s.mimeTypes) {
+      const validMime = Object.keys(s.mimeTypes).some((mime) => val.type === mime);
+      if (!validMime) {
+        throw new Error(
+          `Invalid FileLike type. Expected one of: ${Object.keys(s.mimeTypes).join(", ")}`,
+        );
+      }
+    }
+
+    return validStructure;
   },
 };
 const PRIMITIVE_VALIDATORS_KEYS = getKeys(PRIMITIVE_VALIDATORS);
 const getElementType = <T extends DataType>(type: T): undefined | ElementType<T> => {
   if (typeof type === "string" && type.endsWith("[]")) {
     const elementType = type.slice(0, -2);
-    if (!PRIMITIVE_VALIDATORS_KEYS.includes(elementType as NonArrayTypes)) {
+    if (!includes(PRIMITIVE_VALIDATORS_KEYS, elementType)) {
       throw new Error(`Invalid array field type ${type}`);
     }
     return elementType as ElementType<T>;
   }
 };
 
-const getValidator = (type: Extract<DataType, string>) => {
+const getValidator = (
+  type: Extract<DataType, string>,
+  fieldType: JSONB.BasicType | JSONB.ObjectType | JSONB.Lookup,
+) => {
   const elem = getElementType(type);
   if (elem) {
     const validator = PRIMITIVE_VALIDATORS[elem];
     return {
       isArray: true,
-      validator: (v: any) => Array.isArray(v) && v.every((v) => validator(v)),
+      validator: (v: any) => Array.isArray(v) && v.every((v) => validator(v, fieldType)),
     };
   }
   const validator = PRIMITIVE_VALIDATORS[type as NonArrayTypes];
@@ -73,9 +109,9 @@ const getPropertyValidationError = (
   opts: ValidationOptsions | undefined,
 ): string | undefined => {
   const err = `${path.join(".")} is of invalid type. Expecting ${getTypeDescription(rawFieldType).replaceAll("\n", "")}`;
-  const fieldType = getFieldTypeObj(rawFieldType);
+  const fieldDefinition = getFieldTypeObj(rawFieldType);
 
-  const { type, allowedValues, nullable, optional } = fieldType;
+  const { type, allowedValues, nullable, optional } = fieldDefinition;
   if (nullable && value === null) return;
   if (optional && value === undefined) return;
   if (allowedValues) {
@@ -116,26 +152,27 @@ const getPropertyValidationError = (
       return;
     }
 
-    const { validator } = getValidator(type);
-    const isValid = validator(value);
+    const { validator } = getValidator(type, fieldDefinition);
+    const isValid = validator(value, fieldDefinition);
     if (!isValid) {
       return err;
     }
     return;
   }
 
-  if (fieldType.enum) {
+  if (fieldDefinition.enum) {
     const otherOptions: any[] = [];
-    if (fieldType.nullable) otherOptions.push(null);
-    if (fieldType.optional) otherOptions.push(undefined);
+    if (fieldDefinition.nullable) otherOptions.push(null);
+    if (fieldDefinition.optional) otherOptions.push(undefined);
     // err += `one of: ${JSON.stringify([...fieldType.enum, ...otherOptions]).slice(1, -1)}`;
 
-    if (!fieldType.enum.includes(value)) return err;
+    if (!fieldDefinition.enum.includes(value)) return err;
     return;
   }
 
   const arrayOf =
-    fieldType.arrayOf ?? (fieldType.arrayOfType ? { type: fieldType.arrayOfType } : undefined);
+    fieldDefinition.arrayOf ??
+    (fieldDefinition.arrayOfType ? { type: fieldDefinition.arrayOfType } : undefined);
   if (arrayOf) {
     if (!Array.isArray(value)) {
       return err + " an array";
@@ -151,7 +188,7 @@ const getPropertyValidationError = (
     return;
   }
 
-  const oneOf = fieldType.oneOf ?? fieldType.oneOfType?.map((type) => ({ type }));
+  const oneOf = fieldDefinition.oneOf ?? fieldDefinition.oneOfType?.map((type) => ({ type }));
   if (oneOf) {
     if (!oneOf.length) {
       return err + "to not be empty";
@@ -167,8 +204,8 @@ const getPropertyValidationError = (
     }
     return err;
   }
-  if (fieldType.record) {
-    const { keysEnum, partial, values: valuesSchema } = fieldType.record;
+  if (fieldDefinition.record) {
+    const { keysEnum, partial, values: valuesSchema } = fieldDefinition.record;
     if (!isObject(value)) {
       return err + "object";
     }
@@ -200,7 +237,7 @@ const getPropertyValidationError = (
     }
     return;
   }
-  return `Could not validate field type. Some logic might be missing: ${JSON.stringify(fieldType)}`;
+  return `Could not validate field type. Some logic might be missing: ${JSON.stringify(fieldDefinition)}`;
 };
 
 const getTypeDescription = (schema: JSONB.FieldType): string => {

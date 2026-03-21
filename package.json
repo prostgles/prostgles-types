@@ -1,6 +1,6 @@
 {
   "name": "prostgles-types",
-  "version": "4.0.212",
+  "version": "4.0.213",
   "description": "",
   "main": "dist/index_umd.js",
   "types": "dist/index.d.ts",
@@ -10,6 +10,7 @@
     "test": "npm run build && node --test dist/*.spec.js dist/**/*.spec.js",
     "build": "npm i && rm -rf ./dist/* && tsc && webpack --config webpack.prod.js",
     "prebuild": "tsc --noEmit -p tsconfig.browser.json",
+    "perf": "tsc --extendedDiagnostics 2>&1 | grep -E \"Instantiations|Check time\"",
     "pushpublish": "npm version patch --git-tag-version false && git push && npm publish"
   },
   "repository": {
@@ -31,10 +32,10 @@
   "homepage": "https://prostgles.com",
   "devDependencies": {
     "json-schema": "^0.4.0",
-    "prettier": "^3.4.2",
-    "tsconfig-paths-webpack-plugin": "^4.1.0",
-    "typescript": "^5.8.3",
-    "webpack": "^5.96.1",
+    "prettier": "^3.8.1",
+    "tsconfig-paths-webpack-plugin": "^4.2.0",
+    "typescript": "^5.9.3",
+    "webpack": "^5.105.4",
     "webpack-cli": "^5.1.4"
   }
 }

@@ -1,12 +1,11 @@
 import { DBSchema, RawJoinPath } from ".";
 import { ExactlyOne, getKeys } from "./util";
 
-export type AllowedTSType = string | number | boolean | Date | any;
+export type AllowedTSType = string | number | boolean | Date | unknown;
 export type AllowedTSTypes = AllowedTSType[];
 
 export const CompareFilterKeys = [
   "=",
-  "$eq",
   "<>",
   ">",
   "<",

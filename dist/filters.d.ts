@@ -1,8 +1,8 @@
 import { DBSchema, RawJoinPath } from ".";
 import { ExactlyOne } from "./util";
-export type AllowedTSType = string | number | boolean | Date | any;
+export type AllowedTSType = string | number | boolean | Date | unknown;
 export type AllowedTSTypes = AllowedTSType[];
-export declare const CompareFilterKeys: readonly ["=", "$eq", "<>", ">", "<", ">=", "<=", "$eq", "$ne", "$gt", "$gte", "$lt", "$lte", "$isDistinctFrom", "$isNotDistinctFrom"];
+export declare const CompareFilterKeys: readonly ["=", "<>", ">", "<", ">=", "<=", "$eq", "$ne", "$gt", "$gte", "$lt", "$lte", "$isDistinctFrom", "$isNotDistinctFrom"];
 export declare const CompareInFilterKeys: readonly ["$in", "$nin"];
 export declare const BetweenFilterKeys: readonly ["$between", "$notBetween"];
 export declare const JsonbOperands: {
@@ -108,7 +108,7 @@ export type AnyObject = Record<string, any>;
 export type CastFromTSToPG<T extends AllowedTSType> = T extends number ? T | string : T extends string ? T | number | Date : T extends boolean ? T | string : T extends Date ? T | string : T;
 export declare const EXISTS_KEYS: readonly ["$exists", "$notExists", "$existsJoined", "$notExistsJoined"];
 export type EXISTS_KEY = (typeof EXISTS_KEYS)[number];
-export declare const ComplexFilterComparisonKeys: readonly ["$ilike", "$like", "$nilike", "$nlike", ...("@>" | "<@" | "?" | "?|" | "?&" | "||" | "-" | "#-" | "@?" | "@@")[], "=", "$eq", "<>", ">", "<", ">=", "<=", "$eq", "$ne", "$gt", "$gte", "$lt", "$lte", "$isDistinctFrom", "$isNotDistinctFrom", "$between", "$notBetween", "$in", "$nin"];
+export declare const ComplexFilterComparisonKeys: readonly ["$ilike", "$like", "$nilike", "$nlike", ...("@>" | "<@" | "?" | "?|" | "?&" | "||" | "-" | "#-" | "@?" | "@@")[], "=", "<>", ">", "<", ">=", "<=", "$eq", "$ne", "$gt", "$gte", "$lt", "$lte", "$isDistinctFrom", "$isNotDistinctFrom", "$between", "$notBetween", "$in", "$nin"];
 export declare const COMPLEX_FILTER_KEY: "$filter";
 /**
  * Complex filter that allows applying functions to columns

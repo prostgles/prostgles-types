@@ -7,13 +7,13 @@ export function getJSONBSchemaTSTypes(
   schema: JSONB.JSONBSchema,
   colOpts: ColOpts,
   outerLeading = "",
-  tables: TableSchema[]
+  tables: TableSchema[],
 ): string {
   return getJSONBTSTypes(
     tables,
     { ...(schema as JSONB.FieldTypeObj), nullable: colOpts.nullable },
     undefined,
-    outerLeading
+    outerLeading,
   );
 }
 
@@ -29,7 +29,7 @@ export const getJSONBTSTypes = (
   rawFieldType: JSONB.FieldType,
   isOneOf = false,
   innerLeading = "",
-  depth = 0
+  depth = 0,
 ): string => {
   const fieldType = getFieldTypeObj(rawFieldType);
   const nullType = fieldType.nullable ? `null | ` : "";
@@ -83,6 +83,7 @@ export const getJSONBTSTypes = (
       .replace("integer", "number")
       .replace("time", "string")
       .replace("timestamp", "string")
+      .replace("FileLike", `{ name: string; type: string; data: Blob; }`)
       .replace("Date", "string");
 
     if (fieldType.allowedValues && fieldType.type.endsWith("[]")) {

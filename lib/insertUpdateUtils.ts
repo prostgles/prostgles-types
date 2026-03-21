@@ -8,23 +8,13 @@ export type PartialBy<T, K extends keyof T | string> = Omit<T, K> &
   Partial<Pick<T, Extract<K, keyof T>>>;
 
 export const FUNC_ENDING_HINT = "$func" as const;
-type DataOrFuncValuesObject<ObjectType> = {
-  [Key in keyof ObjectType & string]:
-    | { [K in Key]: ObjectType[Key] }
-    | { [K in `${Key}.${typeof FUNC_ENDING_HINT}`]: Record<string, any[]> };
-};
 
-type PropertyValueIntersection<O> =
-  {
-    [K in keyof O]: (x: O[K]) => void;
-  }[keyof O] extends (x: infer I) => void ?
-    I
-  : never;
+type IsAny<T> = 0 extends 1 & T ? true : false;
+type RejectAny<T> = IsAny<T> extends true ? never : T;
 
-// export type UpsertDataToPGCast<TD> = PropertyValueIntersection<DataOrFuncValuesObject<Required<TD>>>;
-export type UpsertDataToPGCast<TD extends AnyObject = AnyObject> = {
+export type UpsertDataToPGCast<TD extends AnyObject = AnyObject> = RejectAny<{
   [K in keyof TD]: CastFromTSToPG<TD[K]> | Record<string, any[]>;
-};
+}>;
 
 type Schema = {
   col1: number;

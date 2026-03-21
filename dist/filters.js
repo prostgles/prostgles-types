@@ -4,7 +4,6 @@ exports.COMPLEX_FILTER_KEY = exports.ComplexFilterComparisonKeys = exports.EXIST
 const util_1 = require("./util");
 exports.CompareFilterKeys = [
     "=",
-    "$eq",
     "<>",
     ">",
     "<",

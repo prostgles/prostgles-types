@@ -909,6 +909,7 @@ export type ViewHandler<TD extends AnyObject = AnyObject, S extends DBSchema | v
 
 export type PartialLax<T = AnyObject> = Partial<T>;
 type UpsertDataToPGCastLax<T extends AnyObject> = PartialLax<UpsertDataToPGCast<T>>;
+
 export type InsertData<T extends AnyObject> = UpsertDataToPGCast<T> | UpsertDataToPGCast<T>[];
 
 export type DeleteParams<T extends AnyObject | void = void, S extends DBSchema | void = void> = {

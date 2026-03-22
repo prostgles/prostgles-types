@@ -200,7 +200,7 @@ describe("util func tests", () => {
       ffFunc(schemaFFilter);
 
       const dbo: DBOFullyTyped<GSchema> = 1 as any;
-      const funcData = { funcName: [] };
+      const funcData = { $merge: [] };
       const noRow = await dbo.tbl1.update({}, { col1: "" });
       //@ts-expect-error
       noRow.length;
@@ -223,7 +223,7 @@ describe("util func tests", () => {
       manyRows?.col1;
       manyRows?.at(0)?.col1;
 
-      const noIRow = await dbo.tbl1.insert({ col1: "", col2: { $func: [] } });
+      const noIRow = await dbo.tbl1.insert({ col1: "", col2: { $merge: [] } });
       //@ts-expect-error
       noIRow.length;
       //@ts-expect-error
@@ -265,21 +265,64 @@ describe("util func tests", () => {
        * Upsert data funcs
        */
       const gdw: InsertData<{ a: number; z: number }> = {
-        a: { dwa: [] },
-        z: { dwa: [] },
+        a: { $merge: [] },
+        z: { $merge: [] },
       };
       const gdwn: InsertData<{ a: number; z: number }> = {
         a: 2,
-        z: { dwa: [] },
+        z: { $merge: [] },
       };
       const gdw1: InsertData<{ a: number; z: number }> = { a: 1, z: 2 };
-      const gdw1Opt: InsertData<{ a: number; z?: number }> = { a: {}, z: 2 };
-      const gdw2: InsertData<{ a: number; z: number }> = { a: { dwa: [] }, z: { dwa: [] } };
+      const gdw1Opt: InsertData<{ a: number; z?: number }> = { a: 1, z: 2 };
+      const gdw2: InsertData<{ a: number; z: number }> = { a: { $merge: [] }, z: { $merge: [] } };
       //@ts-expect-error
       const missingKey: InsertData<{ a: number; z: number }> = { z: 1, z: { dwa: [] } };
       //@ts-expect-error
       const missingKey2: InsertData<{ a: number; z: number }> = { z: 1 };
       // ra(schema);
+
+      const dboFullyTyped = {} as DBOFullyTyped<{
+        mcp_server_tool_calls: {
+          columns: {
+            called_at?: string;
+            chat_id?: null | number;
+            duration: {
+              years?: number;
+              months?: number;
+              days?: number;
+              hours?: number;
+              minutes?: number;
+              seconds?: number;
+              milliseconds?: number;
+            };
+            error?: any;
+            id?: number;
+            input?: any;
+            mcp_server_config_id?: null | number;
+            mcp_server_name?: null | string;
+            mcp_tool_approval_requests_id?: null | number;
+            mcp_tool_name: string;
+            output?: any;
+            user_id?: null | string;
+          };
+        };
+      }>;
+
+      void dboFullyTyped.mcp_server_tool_calls.insert({
+        duration: { milliseconds: 2 },
+
+        /** TODO dissallow extra keys */
+        calledd: new Date(),
+
+        mcp_server_name: "serverName",
+        mcp_tool_name: "toolName",
+        input: undefined as Record<string, unknown> | undefined,
+        output: {},
+        error: null,
+        chat_id: 1,
+        user_id: "user.id",
+        mcp_tool_approval_requests_id: 1,
+      });
     };
   });
 });

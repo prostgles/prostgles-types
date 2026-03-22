@@ -8,13 +8,11 @@ export type PartialBy<T, K extends keyof T | string> = Omit<T, K> &
   Partial<Pick<T, Extract<K, keyof T>>>;
 
 export const FUNC_ENDING_HINT = "$func" as const;
-
-type IsAny<T> = 0 extends 1 & T ? true : false;
-type RejectAny<T> = IsAny<T> extends true ? never : T;
-
-export type UpsertDataToPGCast<TD extends AnyObject = AnyObject> = RejectAny<{
-  [K in keyof TD]: CastFromTSToPG<TD[K]> | Record<string, any[]>;
-}>;
+type NoExtraKeys<Shape, Input extends Shape> = Input &
+  Record<Exclude<keyof Input, keyof Shape>, never>;
+export type UpsertDataToPGCast<TD extends AnyObject> = {
+  [K in keyof TD]: CastFromTSToPG<TD[K]> | Record<"$merge", unknown[]>;
+};
 
 type Schema = {
   col1: number;
@@ -28,13 +26,13 @@ const basic: UpsertDataToPGCast<Schema> = {
 };
 
 const funcs: UpsertDataToPGCast<Schema> = {
-  col1: { func: [] },
-  col2: { func: [] },
+  col1: { $merge: [] },
+  col2: { $merge: [] },
 };
 
 const mixed: UpsertDataToPGCast<Schema> = {
   col1: 2,
-  col2: { func: [] },
+  col2: { $merge: [] },
 };
 
 const badKey: UpsertDataToPGCast<Schema> = {
@@ -44,5 +42,5 @@ const badKey: UpsertDataToPGCast<Schema> = {
 
 //@ts-expect-error
 const wrong: UpsertDataToPGCast<Schema> = {
-  col2: { func: [] },
+  col2: { $merge: [] },
 };

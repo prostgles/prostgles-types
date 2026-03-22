@@ -161,10 +161,27 @@ export type CompareFilter<T extends AllowedTSType> =
  */
 T | ExactlyOne<Record<(typeof CompareFilterKeys)[number], T>> | ExactlyOne<Record<(typeof CompareInFilterKeys)[number], T[]>> | ExactlyOne<Record<(typeof BetweenFilterKeys)[number], [T, T]>>;
 export type TextFilter = ExactlyOne<Record<(typeof TextFilterKeys)[number], string>> | ExactlyOne<Record<(typeof TextFilterFTSKeys)[number], FullTextSearchFilter>>;
+type Primitive = string | number | boolean | Date | null;
+export type JSONBFilter<T extends Record<string, unknown>> = {
+    /**
+     * Does the left JSON value contain the right JSON path/value entries at the top level?
+     */
+    "@>": T;
+} | {
+    /**
+     * Are the left JSON path/value entries contained at the top level within the right JSON value?
+     */
+    "<@": T;
+} | {
+    /**
+     * Does JSON path return any item for the specified JSON value
+     */
+    "@?": string;
+};
 /**
  * Filter operators for each PG data type
  */
-export type FilterDataType<T extends AllowedTSType> = T extends string ? TextFilter : T extends number ? CompareFilter<CastFromTSToPG<T>> : T extends boolean ? CompareFilter<CastFromTSToPG<T>> : T extends Date ? CompareFilter<CastFromTSToPG<T>> : T extends any[] ? ArrayFilter<T> : CompareFilter<T> | TextFilter | GeomFilter;
+export type FilterDataType<T extends AllowedTSType> = T extends string ? TextFilter : T extends number ? CompareFilter<CastFromTSToPG<T>> : T extends boolean ? CompareFilter<CastFromTSToPG<T>> : T extends Date ? CompareFilter<CastFromTSToPG<T>> : T extends Primitive[] ? ArrayFilter<T> : CompareFilter<T> | TextFilter | GeomFilter;
 /**
  * Column filter with operators
  * Multiple columns are combined with AND

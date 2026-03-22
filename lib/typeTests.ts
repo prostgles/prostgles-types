@@ -129,7 +129,7 @@ async () => {
   ffFunc(schemaFFilter);
 
   const dbo: DBOFullyTyped<GSchema> = 1 as any;
-  const funcData = { funcName: [] };
+  const funcData = { $merge: [] };
   const noRow = await dbo.tbl1.update({}, { col1: "" });
   //@ts-expect-error
   noRow.length;
@@ -152,7 +152,7 @@ async () => {
   manyRows?.col1;
   manyRows?.at(0)?.col1;
 
-  const noIRow = await dbo.tbl1.insert({ col1: "", col2: { $func: [] } });
+  const noIRow = await dbo.tbl1.insert({ col1: "", col2: { $merge: [] } });
   //@ts-expect-error
   noIRow.length;
   //@ts-expect-error
@@ -194,16 +194,16 @@ async () => {
    * Upsert data funcs
    */
   const gdw: InsertData<{ a: number; z: number }> = {
-    a: { dwa: [] },
-    z: { dwa: [] },
+    a: { $merge: [] },
+    z: { $merge: [] },
   };
   const gdwn: InsertData<{ a: number; z: number }> = {
     a: 2,
-    z: { dwa: [] },
+    z: { $merge: [] },
   };
   const gdw1: InsertData<{ a: number; z: number }> = { a: 1, z: 2 };
-  const gdw1Opt: InsertData<{ a: number; z?: number }> = { a: {}, z: 2 };
-  const gdw2: InsertData<{ a: number; z: number }> = { a: { dwa: [] }, z: { dwa: [] } };
+  const gdw1Opt: InsertData<{ a: number; z?: number }> = { a: 1, z: 2 };
+  const gdw2: InsertData<{ a: number; z: number }> = { a: { $merge: [] }, z: { $merge: [] } };
   //@ts-expect-error
   const missingKey: InsertData<{ a: number; z: number }> = { z: 1, z: { dwa: [] } };
   //@ts-expect-error

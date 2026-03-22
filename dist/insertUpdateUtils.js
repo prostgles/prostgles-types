@@ -7,12 +7,12 @@ const basic = {
     col2: "2",
 };
 const funcs = {
-    col1: { func: [] },
-    col2: { func: [] },
+    col1: { $merge: [] },
+    col2: { $merge: [] },
 };
 const mixed = {
     col1: 2,
-    col2: { func: [] },
+    col2: { $merge: [] },
 };
 const badKey = {
     //@ts-expect-error
@@ -20,6 +20,6 @@ const badKey = {
 };
 //@ts-expect-error
 const wrong = {
-    col2: { func: [] },
+    col2: { $merge: [] },
 };
 //# sourceMappingURL=insertUpdateUtils.js.map

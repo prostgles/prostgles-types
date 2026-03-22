@@ -193,7 +193,7 @@ describe("util func tests", () => {
         : Record<string, ViewHandler | TableHandler>;
 
       type TypedFFilter = FullFilter<GSchema["tbl1"]["columns"], GSchema>;
-      const schemaFFilter: TypedFFilter = { "col1.$eq": "dd" };
+      const schemaFFilter: TypedFFilter = { col1: "dd" };
       const fullFilter: FullFilter<void, void> = schemaFFilter;
 
       const ffFunc = (f: FullFilter<void, void>) => {};

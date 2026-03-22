@@ -281,18 +281,18 @@ export type TextFilter =
 
 type Primitive = string | number | boolean | Date | null;
 
-export type JSONBFilter<T extends Record<string, unknown>> =
+export type JSONBFilter<T extends Record<string, unknown> | readonly Record<string, unknown>[]> =
   | {
       /**
        * Does the left JSON value contain the right JSON path/value entries at the top level?
        */
-      "@>": T;
+      "@>": T extends readonly (infer U)[] ? Partial<U>[] : Partial<T>;
     }
   | {
       /**
        * Are the left JSON path/value entries contained at the top level within the right JSON value?
        */
-      "<@": T;
+      "<@": T extends readonly (infer U)[] ? Partial<U>[] : Partial<T>;
     }
   | {
       /**
@@ -310,6 +310,7 @@ export type FilterDataType<T extends AllowedTSType> =
   : T extends boolean ? CompareFilter<CastFromTSToPG<T>>
   : T extends Date ? CompareFilter<CastFromTSToPG<T>>
   : T extends Primitive[] ? ArrayFilter<T>
+  : T extends Record<string, unknown> | Record<string, unknown>[] ? JSONBFilter<T>
   : CompareFilter<T> | TextFilter | GeomFilter;
 
 /**
@@ -321,18 +322,8 @@ export type NormalFilter<T> = {
   [K in keyof Partial<T>]: CompareFilter<T[K]> | FilterDataType<T[K]>;
 } & Partial<ComplexFilter>;
 
-/**
- * Filters with shorthand notation for autocomplete convenience
- * Operator is inside the key: ` "{columnName}.{operator}": value`
- * @example: { "name.$ilike": 'abc' }
- */
-type ShorthandFilter<Obj extends Record<string, any>> = ValueOf<{
-  [K in KeyofString<Obj>]: Obj[K] extends string ? StringFilter<K, Required<Obj>[K]>
-  : BasicFilter<K, Required<Obj>[K]>;
-}>;
-
 /* Traverses object keys to make filter */
-export type FilterForObject<T extends AnyObject = AnyObject> = NormalFilter<T> | ShorthandFilter<T>;
+export type FilterForObject<T extends AnyObject = AnyObject> = NormalFilter<T>;
 
 export type ExistsFilter<S = void> = Partial<{
   [key in EXISTS_KEY]: S extends DBSchema ?

@@ -30,12 +30,12 @@ describe("filters", async () => {
     };
 
     const _f: FilterItem<RR> = {
-      "h.$eq": ["2"],
+      h: ["2"],
       z: "a",
     };
     const forcedFilter: FullFilter<RR, {}> = {
       // "h.$eq": ["2"]
-      $and: [{ "h.$eq": [] }, { h: { $containedBy: [] } }],
+      $and: [{ h: [] }, { h: { $containedBy: [] } }],
     };
     const _f2: FilterItem<RR> = {
       $filter: [{ $funcName: ["colname", "opts"] }, ">", 2],

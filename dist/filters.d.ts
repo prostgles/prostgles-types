@@ -128,19 +128,6 @@ export type ComplexFilter = Record<typeof COMPLEX_FILTER_KEY, [
     any?
 ]>;
 export type KeyofString<T> = keyof T & string;
-/**
- * Shortened filter operands
- */
-type BasicFilter<Field extends string, DataType extends any> = Partial<{
-    [K in Extract<(typeof CompareFilterKeys)[number], string> as `${Field}.${K}`]: CastFromTSToPG<DataType>;
-}> | Partial<{
-    [K in Extract<(typeof CompareInFilterKeys)[number], string> as `${Field}.${K}`]: CastFromTSToPG<DataType>[];
-}>;
-type StringFilter<Field extends string, DataType extends any> = BasicFilter<Field, DataType> & (Partial<{
-    [K in Extract<(typeof TextFilterKeys)[number], string> as `${Field}.${K}`]: DataType;
-}> | Partial<{
-    [K in Extract<(typeof TextFilterFTSKeys)[number], string> as `${Field}.${K}`]: any;
-}>);
 export type ValueOf<T> = T[keyof T];
 /**
  * Filter used for data synchronization, where all specified columns must match the given values.
@@ -162,16 +149,16 @@ export type CompareFilter<T extends AllowedTSType> =
 T | ExactlyOne<Record<(typeof CompareFilterKeys)[number], T>> | ExactlyOne<Record<(typeof CompareInFilterKeys)[number], T[]>> | ExactlyOne<Record<(typeof BetweenFilterKeys)[number], [T, T]>>;
 export type TextFilter = ExactlyOne<Record<(typeof TextFilterKeys)[number], string>> | ExactlyOne<Record<(typeof TextFilterFTSKeys)[number], FullTextSearchFilter>>;
 type Primitive = string | number | boolean | Date | null;
-export type JSONBFilter<T extends Record<string, unknown>> = {
+export type JSONBFilter<T extends Record<string, unknown> | readonly Record<string, unknown>[]> = {
     /**
      * Does the left JSON value contain the right JSON path/value entries at the top level?
      */
-    "@>": T;
+    "@>": T extends readonly (infer U)[] ? Partial<U>[] : Partial<T>;
 } | {
     /**
      * Are the left JSON path/value entries contained at the top level within the right JSON value?
      */
-    "<@": T;
+    "<@": T extends readonly (infer U)[] ? Partial<U>[] : Partial<T>;
 } | {
     /**
      * Does JSON path return any item for the specified JSON value
@@ -181,7 +168,7 @@ export type JSONBFilter<T extends Record<string, unknown>> = {
 /**
  * Filter operators for each PG data type
  */
-export type FilterDataType<T extends AllowedTSType> = T extends string ? TextFilter : T extends number ? CompareFilter<CastFromTSToPG<T>> : T extends boolean ? CompareFilter<CastFromTSToPG<T>> : T extends Date ? CompareFilter<CastFromTSToPG<T>> : T extends Primitive[] ? ArrayFilter<T> : CompareFilter<T> | TextFilter | GeomFilter;
+export type FilterDataType<T extends AllowedTSType> = T extends string ? TextFilter : T extends number ? CompareFilter<CastFromTSToPG<T>> : T extends boolean ? CompareFilter<CastFromTSToPG<T>> : T extends Date ? CompareFilter<CastFromTSToPG<T>> : T extends Primitive[] ? ArrayFilter<T> : T extends Record<string, unknown> | Record<string, unknown>[] ? JSONBFilter<T> : CompareFilter<T> | TextFilter | GeomFilter;
 /**
  * Column filter with operators
  * Multiple columns are combined with AND
@@ -190,15 +177,7 @@ export type FilterDataType<T extends AllowedTSType> = T extends string ? TextFil
 export type NormalFilter<T> = {
     [K in keyof Partial<T>]: CompareFilter<T[K]> | FilterDataType<T[K]>;
 } & Partial<ComplexFilter>;
-/**
- * Filters with shorthand notation for autocomplete convenience
- * Operator is inside the key: ` "{columnName}.{operator}": value`
- * @example: { "name.$ilike": 'abc' }
- */
-type ShorthandFilter<Obj extends Record<string, any>> = ValueOf<{
-    [K in KeyofString<Obj>]: Obj[K] extends string ? StringFilter<K, Required<Obj>[K]> : BasicFilter<K, Required<Obj>[K]>;
-}>;
-export type FilterForObject<T extends AnyObject = AnyObject> = NormalFilter<T> | ShorthandFilter<T>;
+export type FilterForObject<T extends AnyObject = AnyObject> = NormalFilter<T>;
 export type ExistsFilter<S = void> = Partial<{
     [key in EXISTS_KEY]: S extends DBSchema ? ExactlyOne<{
         [tname in KeyofString<S>]: FullFilter<S[tname]["columns"], S> | {

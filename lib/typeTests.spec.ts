@@ -54,7 +54,7 @@ describe("type tests", () => {
       };
 
       const f: FullFilter<{ a: string | null; num: number }, {}> = {
-        $and: [{ a: "d", num: { ">": 232 } }, { "num.$eq": 2 }],
+        $and: [{ a: "d", num: { ">": 232 } }, { num: 2 }],
       };
 
       if (tableHandler) {
@@ -66,7 +66,7 @@ describe("type tests", () => {
         newRow.h;
 
         // const f: FullFilter<Partial<{ a: number; s: string}>> = {  }
-        const row = await tableHandler.findOne?.({ "c.$nin": [2] }, { select: { b: 0 } });
+        const row = await tableHandler.findOne?.({ c: { $nin: [""] } }, { select: { b: 0 } });
         row?.c;
         row?.h;
 
@@ -85,16 +85,16 @@ describe("type tests", () => {
         //@ts-expect-error
         row.b;
 
-        const vals = await tableHandler.find?.({ "c.$nin": [2] }, { returnType: "values" });
+        const vals = await tableHandler.find?.({ c: { $nin: ["2"] } }, { returnType: "values" });
         const vals2 = await tableHandler.find?.(
-          { "c.$nin": [2] },
-          { select: { h: 1 }, returnType: "values" }
+          { c: { $nin: ["2"] } },
+          { select: { h: 1 }, returnType: "values" },
         );
         vals2[0]?.toExponential();
 
         const valsOptional = await tableHandler.find?.(
           {},
-          { select: { b: 1 }, returnType: "values" }
+          { select: { b: 1 }, returnType: "values" },
         );
         const starSelect = await tableHandler.find?.(
           {},
@@ -104,7 +104,7 @@ describe("type tests", () => {
               bd: { $max: ["b"] },
               joined_table: { ids: { $array_agg: ["joined_field"] } },
             },
-          }
+          },
         );
 
         starSelect[0]?.bd;
@@ -208,7 +208,7 @@ describe("type tests", () => {
 
       const s33: Select<{ a: number; c: string }, {}> = { a: 1, c: "$max" };
 
-      db.view1.find({ "c1.$in": ["2", new Date()] }, { select: { c1: 1, c2: 1 } });
+      db.view1.find({ c1: { $in: ["2", "new Date()"] } }, { select: { c1: 1, c2: 1 } });
       db.table1.insert({ c1: "2" }, { returning: { c1: 1, c2: "func", dwad: { dwada: [] } } });
 
       //@ts-expect-error

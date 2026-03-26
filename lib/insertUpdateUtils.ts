@@ -8,8 +8,7 @@ export type PartialBy<T, K extends keyof T | string> = Omit<T, K> &
   Partial<Pick<T, Extract<K, keyof T>>>;
 
 export const FUNC_ENDING_HINT = "$func" as const;
-type NoExtraKeys<Shape, Input extends Shape> = Input &
-  Record<Exclude<keyof Input, keyof Shape>, never>;
+
 export type UpsertDataToPGCast<TD extends AnyObject> = {
   [K in keyof TD]: CastFromTSToPG<TD[K]> | Record<"$merge", unknown[]>;
 };

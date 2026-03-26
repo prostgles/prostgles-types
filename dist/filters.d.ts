@@ -1,7 +1,5 @@
 import { DBSchema, RawJoinPath } from ".";
 import { ExactlyOne } from "./util";
-export type AllowedTSType = string | number | boolean | Date | unknown;
-export type AllowedTSTypes = AllowedTSType[];
 export declare const CompareFilterKeys: readonly ["=", "<>", ">", "<", ">=", "<=", "$eq", "$ne", "$gt", "$gte", "$lt", "$lte", "$isDistinctFrom", "$isNotDistinctFrom"];
 export declare const CompareInFilterKeys: readonly ["$in", "$nin"];
 export declare const BetweenFilterKeys: readonly ["$between", "$notBetween"];
@@ -73,6 +71,9 @@ export declare const TextFilterFTSKeys: readonly ["@@", "@>", "<@", "$contains",
 export declare const TextFilter_FullTextSearchFilterKeys: readonly ["to_tsquery", "plainto_tsquery", "phraseto_tsquery", "websearch_to_tsquery"];
 export type FullTextSearchFilter = ExactlyOne<Record<(typeof TextFilter_FullTextSearchFilterKeys)[number], string[]>>;
 export declare const ArrayFilterOperands: readonly ["@>", "<@", "=", "$eq", "$contains", "$containedBy", "&&", "$overlaps"];
+export type AllowedTSType = string | number | boolean | Date | unknown;
+export type AllowedTSTypes = AllowedTSType[];
+export type CastFromTSToPG<T extends AllowedTSType> = T extends number ? T | string : T extends string ? T | number | Date : T extends boolean ? T | string : T extends Date ? T | string : T;
 export type ArrayFilter<T extends AllowedTSType[]> = Record<(typeof ArrayFilterOperands)[number], T> | ExactlyOne<Record<(typeof ArrayFilterOperands)[number], T>>;
 /**
  * Makes bounding box from NW and SE points
@@ -105,7 +106,6 @@ export type GeomFilter =
 export declare const GeomFilterKeys: readonly ["~", "~=", "@", "|&>", "|>>", ">>", "=", "<<|", "<<", "&>", "&<|", "&<", "&&&", "&&"];
 export declare const GeomFilter_Funcs: readonly ["ST_MakeEnvelope", "st_makeenvelope", "ST_MakePolygon", "st_makepolygon"];
 export type AnyObject = Record<string, any>;
-export type CastFromTSToPG<T extends AllowedTSType> = T extends number ? T | string : T extends string ? T | number | Date : T extends boolean ? T | string : T extends Date ? T | string : T;
 export declare const EXISTS_KEYS: readonly ["$exists", "$notExists", "$existsJoined", "$notExistsJoined"];
 export type EXISTS_KEY = (typeof EXISTS_KEYS)[number];
 export declare const ComplexFilterComparisonKeys: readonly ["$ilike", "$like", "$nilike", "$nlike", ...("@>" | "<@" | "?" | "?|" | "?&" | "||" | "-" | "#-" | "@?" | "@@")[], "=", "<>", ">", "<", ">=", "<=", "$eq", "$ne", "$gt", "$gte", "$lt", "$lte", "$isDistinctFrom", "$isNotDistinctFrom", "$between", "$notBetween", "$in", "$nin"];

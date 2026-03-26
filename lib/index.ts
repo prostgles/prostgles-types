@@ -772,7 +772,7 @@ export type UpdateReturnType<
  * otherwise a single record will be returned.
  */
 export type InsertReturnType<
-  Data extends InsertData<AnyObject>,
+  Data extends AnyObject,
   O extends UpdateParams<TD, S>,
   TD extends AnyObject,
   S extends DBSchema | void = void,

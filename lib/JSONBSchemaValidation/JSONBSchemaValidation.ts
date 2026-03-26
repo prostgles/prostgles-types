@@ -115,7 +115,21 @@ const getPropertyValidationError = (
   if (nullable && value === null) return;
   if (optional && value === undefined) return;
   if (allowedValues) {
-    return `${path.join(".")} Allowed values are not supported for validation`;
+    if (typeof type !== "string") {
+      throw new Error("allowedValues is only supported for primitive types");
+    }
+
+    const isArrayType = type.endsWith("[]");
+    const valuesToTest = isArrayType && Array.isArray(value) ? value : [value];
+    const normalisedAllowedValues = allowedValues.map((v) => (isObject(v) ? v.value : v));
+    for (const [index, val] of valuesToTest.entries()) {
+      if (!normalisedAllowedValues.includes(val)) {
+        const pathInfo = isArrayType ? `${path.join(".")}[${index}]` : path.join(".");
+        return `${pathInfo} is of invalid type. Expecting ${normalisedAllowedValues
+          .map((v) => (typeof v === "string" ? JSON.stringify(v) : String(v)))
+          .join(" | ")} But got ${JSON.stringify(val)}`;
+      }
+    }
   }
   if (type) {
     if (isObject(type)) {

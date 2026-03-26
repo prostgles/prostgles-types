@@ -1,4 +1,4 @@
-import { AnyObject } from "../filters";
+import { AnyObject, type ValueOf } from "../filters";
 import { getKeys } from "../util";
 
 export type PrimitiveTypeMap = {
@@ -22,8 +22,9 @@ export type PrimitiveTypeMap = {
 /**
  * Provide more info for allowed values
  */
+export type AllowedValueType = null | number | string | boolean;
 type AllowedValueInfo = {
-  value: any;
+  value: AllowedValueType;
   label: string;
   subLabel?: string;
   /**
@@ -33,7 +34,11 @@ type AllowedValueInfo = {
 };
 
 export type PrimitiveOptions = {
-  allowedValues?: readonly any[] | any[] | readonly AllowedValueInfo[] | AllowedValueInfo[];
+  allowedValues?:
+    | readonly AllowedValueType[]
+    | AllowedValueType[]
+    | readonly AllowedValueInfo[]
+    | AllowedValueInfo[];
   /**
    * Optional MIME types that can be used with Blob or FileLike types.
    * @example

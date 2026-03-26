@@ -1,9 +1,6 @@
 import { DBSchema, RawJoinPath } from ".";
 import { ExactlyOne, getKeys } from "./util";
 
-export type AllowedTSType = string | number | boolean | Date | unknown;
-export type AllowedTSTypes = AllowedTSType[];
-
 export const CompareFilterKeys = [
   "=",
   "<>",
@@ -117,6 +114,18 @@ export const ArrayFilterOperands = [
   "&&",
   "$overlaps",
 ] as const;
+
+export type AllowedTSType = string | number | boolean | Date | unknown;
+export type AllowedTSTypes = AllowedTSType[];
+
+// PG will try to cast strings to appropriate type
+export type CastFromTSToPG<T extends AllowedTSType> =
+  T extends number ? T | string
+  : T extends string ? T | number | Date
+  : T extends boolean ? T | string
+  : T extends Date ? T | string
+  : T;
+
 export type ArrayFilter<T extends AllowedTSType[]> =
   | Record<(typeof ArrayFilterOperands)[number], T>
   | ExactlyOne<Record<(typeof ArrayFilterOperands)[number], T>>;
@@ -185,14 +194,6 @@ export const GeomFilter_Funcs = [
 ] as const;
 
 export type AnyObject = Record<string, any>;
-
-// PG will try to cast strings to appropriate type
-export type CastFromTSToPG<T extends AllowedTSType> =
-  T extends number ? T | string
-  : T extends string ? T | number | Date
-  : T extends boolean ? T | string
-  : T extends Date ? T | string
-  : T;
 
 export const EXISTS_KEYS = ["$exists", "$notExists", "$existsJoined", "$notExistsJoined"] as const;
 export type EXISTS_KEY = (typeof EXISTS_KEYS)[number];

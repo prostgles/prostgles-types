@@ -40,55 +40,55 @@ void describe("JSONBValidation", async () => {
       getJSONBObjectSchemaValidationError(schema.type, { ...obj, age: null }, "test"),
       {
         data: { ...obj, age: null },
-      }
+      },
     );
     assert.deepStrictEqual(
       getJSONBObjectSchemaValidationError(schema.type, { ...obj, age: 22.2 }, "test"),
       {
         error: "age is of invalid type. Expecting null | integer",
-      }
+      },
     );
     assert.deepStrictEqual(
       getJSONBObjectSchemaValidationError(
         schema.type,
         { ...obj, address: { ...obj.address, city: 22 } },
-        "test"
+        "test",
       ),
       {
         error: "address.city is of invalid type. Expecting string",
-      }
+      },
     );
     assert.deepStrictEqual(
       getJSONBObjectSchemaValidationError(
         schema.type,
         { ...obj, address: { ...obj.address, street_number: 22.22 } },
-        "test"
+        "test",
       ),
-      { error: "address.street_number is of invalid type. Expecting undefined | integer" }
+      { error: "address.street_number is of invalid type. Expecting undefined | integer" },
     );
     assert.deepStrictEqual(
       getJSONBObjectSchemaValidationError(
         schema.type,
         { ...obj, address: { ...obj.address, street_number: undefined } },
-        "test"
+        "test",
       ),
-      { data: { ...obj, address: { ...obj.address, street_number: undefined } } }
+      { data: { ...obj, address: { ...obj.address, street_number: undefined } } },
     );
     assert.deepStrictEqual(
       getJSONBObjectSchemaValidationError(
         schema.type,
         { ...obj, address: { ...obj.address, t: "c" } },
-        "test"
+        "test",
       ),
-      { data: { ...obj, address: { ...obj.address, t: "c" } } }
+      { data: { ...obj, address: { ...obj.address, t: "c" } } },
     );
     assert.deepStrictEqual(
       getJSONBObjectSchemaValidationError(
         schema.type,
         { ...obj, address: { ...obj.address, t: 2 } },
-        "test"
+        "test",
       ),
-      { error: 'address.t is of invalid type. Expecting undefined | "a" | "b" | "c"' }
+      { error: 'address.t is of invalid type. Expecting undefined | "a" | "b" | "c"' },
     );
   });
   await test("getJSONBObjectSchemaValidationError oneOf record", () => {
@@ -99,9 +99,9 @@ void describe("JSONBValidation", async () => {
           o: { optional: true, oneOf: ["number", "string[]"] },
         },
         { d: { a: true, b: 1 } },
-        "test"
+        "test",
       ),
-      { error: "d.b is of invalid type. Expecting boolean" }
+      { error: "d.b is of invalid type. Expecting boolean" },
     );
     assert.deepStrictEqual(
       getJSONBObjectSchemaValidationError(
@@ -110,9 +110,9 @@ void describe("JSONBValidation", async () => {
           o: { optional: true, oneOf: ["number", "string[]"] },
         },
         { d: { a: true, b: true }, o: false },
-        "test"
+        "test",
       ),
-      { error: "o is of invalid type. Expecting undefined | number | string[]" }
+      { error: "o is of invalid type. Expecting undefined | number | string[]" },
     );
     assert.deepStrictEqual(
       getJSONBObjectSchemaValidationError(
@@ -121,9 +121,9 @@ void describe("JSONBValidation", async () => {
           o: { optional: true, oneOf: ["number", "string[]"] },
         },
         { d: { a: true, b: true }, o: ["str"] },
-        "test"
+        "test",
       ),
-      { data: { d: { a: true, b: true }, o: ["str"] } }
+      { data: { d: { a: true, b: true }, o: ["str"] } },
     );
   });
 
@@ -225,23 +225,23 @@ void describe("JSONBValidation", async () => {
     // NaN and Infinity should fail for 'number' type
     assert.deepStrictEqual(
       getJSONBObjectSchemaValidationError(schema, { num: NaN, int: 1 }, "test"),
-      { error: "num is of invalid type. Expecting number" }
+      { error: "num is of invalid type. Expecting number" },
     );
 
     assert.deepStrictEqual(
       getJSONBObjectSchemaValidationError(schema, { num: Infinity, int: 1 }, "test"),
-      { error: "num is of invalid type. Expecting number" }
+      { error: "num is of invalid type. Expecting number" },
     );
 
     assert.deepStrictEqual(
       getJSONBObjectSchemaValidationError(schema, { num: -Infinity, int: 1 }, "test"),
-      { error: "num is of invalid type. Expecting number" }
+      { error: "num is of invalid type. Expecting number" },
     );
 
     // Valid numbers should pass
     assert.deepStrictEqual(
       getJSONBObjectSchemaValidationError(schema, { num: 0, int: 0 }, "test"),
-      { data: { num: 0, int: 0 } }
+      { data: { num: 0, int: 0 } },
     );
   });
 
@@ -357,7 +357,7 @@ void describe("JSONBValidation", async () => {
     const result4 = getJSONBObjectSchemaValidationError(
       schema,
       { name: "john", constructor: 123, __proto__: "malicious" },
-      "test"
+      "test",
     );
     assert.deepStrictEqual(result4, { error: "constructor is of invalid type. Expecting string" });
   });
@@ -372,7 +372,7 @@ void describe("JSONBValidation", async () => {
       JSON.parse(`{ 
           "constructor": "test", 
           "name": "john" 
-        }`)
+        }`),
     );
     assert.deepStrictEqual(result, { error: "__proto__ is missing but required" });
 
@@ -382,7 +382,7 @@ void describe("JSONBValidation", async () => {
           "constructor": "test", 
           "name": "john",
           "__proto__": "123"
-        }`)
+        }`),
     );
     assert.deepStrictEqual(result5, { error: "__proto__ is of invalid type. Expecting number" });
 
@@ -469,6 +469,32 @@ void describe("JSONBValidation", async () => {
     const resultInvalid = getJSONBObjectSchemaValidationError(schema, invalidInput, "test");
     assert.deepStrictEqual(resultInvalid, {
       error: "file is of invalid type. Expecting Blob",
+    });
+  });
+
+  await test("test allowedValues", () => {
+    const schema = {
+      status: { type: "string", allowedValues: ["active", "inactive"] },
+      statuses: { optional: true, type: "string[]", allowedValues: ["active", "inactive"] },
+    } as const;
+    const validInput = { status: "active" };
+    const invalidInput = { status: "pending" };
+
+    const resultValid = getJSONBObjectSchemaValidationError(schema, validInput, "test");
+    assert.deepStrictEqual(resultValid, { data: validInput });
+
+    const resultInvalid = getJSONBObjectSchemaValidationError(schema, invalidInput, "test");
+    assert.deepStrictEqual(resultInvalid, {
+      error: 'status is of invalid type. Expecting "active" | "inactive" But got "pending"',
+    });
+
+    const resultInvalidArray = getJSONBObjectSchemaValidationError(
+      schema,
+      { ...validInput, statuses: ["active", "pending"] },
+      "test",
+    );
+    assert.deepStrictEqual(resultInvalidArray, {
+      error: 'statuses[1] is of invalid type. Expecting "active" | "inactive" But got "pending"',
     });
   });
 });

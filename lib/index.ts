@@ -910,8 +910,6 @@ export type ViewHandler<TD extends AnyObject = AnyObject, S extends DBSchema | v
 export type PartialLax<T = AnyObject> = Partial<T>;
 type UpsertDataToPGCastLax<T extends AnyObject> = PartialLax<UpsertDataToPGCast<T>>;
 
-export type InsertData<T extends AnyObject> = UpsertDataToPGCast<T> | UpsertDataToPGCast<T>[];
-
 export type DeleteParams<T extends AnyObject | void = void, S extends DBSchema | void = void> = {
   returning?: Select<T, S>;
 } & Pick<CommonSelectParams, "returnType">;
@@ -946,10 +944,18 @@ export type TableHandler<
   /**
    * Inserts a new record into the table.
    */
-  insert: <P extends InsertParams<TD, S>, D extends InsertData<TD>>(
-    data: D,
+  insert: <P extends InsertParams<TD, S>>(
+    data: UpsertDataToPGCast<TD>,
     params?: P,
-  ) => Promise<InsertReturnType<D, P, TD, S>>;
+  ) => Promise<GetReturningReturnType<P, TD, S>>;
+
+  /**
+   * Inserts new records into the table.
+   */
+  insertMany: <P extends InsertParams<TD, S>>(
+    data: UpsertDataToPGCast<TD>[],
+    params?: P,
+  ) => Promise<GetReturningReturnType<P, TD, S>[]>;
 
   /**
    * Inserts or updates a record in the table.

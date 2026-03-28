@@ -6,7 +6,6 @@ import type {
   DBSchema,
   DeleteParams,
   FullFilter,
-  InsertData,
   Select,
   SelectParams,
   TableHandler,
@@ -181,7 +180,7 @@ describe("util func tests", () => {
 
       type TableDef = { h: number; b?: number; c?: number };
       const tableHandler: TableHandler<TableDef> = undefined as any;
-      tableHandler.insert({ h: 1, c: 2, "b.$func": { dwa: [] } });
+      tableHandler.insert({ h: 1, c: 2 });
 
       type DBOFullyTyped<Schema = void> =
         Schema extends DBSchema ?
@@ -236,7 +235,7 @@ describe("util func tests", () => {
 
       const irowFunc = await dbo.tbl1.insert({ col1: funcData, col2: "" }, { returning: "*" });
 
-      const irows = await dbo.tbl1.insert([{ col1: "", col2: "" }], { returning: "*" });
+      const irows = await dbo.tbl1.insertMany([{ col1: "", col2: "" }], { returning: "*" });
       //@ts-expect-error
       irows.col1;
       irows.length;
@@ -264,21 +263,24 @@ describe("util func tests", () => {
       /**
        * Upsert data funcs
        */
-      const gdw: InsertData<{ a: number; z: number }> = {
+      const gdw: UpsertDataToPGCast<{ a: number; z: number }> = {
         a: { $merge: [] },
         z: { $merge: [] },
       };
-      const gdwn: InsertData<{ a: number; z: number }> = {
+      const gdwn: UpsertDataToPGCast<{ a: number; z: number }> = {
         a: 2,
         z: { $merge: [] },
       };
-      const gdw1: InsertData<{ a: number; z: number }> = { a: 1, z: 2 };
-      const gdw1Opt: InsertData<{ a: number; z?: number }> = { a: 1, z: 2 };
-      const gdw2: InsertData<{ a: number; z: number }> = { a: { $merge: [] }, z: { $merge: [] } };
+      const gdw1: UpsertDataToPGCast<{ a: number; z: number }> = { a: 1, z: 2 };
+      const gdw1Opt: UpsertDataToPGCast<{ a: number; z?: number }> = { a: 1, z: 2 };
+      const gdw2: UpsertDataToPGCast<{ a: number; z: number }> = {
+        a: { $merge: [] },
+        z: { $merge: [] },
+      };
       //@ts-expect-error
-      const missingKey: InsertData<{ a: number; z: number }> = { z: 1, z: { dwa: [] } };
+      const missingKey: UpsertDataToPGCast<{ a: number; z: number }> = { z: 1, z: { dwa: [] } };
       //@ts-expect-error
-      const missingKey2: InsertData<{ a: number; z: number }> = { z: 1 };
+      const missingKey2: UpsertDataToPGCast<{ a: number; z: number }> = { z: 1 };
       // ra(schema);
 
       const dboFullyTyped = {} as DBOFullyTyped<{
@@ -311,7 +313,7 @@ describe("util func tests", () => {
       void dboFullyTyped.mcp_server_tool_calls.insert({
         duration: { milliseconds: 2 },
 
-        /** TODO dissallow extra keys */
+        //@ts-expect-error
         calledd: new Date(),
 
         mcp_server_name: "serverName",

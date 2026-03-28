@@ -54,6 +54,12 @@ export type DBTableSchema = {
      * fields that are nullable or with a default value are be optional
      */
     columns: AnyObject;
+    /**
+     * TODO: extract references and update InsertDataWithNested type to allow nested inserts based on the references
+     * Table names and their columns that reference the current table through foreign keys.
+     * used in nested inserts
+     */
+    referencedBy?: Record<string, string[]>;
 };
 export type DBSchema = {
     [tov_name: string]: DBTableSchema;
@@ -682,10 +688,10 @@ export type DeleteParams<T extends AnyObject | void = void, S extends DBSchema |
     returning?: Select<T, S>;
 } & Pick<CommonSelectParams, "returnType">;
 /**
- * TODO: pick only joined tables from schema
+ * TODO: pick only joined tables from schema AND exclude parent fkey columns from the nested data
  */
 type InsertDataWithNested<TD extends AnyObject, S extends DBSchema | void> = UpsertDataToPGCast<TD> & (S extends DBSchema ? {
-    [TableName in keyof S]?: InsertDataWithNested<S[TableName]["columns"], S>[];
+    [TableName in keyof S]?: Partial<InsertDataWithNested<S[TableName]["columns"], S>>[];
 } : {});
 /**
  * Methods for interacting with a table

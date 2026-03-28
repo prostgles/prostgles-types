@@ -1,4 +1,33 @@
-import type { CommonSelect, DBSchema } from ".";
+import type { AnyObject, CommonSelect, DBSchema, SelectFunction } from ".";
+
+type Expand<T> = T extends infer O ? { [K in keyof O]: O[K] } : never;
+type TableCols<S extends DBSchema, K extends keyof S> = Required<S[K]["columns"]>;
+
+type JoinSelectResult<S extends DBSchema, K extends keyof S, V> =
+  V extends "*" ? TableCols<S, K>[]
+  : V extends Record<string, any> ? ParseSelectObject<V, TableCols<S, K>, S>[]
+  : never;
+
+export type ParseSelectObject<Sel, TD extends AnyObject, S extends DBSchema> = Expand<
+  (Sel extends { "*": 1 } ? Required<TD> : {}) & {
+    [K in keyof Sel as K extends "*" ? never
+    : K extends keyof TD ?
+      Sel[K] extends 1 | SelectFunction ?
+        K
+      : never
+    : K extends keyof S ? K
+    : Sel[K] extends SelectFunction ?
+      K // <-- computed alias like "bd"
+    : never]: K extends keyof TD ?
+      Sel[K] extends SelectFunction ?
+        any
+      : Required<TD>[K]
+    : K extends keyof S ? JoinSelectResult<S, K, Sel[K]>
+    : Sel[K] extends SelectFunction ?
+      any // <-- type of computed field
+    : never;
+  }
+>;
 
 type JoinSelect<S extends DBSchema, ParentK extends keyof S> = Partial<{
   [K in keyof Omit<S, ParentK>]: SelectV2<Omit<S, ParentK>, K>;
@@ -83,6 +112,29 @@ const joinedResult = {
   },
 } satisfies SelectV2<S, "table1">;
 
-// const data: SelectV2ReturnType<S, "table1", ["c2"]> = {
-//   c1: "1",
-// };
+const result: ParseSelectObject<
+  { "*": 1; hehe: { $func: [] }; table2: { c1: 1; c2: 1 } },
+  S["table1"]["columns"],
+  S
+> = {
+  c1: "string",
+  c2: 1,
+  hehe: 3,
+  table2: [
+    {
+      c1: "string",
+      c2: 1,
+    },
+  ],
+};
+
+const result2: ParseSelectObject<{ "*": 1; table2: { "*": 1 } }, S["table1"]["columns"], S> = {
+  c1: "string",
+  c2: 1,
+  table2: [
+    {
+      c1: "string",
+      c2: 1,
+    },
+  ],
+};

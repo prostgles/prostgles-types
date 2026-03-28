@@ -3,6 +3,7 @@ import { FileColumnConfig } from "./files";
 import { AnyObject, ComplexFilter, FullFilter, ValueOf } from "./filters";
 import type { UpsertDataToPGCast } from "./insertUpdateUtils";
 import { JSONB } from "./JSONBSchemaValidation/JSONBSchema";
+import type { ParseSelectObject } from "./selectTypesV2";
 import { getKeys, isDefined } from "./util";
 import { includes } from "./utilFuncs/includes";
 export const _PG_strings = [
@@ -915,6 +916,19 @@ export type DeleteParams<T extends AnyObject | void = void, S extends DBSchema |
 } & Pick<CommonSelectParams, "returnType">;
 
 /**
+ * TODO: pick only joined tables from schema
+ */
+type InsertDataWithNested<
+  TD extends AnyObject,
+  S extends DBSchema | void,
+> = UpsertDataToPGCast<TD> &
+  (S extends DBSchema ?
+    {
+      [TableName in keyof S]?: InsertDataWithNested<S[TableName]["columns"], S>[];
+    }
+  : {});
+
+/**
  * Methods for interacting with a table
  * - On client-side some methods are restricted (and undefined) based on publish rules on the server
  */
@@ -945,7 +959,7 @@ export type TableHandler<
    * Inserts a new record into the table.
    */
   insert: <P extends InsertParams<TD, S>>(
-    data: UpsertDataToPGCast<TD>,
+    data: InsertDataWithNested<TD, S>,
     params?: P,
   ) => Promise<GetReturningReturnType<P, TD, S>>;
 
@@ -953,7 +967,7 @@ export type TableHandler<
    * Inserts new records into the table.
    */
   insertMany: <P extends InsertParams<TD, S>>(
-    data: UpsertDataToPGCast<TD>[],
+    data: InsertDataWithNested<TD, S>[],
     params?: P,
   ) => Promise<GetReturningReturnType<P, TD, S>[]>;
 

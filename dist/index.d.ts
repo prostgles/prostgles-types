@@ -682,6 +682,12 @@ export type DeleteParams<T extends AnyObject | void = void, S extends DBSchema |
     returning?: Select<T, S>;
 } & Pick<CommonSelectParams, "returnType">;
 /**
+ * TODO: pick only joined tables from schema
+ */
+type InsertDataWithNested<TD extends AnyObject, S extends DBSchema | void> = UpsertDataToPGCast<TD> & (S extends DBSchema ? {
+    [TableName in keyof S]?: InsertDataWithNested<S[TableName]["columns"], S>[];
+} : {});
+/**
  * Methods for interacting with a table
  * - On client-side some methods are restricted (and undefined) based on publish rules on the server
  */
@@ -699,11 +705,11 @@ export type TableHandler<TD extends AnyObject = AnyObject, S extends DBSchema | 
     /**
      * Inserts a new record into the table.
      */
-    insert: <P extends InsertParams<TD, S>>(data: UpsertDataToPGCast<TD>, params?: P) => Promise<GetReturningReturnType<P, TD, S>>;
+    insert: <P extends InsertParams<TD, S>>(data: InsertDataWithNested<TD, S>, params?: P) => Promise<GetReturningReturnType<P, TD, S>>;
     /**
      * Inserts new records into the table.
      */
-    insertMany: <P extends InsertParams<TD, S>>(data: UpsertDataToPGCast<TD>[], params?: P) => Promise<GetReturningReturnType<P, TD, S>[]>;
+    insertMany: <P extends InsertParams<TD, S>>(data: InsertDataWithNested<TD, S>[], params?: P) => Promise<GetReturningReturnType<P, TD, S>[]>;
     /**
      * Inserts or updates a record in the table.
      * - If a record matching the `filter` exists, it updates the record.

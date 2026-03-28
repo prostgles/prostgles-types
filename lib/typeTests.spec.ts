@@ -208,7 +208,10 @@ describe("type tests", () => {
 
       const s33: Select<{ a: number; c: string }, {}> = { a: 1, c: "$max" };
 
-      db.view1.find({ c1: { $in: ["2", "new Date()"] } }, { select: { c1: 1, c2: 1 } });
+      db.view1.find({}, { select: { c1: 1, c2: 1, table1: "*" } }).then((data) => {
+        data[0]?.c1 satisfies string | undefined;
+        data[0]?.c2 satisfies number | undefined;
+      });
       db.table1.insert({ c1: "2" }, { returning: { c1: 1, c2: "func", dwad: { dwada: [] } } });
 
       //@ts-expect-error

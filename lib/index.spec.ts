@@ -325,6 +325,37 @@ describe("util func tests", () => {
         user_id: "user.id",
         mcp_tool_approval_requests_id: 1,
       });
+
+      void dboFullyTyped.mcp_server_tool_calls.insert({
+        duration: { milliseconds: 2 },
+
+        mcp_server_name: "serverName",
+        mcp_tool_name: "toolName",
+        input: undefined as Record<string, unknown> | undefined,
+        output: {},
+        error: null,
+        chat_id: 1,
+        user_id: "user.id",
+        mcp_tool_approval_requests_id: 1,
+
+        mcp_server_tool_calls: [
+          {
+            duration: { milliseconds: 2 },
+
+            //@ts-expect-error
+            calledd: new Date(),
+
+            mcp_server_name: "serverName",
+            mcp_tool_name: "toolName",
+            input: undefined as Record<string, unknown> | undefined,
+            output: {},
+            error: null,
+            chat_id: 1,
+            user_id: "user.id",
+            mcp_tool_approval_requests_id: 1,
+          },
+        ],
+      });
     };
   });
 });

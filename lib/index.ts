@@ -419,7 +419,7 @@ export const getAllowedTableMethods = ({ publishInfo }: Pick<TableInfo, "publish
       commandCounts.delete(cmd);
     }
   });
-  return Array.from(allowedCommands.keys());
+  return Array.from(commandCounts.keys());
 };
 
 export type RequiredNestedInsert = {

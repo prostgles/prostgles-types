@@ -111,7 +111,7 @@ const getAllowedTableMethods = ({ publishInfo }) => {
             commandCounts.delete(cmd);
         }
     });
-    return Array.from(allowedCommands.keys());
+    return Array.from(commandCounts.keys());
 };
 exports.getAllowedTableMethods = getAllowedTableMethods;
 exports.JOIN_KEYS = ["$innerJoin", "$leftJoin"];

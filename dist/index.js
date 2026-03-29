@@ -152,17 +152,7 @@ exports.SQL_COMMAND_TABLE_METHODS = {
     schema: ["getColumns", "getInfo"],
     insert: ["insert", "insertMany", "upsert"],
     update: ["update", "upsert", "updateBatch"],
-    select: [
-        "getColumns",
-        "getInfo",
-        "findOne",
-        "find",
-        "count",
-        "size",
-        "subscribe",
-        "subscribeOne",
-        "sync",
-    ],
+    select: ["findOne", "find", "count", "size", "subscribe", "subscribeOne", "sync"],
     delete: ["delete", "remove"],
 };
 const getPossibleNestedInsert = (column, schema, silent = true) => {

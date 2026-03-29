@@ -919,7 +919,7 @@ export declare const SQL_COMMAND_TABLE_METHODS: {
     readonly schema: readonly ["getColumns", "getInfo"];
     readonly insert: readonly ["insert", "insertMany", "upsert"];
     readonly update: readonly ["update", "upsert", "updateBatch"];
-    readonly select: readonly ["getColumns", "getInfo", "findOne", "find", "count", "size", "subscribe", "subscribeOne", "sync"];
+    readonly select: readonly ["findOne", "find", "count", "size", "subscribe", "subscribeOne", "sync"];
     readonly delete: readonly ["delete", "remove"];
 };
 export type TableSchema = {

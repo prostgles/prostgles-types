@@ -123,7 +123,6 @@ exports.SQL_COMMAND_TABLE_METHODS = {
         "subscribe",
         "subscribeOne",
         "sync",
-        "unsync",
     ],
     delete: ["delete", "remove"],
 };

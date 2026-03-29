@@ -3,7 +3,7 @@ import { FileColumnConfig } from "./files";
 import { AnyObject, ComplexFilter, FullFilter, ValueOf } from "./filters";
 import type { UpsertDataToPGCast } from "./insertUpdateUtils";
 import { JSONB } from "./JSONBSchemaValidation/JSONBSchema";
-import type { SyncConfig } from "./replication";
+import { type SyncTableInfo } from "./util";
 export declare const _PG_strings: readonly ["bpchar", "char", "varchar", "text", "citext", "uuid", "bytea", "time", "timetz", "interval", "name", "cidr", "inet", "macaddr", "macaddr8", "int4range", "int8range", "numrange", "tsvector"];
 export declare const _PG_numbers_num: readonly ["int2", "int4", "float4", "float8", "oid"];
 export declare const _PG_numbers_str: readonly ["int8", "numeric", "money"];
@@ -238,6 +238,7 @@ export type TableInfo = {
      */
     fileTableName?: string;
     /**
+     * @deprecated
      * Used for getColumns in cases where the columns are dynamic based on the request.
      * See dynamicFields from Update rules
      */
@@ -253,26 +254,27 @@ export type TableInfo = {
      * Column groups where at least a column is not allowed to be viewed (selected) are omitted.
      */
     uniqueColumnGroups?: string[][];
-    /**
-     * Controlled through the publish.table_name.insert config
-     * If defined then any insert on this table must also contain nested inserts for the specified tables that reference this table
-     */
-    requiredNestedInserts?: RequiredNestedInsert[];
-    /**
-     * Controlled through the publish.table_name.insert config
-     * If defined then nested inserts for the specified tables are allowed (but not required)
-     */
-    allowedNestedInserts?: string[];
     publishInfo: {
         select?: {
-            disabledMethods?: Record<(typeof SQL_COMMAND_TABLE_METHODS.select)[number], 1>;
+            disabledMethods?: Partial<Record<(typeof SQL_COMMAND_TABLE_METHODS.select)[number], 1>>;
         };
         update?: {
-            disabledMethods?: Record<(typeof SQL_COMMAND_TABLE_METHODS.select)[number], 1>;
+            disabledMethods?: Partial<Record<(typeof SQL_COMMAND_TABLE_METHODS.update)[number], 1>>;
         };
-        insert?: {};
+        insert?: {
+            /**
+             * Controlled through the publish.table_name.insert config
+             * If defined then any insert on this table must also contain nested inserts for the specified tables that reference this table
+             */
+            requiredNestedInserts?: RequiredNestedInsert[];
+            /**
+             * Controlled through the publish.table_name.insert config
+             * If defined then nested inserts for the specified tables are allowed (but not required)
+             */
+            allowedNestedInserts?: string[];
+        };
         delete?: {};
-        sync?: SyncConfig;
+        sync?: SyncTableInfo;
     };
 };
 type RequiredNestedInsert = {
@@ -912,7 +914,7 @@ export type AuthGuardLocationResponse = {
 export declare const SQL_COMMAND_TABLE_METHODS: {
     readonly insert: readonly ["insert", "insertMany", "upsert"];
     readonly update: readonly ["update", "upsert", "updateBatch"];
-    readonly select: readonly ["getColumns", "getInfo", "findOne", "find", "count", "size", "subscribe", "subscribeOne", "sync", "unsync"];
+    readonly select: readonly ["getColumns", "getInfo", "findOne", "find", "count", "size", "subscribe", "subscribeOne", "sync"];
     readonly delete: readonly ["delete", "remove"];
 };
 export type TableSchema = {

@@ -4,7 +4,7 @@ import { AnyObject, ComplexFilter, FullFilter, ValueOf } from "./filters";
 import type { UpsertDataToPGCast } from "./insertUpdateUtils";
 import { JSONB } from "./JSONBSchemaValidation/JSONBSchema";
 import type { SyncConfig } from "./replication";
-import { getKeys, isDefined } from "./util";
+import { getKeys, isDefined, type SyncTableInfo } from "./util";
 import { includes } from "./utilFuncs/includes";
 export const _PG_strings = [
   "bpchar",
@@ -338,6 +338,7 @@ export type TableInfo = {
   fileTableName?: string;
 
   /**
+   * @deprecated
    * Used for getColumns in cases where the columns are dynamic based on the request.
    * See dynamicFields from Update rules
    */
@@ -356,28 +357,28 @@ export type TableInfo = {
    */
   uniqueColumnGroups?: string[][];
 
-  /**
-   * Controlled through the publish.table_name.insert config
-   * If defined then any insert on this table must also contain nested inserts for the specified tables that reference this table
-   */
-  requiredNestedInserts?: RequiredNestedInsert[];
-
-  /**
-   * Controlled through the publish.table_name.insert config
-   * If defined then nested inserts for the specified tables are allowed (but not required)
-   */
-  allowedNestedInserts?: string[];
-
   publishInfo: {
     select?: {
-      disabledMethods?: Record<(typeof SQL_COMMAND_TABLE_METHODS.select)[number], 1>;
+      disabledMethods?: Partial<Record<(typeof SQL_COMMAND_TABLE_METHODS.select)[number], 1>>;
     };
     update?: {
-      disabledMethods?: Record<(typeof SQL_COMMAND_TABLE_METHODS.select)[number], 1>;
+      disabledMethods?: Partial<Record<(typeof SQL_COMMAND_TABLE_METHODS.update)[number], 1>>;
     };
-    insert?: {};
+    insert?: {
+      /**
+       * Controlled through the publish.table_name.insert config
+       * If defined then any insert on this table must also contain nested inserts for the specified tables that reference this table
+       */
+      requiredNestedInserts?: RequiredNestedInsert[];
+
+      /**
+       * Controlled through the publish.table_name.insert config
+       * If defined then nested inserts for the specified tables are allowed (but not required)
+       */
+      allowedNestedInserts?: string[];
+    };
     delete?: {};
-    sync?: SyncConfig;
+    sync?: SyncTableInfo;
   };
 };
 
@@ -1293,7 +1294,6 @@ export const SQL_COMMAND_TABLE_METHODS = {
     "subscribe",
     "subscribeOne",
     "sync",
-    "unsync",
   ],
   delete: ["delete", "remove"],
 } as const;

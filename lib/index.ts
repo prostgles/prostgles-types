@@ -3,7 +3,6 @@ import { FileColumnConfig } from "./files";
 import { AnyObject, ComplexFilter, FullFilter, ValueOf } from "./filters";
 import type { UpsertDataToPGCast } from "./insertUpdateUtils";
 import { JSONB } from "./JSONBSchemaValidation/JSONBSchema";
-import type { ParseSelectObject } from "./selectTypesV2";
 import { getKeys, isDefined } from "./util";
 import { includes } from "./utilFuncs/includes";
 export const _PG_strings = [
@@ -284,9 +283,8 @@ export type ValidatedColumnInfo = ColumnInfo & {
   delete: boolean;
 };
 
-export type DBSchemaTable = {
+export type DBSchemaTable = TableInfo & {
   name: string;
-  info: TableInfo;
   columns: ValidatedColumnInfo[];
 };
 
@@ -349,9 +347,7 @@ export type TableInfo = {
   /**
    * Additional table info provided through TableConfig
    */
-  info?: {
-    label?: string;
-  };
+  label?: string;
 
   /**
    * List of unique column indexes/constraints.
@@ -364,6 +360,16 @@ export type TableInfo = {
    * If defined then any insert on this table must also contain nested inserts for the specified tables that reference this table
    */
   requiredNestedInserts?: RequiredNestedInsert[];
+
+  /**
+   * Controlled through the publish.table_name.insert config
+   * If defined then nested inserts for the specified tables are allowed (but not required)
+   */
+  allowedNestedInserts?: string[];
+
+  allowedMethods: Partial<{
+    [K in keyof typeof SQL_COMMAND_TABLE_METHODS]: "*" | (typeof SQL_COMMAND_TABLE_METHODS)[K];
+  }>;
 };
 
 type RequiredNestedInsert = {
@@ -1265,24 +1271,23 @@ export type AuthGuardLocationResponse = {
   shouldReload: boolean;
 };
 
-export const RULE_METHODS = {
-  getColumns: ["getColumns"],
-  getInfo: ["getInfo"],
-  insert: ["insert", "upsert"],
+export const SQL_COMMAND_TABLE_METHODS = {
+  insert: ["insert", "insertMany", "upsert"],
   update: ["update", "upsert", "updateBatch"],
-  select: ["findOne", "find", "count", "size"],
+  select: [
+    "getColumns",
+    "getInfo",
+    "findOne",
+    "find",
+    "count",
+    "size",
+    "subscribe",
+    "subscribeOne",
+    "sync",
+    "unsync",
+  ],
   delete: ["delete", "remove"],
-  sync: ["sync", "unsync"],
-  subscribe: ["unsubscribe", "subscribe", "subscribeOne"],
 } as const;
-
-export type MethodKey = (typeof RULE_METHODS)[keyof typeof RULE_METHODS][number];
-export type TableSchemaForClient = Record<
-  string,
-  Partial<
-    Record<MethodKey, MethodKey extends "insert" ? { allowedNestedInserts?: string[] } : AnyObject>
-  >
->;
 
 /* Schema */
 export type TableSchema = {
@@ -1338,7 +1343,6 @@ export type ClientSchema = {
   err?: string;
   tableSchemaErrors: TableSchemaErrors;
   tableSchema: DBSchemaTable[];
-  schema: TableSchemaForClient;
   methods: {
     name: string;
     description?: string;

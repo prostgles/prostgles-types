@@ -193,9 +193,8 @@ export type ValidatedColumnInfo = ColumnInfo & {
      */
     delete: boolean;
 };
-export type DBSchemaTable = {
+export type DBSchemaTable = TableInfo & {
     name: string;
-    info: TableInfo;
     columns: ValidatedColumnInfo[];
 };
 type FileTableConfig = {
@@ -247,9 +246,7 @@ export type TableInfo = {
     /**
      * Additional table info provided through TableConfig
      */
-    info?: {
-        label?: string;
-    };
+    label?: string;
     /**
      * List of unique column indexes/constraints.
      * Column groups where at least a column is not allowed to be viewed (selected) are omitted.
@@ -260,6 +257,14 @@ export type TableInfo = {
      * If defined then any insert on this table must also contain nested inserts for the specified tables that reference this table
      */
     requiredNestedInserts?: RequiredNestedInsert[];
+    /**
+     * Controlled through the publish.table_name.insert config
+     * If defined then nested inserts for the specified tables are allowed (but not required)
+     */
+    allowedNestedInserts?: string[];
+    allowedMethods: Partial<{
+        [K in keyof typeof SQL_COMMAND_TABLE_METHODS]: "*" | (typeof SQL_COMMAND_TABLE_METHODS)[K];
+    }>;
 };
 type RequiredNestedInsert = {
     ftable: string;
@@ -895,20 +900,12 @@ export type AuthGuardLocation = {
 export type AuthGuardLocationResponse = {
     shouldReload: boolean;
 };
-export declare const RULE_METHODS: {
-    readonly getColumns: readonly ["getColumns"];
-    readonly getInfo: readonly ["getInfo"];
-    readonly insert: readonly ["insert", "upsert"];
+export declare const SQL_COMMAND_TABLE_METHODS: {
+    readonly insert: readonly ["insert", "insertMany", "upsert"];
     readonly update: readonly ["update", "upsert", "updateBatch"];
-    readonly select: readonly ["findOne", "find", "count", "size"];
+    readonly select: readonly ["getColumns", "getInfo", "findOne", "find", "count", "size", "subscribe", "subscribeOne", "sync", "unsync"];
     readonly delete: readonly ["delete", "remove"];
-    readonly sync: readonly ["sync", "unsync"];
-    readonly subscribe: readonly ["unsubscribe", "subscribe", "subscribeOne"];
 };
-export type MethodKey = (typeof RULE_METHODS)[keyof typeof RULE_METHODS][number];
-export type TableSchemaForClient = Record<string, Partial<Record<MethodKey, MethodKey extends "insert" ? {
-    allowedNestedInserts?: string[];
-} : AnyObject>>>;
 export type TableSchema = {
     schema: string;
     name: string;
@@ -956,7 +953,6 @@ export type ClientSchema = {
     err?: string;
     tableSchemaErrors: TableSchemaErrors;
     tableSchema: DBSchemaTable[];
-    schema: TableSchemaForClient;
     methods: {
         name: string;
         description?: string;

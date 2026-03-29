@@ -388,6 +388,9 @@ export const getAllowedTableMethods = ({ publishInfo }: Pick<TableInfo, "publish
       SQL_COMMAND_TABLE_METHODS.schema
     : []),
     ...SQL_COMMAND_TABLE_METHODS.select.filter((cmd) => {
+      if (cmd === "sync") {
+        return publishInfo.select?.syncConfig !== undefined;
+      }
       return (
         publishInfo.select && !Object.keys(publishInfo.select.disabledMethods ?? {}).includes(cmd)
       );

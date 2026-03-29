@@ -85,6 +85,9 @@ const getAllowedTableMethods = ({ publishInfo }) => {
             exports.SQL_COMMAND_TABLE_METHODS.schema
             : []),
         ...exports.SQL_COMMAND_TABLE_METHODS.select.filter((cmd) => {
+            if (cmd === "sync") {
+                return publishInfo.select?.syncConfig !== undefined;
+            }
             return (publishInfo.select && !Object.keys(publishInfo.select.disabledMethods ?? {}).includes(cmd));
         }),
         ...exports.SQL_COMMAND_TABLE_METHODS.update.filter((cmd) => {

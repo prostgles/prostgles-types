@@ -384,6 +384,9 @@ export type TableInfo = {
 
 export const getAllowedTableMethods = ({ publishInfo }: Pick<TableInfo, "publishInfo">) => {
   const allowedCommands = [
+    ...(publishInfo.select || publishInfo.insert || publishInfo.delete || publishInfo.update ?
+      SQL_COMMAND_TABLE_METHODS.schema
+    : []),
     ...SQL_COMMAND_TABLE_METHODS.select.filter((cmd) => {
       return (
         publishInfo.select && !Object.keys(publishInfo.select.disabledMethods ?? {}).includes(cmd)
@@ -1319,6 +1322,10 @@ export type AuthGuardLocationResponse = {
 };
 
 export const SQL_COMMAND_TABLE_METHODS = {
+  /**
+   * Schema is allowed if any of the other commands are allowed
+   */
+  schema: ["getColumns", "getInfo"],
   insert: ["insert", "insertMany", "upsert"],
   update: ["update", "upsert", "updateBatch"],
   select: [

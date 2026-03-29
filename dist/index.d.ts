@@ -277,7 +277,7 @@ export type TableInfo = {
         delete?: {};
     };
 };
-export declare const getAllowedTableMethods: ({ publishInfo }: Pick<TableInfo, "publishInfo">) => ("insert" | "update" | "delete" | "find" | "insertMany" | "upsert" | "updateBatch" | "getColumns" | "getInfo" | "findOne" | "count" | "size" | "subscribe" | "subscribeOne" | "sync" | "remove")[];
+export declare const getAllowedTableMethods: ({ publishInfo }: Pick<TableInfo, "publishInfo">) => ("insert" | "update" | "delete" | "find" | "getColumns" | "getInfo" | "insertMany" | "upsert" | "updateBatch" | "findOne" | "count" | "size" | "subscribe" | "subscribeOne" | "sync" | "remove")[];
 export type RequiredNestedInsert = {
     ftable: string;
     minRows?: number;
@@ -913,6 +913,10 @@ export type AuthGuardLocationResponse = {
     shouldReload: boolean;
 };
 export declare const SQL_COMMAND_TABLE_METHODS: {
+    /**
+     * Schema is allowed if any of the other commands are allowed
+     */
+    readonly schema: readonly ["getColumns", "getInfo"];
     readonly insert: readonly ["insert", "insertMany", "upsert"];
     readonly update: readonly ["update", "upsert", "updateBatch"];
     readonly select: readonly ["getColumns", "getInfo", "findOne", "find", "count", "size", "subscribe", "subscribeOne", "sync"];

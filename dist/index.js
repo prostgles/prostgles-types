@@ -81,6 +81,9 @@ const postgresToTsType = (udt_data_type) => {
 exports.postgresToTsType = postgresToTsType;
 const getAllowedTableMethods = ({ publishInfo }) => {
     const allowedCommands = [
+        ...(publishInfo.select || publishInfo.insert || publishInfo.delete || publishInfo.update ?
+            exports.SQL_COMMAND_TABLE_METHODS.schema
+            : []),
         ...exports.SQL_COMMAND_TABLE_METHODS.select.filter((cmd) => {
             return (publishInfo.select && !Object.keys(publishInfo.select.disabledMethods ?? {}).includes(cmd));
         }),
@@ -143,6 +146,10 @@ exports.CHANNELS = {
     _preffix: preffix,
 };
 exports.SQL_COMMAND_TABLE_METHODS = {
+    /**
+     * Schema is allowed if any of the other commands are allowed
+     */
+    schema: ["getColumns", "getInfo"],
     insert: ["insert", "insertMany", "upsert"],
     update: ["update", "upsert", "updateBatch"],
     select: [

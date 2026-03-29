@@ -383,7 +383,7 @@ export type TableInfo = {
 };
 
 export const getAllowedTableMethods = ({ publishInfo }: Pick<TableInfo, "publishInfo">) => {
-  const allowedCommands = [
+  let allowedCommands = [
     ...(publishInfo.select || publishInfo.insert || publishInfo.delete || publishInfo.update ?
       SQL_COMMAND_TABLE_METHODS.schema
     : []),
@@ -413,16 +413,13 @@ export const getAllowedTableMethods = ({ publishInfo }: Pick<TableInfo, "publish
       commandCounts.set(cmd, (commandCounts.get(cmd) ?? 0) + 1);
     });
   });
-  commandCounts.forEach((count, cmd) => {
-    if (count <= 1) {
-      return;
-    }
+  commandCounts.forEach((requiredCount, cmd) => {
     const actualCount = allowedCommands.filter((c) => c === cmd).length;
-    if (actualCount !== count) {
-      allowedCommands.splice(allowedCommands.indexOf(cmd), 1);
+    if (actualCount !== requiredCount) {
+      commandCounts.delete(cmd);
     }
   });
-  return allowedCommands;
+  return Array.from(allowedCommands.keys());
 };
 
 export type RequiredNestedInsert = {

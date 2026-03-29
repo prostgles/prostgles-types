@@ -277,7 +277,7 @@ export type TableInfo = {
         delete?: {};
     };
 };
-export declare const getAllowedTableMethods: ({ publishInfo }: Pick<TableInfo, "publishInfo">) => ("insert" | "update" | "delete" | "find" | "getColumns" | "getInfo" | "insertMany" | "upsert" | "updateBatch" | "findOne" | "count" | "size" | "subscribe" | "subscribeOne" | "sync" | "remove")[];
+export declare const getAllowedTableMethods: ({ publishInfo }: Pick<TableInfo, "publishInfo">) => number[];
 export type RequiredNestedInsert = {
     ftable: string;
     minRows?: number;

@@ -1,15 +1,16 @@
 import { strict as assert } from "assert";
 import { describe, test } from "node:test";
 import { getTextPatch, TextPatch, unpatchText, WAL } from "./util";
-import type {
-  AnyObject,
-  DBSchema,
-  DeleteParams,
-  FullFilter,
-  Select,
-  SelectParams,
-  TableHandler,
-  ViewHandler,
+import {
+  getAllowedTableMethods,
+  type AnyObject,
+  type DBSchema,
+  type DeleteParams,
+  type FullFilter,
+  type Select,
+  type SelectParams,
+  type TableHandler,
+  type ViewHandler,
 } from "./index";
 import type { UpsertDataToPGCast } from "./insertUpdateUtils";
 

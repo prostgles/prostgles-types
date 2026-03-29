@@ -80,7 +80,7 @@ const postgresToTsType = (udt_data_type) => {
 };
 exports.postgresToTsType = postgresToTsType;
 const getAllowedTableMethods = ({ publishInfo }) => {
-    const allowedCommands = [
+    let allowedCommands = [
         ...(publishInfo.select || publishInfo.insert || publishInfo.delete || publishInfo.update ?
             exports.SQL_COMMAND_TABLE_METHODS.schema
             : []),
@@ -105,16 +105,13 @@ const getAllowedTableMethods = ({ publishInfo }) => {
             commandCounts.set(cmd, (commandCounts.get(cmd) ?? 0) + 1);
         });
     });
-    commandCounts.forEach((count, cmd) => {
-        if (count <= 1) {
-            return;
-        }
+    commandCounts.forEach((requiredCount, cmd) => {
         const actualCount = allowedCommands.filter((c) => c === cmd).length;
-        if (actualCount !== count) {
-            allowedCommands.splice(allowedCommands.indexOf(cmd), 1);
+        if (actualCount !== requiredCount) {
+            commandCounts.delete(cmd);
         }
     });
-    return allowedCommands;
+    return Array.from(allowedCommands.keys());
 };
 exports.getAllowedTableMethods = getAllowedTableMethods;
 exports.JOIN_KEYS = ["$innerJoin", "$leftJoin"];

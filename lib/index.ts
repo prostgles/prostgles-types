@@ -3,6 +3,7 @@ import { FileColumnConfig } from "./files";
 import { AnyObject, ComplexFilter, FullFilter, ValueOf } from "./filters";
 import type { UpsertDataToPGCast } from "./insertUpdateUtils";
 import { JSONB } from "./JSONBSchemaValidation/JSONBSchema";
+import type { SyncConfig } from "./replication";
 import { getKeys, isDefined } from "./util";
 import { includes } from "./utilFuncs/includes";
 export const _PG_strings = [
@@ -367,9 +368,17 @@ export type TableInfo = {
    */
   allowedNestedInserts?: string[];
 
-  allowedMethods: Partial<{
-    [K in keyof typeof SQL_COMMAND_TABLE_METHODS]: "*" | (typeof SQL_COMMAND_TABLE_METHODS)[K];
-  }>;
+  publishInfo: {
+    select?: {
+      disabledMethods?: Record<(typeof SQL_COMMAND_TABLE_METHODS.select)[number], 1>;
+    };
+    update?: {
+      disabledMethods?: Record<(typeof SQL_COMMAND_TABLE_METHODS.select)[number], 1>;
+    };
+    insert?: {};
+    delete?: {};
+    sync?: SyncConfig;
+  };
 };
 
 type RequiredNestedInsert = {

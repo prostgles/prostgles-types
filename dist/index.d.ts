@@ -3,6 +3,7 @@ import { FileColumnConfig } from "./files";
 import { AnyObject, ComplexFilter, FullFilter, ValueOf } from "./filters";
 import type { UpsertDataToPGCast } from "./insertUpdateUtils";
 import { JSONB } from "./JSONBSchemaValidation/JSONBSchema";
+import type { SyncConfig } from "./replication";
 export declare const _PG_strings: readonly ["bpchar", "char", "varchar", "text", "citext", "uuid", "bytea", "time", "timetz", "interval", "name", "cidr", "inet", "macaddr", "macaddr8", "int4range", "int8range", "numrange", "tsvector"];
 export declare const _PG_numbers_num: readonly ["int2", "int4", "float4", "float8", "oid"];
 export declare const _PG_numbers_str: readonly ["int8", "numeric", "money"];
@@ -262,9 +263,17 @@ export type TableInfo = {
      * If defined then nested inserts for the specified tables are allowed (but not required)
      */
     allowedNestedInserts?: string[];
-    allowedMethods: Partial<{
-        [K in keyof typeof SQL_COMMAND_TABLE_METHODS]: "*" | (typeof SQL_COMMAND_TABLE_METHODS)[K];
-    }>;
+    publishInfo: {
+        select?: {
+            disabledMethods?: Record<(typeof SQL_COMMAND_TABLE_METHODS.select)[number], 1>;
+        };
+        update?: {
+            disabledMethods?: Record<(typeof SQL_COMMAND_TABLE_METHODS.select)[number], 1>;
+        };
+        insert?: {};
+        delete?: {};
+        sync?: SyncConfig;
+    };
 };
 type RequiredNestedInsert = {
     ftable: string;

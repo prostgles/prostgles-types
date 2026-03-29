@@ -90,6 +90,24 @@ const getAllowedTableMethods = ({ publishInfo }) => {
         ...(publishInfo.insert ? exports.SQL_COMMAND_TABLE_METHODS.insert : []),
         ...(publishInfo.delete ? exports.SQL_COMMAND_TABLE_METHODS.delete : []),
     ];
+    /**
+     * Commands like upsert need both insert and update to be allowed. If one of them is disabled then the command will be removed from the allowedCommands list
+     */
+    const commandCounts = new Map();
+    Object.values(exports.SQL_COMMAND_TABLE_METHODS).forEach((commands) => {
+        commands.forEach((cmd) => {
+            commandCounts.set(cmd, (commandCounts.get(cmd) ?? 0) + 1);
+        });
+    });
+    commandCounts.forEach((count, cmd) => {
+        if (count <= 1) {
+            return;
+        }
+        const actualCount = allowedCommands.filter((c) => c === cmd).length;
+        if (actualCount !== count) {
+            allowedCommands.splice(allowedCommands.indexOf(cmd), 1);
+        }
+    });
     return allowedCommands;
 };
 exports.getAllowedTableMethods = getAllowedTableMethods;

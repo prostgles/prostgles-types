@@ -382,6 +382,24 @@ export type TableInfo = {
   };
 };
 
+export const getAllowedTableMethods = ({ publishInfo }: Pick<TableInfo, "publishInfo">) => {
+  const allowedCommands = [
+    ...SQL_COMMAND_TABLE_METHODS.select.filter((cmd) => {
+      return (
+        publishInfo.select && !Object.keys(publishInfo.select.disabledMethods ?? {}).includes(cmd)
+      );
+    }),
+    ...SQL_COMMAND_TABLE_METHODS.update.filter((cmd) => {
+      return (
+        publishInfo.update && !Object.keys(publishInfo.update.disabledMethods ?? {}).includes(cmd)
+      );
+    }),
+    ...(publishInfo.insert ? SQL_COMMAND_TABLE_METHODS.insert : []),
+    ...(publishInfo.delete ? SQL_COMMAND_TABLE_METHODS.delete : []),
+  ];
+  return allowedCommands;
+};
+
 export type RequiredNestedInsert = {
   ftable: string;
   minRows?: number;

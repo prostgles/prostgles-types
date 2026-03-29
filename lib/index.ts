@@ -382,7 +382,7 @@ export type TableInfo = {
   };
 };
 
-type RequiredNestedInsert = {
+export type RequiredNestedInsert = {
   ftable: string;
   minRows?: number;
   maxRows?: number;

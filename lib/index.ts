@@ -360,6 +360,7 @@ export type TableInfo = {
   publishInfo: {
     select?: {
       disabledMethods?: Partial<Record<(typeof SQL_COMMAND_TABLE_METHODS.select)[number], 1>>;
+      syncConfig: SyncTableInfo | undefined;
     };
     update?: {
       disabledMethods?: Partial<Record<(typeof SQL_COMMAND_TABLE_METHODS.update)[number], 1>>;
@@ -378,7 +379,6 @@ export type TableInfo = {
       allowedNestedInserts?: string[];
     };
     delete?: {};
-    sync?: SyncTableInfo;
   };
 };
 

@@ -976,18 +976,25 @@ type UpsertDataToPGCastLax<T extends AnyObject> = PartialLax<UpsertDataToPGCast<
 export type DeleteParams<T extends AnyObject | void = void, S extends DBSchema | void = void> = {
   returning?: Select<T, S>;
 } & Pick<CommonSelectParams, "returnType">;
-
+type KnownKeys<T> = {
+  [K in keyof T]: string extends K ? never
+  : number extends K ? never
+  : symbol extends K ? never
+  : K;
+}[keyof T];
 /**
  * TODO: pick only joined tables from schema AND exclude parent fkey columns from the nested data
  */
-type InsertDataWithNested<
+export type InsertDataWithNested<
   TD extends AnyObject,
   S extends DBSchema | void,
 > = UpsertDataToPGCast<TD> &
   (S extends DBSchema ?
-    {
-      [TableName in keyof S]?: Partial<InsertDataWithNested<S[TableName]["columns"], S>>[];
-    }
+    string extends keyof S ?
+      {} // collapse to void-like behavior for untyped/dynamic schema
+    : {
+        [TableName in keyof S]?: Partial<InsertDataWithNested<S[TableName]["columns"], S>>[];
+      }
   : {});
 
 /**

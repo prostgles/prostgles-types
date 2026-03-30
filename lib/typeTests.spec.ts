@@ -5,6 +5,7 @@ import type {
   DBSchema,
   ExistsFilter,
   FullFilter,
+  InsertDataWithNested,
   Select,
   SelectParams,
   SelectTyped,
@@ -264,6 +265,28 @@ describe("type tests", () => {
           tbl1: {},
         },
       };
+
+      /** Typed DBSchema works */
+      const dTyped = {
+        col1: 1,
+        col2: 2,
+        tbl11: [
+          {
+            col11: 1,
+            col21: "2",
+          },
+        ],
+      } satisfies InsertDataWithNested<SampleSchema["tbl1"]["columns"], SampleSchema>;
+
+      /** Untyped DBSchema works */
+      const dUntyped = { named: "John", email: "", dwada: [] } satisfies InsertDataWithNested<
+        Record<string, any>,
+        {
+          [x: string]: {
+            columns: Record<string, any>;
+          };
+        }
+      >;
     };
   });
 });

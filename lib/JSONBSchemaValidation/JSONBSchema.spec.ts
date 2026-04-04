@@ -51,7 +51,7 @@ describe("jsonb to json schema conversion", async () => {
   });
 
   test("complex", () => {
-    const jsonS = getJSONBSchemaAsJSONSchema("tjson", "json", {
+    const jsonSSchema = {
       type: {
         a: { type: "boolean" },
         arr: { enum: ["1", "2", "3"] },
@@ -70,7 +70,17 @@ describe("jsonb to json schema conversion", async () => {
           },
         },
       },
-    });
+    } as const satisfies JSONB.JSONBSchema;
+    const jsonS = getJSONBSchemaAsJSONSchema("tjson", "json", jsonSSchema);
+
+    const jsonSSchemaArrAllowedValues = {
+      type: {
+        arrStr: { type: "string[]", optional: true, nullable: true, allowedValues: ["a", "b"] },
+      },
+    } as const satisfies JSONB.JSONBSchema;
+    const d: JSONB.GetSchemaType<typeof jsonSSchemaArrAllowedValues> = {
+      arrStr: ["a"],
+    };
 
     assert.deepEqual(jsonS, {
       $id: "tjson.json",

@@ -18,6 +18,8 @@ const getJSONSchemaType = (
       : type === "any" ? undefined
       : type === "unknown" ? undefined
       : type === "Lookup" ? undefined
+      : type === "Blob" ? undefined
+      : type === "FileLike" ? undefined
       : "string",
     isArray: rawType.endsWith("[]"),
   };

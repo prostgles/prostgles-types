@@ -247,8 +247,19 @@ export namespace JSONB {
   type NormalizeField<T extends FieldType | Omit<FieldTypeObj, "optional">> =
     T extends DataType ? { type: T } : T;
 
+  type AllowedValueFromItem<I> = I extends { value: infer V } ? V : I;
+
+  type AllowedValuesUnion<A extends readonly any[]> = AllowedValueFromItem<A[number]>;
+
+  type ApplyAllowedToType<Allowed, TType> =
+    TType extends readonly any[] ? Allowed[]
+    : TType extends any[] ? Allowed[]
+    : Allowed;
+
   type GetAllowedValues<T extends FieldTypeObj | Omit<FieldTypeObj, "optional">, TType> =
-    T extends { allowedValues: readonly any[] } ? T["allowedValues"][number] : TType;
+    T extends { allowedValues: readonly any[] } ?
+      ApplyAllowedToType<AllowedValuesUnion<T["allowedValues"]>, TType>
+    : TType;
 
   type PrimitiveValue<U extends DataType> =
     U extends `${infer P}[]` ?

@@ -86,8 +86,12 @@ export const getJSONBTSTypes = (
       .replace("FileLike", `{ name: string; type: string; data: Blob; }`)
       .replace("Date", "string");
 
-    if (fieldType.allowedValues && fieldType.type.endsWith("[]")) {
-      return nullType + ` (${fieldType.allowedValues.map((v) => JSON.stringify(v)).join(" | ")})[]`;
+    if (fieldType.allowedValues) {
+      const arrayType = fieldType.type.endsWith("[]") ? "[]" : "";
+      return (
+        nullType +
+        ` (${fieldType.allowedValues.map((v) => JSON.stringify(isObject(v) ? v.value : v)).join(" | ")})${arrayType}`
+      );
     }
     return nullType + correctType;
 

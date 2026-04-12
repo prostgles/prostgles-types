@@ -541,32 +541,32 @@ export type InsertParams<T extends AnyObject | void = void, S extends DBSchema |
 type CollapseNumberIfStringPresent<T> = [
     Extract<T, string>
 ] extends [never] ? T : Exclude<T, number>;
-type RequiredCollapsed<T extends Record<string, unknown>> = Required<{
+export type NormalizedRow<T extends Record<string, unknown>> = Required<{
     [K in keyof T]: CollapseNumberIfStringPresent<T[K]>;
 }>;
 type JoinedSelect = Record<string, Select>;
 export type SelectFunction = Record<string, any[]>;
 type ParseSelect<Select extends SelectParams<TD>["select"], TD extends AnyObject> = (Select extends {
     "*": 1;
-} ? RequiredCollapsed<TD> : {}) & {
-    [Key in keyof Omit<Select, "*"> & string]: Select[Key] extends 1 ? RequiredCollapsed<TD>[Key] : Select[Key] extends SelectFunction ? any : Select[Key] extends JoinedSelect ? any[] : any;
+} ? NormalizedRow<TD> : {}) & {
+    [Key in keyof Omit<Select, "*"> & string]: Select[Key] extends 1 ? NormalizedRow<TD>[Key] : Select[Key] extends SelectFunction ? any : Select[Key] extends JoinedSelect ? any[] : any;
 };
 type SelectDataType<S extends DBSchema | void, O extends SelectParams<TD, S>, TD extends AnyObject> = O extends {
     returnType: "value";
 } ? any : O extends {
     returnType: "values";
     select: Record<string, 1>;
-} ? ValueOf<Pick<RequiredCollapsed<TD>, keyof O["select"]>> : O extends {
+} ? ValueOf<Pick<NormalizedRow<TD>, keyof O["select"]>> : O extends {
     returnType: "values";
 } ? any : O extends {
     select: "*";
-} ? RequiredCollapsed<TD> : O extends {
+} ? NormalizedRow<TD> : O extends {
     select: "";
 } ? Record<string, never> : O extends {
     select: Record<string, 0>;
-} ? Omit<RequiredCollapsed<TD>, keyof O["select"]> : O extends {
+} ? Omit<NormalizedRow<TD>, keyof O["select"]> : O extends {
     select: Record<string, any>;
-} ? ParseSelect<O["select"], RequiredCollapsed<TD>> : RequiredCollapsed<TD>;
+} ? ParseSelect<O["select"], NormalizedRow<TD>> : NormalizedRow<TD>;
 export type SelectReturnType<S extends DBSchema | void, O extends SelectParams<TD, S>, TD extends AnyObject, isMulti extends boolean> = O extends {
     returnType: "statement";
 } ? string : isMulti extends true ? SelectDataType<S, O, TD>[] : SelectDataType<S, O, TD>;
@@ -588,13 +588,13 @@ export type UpdateParams<T extends AnyObject | void = void, S extends DBSchema |
 } & Pick<CommonSelectParams, "returnType">;
 type GetReturningReturnType<O extends UpdateParams<TD, S>, TD extends AnyObject, S extends DBSchema | void = void> = O extends {
     returning: "*";
-} ? RequiredCollapsed<TD> : O extends {
+} ? NormalizedRow<TD> : O extends {
     returning: "";
 } ? Record<string, never> : O extends {
     returning: Record<string, 1>;
-} ? Pick<RequiredCollapsed<TD>, keyof O["returning"]> : O extends {
+} ? Pick<NormalizedRow<TD>, keyof O["returning"]> : O extends {
     returning: Record<string, 0>;
-} ? Omit<RequiredCollapsed<TD>, keyof O["returning"]> : void;
+} ? Omit<NormalizedRow<TD>, keyof O["returning"]> : void;
 /**
  *
  * Nothing is returned by default.

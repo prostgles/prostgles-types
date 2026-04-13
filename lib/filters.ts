@@ -1,4 +1,4 @@
-import { DBSchema, RawJoinPath } from ".";
+import { DBSchema, RawJoinPath, type AllowedTSType, type CastFromTSToPG } from ".";
 import { ExactlyOne, getKeys } from "./util";
 
 export const CompareFilterKeys = [
@@ -115,16 +115,7 @@ export const ArrayFilterOperands = [
   "$overlaps",
 ] as const;
 
-export type AllowedTSType = string | number | boolean | Date | unknown;
 export type AllowedTSTypes = AllowedTSType[];
-
-// PG will try to cast strings to appropriate type
-export type CastFromTSToPG<T extends AllowedTSType> =
-  T extends number ? T | string
-  : T extends string ? T | number | Date
-  : T extends boolean ? T | string
-  : T extends Date ? T | string
-  : T;
 
 export type ArrayFilter<T extends AllowedTSType[]> =
   | Record<(typeof ArrayFilterOperands)[number], T>

@@ -1,8 +1,6 @@
 import { strict as assert } from "assert";
 import { describe, test } from "node:test";
-import { getTextPatch, TextPatch, unpatchText, WAL } from "./util";
 import {
-  getAllowedTableMethods,
   type AnyObject,
   type DBSchema,
   type DeleteParams,
@@ -10,9 +8,9 @@ import {
   type Select,
   type SelectParams,
   type TableHandler,
-  type ViewHandler,
+  type UpsertDataToPGCast,
 } from "./index";
-import type { UpsertDataToPGCast } from "./insertUpdateUtils";
+import { getTextPatch, TextPatch, unpatchText, WAL } from "./util";
 
 describe("util func tests", () => {
   test("getTextPatch", () => {
@@ -186,11 +184,9 @@ describe("util func tests", () => {
       type DBOFullyTyped<Schema = void> =
         Schema extends DBSchema ?
           {
-            [tov_name in keyof Schema]: Schema[tov_name]["is_view"] extends true ?
-              ViewHandler<Schema[tov_name]["columns"], Schema>
-            : TableHandler<Schema[tov_name]["columns"], Schema>;
+            [tov_name in keyof Schema]: TableHandler<Schema[tov_name]["columns"], Schema>;
           }
-        : Record<string, ViewHandler | TableHandler>;
+        : Record<string, TableHandler>;
 
       type TypedFFilter = FullFilter<GSchema["tbl1"]["columns"], GSchema>;
       const schemaFFilter: TypedFFilter = { col1: "dd" };

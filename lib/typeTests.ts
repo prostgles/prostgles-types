@@ -6,9 +6,8 @@ import type {
   Select,
   SelectParams,
   TableHandler,
-  ViewHandler,
+  UpsertDataToPGCast,
 } from ".";
-import type { UpsertDataToPGCast } from "./insertUpdateUtils";
 
 /**
  * Type tests
@@ -114,11 +113,9 @@ async () => {
   type DBOFullyTyped<Schema = void> =
     Schema extends DBSchema ?
       {
-        [tov_name in keyof Schema]: Schema[tov_name]["is_view"] extends true ?
-          ViewHandler<Schema[tov_name]["columns"], Schema>
-        : TableHandler<Schema[tov_name]["columns"], Schema>;
+        [tov_name in keyof Schema]: TableHandler<Schema[tov_name]["columns"], Schema>;
       }
-    : Record<string, ViewHandler | TableHandler>;
+    : Record<string, TableHandler>;
 
   type TypedFFilter = FullFilter<GSchema["tbl1"]["columns"], GSchema>;
   const schemaFFilter: TypedFFilter = { col1: "dd" };

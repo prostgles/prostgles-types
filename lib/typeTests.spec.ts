@@ -11,7 +11,6 @@ import type {
   SelectTyped,
   SQLHandler,
   TableHandler,
-  ViewHandler,
 } from "./index";
 
 describe("type tests", () => {
@@ -23,11 +22,9 @@ describe("type tests", () => {
       type DBOFullyTyped<Schema = void> =
         Schema extends DBSchema ?
           {
-            [tov_name in keyof Schema]: Schema[tov_name]["is_view"] extends true ?
-              ViewHandler<Schema[tov_name]["columns"], Schema>
-            : TableHandler<Schema[tov_name]["columns"], Schema>;
+            [tov_name in keyof Schema]: TableHandler<Schema[tov_name]["columns"], Schema>;
           }
-        : Record<string, ViewHandler | TableHandler>;
+        : Record<string, TableHandler>;
 
       type GSchema = {
         tbl1: {
@@ -43,7 +40,16 @@ describe("type tests", () => {
           update: true;
         };
       };
-      const dbo: DBOFullyTyped<GSchema> = 1 as any;
+
+      const tblTyped = {} as TableHandler<GSchema["tbl1"]["columns"], GSchema>;
+      let tblGeneric = {} as TableHandler;
+      tblGeneric = tblTyped;
+
+      const dbTyped = {} as DBHandler<GSchema>;
+      let dbGeneric = {} as DBHandler;
+      dbGeneric = dbTyped;
+
+      const dbo = {} as DBOFullyTyped<GSchema>;
       // type SchemaDef = { h: number; b?: number; c?: number; }
       const tableHandler = dbo.tbl1; //: TableHandler<TableDef> = undefined as any;
       const params: SelectParams<GSchema["tbl1"]["columns"]> = {

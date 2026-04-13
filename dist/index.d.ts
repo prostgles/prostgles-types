@@ -1,7 +1,6 @@
 import * as AuthTypes from "./auth";
 import { FileColumnConfig } from "./files";
 import { AnyObject, ComplexFilter, FullFilter, ValueOf } from "./filters";
-import type { UpsertDataToPGCast } from "./insertUpdateUtils";
 import { JSONB } from "./JSONBSchemaValidation/JSONBSchema";
 import { type SyncTableInfo } from "./util";
 export declare const _PG_strings: readonly ["bpchar", "char", "varchar", "text", "citext", "uuid", "bytea", "time", "timetz", "interval", "name", "cidr", "inet", "macaddr", "macaddr8", "int4range", "int8range", "numrange", "tsvector"];
@@ -297,11 +296,6 @@ type GetColumnsParams = {
      */
     filter: FullFilter<void, void>;
 };
-type GetColumns = (
-/**
- * Language code for i18n data. "en" by default
- */
-lang?: string, params?: GetColumnsParams) => Promise<ValidatedColumnInfo[]>;
 /**
  * Data fetching and manipulation methods for interacting with the database
  */
@@ -627,27 +621,47 @@ error?: unknown) => void | Promise<void>;
  * Callback fired once after subscribing and then every time the data matching the filter changes
  */
 type SubscribeOneCallback<ItemDataType> = (item: ItemDataType) => void | Promise<void>;
+export type AllowedTSType = string | number | boolean | Date | unknown;
+export type CastFromTSToPG<T extends AllowedTSType> = T extends number ? T | string : T extends string ? T | number | Date : T extends boolean ? T | string : T extends Date ? T | string : T;
+export type UpsertDataToPGCast<TD extends AnyObject> = {
+    [K in keyof TD]: CastFromTSToPG<TD[K]> | Record<"$merge", unknown[]>;
+};
+export type PartialLax<T = AnyObject> = Partial<T>;
+type UpsertDataToPGCastLax<T extends AnyObject> = PartialLax<UpsertDataToPGCast<T>>;
+export type DeleteParams<T extends AnyObject | void = void, S extends DBSchema | void = void> = {
+    returning?: Select<T, S>;
+} & Pick<CommonSelectParams, "returnType">;
 /**
- * Methods for interacting with a view
+ * TODO: pick only joined tables from schema AND exclude parent fkey columns from the nested data
+ */
+export type InsertDataWithNested<TD extends AnyObject, S extends DBSchema | void> = UpsertDataToPGCast<TD> & (S extends DBSchema ? string extends keyof S ? {} : {
+    [TableName in keyof S]?: Partial<InsertDataWithNested<S[TableName]["columns"], S>>[];
+} : {});
+/**
+ * Methods for interacting with a table/view
  * - On client-side some methods are restricted (and undefined) based on publish rules on the server
  */
-export type ViewHandler<TD extends AnyObject = AnyObject, S extends DBSchema | void = void> = {
+export type TableHandler<TD extends AnyObject = AnyObject, S extends DBSchema | void = void> = {
     /**
      * Retrieves the table/view info
      */
-    getInfo: (
+    getInfo(
     /**
      * Language code for i18n data. "en" by default
      */
-    lang?: string) => Promise<TableInfo>;
+    lang?: string): Promise<TableInfo>;
     /**
      * Retrieves columns metadata of the table/view
      */
-    getColumns: GetColumns;
+    getColumns(
+    /**
+     * Language code for i18n data. "en" by default
+     */
+    lang?: string, params?: GetColumnsParams): Promise<ValidatedColumnInfo[]>;
     /**
      * Retrieves a list of matching records from the view/table
      */
-    find: <P extends SelectParams<TD, S>>(
+    find<P extends SelectParams<TD, S>>(
     /**
      * A filter for a table, defined as a MongoDB-like query object.
      * Supported operators:
@@ -683,73 +697,56 @@ export type ViewHandler<TD extends AnyObject = AnyObject, S extends DBSchema | v
      *    limit: 10,
      * }
      */
-    selectParams?: P) => Promise<SelectReturnType<S, P, TD, true>>;
+    selectParams?: P): Promise<SelectReturnType<S, P, TD, true>>;
     /**
      * Retrieves a record from the view/table
      */
-    findOne: <P extends SelectParams<TD, S>>(filter?: FullFilter<TD, S>, selectParams?: P) => Promise<undefined | SelectReturnType<S, P, TD, false>>;
+    findOne<P extends SelectParams<TD, S>>(filter?: FullFilter<TD, S>, selectParams?: P): Promise<undefined | SelectReturnType<S, P, TD, false>>;
     /**
      * Retrieves a list of matching records from the view/table and subscribes to changes
      */
-    subscribe: <P extends SubscribeParams<TD, S>>(filter: FullFilter<TD, S>, params: P, onData: SubscribeCallback<SelectReturnType<S, P, TD, true>>) => Promise<SubscriptionHandler>;
+    subscribe<P extends SubscribeParams<TD, S>>(filter: FullFilter<TD, S>, params: P, onData: SubscribeCallback<SelectReturnType<S, P, TD, true>>): Promise<SubscriptionHandler>;
     /**
      * Retrieves first matching record from the view/table and subscribes to changes
      */
-    subscribeOne: <P extends SubscribeParams<TD, S>>(filter: FullFilter<TD, S>, params: P, onData: SubscribeOneCallback<SelectReturnType<S, P, TD, false> | undefined>) => Promise<SubscriptionHandler>;
+    subscribeOne<P extends SubscribeParams<TD, S>>(filter: FullFilter<TD, S>, params: P, onData: SubscribeOneCallback<SelectReturnType<S, P, TD, false> | undefined>): Promise<SubscriptionHandler>;
     /**
      * Returns the number of rows that match the filter
      */
-    count: <P extends SelectParams<TD, S>>(filter?: FullFilter<TD, S>, selectParams?: P) => Promise<number>;
+    count<P extends SelectParams<TD, S>>(filter?: FullFilter<TD, S>, selectParams?: P): Promise<number>;
     /**
      * Returns result size in bits
      */
-    size: <P extends SelectParams<TD, S>>(filter?: FullFilter<TD, S>, selectParams?: P) => Promise<string>;
-};
-export type PartialLax<T = AnyObject> = Partial<T>;
-type UpsertDataToPGCastLax<T extends AnyObject> = PartialLax<UpsertDataToPGCast<T>>;
-export type DeleteParams<T extends AnyObject | void = void, S extends DBSchema | void = void> = {
-    returning?: Select<T, S>;
-} & Pick<CommonSelectParams, "returnType">;
-/**
- * TODO: pick only joined tables from schema AND exclude parent fkey columns from the nested data
- */
-export type InsertDataWithNested<TD extends AnyObject, S extends DBSchema | void> = UpsertDataToPGCast<TD> & (S extends DBSchema ? string extends keyof S ? {} : {
-    [TableName in keyof S]?: Partial<InsertDataWithNested<S[TableName]["columns"], S>>[];
-} : {});
-/**
- * Methods for interacting with a table
- * - On client-side some methods are restricted (and undefined) based on publish rules on the server
- */
-export type TableHandler<TD extends AnyObject = AnyObject, S extends DBSchema | void = void> = ViewHandler<TD, S> & {
+    size<P extends SelectParams<TD, S>>(filter?: FullFilter<TD, S>, selectParams?: P): Promise<string>;
     /**
      * Updates a record in the table based on the specified filter criteria
      * - Use { multi: false } to ensure no more than one row is updated
      */
-    update: <P extends UpdateParams<TD, S>>(filter: FullFilter<TD, S>, newData: UpsertDataToPGCastLax<TD>, params?: P) => Promise<UpdateReturnType<P, TD, S> | undefined>;
+    update<P extends UpdateParams<TD, S>>(filter: FullFilter<TD, S>, newData: UpsertDataToPGCastLax<TD>, params?: P): Promise<UpdateReturnType<P, TD, S> | undefined>;
     /**
      * Updates multiple records in the table in a batch operation.
      * - Each item in the `data` array contains a filter and the corresponding data to update.
      */
-    updateBatch: <P extends UpdateParams<TD, S>>(data: [FullFilter<TD, S>, UpsertDataToPGCastLax<TD>][], params?: P) => Promise<UpdateReturnType<P, TD, S> | void>;
+    updateBatch<P extends UpdateParams<TD, S>>(data: [FullFilter<TD, S>, UpsertDataToPGCastLax<TD>][], params?: P): Promise<UpdateReturnType<P, TD, S> | void>;
     /**
      * Inserts a new record into the table.
      */
-    insert: <P extends InsertParams<TD, S>>(data: InsertDataWithNested<TD, S>, params?: P) => Promise<GetReturningReturnType<P, TD, S>>;
+    insert<P extends InsertParams<TD, S>>(data: InsertDataWithNested<TD, S>, params?: P): Promise<GetReturningReturnType<P, TD, S>>;
     /**
      * Inserts new records into the table.
      */
-    insertMany: <P extends InsertParams<TD, S>>(data: InsertDataWithNested<TD, S>[], params?: P) => Promise<GetReturningReturnType<P, TD, S>[]>;
+    insertMany<P extends InsertParams<TD, S>>(data: InsertDataWithNested<TD, S>[], params?: P): Promise<GetReturningReturnType<P, TD, S>[]>;
     /**
      * Inserts or updates a record in the table.
      * - If a record matching the `filter` exists, it updates the record.
      * - If no matching record exists, it inserts a new record.
      */
-    upsert: <P extends UpdateParams<TD, S>>(filter: FullFilter<TD, S>, newData: UpsertDataToPGCastLax<TD>, params?: P) => Promise<UpdateReturnType<P, TD, S>>;
+    upsert<P extends UpdateParams<TD, S>>(filter: FullFilter<TD, S>, newData: UpsertDataToPGCastLax<TD>, params?: P): Promise<UpdateReturnType<P, TD, S>>;
     /**
      * Deletes records from the table based on the specified filter criteria.
      * - If no filter is provided, all records may be deleted (use with caution).
      */
-    delete: <P extends DeleteParams<TD, S>>(filter?: FullFilter<TD, S>, params?: P) => Promise<UpdateReturnType<P, TD, S> | undefined>;
+    delete<P extends DeleteParams<TD, S>>(filter?: FullFilter<TD, S>, params?: P): Promise<UpdateReturnType<P, TD, S> | undefined>;
 };
 export type JoinMakerOptions<TT extends AnyObject = AnyObject> = SelectParams<TT> & {
     path?: RawJoinPath;

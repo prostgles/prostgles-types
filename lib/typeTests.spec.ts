@@ -136,7 +136,7 @@ describe("type tests", () => {
         val: { $template_string: ["$template_string"] },
       };
 
-      const sqlHandler: SQLHandler = undefined as any;
+      const sqlHandler = {} as SQLHandler;
       if (sqlHandler) {
         const full = await sqlHandler("SELECT 1", {});
         full.rows.flatMap;
@@ -180,13 +180,14 @@ describe("type tests", () => {
 
       const db = {} as DBHandler<{
         table1: {
+          is_view: false;
           select: true;
           insert: true;
           update: false;
           columns: { c1: string; c2?: number };
         };
         view1: {
-          is_view: true;
+          select: true;
           columns: { c1: string; c2: number };
         };
         table2: {

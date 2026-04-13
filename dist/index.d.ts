@@ -820,12 +820,10 @@ type InsertMethods<T extends DBTableSchema> = T["insert"] extends true ? keyof P
 type UpsertMethods<T extends DBTableSchema> = T["insert"] extends true ? T["update"] extends true ? keyof Pick<TableHandler, "upsert"> : never : never;
 type DeleteMethods<T extends DBTableSchema> = T["delete"] extends true ? keyof Pick<TableHandler, "delete"> : never;
 export type ValidatedMethods<T extends DBTableSchema> = SelectMethods<T> | UpdateMethods<T> | InsertMethods<T> | UpsertMethods<T> | DeleteMethods<T>;
-export type DBHandler<S = void> = (S extends DBSchema ? {
-    [k in keyof S]: S[k]["is_view"] extends true ? ViewHandler<S[k]["columns"], S> : Pick<TableHandler<S[k]["columns"], S>, ValidatedMethods<S[k]>>;
+export type DBHandler<S = void> = S extends DBSchema ? {
+    [k in keyof S]: Pick<TableHandler<S[k]["columns"], S>, ValidatedMethods<S[k]>>;
 } : {
     [key: string]: Partial<TableHandler>;
-}) & {
-    sql?: SQLHandler;
 };
 export type DBNoticeConfig = {
     socketChannel: string;

@@ -1204,16 +1204,14 @@ export type ValidatedMethods<T extends DBTableSchema> =
   | DeleteMethods<T>;
 // | SyncMethods<T>
 
-export type DBHandler<S = void> = (S extends DBSchema ?
-  {
-    [k in keyof S]: S[k]["is_view"] extends true ? ViewHandler<S[k]["columns"], S>
-    : Pick<TableHandler<S[k]["columns"], S>, ValidatedMethods<S[k]>>;
-  }
-: {
-    [key: string]: Partial<TableHandler>;
-  }) & {
-  sql?: SQLHandler;
-};
+export type DBHandler<S = void> =
+  S extends DBSchema ?
+    {
+      [k in keyof S]: Pick<TableHandler<S[k]["columns"], S>, ValidatedMethods<S[k]>>;
+    }
+  : {
+      [key: string]: Partial<TableHandler>;
+    };
 
 export type DBNoticeConfig = {
   socketChannel: string;

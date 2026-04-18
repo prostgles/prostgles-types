@@ -59,7 +59,7 @@ export type DBTableSchema = {
      * Table names and their columns that reference the current table through foreign keys.
      * used in nested inserts
      */
-    referencedBy?: Record<string, string[]>;
+    referencedBy?: Record<string, readonly string[]>;
 };
 export type DBSchema = {
     [tov_name: string]: DBTableSchema;
@@ -641,7 +641,7 @@ export type InsertDataWithNested<TD extends AnyObject, S extends DBSchema | void
  * Methods for interacting with a table/view
  * - On client-side some methods are restricted (and undefined) based on publish rules on the server
  */
-export type TableHandler<TD extends AnyObject = AnyObject, S extends DBSchema | void = void> = {
+export type TableHandler<TD extends AnyObject = AnyObject, S extends DBSchema | void = void, TName extends S extends DBSchema ? keyof S : never = never> = {
     /**
      * Retrieves the table/view info
      */

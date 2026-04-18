@@ -195,7 +195,7 @@ describe("util func tests", () => {
       const ffFunc = (f: FullFilter<void, void>) => {};
       ffFunc(schemaFFilter);
 
-      const dbo: DBOFullyTyped<GSchema> = 1 as any;
+      const dbo = {} as DBOFullyTyped<GSchema>;
       const funcData = { $merge: [] };
       const noRow = await dbo.tbl1.update({}, { col1: "" });
       //@ts-expect-error

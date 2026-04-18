@@ -104,6 +104,20 @@ async () => {
       insert: true;
       update: true;
     };
+    tbl2: {
+      is_view: false;
+      columns: {
+        col1: string;
+        col2: string;
+      };
+      delete: true;
+      select: true;
+      insert: true;
+      update: true;
+      referencedBy: {
+        tbl1: ["col2"];
+      };
+    };
   };
 
   type TableDef = { h: number; b?: number; c?: number };
@@ -124,7 +138,7 @@ async () => {
   const ffFunc = (f: FullFilter<void, void>) => {};
   ffFunc(schemaFFilter);
 
-  const dbo: DBOFullyTyped<GSchema> = 1 as any;
+  const dbo = {} as DBOFullyTyped<GSchema>;
   const funcData = { $merge: [] };
   const noRow = await dbo.tbl1.update({}, { col1: "" });
   //@ts-expect-error

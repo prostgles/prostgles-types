@@ -89,7 +89,7 @@ export declare class WAL {
     getIdStr(d: AnyObject): string;
     getIdObj(d: AnyObject): AnyObject;
     getDeltaObj(d: AnyObject): AnyObject;
-    addData: (data: WALItem[]) => void;
+    addData: (data: WALItem[]) => Promise<void>;
     isOnSending: boolean;
     isSendingTimeout?: ReturnType<typeof setTimeout>;
     willDeleteHistory?: ReturnType<typeof setTimeout>;

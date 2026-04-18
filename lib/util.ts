@@ -360,7 +360,7 @@ export class WAL {
         ...delta,
       };
     });
-    this.sendItems();
+    return this.sendItems();
   };
 
   isOnSending = false;

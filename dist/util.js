@@ -232,7 +232,7 @@ class WAL {
                     ...delta,
                 };
             });
-            this.sendItems();
+            return this.sendItems();
         };
         this.isOnSending = false;
         this.isSendingTimeout = undefined;

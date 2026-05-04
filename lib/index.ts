@@ -1348,6 +1348,10 @@ export const SQL_COMMAND_TABLE_METHODS = {
 export type TableSchema = {
   schema: string;
   name: string;
+  qualifiedNameParts: {
+    schema: string;
+    name: string;
+  };
   oid: number;
   comment: string;
   columns: (ColumnInfo & {

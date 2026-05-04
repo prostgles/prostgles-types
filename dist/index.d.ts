@@ -213,6 +213,10 @@ export type TableInfo = {
      * Useful in handling renamed tables
      */
     oid: number;
+    qualifiedNameParts: {
+        schema: string;
+        name: string;
+    };
     /**
      * Comment from the postgres database
      */
@@ -926,10 +930,6 @@ export declare const SQL_COMMAND_TABLE_METHODS: {
 export type TableSchema = {
     schema: string;
     name: string;
-    qualifiedNameParts: {
-        schema: string;
-        name: string;
-    };
     oid: number;
     comment: string;
     columns: (ColumnInfo & {

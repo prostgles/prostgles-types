@@ -1,4 +1,4 @@
-import { CHANNEL_PREFIX, stableStringify } from "./index";
+import { CHANNEL_PREFIX, stableStringify, type FieldFilter } from "./index";
 import { AnyObject } from "./filters";
 
 /**
@@ -107,11 +107,17 @@ export type ClientSyncHandles = {
 
 export const getSyncChannelName = ({
   tableName,
-  filter,
-  select,
+  filter = {},
+  select = {},
 }: {
   tableName: string;
   filter: AnyObject;
-  select: AnyObject;
+  select: FieldFilter;
 }) =>
-  [CHANNEL_PREFIX, tableName, "sync", stableStringify(filter), stableStringify(select)].join(".");
+  [
+    CHANNEL_PREFIX,
+    tableName,
+    "sync",
+    stableStringify(filter),
+    typeof select === "string" ? select : stableStringify(select),
+  ].join(".");

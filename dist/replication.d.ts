@@ -1,3 +1,4 @@
+import { type FieldFilter } from "./index";
 import { AnyObject } from "./filters";
 /**
  * Response from server to set up a sync channel
@@ -85,6 +86,6 @@ export type ClientSyncHandles = {
 export declare const getSyncChannelName: ({ tableName, filter, select, }: {
     tableName: string;
     filter: AnyObject;
-    select: AnyObject;
+    select: FieldFilter;
 }) => string;
 //# sourceMappingURL=replication.d.ts.map

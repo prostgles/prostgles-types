@@ -55,7 +55,10 @@ export function find<T extends AnyObject, ArrFilter extends Partial<T>>(
   return filter(array, arrFilter)[0];
 }
 
-export function stableStringify(data: AnyObject, opts: any) {
+export function stableStringify(
+  data: AnyObject,
+  opts: Function | { cmp?: Function; cycles?: boolean } = {},
+): string {
   if (!opts) opts = {};
   if (typeof opts === "function") opts = { cmp: opts };
   var cycles = typeof opts.cycles === "boolean" ? opts.cycles : false;
@@ -112,7 +115,7 @@ export function stableStringify(data: AnyObject, opts: any) {
     }
     seen.splice(seenIndex, 1);
     return "{" + out + "}";
-  })(data);
+  })(data)!;
 }
 
 export type TextPatch = {

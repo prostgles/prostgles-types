@@ -1,3 +1,4 @@
+import { CHANNEL_PREFIX, stableStringify } from "./index";
 import { AnyObject } from "./filters";
 
 /**
@@ -16,7 +17,7 @@ export type ClientSyncInfo = {
   c_fr?: AnyObject;
   c_lr?: AnyObject;
   /**
-   * PG count is ussually string due to bigint
+   * PG count is usually string due to bigint
    */
   c_count: number;
 };
@@ -85,7 +86,7 @@ export type ClientSyncHandles = {
    * Also used by server to request client ClientSyncInfo
    */
   onSyncRequest: (
-    params: SyncBatchParams
+    params: SyncBatchParams,
   ) => ClientSyncInfo | ClientExpressData | Promise<ClientSyncInfo | ClientExpressData>;
 
   /**
@@ -93,7 +94,7 @@ export type ClientSyncHandles = {
    * @description: server will send { onPullRequest: { from_synced, limit, ...etc } }
    */
   onPullRequest: (
-    params: SyncBatchParams
+    params: SyncBatchParams,
   ) => ClientSyncPullResponse | Promise<ClientSyncPullResponse>;
 
   /**
@@ -103,3 +104,14 @@ export type ClientSyncHandles = {
    */
   onUpdates: (params: onUpdatesParams) => Promise<true>;
 };
+
+export const getSyncChannelName = ({
+  tableName,
+  filter,
+  select,
+}: {
+  tableName: string;
+  filter: AnyObject;
+  select: AnyObject;
+}) =>
+  [CHANNEL_PREFIX, tableName, "sync", stableStringify(filter), stableStringify(select)].join(".");

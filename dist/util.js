@@ -49,7 +49,7 @@ function filter(array, arrFilter) {
 function find(array, arrFilter) {
     return filter(array, arrFilter)[0];
 }
-function stableStringify(data, opts) {
+function stableStringify(data, opts = {}) {
     if (!opts)
         opts = {};
     if (typeof opts === "function")

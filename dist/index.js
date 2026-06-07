@@ -14,7 +14,7 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CONTENT_TYPE_TO_EXT = exports.getPossibleNestedInsert = exports.SQL_COMMAND_TABLE_METHODS = exports.CHANNELS = exports.JOIN_PARAMS = exports.JOIN_KEYS = exports.getAllowedTableMethods = exports.postgresToTsType = exports.TS_PG_Types = exports._PG_geometric = exports._PG_postgis = exports._PG_interval = exports._PG_date = exports._PG_bool = exports._PG_json = exports._PG_numbers = exports._PG_numbers_str = exports._PG_numbers_num = exports._PG_strings = void 0;
+exports.CONTENT_TYPE_TO_EXT = exports.getPossibleNestedInsert = exports.SQL_COMMAND_TABLE_METHODS = exports.CHANNELS = exports.CHANNEL_PREFIX = exports.JOIN_PARAMS = exports.JOIN_KEYS = exports.getAllowedTableMethods = exports.postgresToTsType = exports.TS_PG_Types = exports._PG_geometric = exports._PG_postgis = exports._PG_interval = exports._PG_date = exports._PG_bool = exports._PG_json = exports._PG_numbers = exports._PG_numbers_str = exports._PG_numbers_num = exports._PG_strings = void 0;
 const util_1 = require("./util");
 const includes_1 = require("./utilFuncs/includes");
 exports._PG_strings = [
@@ -124,26 +124,26 @@ exports.JOIN_PARAMS = [
     "limit",
     "orderBy",
 ];
-const preffix = "_psqlWS_.";
+exports.CHANNEL_PREFIX = "_psqlWS_.";
 exports.CHANNELS = {
-    SCHEMA_CHANGED: preffix + "schema-changed",
-    SCHEMA: preffix + "schema",
-    DEFAULT: preffix,
-    SQL: `${preffix}sql`,
-    SQL_STREAM: `${preffix}sql-stream`,
-    METHOD: `${preffix}method`,
-    NOTICE_EV: `${preffix}notice`,
-    LISTEN_EV: `${preffix}listen`,
+    SCHEMA_CHANGED: exports.CHANNEL_PREFIX + "schema-changed",
+    SCHEMA: exports.CHANNEL_PREFIX + "schema",
+    DEFAULT: exports.CHANNEL_PREFIX,
+    SQL: `${exports.CHANNEL_PREFIX}sql`,
+    SQL_STREAM: `${exports.CHANNEL_PREFIX}sql-stream`,
+    METHOD: `${exports.CHANNEL_PREFIX}method`,
+    NOTICE_EV: `${exports.CHANNEL_PREFIX}notice`,
+    LISTEN_EV: `${exports.CHANNEL_PREFIX}listen`,
     /* Auth channels */
-    REGISTER: `${preffix}register`,
-    LOGIN: `${preffix}login`,
-    LOGOUT: `${preffix}logout`,
-    AUTHGUARD: `${preffix}authguard`,
+    REGISTER: `${exports.CHANNEL_PREFIX}register`,
+    LOGIN: `${exports.CHANNEL_PREFIX}login`,
+    LOGOUT: `${exports.CHANNEL_PREFIX}logout`,
+    AUTH_GUARD: `${exports.CHANNEL_PREFIX}authguard`,
     /**
      * Used for sending any connection errors from onSocketConnect
      */
-    CONNECTION: `${preffix}connection`,
-    _preffix: preffix,
+    CONNECTION: `${exports.CHANNEL_PREFIX}connection`,
+    _preffix: exports.CHANNEL_PREFIX,
 };
 exports.SQL_COMMAND_TABLE_METHODS = {
     /**
@@ -196,6 +196,7 @@ __exportStar(require("./JSONBSchemaValidation/getJSONBSchemaAsJSONSchema"), expo
 __exportStar(require("./JSONBSchemaValidation/getJSONBSchemaTSTypes"), exports);
 __exportStar(require("./JSONBSchemaValidation/JSONBSchema"), exports);
 __exportStar(require("./JSONBSchemaValidation/JSONBSchemaValidation"), exports);
+__exportStar(require("./replication"), exports);
 __exportStar(require("./util"), exports);
 __exportStar(require("./utilFuncs/index"), exports);
 //# sourceMappingURL=index.js.map

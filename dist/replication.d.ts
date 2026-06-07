@@ -14,7 +14,7 @@ export type ClientSyncInfo = {
     c_fr?: AnyObject;
     c_lr?: AnyObject;
     /**
-     * PG count is ussually string due to bigint
+     * PG count is usually string due to bigint
      */
     c_count: number;
 };
@@ -82,4 +82,9 @@ export type ClientSyncHandles = {
      */
     onUpdates: (params: onUpdatesParams) => Promise<true>;
 };
+export declare const getSyncChannelName: ({ tableName, filter, select, }: {
+    tableName: string;
+    filter: AnyObject;
+    select: AnyObject;
+}) => string;
 //# sourceMappingURL=replication.d.ts.map

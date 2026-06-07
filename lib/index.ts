@@ -1286,30 +1286,30 @@ export type NoticeSubscription = {
   socketUnsubChannel: string;
 };
 
-const preffix = "_psqlWS_.";
+export const CHANNEL_PREFIX = "_psqlWS_.";
 export const CHANNELS = {
-  SCHEMA_CHANGED: preffix + "schema-changed",
-  SCHEMA: preffix + "schema",
+  SCHEMA_CHANGED: CHANNEL_PREFIX + "schema-changed",
+  SCHEMA: CHANNEL_PREFIX + "schema",
 
-  DEFAULT: preffix,
-  SQL: `${preffix}sql`,
-  SQL_STREAM: `${preffix}sql-stream`,
-  METHOD: `${preffix}method`,
-  NOTICE_EV: `${preffix}notice`,
-  LISTEN_EV: `${preffix}listen`,
+  DEFAULT: CHANNEL_PREFIX,
+  SQL: `${CHANNEL_PREFIX}sql`,
+  SQL_STREAM: `${CHANNEL_PREFIX}sql-stream`,
+  METHOD: `${CHANNEL_PREFIX}method`,
+  NOTICE_EV: `${CHANNEL_PREFIX}notice`,
+  LISTEN_EV: `${CHANNEL_PREFIX}listen`,
 
   /* Auth channels */
-  REGISTER: `${preffix}register`,
-  LOGIN: `${preffix}login`,
-  LOGOUT: `${preffix}logout`,
-  AUTHGUARD: `${preffix}authguard`,
+  REGISTER: `${CHANNEL_PREFIX}register`,
+  LOGIN: `${CHANNEL_PREFIX}login`,
+  LOGOUT: `${CHANNEL_PREFIX}logout`,
+  AUTH_GUARD: `${CHANNEL_PREFIX}authguard`,
 
   /**
    * Used for sending any connection errors from onSocketConnect
    */
-  CONNECTION: `${preffix}connection`,
+  CONNECTION: `${CHANNEL_PREFIX}connection`,
 
-  _preffix: preffix,
+  _preffix: CHANNEL_PREFIX,
 };
 
 export type SubscriptionChannels = {
@@ -1471,14 +1471,6 @@ export * from "./JSONBSchemaValidation/getJSONBSchemaAsJSONSchema";
 export * from "./JSONBSchemaValidation/getJSONBSchemaTSTypes";
 export * from "./JSONBSchemaValidation/JSONBSchema";
 export * from "./JSONBSchemaValidation/JSONBSchemaValidation";
-export type {
-  ClientExpressData,
-  ClientSyncHandles,
-  ClientSyncInfo,
-  ClientSyncPullResponse,
-  onUpdatesParams,
-  SyncBatchParams,
-  SyncConfig,
-} from "./replication";
+export * from "./replication";
 export * from "./util";
 export * from "./utilFuncs/index";

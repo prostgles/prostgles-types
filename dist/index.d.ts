@@ -17,7 +17,7 @@ export type PG_COLUMN_UDT_DATA_TYPE = (typeof _PG_strings)[number] | (typeof _PG
 export declare const TS_PG_Types: {
     readonly "number[]": ("_int2" | "_int4" | "_float4" | "_float8" | "_oid")[];
     readonly "boolean[]": "_bool"[];
-    readonly "string[]": ("_text" | "_bpchar" | "_char" | "_varchar" | "_citext" | "_uuid" | "_bytea" | "_time" | "_timetz" | "_interval" | "_name" | "_cidr" | "_inet" | "_macaddr" | "_macaddr8" | "_int4range" | "_int8range" | "_numrange" | "_tsvector" | "_int8" | "_numeric" | "_money" | "_date" | "_timestamp" | "_timestamptz" | "_point" | "_line" | "_lseg" | "_box" | "_path" | "_polygon" | "_circle" | "_geometry" | "_geography")[];
+    readonly "string[]": ("_name" | "_text" | "_bpchar" | "_char" | "_varchar" | "_citext" | "_uuid" | "_bytea" | "_time" | "_timetz" | "_interval" | "_cidr" | "_inet" | "_macaddr" | "_macaddr8" | "_int4range" | "_int8range" | "_numrange" | "_tsvector" | "_int8" | "_numeric" | "_money" | "_date" | "_timestamp" | "_timestamptz" | "_point" | "_line" | "_lseg" | "_box" | "_path" | "_polygon" | "_circle" | "_geometry" | "_geography")[];
     readonly "any[]": ("_interval" | "_json" | "_jsonb")[];
     readonly string: readonly ["bpchar", "char", "varchar", "text", "citext", "uuid", "bytea", "time", "timetz", "interval", "name", "cidr", "inet", "macaddr", "macaddr8", "int4range", "int8range", "numrange", "tsvector", "int8", "numeric", "money", "date", "timestamp", "timestamptz", "point", "line", "lseg", "box", "path", "polygon", "circle", "geometry", "geography", "lseg"];
     readonly number: readonly ["int2", "int4", "float4", "float8", "oid"];
@@ -280,7 +280,7 @@ export type TableInfo = {
         delete?: {};
     };
 };
-export declare const getAllowedTableMethods: ({ publishInfo }: Pick<TableInfo, "publishInfo">) => ("insert" | "update" | "delete" | "find" | "getColumns" | "getInfo" | "insertMany" | "upsert" | "updateBatch" | "findOne" | "count" | "size" | "subscribe" | "subscribeOne" | "sync" | "remove")[];
+export declare const getAllowedTableMethods: ({ publishInfo }: Pick<TableInfo, "publishInfo">) => ("insert" | "update" | "delete" | "find" | "sync" | "getColumns" | "getInfo" | "insertMany" | "upsert" | "updateBatch" | "findOne" | "count" | "size" | "subscribe" | "subscribeOne" | "remove")[];
 export type RequiredNestedInsert = {
     ftable: string;
     minRows?: number;
@@ -876,6 +876,7 @@ export type NoticeSubscription = {
     socketChannel: string;
     socketUnsubChannel: string;
 };
+export declare const CHANNEL_PREFIX = "_psqlWS_.";
 export declare const CHANNELS: {
     SCHEMA_CHANGED: string;
     SCHEMA: string;
@@ -888,7 +889,7 @@ export declare const CHANNELS: {
     REGISTER: string;
     LOGIN: string;
     LOGOUT: string;
-    AUTHGUARD: string;
+    AUTH_GUARD: string;
     /**
      * Used for sending any connection errors from onSocketConnect
      */
@@ -1006,7 +1007,7 @@ export * from "./JSONBSchemaValidation/getJSONBSchemaAsJSONSchema";
 export * from "./JSONBSchemaValidation/getJSONBSchemaTSTypes";
 export * from "./JSONBSchemaValidation/JSONBSchema";
 export * from "./JSONBSchemaValidation/JSONBSchemaValidation";
-export type { ClientExpressData, ClientSyncHandles, ClientSyncInfo, ClientSyncPullResponse, onUpdatesParams, SyncBatchParams, SyncConfig, } from "./replication";
+export * from "./replication";
 export * from "./util";
 export * from "./utilFuncs/index";
 //# sourceMappingURL=index.d.ts.map

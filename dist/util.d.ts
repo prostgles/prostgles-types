@@ -4,7 +4,10 @@ export declare const pickKeys: <T extends AnyObject, Include extends keyof T>(ob
 export declare function omitKeys<T extends AnyObject, Exclude extends keyof T>(obj: T, exclude: Exclude[]): Omit<T, Exclude>;
 export declare function filter<T extends AnyObject, ArrFilter extends Partial<T>>(array: T[], arrFilter: ArrFilter): T[];
 export declare function find<T extends AnyObject, ArrFilter extends Partial<T>>(array: T[], arrFilter: ArrFilter): T | undefined;
-export declare function stableStringify(data: AnyObject, opts: any): string | undefined;
+export declare function stableStringify(data: AnyObject, opts?: Function | {
+    cmp?: Function;
+    cycles?: boolean;
+}): string;
 export type TextPatch = {
     from: number;
     to: number;

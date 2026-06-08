@@ -133,7 +133,7 @@ export type ReplicationState = {
           /** Filter */
           param1: EqualityFilter<AnyObject>;
           /** Select */
-          param2: FieldFilter;
+          param2: { select: FieldFilter };
         };
         "server.response": {
           data: SyncConfig & {

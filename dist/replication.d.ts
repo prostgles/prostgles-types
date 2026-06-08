@@ -1,5 +1,5 @@
 import { type FieldFilter } from "./index";
-import { AnyObject } from "./filters";
+import { AnyObject, type EqualityFilter } from "./filters";
 /**
  * Response from server to set up a sync channel
  */
@@ -88,4 +88,36 @@ export declare const getSyncChannelName: ({ tableName, filter, select, }: {
     filter: AnyObject;
     select: FieldFilter;
 }) => string;
+export type ReplicationState = {
+    channels: {
+        CHANNEL_PREFIX: {
+            "channelName.get": () => string;
+            "client.emit": {
+                data: {
+                    tableName: string;
+                    command: "sync";
+                    filter: EqualityFilter<AnyObject>;
+                    select: FieldFilter;
+                };
+                "server.response": {
+                    data: SyncConfig & {
+                        data: AnyObject[];
+                        isSynced: boolean;
+                    };
+                    channels: {
+                        channelName: {
+                            /** Obtained from getSyncChannelName */
+                            "channelName.get": () => string;
+                            "client.emit": {
+                                data: {
+                                    onSyncRequest: ClientSyncInfo | ClientExpressData | Promise<ClientSyncInfo | ClientExpressData>;
+                                };
+                            };
+                        };
+                    };
+                };
+            };
+        };
+    };
+};
 //# sourceMappingURL=replication.d.ts.map

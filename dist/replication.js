@@ -10,4 +10,7 @@ const getSyncChannelName = ({ tableName, filter = {}, select = {}, }) => [
     typeof select === "string" ? select : (0, index_1.stableStringify)(select),
 ].join(".");
 exports.getSyncChannelName = getSyncChannelName;
+/*
+  On server
+*/
 //# sourceMappingURL=replication.js.map

@@ -1,5 +1,5 @@
 import { CHANNEL_PREFIX, stableStringify, type FieldFilter } from "./index";
-import { AnyObject } from "./filters";
+import { AnyObject, type EqualityFilter } from "./filters";
 
 /**
  * Response from server to set up a sync channel
@@ -121,3 +121,44 @@ export const getSyncChannelName = ({
     stableStringify(filter),
     typeof select === "string" ? select : stableStringify(select),
   ].join(".");
+
+export type ReplicationState = {
+  channels: {
+    CHANNEL_PREFIX: {
+      "channelName.get": () => string;
+      "client.emit": {
+        data: {
+          tableName: string;
+          command: "sync";
+          filter: EqualityFilter<AnyObject>;
+          select: FieldFilter;
+        };
+        "server.response": {
+          data: SyncConfig & {
+            data: AnyObject[];
+            isSynced: boolean;
+          };
+
+          channels: {
+            channelName: {
+              /** Obtained from getSyncChannelName */
+              "channelName.get": () => string;
+              "client.emit": {
+                data: {
+                  onSyncRequest:
+                    | ClientSyncInfo
+                    | ClientExpressData
+                    | Promise<ClientSyncInfo | ClientExpressData>;
+                };
+              };
+            };
+          };
+        };
+      };
+    };
+  };
+};
+
+/* 
+  On server
+*/

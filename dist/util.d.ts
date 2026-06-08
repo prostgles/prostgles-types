@@ -1,4 +1,4 @@
-import { AnyObject, JoinPath, TS_COLUMN_DATA_TYPES } from ".";
+import { AnyObject, JoinPath } from ".";
 export declare function asName(str: string): string;
 export declare const pickKeys: <T extends AnyObject, Include extends keyof T>(obj: T, keys?: Include[] | readonly Include[], onlyIfDefined?: boolean) => Pick<T, Include>;
 export declare function omitKeys<T extends AnyObject, Exclude extends keyof T>(obj: T, exclude: Exclude[]): Omit<T, Exclude>;
@@ -16,88 +16,6 @@ export type TextPatch = {
 };
 export declare function getTextPatch(oldStr: string, newStr: string): TextPatch | string;
 export declare function unpatchText(original: string | null, patch: TextPatch): string;
-export type SyncTableInfo = {
-    id_fields: string[];
-    synced_field: string;
-    throttle: number;
-    batch_size: number;
-};
-export type BasicOrderBy = {
-    fieldName: string;
-    /**
-     * Used to ensure numbers are not left as strings in some cases
-     */
-    tsDataType: TS_COLUMN_DATA_TYPES;
-    asc: boolean;
-}[];
-export type WALConfig = SyncTableInfo & {
-    /**
-     * Fired when new data is added and there is no sending in progress
-     */
-    onSendStart?: () => any;
-    /**
-     * Fired on each data send batch
-     */
-    onSend: (items: any[], fullItems: WALItem[]) => Promise<any>;
-    /**
-     * Fired after all data was sent or when a batch error is thrown
-     */
-    onSendEnd?: (batch: any[], fullItems: WALItem[], error?: any) => any;
-    /**
-     * Order by which the items will be synced. Defaults to [synced_field, ...id_fields.sort()]
-     */
-    orderBy?: BasicOrderBy;
-    /**
-     * Defaults to 2 seconds
-     */
-    historyAgeSeconds?: number;
-    DEBUG_MODE?: boolean;
-    id?: string;
-};
-export type WALItem = {
-    initial?: AnyObject;
-    delta?: AnyObject;
-    current: AnyObject;
-};
-export type WALItemsObj = Record<string, WALItem>;
-/**
- * Used to throttle and combine updates sent to server
- * This allows a high rate of optimistic updates on the client
- */
-export declare class WAL {
-    /**
-     * Instantly merged records for prepared for update
-     */
-    private changed;
-    /**
-     * Batch of records (removed from this.changed) that are currently being sent
-     */
-    private sending;
-    /**
-     * Historic data used to reduce data pushes from server to client
-     */
-    private sentHistory;
-    private options;
-    private callbacks;
-    constructor(args: WALConfig);
-    sort: (a?: AnyObject, b?: AnyObject) => number;
-    isSending(): boolean;
-    /**
-     * Used by server to avoid unnecessary data push to client.
-     * This can happen due to the same data item having been previously pushed by the client
-     * @param item data item
-     * @returns boolean
-     */
-    isInHistory: (item: AnyObject) => boolean;
-    getIdStr(d: AnyObject): string;
-    getIdObj(d: AnyObject): AnyObject;
-    getDeltaObj(d: AnyObject): AnyObject;
-    addData: (data: WALItem[]) => Promise<void>;
-    isOnSending: boolean;
-    isSendingTimeout?: ReturnType<typeof setTimeout>;
-    willDeleteHistory?: ReturnType<typeof setTimeout>;
-    private sendItems;
-}
 export declare function isEmpty(obj?: any): boolean;
 export declare const isNotEmpty: <T extends Record<string, unknown>>(obj?: T | null | undefined) => obj is T;
 export declare function get(obj: any, propertyPath: string | string[]): any;

@@ -2,8 +2,9 @@ import * as AuthTypes from "./auth";
 import { FileColumnConfig } from "./files";
 import { AnyObject, ComplexFilter, FullFilter, ValueOf } from "./filters";
 import { JSONB } from "./JSONBSchemaValidation/JSONBSchema";
-import { getKeys, isDefined, type SyncTableInfo } from "./util";
+import { getKeys, isDefined } from "./util";
 import { includes } from "./utilFuncs/includes";
+import type { SyncTableInfo } from "./WAL";
 export const _PG_strings = [
   "bpchar",
   "char",

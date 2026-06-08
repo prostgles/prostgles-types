@@ -2,7 +2,7 @@ import * as AuthTypes from "./auth";
 import { FileColumnConfig } from "./files";
 import { AnyObject, ComplexFilter, FullFilter, ValueOf } from "./filters";
 import { JSONB } from "./JSONBSchemaValidation/JSONBSchema";
-import { type SyncTableInfo } from "./util";
+import type { SyncTableInfo } from "./WAL";
 export declare const _PG_strings: readonly ["bpchar", "char", "varchar", "text", "citext", "uuid", "bytea", "time", "timetz", "interval", "name", "cidr", "inet", "macaddr", "macaddr8", "int4range", "int8range", "numrange", "tsvector"];
 export declare const _PG_numbers_num: readonly ["int2", "int4", "float4", "float8", "oid"];
 export declare const _PG_numbers_str: readonly ["int8", "numeric", "money"];
@@ -17,8 +17,8 @@ export type PG_COLUMN_UDT_DATA_TYPE = (typeof _PG_strings)[number] | (typeof _PG
 export declare const TS_PG_Types: {
     readonly "number[]": ("_int2" | "_int4" | "_float4" | "_float8" | "_oid")[];
     readonly "boolean[]": "_bool"[];
-    readonly "string[]": ("_name" | "_text" | "_bpchar" | "_char" | "_varchar" | "_citext" | "_uuid" | "_bytea" | "_time" | "_timetz" | "_interval" | "_cidr" | "_inet" | "_macaddr" | "_macaddr8" | "_int4range" | "_int8range" | "_numrange" | "_tsvector" | "_int8" | "_numeric" | "_money" | "_date" | "_timestamp" | "_timestamptz" | "_point" | "_line" | "_lseg" | "_box" | "_path" | "_polygon" | "_circle" | "_geometry" | "_geography")[];
-    readonly "any[]": ("_interval" | "_json" | "_jsonb")[];
+    readonly "string[]": ("_text" | "_name" | "_time" | "_timestamp" | "_path" | "_bpchar" | "_char" | "_varchar" | "_citext" | "_uuid" | "_bytea" | "_timetz" | "_interval" | "_cidr" | "_inet" | "_macaddr" | "_macaddr8" | "_int4range" | "_int8range" | "_numrange" | "_tsvector" | "_int8" | "_numeric" | "_money" | "_point" | "_line" | "_lseg" | "_box" | "_polygon" | "_circle" | "_date" | "_timestamptz" | "_geometry" | "_geography")[];
+    readonly "any[]": ("_interval" | "_jsonb" | "_json")[];
     readonly string: readonly ["bpchar", "char", "varchar", "text", "citext", "uuid", "bytea", "time", "timetz", "interval", "name", "cidr", "inet", "macaddr", "macaddr8", "int4range", "int8range", "numrange", "tsvector", "int8", "numeric", "money", "date", "timestamp", "timestamptz", "point", "line", "lseg", "box", "path", "polygon", "circle", "geometry", "geography", "lseg"];
     readonly number: readonly ["int2", "int4", "float4", "float8", "oid"];
     readonly boolean: readonly ["bool"];

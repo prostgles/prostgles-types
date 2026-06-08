@@ -108,11 +108,11 @@ export type ClientSyncHandles = {
 export const getSyncChannelName = ({
   tableName,
   filter = {},
-  select = {},
+  select = "*",
 }: {
   tableName: string;
-  filter: AnyObject;
-  select: FieldFilter;
+  filter: EqualityFilter<AnyObject> | undefined;
+  select: FieldFilter | undefined;
 }) =>
   [
     CHANNEL_PREFIX,

@@ -1009,5 +1009,6 @@ export * from "./JSONBSchemaValidation/JSONBSchema";
 export * from "./JSONBSchemaValidation/JSONBSchemaValidation";
 export * from "./replication";
 export * from "./util";
+export * from "./WAL";
 export * from "./utilFuncs/index";
 //# sourceMappingURL=index.d.ts.map

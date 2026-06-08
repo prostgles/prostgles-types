@@ -198,5 +198,6 @@ __exportStar(require("./JSONBSchemaValidation/JSONBSchema"), exports);
 __exportStar(require("./JSONBSchemaValidation/JSONBSchemaValidation"), exports);
 __exportStar(require("./replication"), exports);
 __exportStar(require("./util"), exports);
+__exportStar(require("./WAL"), exports);
 __exportStar(require("./utilFuncs/index"), exports);
 //# sourceMappingURL=index.js.map

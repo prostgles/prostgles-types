@@ -85,8 +85,8 @@ export type ClientSyncHandles = {
 };
 export declare const getSyncChannelName: ({ tableName, filter, select, }: {
     tableName: string;
-    filter: AnyObject;
-    select: FieldFilter;
+    filter: EqualityFilter<AnyObject> | undefined;
+    select: FieldFilter | undefined;
 }) => string;
 export type ReplicationState = {
     channels: {

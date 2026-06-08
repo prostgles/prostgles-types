@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getSyncChannelName = void 0;
 const index_1 = require("./index");
-const getSyncChannelName = ({ tableName, filter = {}, select = {}, }) => [
+const getSyncChannelName = ({ tableName, filter = {}, select = "*", }) => [
     index_1.CHANNEL_PREFIX,
     tableName,
     "sync",

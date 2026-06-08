@@ -96,8 +96,10 @@ export type ReplicationState = {
                 data: {
                     tableName: string;
                     command: "sync";
-                    filter: EqualityFilter<AnyObject>;
-                    select: FieldFilter;
+                    /** Filter */
+                    param1: EqualityFilter<AnyObject>;
+                    /** Select */
+                    param2: FieldFilter;
                 };
                 "server.response": {
                     data: SyncConfig & {

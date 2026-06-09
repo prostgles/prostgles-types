@@ -371,3 +371,10 @@ export const getProperty = <T extends object, K extends string>(
   if (!Object.keys(obj).includes(key)) return undefined as K extends keyof T ? T[K] : undefined;
   return obj[key as keyof T] as K extends keyof T ? T[K] : undefined;
 };
+
+export const withTimeout = <T>(promise: Promise<T>, ms: number): Promise<T> => {
+  const timeout = new Promise<never>((_, reject) =>
+    setTimeout(() => reject(new Error(`Timed out after ${ms}ms`)), ms),
+  );
+  return Promise.race([promise, timeout]);
+};

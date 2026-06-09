@@ -114,7 +114,15 @@ export type ReplicationState = {
                             "channelName.get": () => string;
                             "client.emit": {
                                 data: {
-                                    onSyncRequest: ClientSyncInfo | ClientExpressData | Promise<ClientSyncInfo | ClientExpressData>;
+                                    onSyncRequest: ClientSyncInfo | ClientExpressData;
+                                };
+                            };
+                            "server.emit": {
+                                data: {
+                                    onPullRequest: SyncBatchParams;
+                                };
+                                "client.response": {
+                                    data: ClientSyncPullResponse;
                                 };
                             };
                         };

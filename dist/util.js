@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getProperty = exports.getSerialisableError = exports.safeStringify = exports.extractTypeUtil = exports.reverseParsedPath = exports.reverseJoinOn = exports.tryCatch = exports.getObjectEntries = exports.isNotEmpty = exports.pickKeys = void 0;
+exports.withTimeout = exports.getProperty = exports.getSerialisableError = exports.safeStringify = exports.extractTypeUtil = exports.reverseParsedPath = exports.reverseJoinOn = exports.tryCatch = exports.getObjectEntries = exports.isNotEmpty = exports.pickKeys = void 0;
 exports.asName = asName;
 exports.omitKeys = omitKeys;
 exports.filter = filter;
@@ -298,4 +298,9 @@ const getProperty = (obj, key) => {
     return obj[key];
 };
 exports.getProperty = getProperty;
+const withTimeout = (promise, ms) => {
+    const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error(`Timed out after ${ms}ms`)), ms));
+    return Promise.race([promise, timeout]);
+};
+exports.withTimeout = withTimeout;
 //# sourceMappingURL=util.js.map

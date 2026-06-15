@@ -81,7 +81,9 @@ var ReplicationProtocol;
         request: {
             oneOfType: [ClientSyncInfoSchema, ClientExpressDataSchema],
         },
-        response: ReplicationProtocol.ServerSyncRequest.response,
+        response: {
+            type: { ok: { enum: [true] } },
+        },
     };
     ReplicationProtocol.PullRequest = {
         name: "PullRequest",
@@ -140,7 +142,7 @@ var ReplicationProtocol;
     };
     const Schemas = { ClientSyncRequest: ReplicationProtocol.ClientSyncRequest, ServerSyncRequest: ReplicationProtocol.ServerSyncRequest, PullRequest: ReplicationProtocol.PullRequest, UpdateRequest: ReplicationProtocol.UpdateRequest };
     const SchemasList = Object.values(Schemas);
-    ReplicationProtocol.getHandlers = (channelName, socket, side, onResponse) => {
+    const getHandlers = (channelName, socket, side, onResponse) => {
         socket.removeAllListeners(channelName);
         socket.on(channelName, async (requestRaw, cb) => {
             const { type, request } = (0, index_1.isObject)(requestRaw) ? requestRaw : {};
@@ -204,5 +206,7 @@ var ReplicationProtocol;
             .filter(index_1.isDefined));
         return outgoingSchemas;
     };
+    ReplicationProtocol.getServerHandlers = (channelName, socket, onResponse) => getHandlers(channelName, socket, "server", onResponse);
+    ReplicationProtocol.getClientHandlers = (channelName, socket, onResponse) => getHandlers(channelName, socket, "client", onResponse);
 })(ReplicationProtocol || (exports.ReplicationProtocol = ReplicationProtocol = {}));
 //# sourceMappingURL=replication.js.map

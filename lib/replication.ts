@@ -169,6 +169,9 @@ export namespace ReplicationProtocol {
     },
   } as const satisfies RequestBase;
 
+  export type CreateSchemaRequest = JSONB.GetType<typeof CreateSchema.request>;
+  export type CreateSchemaResponse = JSONB.GetType<typeof CreateSchema.response>;
+
   const ClientSyncInfoSchema = {
     state: { enum: ["syncing"] },
     c_fr: { optional: true, record: { values: "unknown" } },
@@ -216,7 +219,9 @@ export namespace ReplicationProtocol {
     request: {
       oneOfType: [ClientSyncInfoSchema, ClientExpressDataSchema],
     },
-    response: ServerSyncRequest.response,
+    response: {
+      type: { ok: { enum: [true] } },
+    },
   } as const satisfies RequestBase;
 
   export const PullRequest = {
@@ -280,7 +285,19 @@ export namespace ReplicationProtocol {
   type SchemasType = typeof Schemas;
   const SchemasList = Object.values(Schemas);
 
-  export const getHandlers = <Side extends RequestBase["source"]>(
+  type IncomingHandlers<Side extends RequestBase["source"]> = {
+    [K in keyof SchemasType as SchemasType[K]["source"] extends Side ? never : K]: (
+      params: JSONB.GetType<SchemasType[K]["request"]>,
+    ) => Promise<JSONB.GetType<SchemasType[K]["response"]>>;
+  };
+
+  type OutgoingHandlers<Side extends RequestBase["source"]> = {
+    [K in keyof SchemasType as SchemasType[K]["source"] extends Side ? K : never]: (
+      params: JSONB.GetType<SchemasType[K]["request"]>,
+    ) => Promise<JSONB.GetType<SchemasType[K]["response"]>>;
+  };
+
+  const getHandlers = <Side extends RequestBase["source"]>(
     channelName: string,
     socket: {
       on: (
@@ -295,16 +312,8 @@ export namespace ReplicationProtocol {
       removeAllListeners: (channelName: string) => void;
     },
     side: Side,
-    onResponse: {
-      [K in keyof SchemasType as SchemasType[K]["source"] extends Side ? never : K]: (
-        params: JSONB.GetType<SchemasType[K]["request"]>,
-      ) => Promise<JSONB.GetType<SchemasType[K]["response"]>>;
-    },
-  ): {
-    [K in keyof SchemasType as SchemasType[K]["source"] extends Side ? K : never]: (
-      params: JSONB.GetType<SchemasType[K]["request"]>,
-    ) => Promise<JSONB.GetType<SchemasType[K]["response"]>>;
-  } => {
+    onResponse: IncomingHandlers<Side>,
+  ): OutgoingHandlers<Side> => {
     socket.removeAllListeners(channelName);
     socket.on(channelName, async (requestRaw, cb) => {
       const { type, request } = isObject(requestRaw) ? requestRaw : {};
@@ -379,6 +388,18 @@ export namespace ReplicationProtocol {
         .filter(isDefined),
     );
 
-    return outgoingSchemas as any;
+    return outgoingSchemas as OutgoingHandlers<Side>;
   };
+
+  export const getServerHandlers = (
+    channelName: string,
+    socket: Parameters<typeof getHandlers>[1],
+    onResponse: IncomingHandlers<"server">,
+  ) => getHandlers(channelName, socket, "server", onResponse);
+
+  export const getClientHandlers = (
+    channelName: string,
+    socket: Parameters<typeof getHandlers>[1],
+    onResponse: IncomingHandlers<"client">,
+  ) => getHandlers(channelName, socket, "client", onResponse);
 }

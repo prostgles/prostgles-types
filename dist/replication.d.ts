@@ -129,6 +129,8 @@ export declare namespace ReplicationProtocol {
             };
         };
     };
+    export type CreateSchemaRequest = JSONB.GetType<typeof CreateSchema.request>;
+    export type CreateSchemaResponse = JSONB.GetType<typeof CreateSchema.response>;
     export const ServerSyncRequest: {
         readonly name: "ServerSyncRequest";
         readonly source: "server";
@@ -245,51 +247,11 @@ export declare namespace ReplicationProtocol {
             }];
         };
         readonly response: {
-            readonly oneOfType: readonly [{
-                readonly state: {
-                    readonly enum: readonly ["syncing"];
+            readonly type: {
+                readonly ok: {
+                    readonly enum: readonly [true];
                 };
-                readonly c_fr: {
-                    readonly optional: true;
-                    readonly record: {
-                        readonly values: "unknown";
-                    };
-                };
-                readonly c_lr: {
-                    readonly optional: true;
-                    readonly record: {
-                        readonly values: "unknown";
-                    };
-                };
-                readonly c_count: "number";
-            }, {
-                readonly state: {
-                    readonly enum: readonly ["syncing-data"];
-                };
-                readonly c_fr: {
-                    readonly record: {
-                        readonly values: "unknown";
-                    };
-                };
-                readonly c_lr: {
-                    readonly record: {
-                        readonly values: "unknown";
-                    };
-                };
-                readonly c_count: "number";
-                readonly data: {
-                    readonly arrayOf: {
-                        readonly record: {
-                            readonly values: "unknown";
-                        };
-                    };
-                };
-            }, {
-                readonly state: {
-                    readonly enum: readonly ["error"];
-                };
-                readonly err: "unknown";
-            }];
+            };
         };
     };
     export const PullRequest: {
@@ -426,51 +388,11 @@ export declare namespace ReplicationProtocol {
                 }];
             };
             readonly response: {
-                readonly oneOfType: readonly [{
-                    readonly state: {
-                        readonly enum: readonly ["syncing"];
+                readonly type: {
+                    readonly ok: {
+                        readonly enum: readonly [true];
                     };
-                    readonly c_fr: {
-                        readonly optional: true;
-                        readonly record: {
-                            readonly values: "unknown";
-                        };
-                    };
-                    readonly c_lr: {
-                        readonly optional: true;
-                        readonly record: {
-                            readonly values: "unknown";
-                        };
-                    };
-                    readonly c_count: "number";
-                }, {
-                    readonly state: {
-                        readonly enum: readonly ["syncing-data"];
-                    };
-                    readonly c_fr: {
-                        readonly record: {
-                            readonly values: "unknown";
-                        };
-                    };
-                    readonly c_lr: {
-                        readonly record: {
-                            readonly values: "unknown";
-                        };
-                    };
-                    readonly c_count: "number";
-                    readonly data: {
-                        readonly arrayOf: {
-                            readonly record: {
-                                readonly values: "unknown";
-                            };
-                        };
-                    };
-                }, {
-                    readonly state: {
-                        readonly enum: readonly ["error"];
-                    };
-                    readonly err: "unknown";
-                }];
+                };
             };
         };
         readonly ServerSyncRequest: {
@@ -632,11 +554,19 @@ export declare namespace ReplicationProtocol {
         };
     };
     type SchemasType = typeof Schemas;
-    export const getHandlers: <Side extends RequestBase["source"]>(channelName: string, socket: {
+    type IncomingHandlers<Side extends RequestBase["source"]> = {
+        [K in keyof SchemasType as SchemasType[K]["source"] extends Side ? never : K]: (params: JSONB.GetType<SchemasType[K]["request"]>) => Promise<JSONB.GetType<SchemasType[K]["response"]>>;
+    };
+    type OutgoingHandlers<Side extends RequestBase["source"]> = {
+        [K in keyof SchemasType as SchemasType[K]["source"] extends Side ? K : never]: (params: JSONB.GetType<SchemasType[K]["request"]>) => Promise<JSONB.GetType<SchemasType[K]["response"]>>;
+    };
+    const getHandlers: <Side extends RequestBase["source"]>(channelName: string, socket: {
         on: (channelName: string, request: (data: unknown, cb: SocketCallback) => MaybePromise<void>) => void;
         emit: (channelName: string, request: unknown, response: (response: unknown) => MaybePromise<void>) => void;
         removeAllListeners: (channelName: string) => void;
-    }, side: Side, onResponse: { [K in keyof SchemasType as SchemasType[K]["source"] extends Side ? never : K]: (params: JSONB.GetType<SchemasType[K]["request"]>) => Promise<JSONB.GetType<SchemasType[K]["response"]>>; }) => { [K in keyof SchemasType as SchemasType[K]["source"] extends Side ? K : never]: (params: JSONB.GetType<SchemasType[K]["request"]>) => Promise<JSONB.GetType<SchemasType[K]["response"]>>; };
+    }, side: Side, onResponse: IncomingHandlers<Side>) => OutgoingHandlers<Side>;
+    export const getServerHandlers: (channelName: string, socket: Parameters<typeof getHandlers>[1], onResponse: IncomingHandlers<"server">) => OutgoingHandlers<"server">;
+    export const getClientHandlers: (channelName: string, socket: Parameters<typeof getHandlers>[1], onResponse: IncomingHandlers<"client">) => OutgoingHandlers<"client">;
     export {};
 }
 export {};

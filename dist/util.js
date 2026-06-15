@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.withTimeout = exports.getProperty = exports.getSerialisableError = exports.safeStringify = exports.extractTypeUtil = exports.reverseParsedPath = exports.reverseJoinOn = exports.tryCatch = exports.getObjectEntries = exports.isNotEmpty = exports.pickKeys = void 0;
+exports.fromEntries = exports.getEntries = exports.withTimeout = exports.getProperty = exports.getSerialisableError = exports.safeStringify = exports.extractTypeUtil = exports.reverseParsedPath = exports.reverseJoinOn = exports.tryCatch = exports.getObjectEntries = exports.isNotEmpty = exports.pickKeys = void 0;
 exports.asName = asName;
 exports.omitKeys = omitKeys;
 exports.filter = filter;
@@ -303,4 +303,10 @@ const withTimeout = (promise, ms) => {
     return Promise.race([promise, timeout]);
 };
 exports.withTimeout = withTimeout;
+const getEntries = (obj) => Object.entries(obj);
+exports.getEntries = getEntries;
+const fromEntries = (entries) => {
+    return Object.fromEntries(entries);
+};
+exports.fromEntries = fromEntries;
 //# sourceMappingURL=util.js.map

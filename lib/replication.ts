@@ -1,5 +1,17 @@
-import { CHANNEL_PREFIX, stableStringify, type FieldFilter } from "./index";
 import { AnyObject, type EqualityFilter } from "./filters";
+import {
+  CHANNEL_PREFIX,
+  fromEntries,
+  getEntries,
+  getJSONBSchemaValidationError,
+  getSerialisableError,
+  isDefined,
+  isObject,
+  stableStringify,
+  type FieldFilter,
+  type JSONB,
+  type MaybePromise,
+} from "./index";
 
 /**
  * Response from server to set up a sync channel
@@ -75,7 +87,7 @@ export type SyncBatchParams = {
   offset?: number;
 
   /**
-   * Maxmimum number of rows to take
+   * Maximum number of rows to take
    */
   limit?: number;
 };
@@ -122,50 +134,252 @@ export const getSyncChannelName = ({
     typeof select === "string" ? select : stableStringify(select),
   ].join(".");
 
-export type ReplicationState = {
-  channels: {
-    CHANNEL_PREFIX: {
-      "channelName.get": () => string;
-      "client.emit": {
-        data: {
-          tableName: string;
-          command: "sync";
-          /** Filter */
-          param1: EqualityFilter<AnyObject>;
-          /** Select */
-          param2: { select: FieldFilter };
-        };
-        "server.response": {
-          data: SyncConfig & {
-            data: AnyObject[];
-            isSynced: boolean;
-          };
+export type SocketCallback = (err?: unknown, res?: unknown) => void;
 
-          channels: {
-            channelName: {
-              /** Obtained from getSyncChannelName */
-              "channelName.get": () => string;
-              "client.emit": {
-                data: {
-                  onSyncRequest: ClientSyncInfo | ClientExpressData;
-                };
-              };
-              "server.emit": {
-                data: {
-                  onPullRequest: SyncBatchParams;
-                };
-                "client.response": {
-                  data: ClientSyncPullResponse;
-                };
-              };
-            };
-          };
-        };
-      };
-    };
-  };
+type RequestBase = {
+  name: string;
+  source: "client" | "server";
+  request: Omit<JSONB.FieldTypeObj, "optional">;
+  response: Omit<JSONB.FieldTypeObj, "optional">;
 };
+export namespace ReplicationProtocol {
+  export const CreateSchema = {
+    name: "Create",
+    source: "client",
+    request: {
+      type: {
+        tableName: "string",
+        command: { enum: ["sync"] },
+        /** Filter */
+        param1: {
+          record: { values: "unknown" },
+        },
+        /** Select */
+        param2: { type: { select: "unknown" } },
+      },
+    },
+    response: {
+      type: {
+        id_fields: "string[]",
+        synced_field: "string",
+        channelName: "string",
+        data: "any[]",
+        isSynced: "boolean",
+      },
+    },
+  } as const satisfies RequestBase;
 
-/* 
-  On server
-*/
+  const ClientSyncInfoSchema = {
+    state: { enum: ["syncing"] },
+    c_fr: { optional: true, record: { values: "unknown" } },
+    c_lr: { optional: true, record: { values: "unknown" } },
+    c_count: "number",
+  } as const satisfies JSONB.ObjectType["type"];
+
+  const ClientExpressDataSchema = {
+    state: { enum: ["syncing-data"] },
+    c_fr: { record: { values: "unknown" } },
+    c_lr: { record: { values: "unknown" } },
+    c_count: "number",
+    data: {
+      arrayOf: {
+        record: { values: "unknown" },
+      },
+    },
+  } as const satisfies JSONB.ObjectType["type"];
+
+  export const ServerSyncRequest = {
+    name: "ServerSyncRequest",
+    source: "server",
+    request: {
+      type: {
+        from_synced: { oneOf: ["string", { enum: [null] }] },
+        to_synced: { oneOf: ["string", { enum: [null] }] },
+        end_offset: { oneOf: ["number", { enum: [null] }] },
+      },
+    },
+    response: {
+      oneOfType: [
+        ClientSyncInfoSchema,
+        ClientExpressDataSchema,
+        {
+          state: { enum: ["error"] },
+          err: "unknown",
+        },
+      ],
+    },
+  } as const satisfies RequestBase;
+
+  export const ClientSyncRequest = {
+    name: "ClientSyncRequest",
+    source: "client",
+    request: {
+      oneOfType: [ClientSyncInfoSchema, ClientExpressDataSchema],
+    },
+    response: ServerSyncRequest.response,
+  } as const satisfies RequestBase;
+
+  export const PullRequest = {
+    name: "PullRequest",
+    source: "server",
+    request: {
+      type: {
+        from_synced: { oneOf: ["string", { enum: [undefined] }] },
+        to_synced: { oneOf: ["string", { enum: [undefined] }] },
+        offset: { oneOf: ["number", { enum: [undefined] }] },
+        limit: { oneOf: ["number", { enum: [undefined] }] },
+      },
+    },
+    response: {
+      oneOfType: [
+        {
+          success: { enum: [true] },
+          data: { arrayOf: { record: { values: "unknown" } } },
+        },
+        {
+          success: { enum: [false] },
+          err: "unknown",
+        },
+      ],
+    },
+  } as const satisfies RequestBase;
+
+  export const UpdateRequest = {
+    name: "UpdateRequest",
+    source: "server",
+    request: {
+      oneOfType: [
+        {
+          state: { enum: ["error"] },
+          err: "unknown",
+        },
+        {
+          state: { enum: ["synced"] },
+          isSynced: "boolean",
+        },
+        {
+          state: { enum: ["syncing"] },
+          data: { arrayOf: { record: { values: "unknown" } } },
+        },
+      ],
+    },
+    response: {
+      oneOfType: [
+        {
+          success: { enum: [true] },
+        },
+        {
+          success: { enum: [false] },
+          err: "unknown",
+        },
+      ],
+    },
+  } as const satisfies RequestBase;
+
+  const Schemas = { ClientSyncRequest, ServerSyncRequest, PullRequest, UpdateRequest } as const;
+  type SchemasType = typeof Schemas;
+  const SchemasList = Object.values(Schemas);
+
+  export const getHandlers = <Side extends RequestBase["source"]>(
+    params: Parameters<typeof getSyncChannelName>[0],
+    socket: {
+      on: (
+        channelName: string,
+        request: (data: unknown, cb: SocketCallback) => MaybePromise<void>,
+      ) => void;
+      emit: (
+        channelName: string,
+        request: unknown,
+        response: (response: unknown) => MaybePromise<void>,
+      ) => void;
+      removeAllListeners: (channelName: string) => void;
+    },
+    side: Side,
+    onResponse: {
+      [K in keyof SchemasType as SchemasType[K]["source"] extends Side ? never : K]: (
+        params: JSONB.GetType<SchemasType[K]["request"]>,
+      ) => Promise<JSONB.GetType<SchemasType[K]["response"]>>;
+    },
+  ): {
+    [K in keyof SchemasType as SchemasType[K]["source"] extends Side ? K : never]: (
+      params: JSONB.GetType<SchemasType[K]["request"]>,
+    ) => Promise<JSONB.GetType<SchemasType[K]["response"]>>;
+  } => {
+    const channelName = getSyncChannelName(params);
+    socket.removeAllListeners(channelName);
+    socket.on(channelName, async (requestRaw, cb) => {
+      const { type, request } = isObject(requestRaw) ? requestRaw : {};
+      if (typeof type !== "string" || !request) {
+        cb("Unexpected data");
+        return;
+      }
+
+      const schema = SchemasList.find((s) => s.name === type && s.source !== side);
+      if (!schema) {
+        cb("Invalid data.type");
+        return;
+      }
+
+      if (schema.source === side) {
+        cb("Invalid schema.source");
+        return;
+      }
+
+      /** Must validate incoming data */
+      if (side === "server") {
+        if (schema.source === "server") {
+          const validationResult = getJSONBSchemaValidationError(schema.request, request);
+          if (validationResult.error !== undefined) {
+            console.error("Invalid request from client", validationResult.error, request);
+            cb(validationResult.error);
+            return;
+          }
+        }
+      }
+      const schemaName = schema.name as keyof typeof onResponse;
+      try {
+        const response = await onResponse[schemaName](request);
+        cb(undefined, response);
+      } catch (err) {
+        cb(getSerialisableError(err));
+      }
+    });
+
+    const outgoingSchemas = fromEntries(
+      getEntries(Schemas)
+        .map(([key, schema]) => {
+          if (schema.source !== side) {
+            return undefined;
+          }
+          return [
+            key,
+            (request: unknown) => {
+              return new Promise((resolve, reject) => {
+                socket.emit(channelName, { type: schema.name, request }, (response: unknown) => {
+                  if (side === "server") {
+                    const validationResult = getJSONBSchemaValidationError(
+                      schema.response,
+                      response,
+                    );
+                    if (validationResult.error !== undefined) {
+                      console.error(
+                        "Invalid response from client",
+                        validationResult.error,
+                        response,
+                      );
+                      reject(validationResult.error);
+                      return;
+                    }
+                  }
+                  resolve(response);
+                });
+              });
+            },
+          ] as const;
+        })
+        .filter(isDefined),
+    );
+
+    return outgoingSchemas as any;
+  };
+}

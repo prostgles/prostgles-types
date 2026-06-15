@@ -378,3 +378,12 @@ export const withTimeout = <T>(promise: Promise<T>, ms: number): Promise<T> => {
   );
   return Promise.race([promise, timeout]);
 };
+
+export const getEntries = <T extends AnyObject>(obj: T) =>
+  Object.entries(obj) as [keyof T, T[keyof T]][];
+
+export const fromEntries = <K extends string | number | symbol, V>(
+  entries: readonly (readonly [K, V])[],
+): Record<K, V> => {
+  return Object.fromEntries(entries) as Record<K, V>;
+};

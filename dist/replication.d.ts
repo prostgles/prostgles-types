@@ -1,5 +1,5 @@
-import { type FieldFilter } from "./index";
 import { AnyObject, type EqualityFilter } from "./filters";
+import { type FieldFilter, type JSONB, type MaybePromise } from "./index";
 /**
  * Response from server to set up a sync channel
  */
@@ -61,7 +61,7 @@ export type SyncBatchParams = {
      */
     offset?: number;
     /**
-     * Maxmimum number of rows to take
+     * Maximum number of rows to take
      */
     limit?: number;
 };
@@ -88,48 +88,556 @@ export declare const getSyncChannelName: ({ tableName, filter, select, }: {
     filter: EqualityFilter<AnyObject> | undefined;
     select: FieldFilter | undefined;
 }) => string;
-export type ReplicationState = {
-    channels: {
-        CHANNEL_PREFIX: {
-            "channelName.get": () => string;
-            "client.emit": {
-                data: {
-                    tableName: string;
-                    command: "sync";
-                    /** Filter */
-                    param1: EqualityFilter<AnyObject>;
-                    /** Select */
-                    param2: {
-                        select: FieldFilter;
+export type SocketCallback = (err?: unknown, res?: unknown) => void;
+type RequestBase = {
+    name: string;
+    source: "client" | "server";
+    request: Omit<JSONB.FieldTypeObj, "optional">;
+    response: Omit<JSONB.FieldTypeObj, "optional">;
+};
+export declare namespace ReplicationProtocol {
+    export const CreateSchema: {
+        readonly name: "Create";
+        readonly source: "client";
+        readonly request: {
+            readonly type: {
+                readonly tableName: "string";
+                readonly command: {
+                    readonly enum: readonly ["sync"];
+                };
+                /** Filter */
+                readonly param1: {
+                    readonly record: {
+                        readonly values: "unknown";
                     };
                 };
-                "server.response": {
-                    data: SyncConfig & {
-                        data: AnyObject[];
-                        isSynced: boolean;
-                    };
-                    channels: {
-                        channelName: {
-                            /** Obtained from getSyncChannelName */
-                            "channelName.get": () => string;
-                            "client.emit": {
-                                data: {
-                                    onSyncRequest: ClientSyncInfo | ClientExpressData;
-                                };
-                            };
-                            "server.emit": {
-                                data: {
-                                    onPullRequest: SyncBatchParams;
-                                };
-                                "client.response": {
-                                    data: ClientSyncPullResponse;
-                                };
-                            };
-                        };
+                /** Select */
+                readonly param2: {
+                    readonly type: {
+                        readonly select: "unknown";
                     };
                 };
             };
         };
+        readonly response: {
+            readonly type: {
+                readonly id_fields: "string[]";
+                readonly synced_field: "string";
+                readonly channelName: "string";
+                readonly data: "any[]";
+                readonly isSynced: "boolean";
+            };
+        };
     };
-};
+    export const ServerSyncRequest: {
+        readonly name: "ServerSyncRequest";
+        readonly source: "server";
+        readonly request: {
+            readonly type: {
+                readonly from_synced: {
+                    readonly oneOf: readonly ["string", {
+                        readonly enum: readonly [null];
+                    }];
+                };
+                readonly to_synced: {
+                    readonly oneOf: readonly ["string", {
+                        readonly enum: readonly [null];
+                    }];
+                };
+                readonly end_offset: {
+                    readonly oneOf: readonly ["number", {
+                        readonly enum: readonly [null];
+                    }];
+                };
+            };
+        };
+        readonly response: {
+            readonly oneOfType: readonly [{
+                readonly state: {
+                    readonly enum: readonly ["syncing"];
+                };
+                readonly c_fr: {
+                    readonly optional: true;
+                    readonly record: {
+                        readonly values: "unknown";
+                    };
+                };
+                readonly c_lr: {
+                    readonly optional: true;
+                    readonly record: {
+                        readonly values: "unknown";
+                    };
+                };
+                readonly c_count: "number";
+            }, {
+                readonly state: {
+                    readonly enum: readonly ["syncing-data"];
+                };
+                readonly c_fr: {
+                    readonly record: {
+                        readonly values: "unknown";
+                    };
+                };
+                readonly c_lr: {
+                    readonly record: {
+                        readonly values: "unknown";
+                    };
+                };
+                readonly c_count: "number";
+                readonly data: {
+                    readonly arrayOf: {
+                        readonly record: {
+                            readonly values: "unknown";
+                        };
+                    };
+                };
+            }, {
+                readonly state: {
+                    readonly enum: readonly ["error"];
+                };
+                readonly err: "unknown";
+            }];
+        };
+    };
+    export const ClientSyncRequest: {
+        readonly name: "ClientSyncRequest";
+        readonly source: "client";
+        readonly request: {
+            readonly oneOfType: readonly [{
+                readonly state: {
+                    readonly enum: readonly ["syncing"];
+                };
+                readonly c_fr: {
+                    readonly optional: true;
+                    readonly record: {
+                        readonly values: "unknown";
+                    };
+                };
+                readonly c_lr: {
+                    readonly optional: true;
+                    readonly record: {
+                        readonly values: "unknown";
+                    };
+                };
+                readonly c_count: "number";
+            }, {
+                readonly state: {
+                    readonly enum: readonly ["syncing-data"];
+                };
+                readonly c_fr: {
+                    readonly record: {
+                        readonly values: "unknown";
+                    };
+                };
+                readonly c_lr: {
+                    readonly record: {
+                        readonly values: "unknown";
+                    };
+                };
+                readonly c_count: "number";
+                readonly data: {
+                    readonly arrayOf: {
+                        readonly record: {
+                            readonly values: "unknown";
+                        };
+                    };
+                };
+            }];
+        };
+        readonly response: {
+            readonly oneOfType: readonly [{
+                readonly state: {
+                    readonly enum: readonly ["syncing"];
+                };
+                readonly c_fr: {
+                    readonly optional: true;
+                    readonly record: {
+                        readonly values: "unknown";
+                    };
+                };
+                readonly c_lr: {
+                    readonly optional: true;
+                    readonly record: {
+                        readonly values: "unknown";
+                    };
+                };
+                readonly c_count: "number";
+            }, {
+                readonly state: {
+                    readonly enum: readonly ["syncing-data"];
+                };
+                readonly c_fr: {
+                    readonly record: {
+                        readonly values: "unknown";
+                    };
+                };
+                readonly c_lr: {
+                    readonly record: {
+                        readonly values: "unknown";
+                    };
+                };
+                readonly c_count: "number";
+                readonly data: {
+                    readonly arrayOf: {
+                        readonly record: {
+                            readonly values: "unknown";
+                        };
+                    };
+                };
+            }, {
+                readonly state: {
+                    readonly enum: readonly ["error"];
+                };
+                readonly err: "unknown";
+            }];
+        };
+    };
+    export const PullRequest: {
+        readonly name: "PullRequest";
+        readonly source: "server";
+        readonly request: {
+            readonly type: {
+                readonly from_synced: {
+                    readonly oneOf: readonly ["string", {
+                        readonly enum: readonly [undefined];
+                    }];
+                };
+                readonly to_synced: {
+                    readonly oneOf: readonly ["string", {
+                        readonly enum: readonly [undefined];
+                    }];
+                };
+                readonly offset: {
+                    readonly oneOf: readonly ["number", {
+                        readonly enum: readonly [undefined];
+                    }];
+                };
+                readonly limit: {
+                    readonly oneOf: readonly ["number", {
+                        readonly enum: readonly [undefined];
+                    }];
+                };
+            };
+        };
+        readonly response: {
+            readonly oneOfType: readonly [{
+                readonly success: {
+                    readonly enum: readonly [true];
+                };
+                readonly data: {
+                    readonly arrayOf: {
+                        readonly record: {
+                            readonly values: "unknown";
+                        };
+                    };
+                };
+            }, {
+                readonly success: {
+                    readonly enum: readonly [false];
+                };
+                readonly err: "unknown";
+            }];
+        };
+    };
+    export const UpdateRequest: {
+        readonly name: "UpdateRequest";
+        readonly source: "server";
+        readonly request: {
+            readonly oneOfType: readonly [{
+                readonly state: {
+                    readonly enum: readonly ["error"];
+                };
+                readonly err: "unknown";
+            }, {
+                readonly state: {
+                    readonly enum: readonly ["synced"];
+                };
+                readonly isSynced: "boolean";
+            }, {
+                readonly state: {
+                    readonly enum: readonly ["syncing"];
+                };
+                readonly data: {
+                    readonly arrayOf: {
+                        readonly record: {
+                            readonly values: "unknown";
+                        };
+                    };
+                };
+            }];
+        };
+        readonly response: {
+            readonly oneOfType: readonly [{
+                readonly success: {
+                    readonly enum: readonly [true];
+                };
+            }, {
+                readonly success: {
+                    readonly enum: readonly [false];
+                };
+                readonly err: "unknown";
+            }];
+        };
+    };
+    const Schemas: {
+        readonly ClientSyncRequest: {
+            readonly name: "ClientSyncRequest";
+            readonly source: "client";
+            readonly request: {
+                readonly oneOfType: readonly [{
+                    readonly state: {
+                        readonly enum: readonly ["syncing"];
+                    };
+                    readonly c_fr: {
+                        readonly optional: true;
+                        readonly record: {
+                            readonly values: "unknown";
+                        };
+                    };
+                    readonly c_lr: {
+                        readonly optional: true;
+                        readonly record: {
+                            readonly values: "unknown";
+                        };
+                    };
+                    readonly c_count: "number";
+                }, {
+                    readonly state: {
+                        readonly enum: readonly ["syncing-data"];
+                    };
+                    readonly c_fr: {
+                        readonly record: {
+                            readonly values: "unknown";
+                        };
+                    };
+                    readonly c_lr: {
+                        readonly record: {
+                            readonly values: "unknown";
+                        };
+                    };
+                    readonly c_count: "number";
+                    readonly data: {
+                        readonly arrayOf: {
+                            readonly record: {
+                                readonly values: "unknown";
+                            };
+                        };
+                    };
+                }];
+            };
+            readonly response: {
+                readonly oneOfType: readonly [{
+                    readonly state: {
+                        readonly enum: readonly ["syncing"];
+                    };
+                    readonly c_fr: {
+                        readonly optional: true;
+                        readonly record: {
+                            readonly values: "unknown";
+                        };
+                    };
+                    readonly c_lr: {
+                        readonly optional: true;
+                        readonly record: {
+                            readonly values: "unknown";
+                        };
+                    };
+                    readonly c_count: "number";
+                }, {
+                    readonly state: {
+                        readonly enum: readonly ["syncing-data"];
+                    };
+                    readonly c_fr: {
+                        readonly record: {
+                            readonly values: "unknown";
+                        };
+                    };
+                    readonly c_lr: {
+                        readonly record: {
+                            readonly values: "unknown";
+                        };
+                    };
+                    readonly c_count: "number";
+                    readonly data: {
+                        readonly arrayOf: {
+                            readonly record: {
+                                readonly values: "unknown";
+                            };
+                        };
+                    };
+                }, {
+                    readonly state: {
+                        readonly enum: readonly ["error"];
+                    };
+                    readonly err: "unknown";
+                }];
+            };
+        };
+        readonly ServerSyncRequest: {
+            readonly name: "ServerSyncRequest";
+            readonly source: "server";
+            readonly request: {
+                readonly type: {
+                    readonly from_synced: {
+                        readonly oneOf: readonly ["string", {
+                            readonly enum: readonly [null];
+                        }];
+                    };
+                    readonly to_synced: {
+                        readonly oneOf: readonly ["string", {
+                            readonly enum: readonly [null];
+                        }];
+                    };
+                    readonly end_offset: {
+                        readonly oneOf: readonly ["number", {
+                            readonly enum: readonly [null];
+                        }];
+                    };
+                };
+            };
+            readonly response: {
+                readonly oneOfType: readonly [{
+                    readonly state: {
+                        readonly enum: readonly ["syncing"];
+                    };
+                    readonly c_fr: {
+                        readonly optional: true;
+                        readonly record: {
+                            readonly values: "unknown";
+                        };
+                    };
+                    readonly c_lr: {
+                        readonly optional: true;
+                        readonly record: {
+                            readonly values: "unknown";
+                        };
+                    };
+                    readonly c_count: "number";
+                }, {
+                    readonly state: {
+                        readonly enum: readonly ["syncing-data"];
+                    };
+                    readonly c_fr: {
+                        readonly record: {
+                            readonly values: "unknown";
+                        };
+                    };
+                    readonly c_lr: {
+                        readonly record: {
+                            readonly values: "unknown";
+                        };
+                    };
+                    readonly c_count: "number";
+                    readonly data: {
+                        readonly arrayOf: {
+                            readonly record: {
+                                readonly values: "unknown";
+                            };
+                        };
+                    };
+                }, {
+                    readonly state: {
+                        readonly enum: readonly ["error"];
+                    };
+                    readonly err: "unknown";
+                }];
+            };
+        };
+        readonly PullRequest: {
+            readonly name: "PullRequest";
+            readonly source: "server";
+            readonly request: {
+                readonly type: {
+                    readonly from_synced: {
+                        readonly oneOf: readonly ["string", {
+                            readonly enum: readonly [undefined];
+                        }];
+                    };
+                    readonly to_synced: {
+                        readonly oneOf: readonly ["string", {
+                            readonly enum: readonly [undefined];
+                        }];
+                    };
+                    readonly offset: {
+                        readonly oneOf: readonly ["number", {
+                            readonly enum: readonly [undefined];
+                        }];
+                    };
+                    readonly limit: {
+                        readonly oneOf: readonly ["number", {
+                            readonly enum: readonly [undefined];
+                        }];
+                    };
+                };
+            };
+            readonly response: {
+                readonly oneOfType: readonly [{
+                    readonly success: {
+                        readonly enum: readonly [true];
+                    };
+                    readonly data: {
+                        readonly arrayOf: {
+                            readonly record: {
+                                readonly values: "unknown";
+                            };
+                        };
+                    };
+                }, {
+                    readonly success: {
+                        readonly enum: readonly [false];
+                    };
+                    readonly err: "unknown";
+                }];
+            };
+        };
+        readonly UpdateRequest: {
+            readonly name: "UpdateRequest";
+            readonly source: "server";
+            readonly request: {
+                readonly oneOfType: readonly [{
+                    readonly state: {
+                        readonly enum: readonly ["error"];
+                    };
+                    readonly err: "unknown";
+                }, {
+                    readonly state: {
+                        readonly enum: readonly ["synced"];
+                    };
+                    readonly isSynced: "boolean";
+                }, {
+                    readonly state: {
+                        readonly enum: readonly ["syncing"];
+                    };
+                    readonly data: {
+                        readonly arrayOf: {
+                            readonly record: {
+                                readonly values: "unknown";
+                            };
+                        };
+                    };
+                }];
+            };
+            readonly response: {
+                readonly oneOfType: readonly [{
+                    readonly success: {
+                        readonly enum: readonly [true];
+                    };
+                }, {
+                    readonly success: {
+                        readonly enum: readonly [false];
+                    };
+                    readonly err: "unknown";
+                }];
+            };
+        };
+    };
+    type SchemasType = typeof Schemas;
+    export const getHandlers: <Side extends RequestBase["source"]>(params: Parameters<typeof getSyncChannelName>[0], socket: {
+        on: (channelName: string, request: (data: unknown, cb: SocketCallback) => MaybePromise<void>) => void;
+        emit: (channelName: string, request: unknown, response: (response: unknown) => MaybePromise<void>) => void;
+        removeAllListeners: (channelName: string) => void;
+    }, side: Side, onResponse: { [K in keyof SchemasType as SchemasType[K]["source"] extends Side ? never : K]: (params: JSONB.GetType<SchemasType[K]["request"]>) => Promise<JSONB.GetType<SchemasType[K]["response"]>>; }) => { [K in keyof SchemasType as SchemasType[K]["source"] extends Side ? K : never]: (params: JSONB.GetType<SchemasType[K]["request"]>) => Promise<JSONB.GetType<SchemasType[K]["response"]>>; };
+    export {};
+}
+export {};
 //# sourceMappingURL=replication.d.ts.map

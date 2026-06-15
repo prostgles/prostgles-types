@@ -73,5 +73,7 @@ export declare const safeStringify: (obj: AnyObject) => string;
 export declare const getSerialisableError: (rawError: any, includeStack?: boolean) => AnyObject | any[] | string | undefined | null;
 export declare const getProperty: <T extends object, K extends string>(obj: T, key: K | string) => K extends keyof T ? T[K] : K extends string ? T[keyof T] | undefined : undefined;
 export declare const withTimeout: <T>(promise: Promise<T>, ms: number) => Promise<T>;
+export declare const getEntries: <T extends AnyObject>(obj: T) => [keyof T, T[keyof T]][];
+export declare const fromEntries: <K extends string | number | symbol, V>(entries: readonly (readonly [K, V])[]) => Record<K, V>;
 export {};
 //# sourceMappingURL=util.d.ts.map

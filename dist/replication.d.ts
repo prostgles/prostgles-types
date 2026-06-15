@@ -57,12 +57,12 @@ export type SyncBatchParams = {
      * Minimum value of the synced field. If missing then take from the lowest available (if no offset)
      * Must take >= from_synced
      */
-    from_synced?: number;
+    from_synced?: number | string;
     /**
      * maximum value of the synced field. If missing then take up to highest available (if no limit and offset)
      * Must take <= to_synced
      */
-    to_synced?: number;
+    to_synced?: number | string;
     /**
      * Number of rows to skip from from_synced value.
      */

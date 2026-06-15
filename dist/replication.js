@@ -59,8 +59,8 @@ var ReplicationProtocol;
         source: "server",
         request: {
             type: {
-                from_synced: { oneOf: ["string", { enum: [null] }] },
-                to_synced: { oneOf: ["string", { enum: [null] }] },
+                from_synced: { oneOf: ["string", "number", { enum: [null] }] },
+                to_synced: { oneOf: ["string", "number", { enum: [null] }] },
                 end_offset: { oneOf: ["number", { enum: [null] }] },
             },
         },
@@ -90,8 +90,8 @@ var ReplicationProtocol;
         source: "server",
         request: {
             type: {
-                from_synced: { oneOf: ["string", { enum: [undefined] }] },
-                to_synced: { oneOf: ["string", { enum: [undefined] }] },
+                from_synced: { oneOf: ["string", "number", { enum: [undefined] }] },
+                to_synced: { oneOf: ["string", "number", { enum: [undefined] }] },
                 offset: { oneOf: ["number", { enum: [undefined] }] },
                 limit: { oneOf: ["number", { enum: [undefined] }] },
             },

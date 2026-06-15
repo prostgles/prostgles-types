@@ -144,12 +144,12 @@ export declare namespace ReplicationProtocol {
         readonly request: {
             readonly type: {
                 readonly from_synced: {
-                    readonly oneOf: readonly ["string", {
+                    readonly oneOf: readonly ["string", "number", {
                         readonly enum: readonly [null];
                     }];
                 };
                 readonly to_synced: {
-                    readonly oneOf: readonly ["string", {
+                    readonly oneOf: readonly ["string", "number", {
                         readonly enum: readonly [null];
                     }];
                 };
@@ -267,12 +267,12 @@ export declare namespace ReplicationProtocol {
         readonly request: {
             readonly type: {
                 readonly from_synced: {
-                    readonly oneOf: readonly ["string", {
+                    readonly oneOf: readonly ["string", "number", {
                         readonly enum: readonly [undefined];
                     }];
                 };
                 readonly to_synced: {
-                    readonly oneOf: readonly ["string", {
+                    readonly oneOf: readonly ["string", "number", {
                         readonly enum: readonly [undefined];
                     }];
                 };
@@ -408,12 +408,12 @@ export declare namespace ReplicationProtocol {
             readonly request: {
                 readonly type: {
                     readonly from_synced: {
-                        readonly oneOf: readonly ["string", {
+                        readonly oneOf: readonly ["string", "number", {
                             readonly enum: readonly [null];
                         }];
                     };
                     readonly to_synced: {
-                        readonly oneOf: readonly ["string", {
+                        readonly oneOf: readonly ["string", "number", {
                             readonly enum: readonly [null];
                         }];
                     };
@@ -478,12 +478,12 @@ export declare namespace ReplicationProtocol {
             readonly request: {
                 readonly type: {
                     readonly from_synced: {
-                        readonly oneOf: readonly ["string", {
+                        readonly oneOf: readonly ["string", "number", {
                             readonly enum: readonly [undefined];
                         }];
                     };
                     readonly to_synced: {
-                        readonly oneOf: readonly ["string", {
+                        readonly oneOf: readonly ["string", "number", {
                             readonly enum: readonly [undefined];
                         }];
                     };

@@ -22,7 +22,7 @@ export type ClientSyncInfo = {
 };
 export type onUpdatesParams = {
     state: "error";
-    err?: AnyObject;
+    err: unknown;
 } | {
     state: "synced";
     /**
@@ -88,7 +88,9 @@ export type ClientSyncHandles = {
      * Must acknowledge so server can send next batch if necessary
      * @description: server will send { onUpdates: { data } }
      */
-    onUpdates: (params: onUpdatesParams) => MaybePromise<true>;
+    onUpdates: (params: onUpdatesParams) => MaybePromise<{
+        success: true;
+    }>;
 };
 export declare const getSyncChannelName: ({ tableName, filter, select, }: {
     tableName: string;
@@ -561,10 +563,10 @@ export declare namespace ReplicationProtocol {
         };
     };
     type SchemasType = typeof Schemas;
-    type IncomingHandlers<Side extends RequestBase["source"]> = {
+    export type IncomingHandlers<Side extends RequestBase["source"]> = {
         [K in keyof SchemasType as SchemasType[K]["source"] extends Side ? never : K]: (params: JSONB.GetType<SchemasType[K]["request"]>) => MaybePromise<JSONB.GetType<SchemasType[K]["response"]>>;
     };
-    type OutgoingHandlers<Side extends RequestBase["source"]> = {
+    export type OutgoingHandlers<Side extends RequestBase["source"]> = {
         [K in keyof SchemasType as SchemasType[K]["source"] extends Side ? K : never]: (params: JSONB.GetType<SchemasType[K]["request"]>) => Promise<JSONB.GetType<SchemasType[K]["response"]>>;
     };
     const getHandlers: <Side extends RequestBase["source"]>(channelName: string, socket: {

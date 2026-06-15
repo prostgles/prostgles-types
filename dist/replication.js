@@ -2,6 +2,10 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ReplicationProtocol = exports.getSyncChannelName = void 0;
 const index_1 = require("./index");
+const clientSyncHandles = {};
+clientSyncHandles.onUpdates;
+clientSyncHandles.onPullRequest;
+clientSyncHandles.onSyncRequest;
 const getSyncChannelName = ({ tableName, filter = {}, select = "*", }) => [
     index_1.CHANNEL_PREFIX,
     tableName,

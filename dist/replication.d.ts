@@ -256,11 +256,16 @@ export declare namespace ReplicationProtocol {
             }];
         };
         readonly response: {
-            readonly type: {
-                readonly ok: {
+            readonly oneOfType: readonly [{
+                readonly success: {
                     readonly enum: readonly [true];
                 };
-            };
+            }, {
+                readonly success: {
+                    readonly enum: readonly [false];
+                };
+                readonly err: "unknown";
+            }];
         };
     };
     export const PullRequest: {
@@ -397,11 +402,16 @@ export declare namespace ReplicationProtocol {
                 }];
             };
             readonly response: {
-                readonly type: {
-                    readonly ok: {
+                readonly oneOfType: readonly [{
+                    readonly success: {
                         readonly enum: readonly [true];
                     };
-                };
+                }, {
+                    readonly success: {
+                        readonly enum: readonly [false];
+                    };
+                    readonly err: "unknown";
+                }];
             };
         };
         readonly ServerSyncRequest: {

@@ -232,7 +232,7 @@ export namespace ReplicationProtocol {
       oneOfType: [ClientSyncInfoSchema, ClientExpressDataSchema],
     },
     response: {
-      type: { ok: { enum: [true] } },
+      oneOfType: [{ success: { enum: [true] } }, { success: { enum: [false] }, err: "unknown" }],
     },
   } as const satisfies RequestBase;
 

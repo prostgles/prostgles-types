@@ -89,7 +89,7 @@ var ReplicationProtocol;
             oneOfType: [ClientSyncInfoSchema, ClientExpressDataSchema],
         },
         response: {
-            type: { ok: { enum: [true] } },
+            oneOfType: [{ success: { enum: [true] } }, { success: { enum: [false] }, err: "unknown" }],
         },
     };
     ReplicationProtocol.PullRequest = {

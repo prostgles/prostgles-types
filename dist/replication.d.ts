@@ -562,7 +562,7 @@ export declare namespace ReplicationProtocol {
     };
     type SchemasType = typeof Schemas;
     type IncomingHandlers<Side extends RequestBase["source"]> = {
-        [K in keyof SchemasType as SchemasType[K]["source"] extends Side ? never : K]: (params: JSONB.GetType<SchemasType[K]["request"]>) => Promise<JSONB.GetType<SchemasType[K]["response"]>>;
+        [K in keyof SchemasType as SchemasType[K]["source"] extends Side ? never : K]: (params: JSONB.GetType<SchemasType[K]["request"]>) => MaybePromise<JSONB.GetType<SchemasType[K]["response"]>>;
     };
     type OutgoingHandlers<Side extends RequestBase["source"]> = {
         [K in keyof SchemasType as SchemasType[K]["source"] extends Side ? K : never]: (params: JSONB.GetType<SchemasType[K]["request"]>) => Promise<JSONB.GetType<SchemasType[K]["response"]>>;

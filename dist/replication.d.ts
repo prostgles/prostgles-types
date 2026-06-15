@@ -12,6 +12,7 @@ export type SyncConfig = {
  * If no data on client then will return { c_count: 0 }
  */
 export type ClientSyncInfo = {
+    state: "syncing";
     c_fr?: AnyObject;
     c_lr?: AnyObject;
     /**
@@ -20,25 +21,31 @@ export type ClientSyncInfo = {
     c_count: number;
 };
 export type onUpdatesParams = {
+    state: "error";
     err?: AnyObject;
 } | {
+    state: "synced";
     /**
      * TRUE after server had sent/pulled all data and both databases are in sync now.
      * Client will notify listeners with all data items
      */
     isSynced: boolean;
 } | {
+    state: "syncing";
     /**
      * Ordered data
      */
     data: AnyObject[];
 };
 export type ClientExpressData = Required<ClientSyncInfo> & {
+    state: "syncing-data";
     data: AnyObject[];
 };
 export type ClientSyncPullResponse = {
+    success: true;
     data: AnyObject[];
 } | {
+    success: false;
     err: AnyObject;
 };
 /**
@@ -70,18 +77,18 @@ export type ClientSyncHandles = {
      * Used by client to notify server that data has changed (and send express data if necessary)
      * Also used by server to request client ClientSyncInfo
      */
-    onSyncRequest: (params: SyncBatchParams) => ClientSyncInfo | ClientExpressData | Promise<ClientSyncInfo | ClientExpressData>;
+    onSyncRequest: (params: SyncBatchParams) => MaybePromise<ClientSyncInfo | ClientExpressData>;
     /**
      * Used to respond to server with the requested data
      * @description: server will send { onPullRequest: { from_synced, limit, ...etc } }
      */
-    onPullRequest: (params: SyncBatchParams) => ClientSyncPullResponse | Promise<ClientSyncPullResponse>;
+    onPullRequest: (params: SyncBatchParams) => MaybePromise<ClientSyncPullResponse>;
     /**
      * Used to set the data sent by server.
      * Must acknowledge so server can send next batch if necessary
      * @description: server will send { onUpdates: { data } }
      */
-    onUpdates: (params: onUpdatesParams) => Promise<true>;
+    onUpdates: (params: onUpdatesParams) => MaybePromise<true>;
 };
 export declare const getSyncChannelName: ({ tableName, filter, select, }: {
     tableName: string;

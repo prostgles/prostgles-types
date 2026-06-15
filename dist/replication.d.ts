@@ -143,19 +143,19 @@ export declare namespace ReplicationProtocol {
         readonly source: "server";
         readonly request: {
             readonly type: {
+                readonly end_offset: {
+                    readonly oneOf: readonly ["number", {
+                        readonly enum: readonly [null];
+                    }];
+                };
                 readonly from_synced: {
                     readonly oneOf: readonly ["string", "number", {
-                        readonly enum: readonly [null];
+                        readonly enum: readonly [undefined];
                     }];
                 };
                 readonly to_synced: {
                     readonly oneOf: readonly ["string", "number", {
-                        readonly enum: readonly [null];
-                    }];
-                };
-                readonly end_offset: {
-                    readonly oneOf: readonly ["number", {
-                        readonly enum: readonly [null];
+                        readonly enum: readonly [undefined];
                     }];
                 };
             };
@@ -266,16 +266,6 @@ export declare namespace ReplicationProtocol {
         readonly source: "server";
         readonly request: {
             readonly type: {
-                readonly from_synced: {
-                    readonly oneOf: readonly ["string", "number", {
-                        readonly enum: readonly [undefined];
-                    }];
-                };
-                readonly to_synced: {
-                    readonly oneOf: readonly ["string", "number", {
-                        readonly enum: readonly [undefined];
-                    }];
-                };
                 readonly offset: {
                     readonly oneOf: readonly ["number", {
                         readonly enum: readonly [undefined];
@@ -283,6 +273,16 @@ export declare namespace ReplicationProtocol {
                 };
                 readonly limit: {
                     readonly oneOf: readonly ["number", {
+                        readonly enum: readonly [undefined];
+                    }];
+                };
+                readonly from_synced: {
+                    readonly oneOf: readonly ["string", "number", {
+                        readonly enum: readonly [undefined];
+                    }];
+                };
+                readonly to_synced: {
+                    readonly oneOf: readonly ["string", "number", {
                         readonly enum: readonly [undefined];
                     }];
                 };
@@ -407,19 +407,19 @@ export declare namespace ReplicationProtocol {
             readonly source: "server";
             readonly request: {
                 readonly type: {
+                    readonly end_offset: {
+                        readonly oneOf: readonly ["number", {
+                            readonly enum: readonly [null];
+                        }];
+                    };
                     readonly from_synced: {
                         readonly oneOf: readonly ["string", "number", {
-                            readonly enum: readonly [null];
+                            readonly enum: readonly [undefined];
                         }];
                     };
                     readonly to_synced: {
                         readonly oneOf: readonly ["string", "number", {
-                            readonly enum: readonly [null];
-                        }];
-                    };
-                    readonly end_offset: {
-                        readonly oneOf: readonly ["number", {
-                            readonly enum: readonly [null];
+                            readonly enum: readonly [undefined];
                         }];
                     };
                 };
@@ -477,16 +477,6 @@ export declare namespace ReplicationProtocol {
             readonly source: "server";
             readonly request: {
                 readonly type: {
-                    readonly from_synced: {
-                        readonly oneOf: readonly ["string", "number", {
-                            readonly enum: readonly [undefined];
-                        }];
-                    };
-                    readonly to_synced: {
-                        readonly oneOf: readonly ["string", "number", {
-                            readonly enum: readonly [undefined];
-                        }];
-                    };
                     readonly offset: {
                         readonly oneOf: readonly ["number", {
                             readonly enum: readonly [undefined];
@@ -494,6 +484,16 @@ export declare namespace ReplicationProtocol {
                     };
                     readonly limit: {
                         readonly oneOf: readonly ["number", {
+                            readonly enum: readonly [undefined];
+                        }];
+                    };
+                    readonly from_synced: {
+                        readonly oneOf: readonly ["string", "number", {
+                            readonly enum: readonly [undefined];
+                        }];
+                    };
+                    readonly to_synced: {
+                        readonly oneOf: readonly ["string", "number", {
                             readonly enum: readonly [undefined];
                         }];
                     };

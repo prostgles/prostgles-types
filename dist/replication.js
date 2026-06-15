@@ -140,8 +140,7 @@ var ReplicationProtocol;
     };
     const Schemas = { ClientSyncRequest: ReplicationProtocol.ClientSyncRequest, ServerSyncRequest: ReplicationProtocol.ServerSyncRequest, PullRequest: ReplicationProtocol.PullRequest, UpdateRequest: ReplicationProtocol.UpdateRequest };
     const SchemasList = Object.values(Schemas);
-    ReplicationProtocol.getHandlers = (params, socket, side, onResponse) => {
-        const channelName = (0, exports.getSyncChannelName)(params);
+    ReplicationProtocol.getHandlers = (channelName, socket, side, onResponse) => {
         socket.removeAllListeners(channelName);
         socket.on(channelName, async (requestRaw, cb) => {
             const { type, request } = (0, index_1.isObject)(requestRaw) ? requestRaw : {};

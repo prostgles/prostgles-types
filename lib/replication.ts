@@ -281,7 +281,7 @@ export namespace ReplicationProtocol {
   const SchemasList = Object.values(Schemas);
 
   export const getHandlers = <Side extends RequestBase["source"]>(
-    params: Parameters<typeof getSyncChannelName>[0],
+    channelName: string,
     socket: {
       on: (
         channelName: string,
@@ -305,7 +305,6 @@ export namespace ReplicationProtocol {
       params: JSONB.GetType<SchemasType[K]["request"]>,
     ) => Promise<JSONB.GetType<SchemasType[K]["response"]>>;
   } => {
-    const channelName = getSyncChannelName(params);
     socket.removeAllListeners(channelName);
     socket.on(channelName, async (requestRaw, cb) => {
       const { type, request } = isObject(requestRaw) ? requestRaw : {};

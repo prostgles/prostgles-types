@@ -632,7 +632,7 @@ export declare namespace ReplicationProtocol {
         };
     };
     type SchemasType = typeof Schemas;
-    export const getHandlers: <Side extends RequestBase["source"]>(params: Parameters<typeof getSyncChannelName>[0], socket: {
+    export const getHandlers: <Side extends RequestBase["source"]>(channelName: string, socket: {
         on: (channelName: string, request: (data: unknown, cb: SocketCallback) => MaybePromise<void>) => void;
         emit: (channelName: string, request: unknown, response: (response: unknown) => MaybePromise<void>) => void;
         removeAllListeners: (channelName: string) => void;

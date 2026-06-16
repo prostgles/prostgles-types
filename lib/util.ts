@@ -379,6 +379,17 @@ export const withTimeout = <T>(promise: Promise<T>, ms: number): Promise<T> => {
   return Promise.race([promise, timeout]);
 };
 
+export const createPromiseWithTimeout = <T>(
+  executor: (resolve: (value: T | PromiseLike<T>) => void, reject: (reason?: any) => void) => void,
+  ms: number,
+): Promise<T> => {
+  const timeout = new Promise<never>((_, reject) =>
+    setTimeout(() => reject(new Error(`Timed out after ${ms}ms`)), ms),
+  );
+  const mainPromise = new Promise<T>(executor);
+  return Promise.race([mainPromise, timeout]);
+};
+
 export const getEntries = <T extends AnyObject>(obj: T) =>
   Object.entries(obj) as [keyof T, T[keyof T]][];
 

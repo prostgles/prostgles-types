@@ -1,6 +1,7 @@
 import { AnyObject, type EqualityFilter } from "./filters";
 import {
   CHANNEL_PREFIX,
+  createPromiseWithTimeout,
   fromEntries,
   getEntries,
   getJSONBSchemaValidationError,
@@ -8,6 +9,7 @@ import {
   isDefined,
   isObject,
   stableStringify,
+  withTimeout,
   type FieldFilter,
   type JSONB,
   type MaybePromise,
@@ -151,6 +153,7 @@ type RequestBase = {
   response: Omit<JSONB.FieldTypeObj, "optional">;
 };
 export namespace ReplicationProtocol {
+  const TIMEOUT = 10_000;
   export const CreateSchema = {
     name: "Create",
     source: "client",
@@ -346,19 +349,20 @@ export namespace ReplicationProtocol {
 
       /** Must validate incoming data */
       if (side === "server") {
-        if (schema.source === "server") {
-          const validationResult = getJSONBSchemaValidationError(schema.request, request);
-          if (validationResult.error !== undefined) {
-            console.error("Invalid request from client", validationResult.error, request);
-            cb(validationResult.error);
-            return;
-          }
+        const validationResult = getJSONBSchemaValidationError(schema.request, request);
+        if (validationResult.error !== undefined) {
+          console.error("Invalid request from client", validationResult.error, request);
+          cb(validationResult.error);
+          return;
         }
       }
       const schemaName = schema.name as keyof typeof onResponse;
       try {
-        const response = await onResponse[schemaName](request);
-        cb(undefined, response);
+        const response = await withTimeout(
+          Promise.resolve(onResponse[schemaName](request)),
+          TIMEOUT,
+        );
+        cb(response);
       } catch (err) {
         cb(getSerialisableError(err));
       }
@@ -373,7 +377,7 @@ export namespace ReplicationProtocol {
           return [
             key,
             (request: unknown) => {
-              return new Promise((resolve, reject) => {
+              return createPromiseWithTimeout((resolve, reject) => {
                 socket.emit(channelName, { type: schema.name, request }, (response: unknown) => {
                   if (side === "server") {
                     const validationResult = getJSONBSchemaValidationError(
@@ -382,7 +386,7 @@ export namespace ReplicationProtocol {
                     );
                     if (validationResult.error !== undefined) {
                       console.error(
-                        "Invalid response from client",
+                        "Invalid response from client for " + schema.name,
                         validationResult.error,
                         response,
                       );
@@ -392,7 +396,7 @@ export namespace ReplicationProtocol {
                   }
                   resolve(response);
                 });
-              });
+              }, TIMEOUT);
             },
           ] as const;
         })

@@ -16,6 +16,7 @@ const getSyncChannelName = ({ tableName, filter = {}, select = "*", }) => [
 exports.getSyncChannelName = getSyncChannelName;
 var ReplicationProtocol;
 (function (ReplicationProtocol) {
+    const TIMEOUT = 10000;
     ReplicationProtocol.CreateSchema = {
         name: "Create",
         source: "client",
@@ -167,19 +168,17 @@ var ReplicationProtocol;
             }
             /** Must validate incoming data */
             if (side === "server") {
-                if (schema.source === "server") {
-                    const validationResult = (0, index_1.getJSONBSchemaValidationError)(schema.request, request);
-                    if (validationResult.error !== undefined) {
-                        console.error("Invalid request from client", validationResult.error, request);
-                        cb(validationResult.error);
-                        return;
-                    }
+                const validationResult = (0, index_1.getJSONBSchemaValidationError)(schema.request, request);
+                if (validationResult.error !== undefined) {
+                    console.error("Invalid request from client", validationResult.error, request);
+                    cb(validationResult.error);
+                    return;
                 }
             }
             const schemaName = schema.name;
             try {
-                const response = await onResponse[schemaName](request);
-                cb(undefined, response);
+                const response = await (0, index_1.withTimeout)(Promise.resolve(onResponse[schemaName](request)), TIMEOUT);
+                cb(response);
             }
             catch (err) {
                 cb((0, index_1.getSerialisableError)(err));
@@ -193,19 +192,19 @@ var ReplicationProtocol;
             return [
                 key,
                 (request) => {
-                    return new Promise((resolve, reject) => {
+                    return (0, index_1.createPromiseWithTimeout)((resolve, reject) => {
                         socket.emit(channelName, { type: schema.name, request }, (response) => {
                             if (side === "server") {
                                 const validationResult = (0, index_1.getJSONBSchemaValidationError)(schema.response, response);
                                 if (validationResult.error !== undefined) {
-                                    console.error("Invalid response from client", validationResult.error, response);
+                                    console.error("Invalid response from client for " + schema.name, validationResult.error, response);
                                     reject(validationResult.error);
                                     return;
                                 }
                             }
                             resolve(response);
                         });
-                    });
+                    }, TIMEOUT);
                 },
             ];
         })

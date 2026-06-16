@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.fromEntries = exports.getEntries = exports.withTimeout = exports.getProperty = exports.getSerialisableError = exports.safeStringify = exports.extractTypeUtil = exports.reverseParsedPath = exports.reverseJoinOn = exports.tryCatch = exports.getObjectEntries = exports.isNotEmpty = exports.pickKeys = void 0;
+exports.fromEntries = exports.getEntries = exports.createPromiseWithTimeout = exports.withTimeout = exports.getProperty = exports.getSerialisableError = exports.safeStringify = exports.extractTypeUtil = exports.reverseParsedPath = exports.reverseJoinOn = exports.tryCatch = exports.getObjectEntries = exports.isNotEmpty = exports.pickKeys = void 0;
 exports.asName = asName;
 exports.omitKeys = omitKeys;
 exports.filter = filter;
@@ -303,6 +303,12 @@ const withTimeout = (promise, ms) => {
     return Promise.race([promise, timeout]);
 };
 exports.withTimeout = withTimeout;
+const createPromiseWithTimeout = (executor, ms) => {
+    const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error(`Timed out after ${ms}ms`)), ms));
+    const mainPromise = new Promise(executor);
+    return Promise.race([mainPromise, timeout]);
+};
+exports.createPromiseWithTimeout = createPromiseWithTimeout;
 const getEntries = (obj) => Object.entries(obj);
 exports.getEntries = getEntries;
 const fromEntries = (entries) => {

@@ -123,8 +123,6 @@ export class WAL {
   /**
    * Used by server to avoid unnecessary data push to client.
    * This can happen due to the same data item having been previously pushed by the client
-   * @param item data item
-   * @returns boolean
    */
   isInHistory = (item: AnyObject): boolean => {
     if (!item) throw "Provide item";
@@ -147,7 +145,7 @@ export class WAL {
   getIdStr(d: AnyObject): string {
     return this.options.id_fields
       .sort()
-      .map((key) => `${d[key] || ""}`)
+      .map((key) => String(d[key]))
       .join(".");
   }
   getIdObj(d: AnyObject): AnyObject {
@@ -170,7 +168,7 @@ export class WAL {
   addData = (data: WALItem[]) => {
     if (isEmpty(this.changed) && this.options.onSendStart) this.options.onSendStart();
 
-    data.map((d) => {
+    data.forEach((d) => {
       const { initial, current, delta } = { ...d };
       if (!current) throw "Expecting { current: object, initial?: object }";
       const idStr = this.getIdStr(current);

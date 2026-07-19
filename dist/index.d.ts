@@ -13,7 +13,8 @@ export declare const _PG_date: readonly ["date", "timestamp", "timestamptz"];
 export declare const _PG_interval: readonly ["interval"];
 export declare const _PG_postgis: readonly ["geometry", "geography"];
 export declare const _PG_geometric: readonly ["point", "line", "lseg", "box", "path", "polygon", "circle"];
-export type PG_COLUMN_UDT_DATA_TYPE = (typeof _PG_strings)[number] | (typeof _PG_numbers)[number] | (typeof _PG_geometric)[number] | (typeof _PG_json)[number] | (typeof _PG_bool)[number] | (typeof _PG_date)[number] | (typeof _PG_interval)[number] | (typeof _PG_postgis)[number];
+export declare const _PG_bytes: readonly ["bytea"];
+export type PG_COLUMN_UDT_DATA_TYPE = (typeof _PG_strings)[number] | (typeof _PG_numbers)[number] | (typeof _PG_geometric)[number] | (typeof _PG_json)[number] | (typeof _PG_bool)[number] | (typeof _PG_date)[number] | (typeof _PG_interval)[number] | (typeof _PG_postgis)[number] | (typeof _PG_bytes)[number];
 export declare const TS_PG_Types: {
     readonly "number[]": ("_int2" | "_int4" | "_float4" | "_float8" | "_oid")[];
     readonly "boolean[]": "_bool"[];

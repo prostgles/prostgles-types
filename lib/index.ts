@@ -34,6 +34,7 @@ export const _PG_date = ["date", "timestamp", "timestamptz"] as const;
 export const _PG_interval = ["interval"] as const;
 export const _PG_postgis = ["geometry", "geography"] as const;
 export const _PG_geometric = ["point", "line", "lseg", "box", "path", "polygon", "circle"] as const;
+export const _PG_bytes = ["bytea"] as const;
 
 export type PG_COLUMN_UDT_DATA_TYPE =
   | (typeof _PG_strings)[number]
@@ -43,10 +44,11 @@ export type PG_COLUMN_UDT_DATA_TYPE =
   | (typeof _PG_bool)[number]
   | (typeof _PG_date)[number]
   | (typeof _PG_interval)[number]
-  | (typeof _PG_postgis)[number];
+  | (typeof _PG_postgis)[number]
+  | (typeof _PG_bytes)[number];
 
 const TS_PG_PRIMITIVES = {
-  ArrayBuffer: ["bytea"],
+  ArrayBuffer: _PG_bytes,
   string: [
     ..._PG_strings,
     ..._PG_numbers_str,

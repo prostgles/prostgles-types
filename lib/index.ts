@@ -1035,7 +1035,7 @@ export type TableHandler<
   updateBatch<P extends UpdateParams<TD, S>>(
     data: [FullFilter<TD, S>, UpsertDataToPGCastLax<TD>][],
     params?: P,
-  ): Promise<UpdateReturnType<P, TD, S> | void>;
+  ): Promise<null>;
 
   /**
    * Inserts a new record into the table.
@@ -1062,7 +1062,7 @@ export type TableHandler<
     filter: FullFilter<TD, S>,
     newData: UpsertDataToPGCastLax<TD>,
     params?: P,
-  ): Promise<UpdateReturnType<P, TD, S>>;
+  ): Promise<GetReturningReturnType<P, TD, S>>;
 
   /**
    * Deletes records from the table based on the specified filter criteria.
@@ -1071,7 +1071,7 @@ export type TableHandler<
   delete<P extends DeleteParams<TD, S>>(
     filter?: FullFilter<TD, S>,
     params?: P,
-  ): Promise<UpdateReturnType<P, TD, S> | undefined>;
+  ): Promise<GetReturningReturnType<P, TD, S>[]>;
 };
 
 export type JoinMakerOptions<TT extends AnyObject = AnyObject> = SelectParams<TT> & {

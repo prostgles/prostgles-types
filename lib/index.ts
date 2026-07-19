@@ -12,7 +12,6 @@ export const _PG_strings = [
   "text",
   "citext",
   "uuid",
-  "bytea",
   "time",
   "timetz",
   "interval",
@@ -47,6 +46,7 @@ export type PG_COLUMN_UDT_DATA_TYPE =
   | (typeof _PG_postgis)[number];
 
 const TS_PG_PRIMITIVES = {
+  ArrayBuffer: ["bytea"],
   string: [
     ..._PG_strings,
     ..._PG_numbers_str,

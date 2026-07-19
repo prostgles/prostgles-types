@@ -24,7 +24,6 @@ exports._PG_strings = [
     "text",
     "citext",
     "uuid",
-    "bytea",
     "time",
     "timetz",
     "interval",
@@ -48,6 +47,7 @@ exports._PG_interval = ["interval"];
 exports._PG_postgis = ["geometry", "geography"];
 exports._PG_geometric = ["point", "line", "lseg", "box", "path", "polygon", "circle"];
 const TS_PG_PRIMITIVES = {
+    ArrayBuffer: ["bytea"],
     string: [
         ...exports._PG_strings,
         ...exports._PG_numbers_str,

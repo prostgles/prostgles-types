@@ -1480,3 +1480,10 @@ export * from "./replication";
 export * from "./util";
 export * from "./WAL";
 export * from "./utilFuncs/index";
+
+export const ABORTABLE_METHODS = [
+  "find",
+  "findOne",
+  "count",
+  "size",
+] as const satisfies readonly (keyof TableHandler)[];

@@ -14,7 +14,7 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CONTENT_TYPE_TO_EXT = exports.getPossibleNestedInsert = exports.SQL_COMMAND_TABLE_METHODS = exports.CHANNELS = exports.CHANNEL_PREFIX = exports.JOIN_PARAMS = exports.JOIN_KEYS = exports.getAllowedTableMethods = exports.postgresToTsType = exports.TS_PG_Types = exports._PG_bytes = exports._PG_geometric = exports._PG_postgis = exports._PG_interval = exports._PG_date = exports._PG_bool = exports._PG_json = exports._PG_numbers = exports._PG_numbers_str = exports._PG_numbers_num = exports._PG_strings = void 0;
+exports.ABORTABLE_METHODS = exports.CONTENT_TYPE_TO_EXT = exports.getPossibleNestedInsert = exports.SQL_COMMAND_TABLE_METHODS = exports.CHANNELS = exports.CHANNEL_PREFIX = exports.JOIN_PARAMS = exports.JOIN_KEYS = exports.getAllowedTableMethods = exports.postgresToTsType = exports.TS_PG_Types = exports._PG_bytes = exports._PG_geometric = exports._PG_postgis = exports._PG_interval = exports._PG_date = exports._PG_bool = exports._PG_json = exports._PG_numbers = exports._PG_numbers_str = exports._PG_numbers_num = exports._PG_strings = void 0;
 const util_1 = require("./util");
 const includes_1 = require("./utilFuncs/includes");
 exports._PG_strings = [
@@ -201,4 +201,10 @@ __exportStar(require("./replication"), exports);
 __exportStar(require("./util"), exports);
 __exportStar(require("./WAL"), exports);
 __exportStar(require("./utilFuncs/index"), exports);
+exports.ABORTABLE_METHODS = [
+    "find",
+    "findOne",
+    "count",
+    "size",
+];
 //# sourceMappingURL=index.js.map

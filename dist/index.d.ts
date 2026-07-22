@@ -1014,4 +1014,5 @@ export * from "./replication";
 export * from "./util";
 export * from "./WAL";
 export * from "./utilFuncs/index";
+export declare const ABORTABLE_METHODS: readonly ["find", "findOne", "count", "size"];
 //# sourceMappingURL=index.d.ts.map

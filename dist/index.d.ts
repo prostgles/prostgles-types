@@ -488,6 +488,7 @@ export type SelectParams<T extends AnyObject | void = void, S extends DBSchema |
      * Filter applied after any aggregations (group by)
      */
     having?: FullFilter<T, S>;
+    abortSignal?: AbortSignal;
 };
 type SubscribeActions = "insert" | "delete" | "update";
 export type SubscribeOptions = {

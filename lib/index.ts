@@ -685,6 +685,8 @@ export type SelectParams<
    * Filter applied after any aggregations (group by)
    */
   having?: FullFilter<T, S>;
+
+  abortSignal?: AbortSignal;
 };
 
 type SubscribeActions = "insert" | "delete" | "update";

@@ -124,6 +124,12 @@ export const getJSONBTSTypes = (
     return nullType + objDef;
   } else if (fieldType.enum) {
     return nullType + fieldType.enum.map((v) => valueToString(v)).join(" | ");
+  } else if (fieldType.tuple) {
+    const tupleItems = fieldType.tuple
+      .map((item) => getJSONBTSTypes(tables, item, true, undefined, depth + 1))
+      .join(", ");
+
+    return `${nullType}[${tupleItems}]`;
   } else if (fieldType.oneOf || fieldType.oneOfType) {
     const oneOf = fieldType.oneOf || fieldType.oneOfType.map((type) => ({ type }));
     return (

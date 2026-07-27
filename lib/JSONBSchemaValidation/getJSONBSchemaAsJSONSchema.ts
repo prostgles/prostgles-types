@@ -39,6 +39,7 @@ export const getJSONSchemaObject = (
     oneOfType,
     title,
     record,
+    tuple,
     ...t
   } = typeof rawType === "string" ? ({ type: rawType } as JSONB.FieldTypeObj) : rawType;
 
@@ -99,6 +100,15 @@ export const getJSONSchemaObject = (
           [k]: getJSONSchemaObject(v),
         };
       }, {}),
+    };
+  } else if (tuple) {
+    /** TUPLE */
+    result = {
+      type: "array",
+      items: tuple.map((item) => getJSONSchemaObject(item)),
+      additionalItems: false,
+      minItems: tuple.length,
+      maxItems: tuple.length,
     };
   } else if (oneOf || oneOfType) {
     const _oneOf = oneOf || oneOfType!.map((type) => ({ type }));

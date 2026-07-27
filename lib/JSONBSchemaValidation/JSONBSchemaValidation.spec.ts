@@ -497,4 +497,176 @@ void describe("JSONBValidation", async () => {
       error: 'statuses[1] is of invalid type. Expecting "active" | "inactive" But got "pending"',
     });
   });
+
+  await test("tuples", () => {
+    const schema = {
+      coordinates: {
+        tuple: ["number", "number"],
+      },
+      metadata: {
+        tuple: [
+          "string",
+          { type: "integer", nullable: true },
+          { enum: ["draft", "published"] as const },
+        ],
+      },
+      nested: {
+        tuple: [
+          {
+            type: {
+              name: "string",
+              active: { type: "boolean", optional: true },
+            },
+          },
+          {
+            tuple: ["string", "integer"],
+          },
+        ],
+      },
+      nullableTuple: {
+        tuple: ["string", "boolean"],
+        nullable: true,
+      },
+    } as const;
+
+    const validInput = {
+      coordinates: [12.5, -34.2],
+      metadata: ["Post title", null, "draft"],
+      nested: [{ name: "John", active: true }, ["item-1", 42]],
+      nullableTuple: null,
+    };
+
+    assert.deepStrictEqual(getJSONBObjectSchemaValidationError(schema, validInput, "test"), {
+      data: validInput,
+    });
+
+    assert.deepStrictEqual(
+      getJSONBObjectSchemaValidationError(
+        schema,
+        {
+          ...validInput,
+          coordinates: "not-an-array",
+        },
+        "test",
+      ),
+      {
+        error: "coordinates is of invalid type. Expecting [number, number]",
+      },
+    );
+
+    assert.deepStrictEqual(
+      getJSONBObjectSchemaValidationError(
+        schema,
+        {
+          ...validInput,
+          coordinates: [12.5],
+        },
+        "test",
+      ),
+      {
+        error: "coordinates is of invalid tuple length. Expecting 2 elements but got 1",
+      },
+    );
+
+    assert.deepStrictEqual(
+      getJSONBObjectSchemaValidationError(
+        schema,
+        {
+          ...validInput,
+          coordinates: [12.5, -34.2, 99],
+        },
+        "test",
+      ),
+      {
+        error: "coordinates is of invalid tuple length. Expecting 2 elements but got 3",
+      },
+    );
+
+    assert.deepStrictEqual(
+      getJSONBObjectSchemaValidationError(
+        schema,
+        {
+          ...validInput,
+          coordinates: [12.5, "invalid"],
+        },
+        "test",
+      ),
+      {
+        error: "coordinates.1 is of invalid type. Expecting number",
+      },
+    );
+
+    assert.deepStrictEqual(
+      getJSONBObjectSchemaValidationError(
+        schema,
+        {
+          ...validInput,
+          metadata: ["Post title", 1.5, "draft"],
+        },
+        "test",
+      ),
+      {
+        error: "metadata.1 is of invalid type. Expecting null | integer",
+      },
+    );
+
+    assert.deepStrictEqual(
+      getJSONBObjectSchemaValidationError(
+        schema,
+        {
+          ...validInput,
+          metadata: ["Post title", 1, "invalid-status"],
+        },
+        "test",
+      ),
+      {
+        error: 'metadata.2 is of invalid type. Expecting "draft" | "published"',
+      },
+    );
+
+    assert.deepStrictEqual(
+      getJSONBObjectSchemaValidationError(
+        schema,
+        {
+          ...validInput,
+          nested: [{ name: "John", role: "admin" }, ["item-1", 42]],
+        },
+        "test",
+      ),
+      {
+        error: "nested.0 has extra properties: role",
+      },
+    );
+
+    assert.deepStrictEqual(
+      getJSONBObjectSchemaValidationError(
+        schema,
+        {
+          ...validInput,
+          nested: [{ name: "John" }, ["item-1", "not-an-integer"]],
+        },
+        "test",
+      ),
+      {
+        error: "nested.1.1 is of invalid type. Expecting integer",
+      },
+    );
+
+    assert.deepStrictEqual(
+      getJSONBObjectSchemaValidationError(
+        schema,
+        {
+          ...validInput,
+          nullableTuple: ["value", false],
+        },
+        "test",
+      ),
+      {
+        data: {
+          ...validInput,
+          nullableTuple: ["value", false],
+        },
+      },
+    );
+  });
 });

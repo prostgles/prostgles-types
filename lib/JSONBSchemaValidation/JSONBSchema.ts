@@ -135,6 +135,7 @@ export namespace JSONB {
     arrayOf?: undefined;
     arrayOfType?: undefined;
     enum?: undefined;
+    tuple?: undefined;
     record?: undefined;
   };
 
@@ -146,6 +147,7 @@ export namespace JSONB {
       arrayOf?: undefined;
       arrayOfType?: undefined;
       enum?: undefined;
+      tuple?: undefined;
       record?: undefined;
       lookup?: undefined;
     };
@@ -159,12 +161,28 @@ export namespace JSONB {
     arrayOf?: undefined;
     arrayOfType?: undefined;
     enum?: undefined;
+    tuple?: undefined;
     record?: undefined;
     lookup?: undefined;
   };
 
   export type EnumType = BaseOptions & {
     enum: readonly any[];
+    tuple?: undefined;
+    type?: undefined;
+    oneOf?: undefined;
+    oneOfType?: undefined;
+    arrayOf?: undefined;
+    arrayOfType?: undefined;
+    allowedValues?: undefined;
+    mimeTypes?: undefined;
+    record?: undefined;
+    lookup?: undefined;
+  };
+
+  export type TupleType = BaseOptions & {
+    tuple: readonly FieldType[];
+    enum?: undefined;
     type?: undefined;
     oneOf?: undefined;
     oneOfType?: undefined;
@@ -183,6 +201,7 @@ export namespace JSONB {
     allowedValues?: undefined;
     mimeTypes?: undefined;
     enum?: undefined;
+    tuple?: undefined;
     record?: undefined;
     lookup?: undefined;
   } & (
@@ -202,6 +221,7 @@ export namespace JSONB {
     oneOf?: undefined;
     oneOfType?: undefined;
     enum?: undefined;
+    tuple?: undefined;
     record?: undefined;
     lookup?: undefined;
   } & (
@@ -224,6 +244,7 @@ export namespace JSONB {
     arrayOf?: undefined;
     arrayOfType?: undefined;
     enum?: undefined;
+    tuple?: undefined;
     lookup?: undefined;
     record: {
       keysEnum?: readonly string[];
@@ -236,6 +257,7 @@ export namespace JSONB {
     | BasicType
     | ObjectType
     | EnumType
+    | TupleType
     | OneOf
     | ArrayOf
     | RecordType
@@ -282,13 +304,19 @@ export namespace JSONB {
       : any
     : any
   >;
-
+  type ResolveTuple<T extends readonly FieldType[]> = {
+    -readonly [K in keyof T]: T[K] extends FieldType ? GetType<T[K]> : never;
+  };
   type ResolveField<T extends FieldTypeObj | Omit<FieldTypeObj, "optional">> =
     T extends { type: infer U } ?
       U extends DataType ? GetPrimitiveType<T, U>
       : U extends ObjectSchema ? GetObjectType<U>
       : never
     : T extends { enum: readonly any[] } ? T["enum"][number]
+    : T extends { tuple: infer U } ?
+      U extends readonly FieldType[] ?
+        ResolveTuple<U>
+      : never
     : T extends { arrayOfType: infer U } ?
       U extends ObjectSchema ?
         GetObjectType<U>[]

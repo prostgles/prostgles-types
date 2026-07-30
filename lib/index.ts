@@ -285,9 +285,12 @@ export type ValidatedColumnInfo = ColumnInfo & {
   delete: boolean;
 };
 
-export type DBSchemaTable = TableInfo & {
+export type DBSchemaTable<
+  CustomTableMetadata = Record<string, unknown>,
+  CustomColumnMetadata = Record<string, unknown>,
+> = TableInfo<CustomTableMetadata> & {
   name: string;
-  columns: ValidatedColumnInfo[];
+  columns: (ValidatedColumnInfo & CustomColumnMetadata)[];
 };
 
 type FileTableConfig = {
@@ -303,7 +306,7 @@ type FileTableConfig = {
     | undefined;
 };
 
-export type TableInfo = {
+export type TableInfo<CustomMetadata = Record<string, unknown>> = {
   /**
    * OID from the postgres database
    * Useful in handling renamed tables
@@ -386,7 +389,7 @@ export type TableInfo = {
     };
     delete?: {};
   };
-};
+} & CustomMetadata;
 
 export const getAllowedTableMethods = ({ publishInfo }: Pick<TableInfo, "publishInfo">) => {
   let allowedCommands = [

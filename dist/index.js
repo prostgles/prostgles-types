@@ -48,7 +48,7 @@ exports._PG_postgis = ["geometry", "geography"];
 exports._PG_geometric = ["point", "line", "lseg", "box", "path", "polygon", "circle"];
 exports._PG_bytes = ["bytea"];
 const TS_PG_PRIMITIVES = {
-    ArrayBuffer: exports._PG_bytes,
+    "ArrayBuffer | Uint8Array": exports._PG_bytes,
     string: [
         ...exports._PG_strings,
         ...exports._PG_numbers_str,

@@ -20,7 +20,7 @@ export declare const TS_PG_Types: {
     readonly "boolean[]": "_bool"[];
     readonly "string[]": ("_text" | "_name" | "_time" | "_timestamp" | "_path" | "_bpchar" | "_char" | "_varchar" | "_citext" | "_uuid" | "_timetz" | "_interval" | "_cidr" | "_inet" | "_macaddr" | "_macaddr8" | "_int4range" | "_int8range" | "_numrange" | "_tsvector" | "_int8" | "_numeric" | "_money" | "_point" | "_line" | "_lseg" | "_box" | "_polygon" | "_circle" | "_date" | "_timestamptz" | "_geometry" | "_geography")[];
     readonly "any[]": ("_interval" | "_jsonb" | "_json")[];
-    readonly ArrayBuffer: readonly ["bytea"];
+    readonly "ArrayBuffer | Uint8Array": readonly ["bytea"];
     readonly string: readonly ["bpchar", "char", "varchar", "text", "citext", "uuid", "time", "timetz", "interval", "name", "cidr", "inet", "macaddr", "macaddr8", "int4range", "int8range", "numrange", "tsvector", "int8", "numeric", "money", "date", "timestamp", "timestamptz", "point", "line", "lseg", "box", "path", "polygon", "circle", "geometry", "geography", "lseg"];
     readonly number: readonly ["int2", "int4", "float4", "float8", "oid"];
     readonly boolean: readonly ["bool"];

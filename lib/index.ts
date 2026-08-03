@@ -48,7 +48,7 @@ export type PG_COLUMN_UDT_DATA_TYPE =
   | (typeof _PG_bytes)[number];
 
 const TS_PG_PRIMITIVES = {
-  ArrayBuffer: _PG_bytes,
+  "ArrayBuffer | Uint8Array": _PG_bytes,
   string: [
     ..._PG_strings,
     ..._PG_numbers_str,

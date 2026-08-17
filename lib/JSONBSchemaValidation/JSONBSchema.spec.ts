@@ -2,6 +2,8 @@ import { strict as assert } from "assert";
 import { describe, test } from "node:test";
 import { type JSONB } from "./JSONBSchema";
 import { getJSONBSchemaAsJSONSchema, getJSONSchemaObject } from "./getJSONBSchemaAsJSONSchema";
+import { getJSONBTSTypes } from "./getJSONBSchemaTSTypes";
+import type { TableSchema } from "..";
 
 describe("jsonb to json schema conversion", async () => {
   test("array allowedValues", () => {
@@ -240,9 +242,69 @@ describe("jsonb to json schema conversion", async () => {
       f: {
         name: "file",
         type: "text/plain",
+        lastModified: 1234567890,
         data: new Blob(),
       },
     };
+
+    const lookupSchema = {
+      type: {
+        rows: { type: "RowLookup[]", table: "users" },
+        values: {
+          type: "ValueLookup[]",
+          table: "users",
+          column: "id",
+        },
+        tables: { type: "TableLookup[]" },
+        columns: { type: "ColumnLookup[]", filter: { udt_name: "int4" } },
+      },
+    } as const satisfies JSONB.FieldType;
+    const _lookups: JSONB.GetType<typeof lookupSchema> = {
+      rows: [{ id: 1 }],
+      values: [1],
+      tables: ["users"],
+      columns: [{ table: "users", column: "id" }],
+    };
+
+    const rootLookupSchema = {
+      type: "ValueLookup",
+      table: "users",
+      column: "id",
+    } as const satisfies JSONB.JSONBSchema;
+    const _rootLookupValue: JSONB.GetSchemaType<typeof rootLookupSchema> = 1;
+  });
+
+  test("lookup generated types", () => {
+    const tables = [
+      {
+        name: "users",
+        columns: [
+          { name: "id", udt_name: "int4", is_nullable: false },
+          { name: "name", udt_name: "text", is_nullable: true },
+        ],
+      },
+    ] as unknown as TableSchema[];
+
+    assert.equal(
+      getJSONBTSTypes(tables, {
+        type: "RowLookup",
+        table: "users",
+      }),
+      '{ "id":  number;  "name": null |  string;  }',
+    );
+    assert.equal(
+      getJSONBTSTypes(tables, {
+        type: "ValueLookup[]",
+        table: "users",
+        column: "id",
+      }),
+      "number[]",
+    );
+    assert.equal(getJSONBTSTypes(tables, { type: "TableLookup[]" }), "string[]");
+    assert.equal(
+      getJSONBTSTypes(tables, { type: "ColumnLookup", nullable: true }),
+      'null | { "table": string; "column": string; }',
+    );
   });
 
   test("instantiation limits", () => {

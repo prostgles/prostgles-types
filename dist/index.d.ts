@@ -20,7 +20,7 @@ export declare const TS_PG_Types: {
     readonly "boolean[]": "_bool"[];
     readonly "string[]": ("_text" | "_name" | "_time" | "_timestamp" | "_path" | "_bpchar" | "_char" | "_varchar" | "_citext" | "_uuid" | "_timetz" | "_interval" | "_cidr" | "_inet" | "_macaddr" | "_macaddr8" | "_int4range" | "_int8range" | "_numrange" | "_tsvector" | "_int8" | "_numeric" | "_money" | "_point" | "_line" | "_lseg" | "_box" | "_polygon" | "_circle" | "_date" | "_timestamptz" | "_geometry" | "_geography")[];
     readonly "any[]": ("_interval" | "_jsonb" | "_json")[];
-    readonly "ArrayBuffer | Uint8Array": readonly ["bytea"];
+    readonly Uint8Array: readonly ["bytea"];
     readonly string: readonly ["bpchar", "char", "varchar", "text", "citext", "uuid", "time", "timetz", "interval", "name", "cidr", "inet", "macaddr", "macaddr8", "int4range", "int8range", "numrange", "tsvector", "int8", "numeric", "money", "date", "timestamp", "timestamptz", "point", "line", "lseg", "box", "path", "polygon", "circle", "geometry", "geography", "lseg"];
     readonly number: readonly ["int2", "int4", "float4", "float8", "oid"];
     readonly boolean: readonly ["bool"];
@@ -52,7 +52,7 @@ export type DBTableSchema = {
     update?: boolean;
     delete?: boolean;
     /**
-     * Used in update, insertm select and filters
+     * Used in update, insert, select and filters
      * fields that are nullable or with a default value are be optional
      */
     columns: AnyObject;
@@ -74,7 +74,7 @@ type ReferenceTable = {
 export type ColumnInfo = {
     name: string;
     /**
-     * Column display name. Will be first non empty value from i18n data, comment, name
+     * Column display name. Will be first non empty value from i18n data, or prettified name
      */
     label: string;
     /**
@@ -149,7 +149,7 @@ export type ColumnInfo = {
     hint?: string;
     /**
      * JSONB schema (a simplified version of json schema) for the column (if defined in the tableConfig)
-     * A check constraint will use this schema for runtime data validation and apropriate TS types will be generated
+     * A check constraint will use this schema for runtime data validation and appropriate TS types will be generated
      */
     jsonbSchema?: JSONB.JSONBSchema;
     /**
@@ -648,7 +648,7 @@ export type InsertDataWithNested<TD extends AnyObject, S extends DBSchema | void
  * Methods for interacting with a table/view
  * - On client-side some methods are restricted (and undefined) based on publish rules on the server
  */
-export type TableHandler<TD extends AnyObject = AnyObject, S extends DBSchema | void = void, TName extends S extends DBSchema ? keyof S : never = never> = {
+export type TableHandler<TD extends AnyObject = AnyObject, S extends DBSchema | void = void, TName extends (S extends DBSchema ? keyof S : never) = never> = {
     /**
      * Retrieves the table/view info
      */

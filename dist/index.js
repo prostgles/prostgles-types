@@ -48,7 +48,7 @@ exports._PG_postgis = ["geometry", "geography"];
 exports._PG_geometric = ["point", "line", "lseg", "box", "path", "polygon", "circle"];
 exports._PG_bytes = ["bytea"];
 const TS_PG_PRIMITIVES = {
-    "ArrayBuffer | Uint8Array": exports._PG_bytes,
+    Uint8Array: exports._PG_bytes,
     string: [
         ...exports._PG_strings,
         ...exports._PG_numbers_str,
@@ -72,7 +72,6 @@ exports.TS_PG_Types = {
     "string[]": TS_PG_PRIMITIVES.string.map((s) => `_${s}`),
     "any[]": TS_PG_PRIMITIVES.any.map((s) => `_${s}`),
     // "Date[]": _PG_date.map(s => `_${s}` as const),
-    // "any": [],
 };
 const postgresToTsType = (udt_data_type) => {
     return ((0, util_1.getKeys)(exports.TS_PG_Types).find((k) => {

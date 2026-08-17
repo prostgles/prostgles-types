@@ -48,7 +48,7 @@ export type PG_COLUMN_UDT_DATA_TYPE =
   | (typeof _PG_bytes)[number];
 
 const TS_PG_PRIMITIVES = {
-  "ArrayBuffer | Uint8Array": _PG_bytes,
+  Uint8Array: _PG_bytes,
   string: [
     ..._PG_strings,
     ..._PG_numbers_str,
@@ -74,7 +74,6 @@ export const TS_PG_Types = {
   "string[]": TS_PG_PRIMITIVES.string.map((s) => `_${s}` as const),
   "any[]": TS_PG_PRIMITIVES.any.map((s) => `_${s}` as const),
   // "Date[]": _PG_date.map(s => `_${s}` as const),
-  // "any": [],
 } as const;
 export type TS_COLUMN_DATA_TYPES = keyof typeof TS_PG_Types;
 
@@ -113,7 +112,7 @@ export type DBTableSchema = {
   update?: boolean;
   delete?: boolean;
   /**
-   * Used in update, insertm select and filters
+   * Used in update, insert, select and filters
    * fields that are nullable or with a default value are be optional
    */
   columns: AnyObject;
@@ -138,7 +137,7 @@ export type ColumnInfo = {
   name: string;
 
   /**
-   * Column display name. Will be first non empty value from i18n data, comment, name
+   * Column display name. Will be first non empty value from i18n data, or prettified name
    */
   label: string;
 
@@ -230,7 +229,7 @@ export type ColumnInfo = {
 
   /**
    * JSONB schema (a simplified version of json schema) for the column (if defined in the tableConfig)
-   * A check constraint will use this schema for runtime data validation and apropriate TS types will be generated
+   * A check constraint will use this schema for runtime data validation and appropriate TS types will be generated
    */
   jsonbSchema?: JSONB.JSONBSchema;
 
@@ -741,9 +740,7 @@ export type InsertParams<T extends AnyObject | void = void, S extends DBSchema |
    * - DoUpdate: will update all non primary key columns of the conflicting row
    */
   onConflict?:
-    | "DoNothing"
-    | "DoUpdate"
-    | { action: "DoNothing" | "DoUpdate"; conflictColumns: string[] };
+    "DoNothing" | "DoUpdate" | { action: "DoNothing" | "DoUpdate"; conflictColumns: string[] };
 
   /**
    * Used for sync.
@@ -918,7 +915,7 @@ export type InsertDataWithNested<
 export type TableHandler<
   TD extends AnyObject = AnyObject,
   S extends DBSchema | void = void,
-  TName extends S extends DBSchema ? keyof S : never = never,
+  TName extends (S extends DBSchema ? keyof S : never) = never,
 > = {
   /**
    * Retrieves the table/view info
@@ -1210,11 +1207,7 @@ type DeleteMethods<T extends DBTableSchema> =
   T["delete"] extends true ? keyof Pick<TableHandler, "delete"> : never;
 
 export type ValidatedMethods<T extends DBTableSchema> =
-  | SelectMethods<T>
-  | UpdateMethods<T>
-  | InsertMethods<T>
-  | UpsertMethods<T>
-  | DeleteMethods<T>;
+  SelectMethods<T> | UpdateMethods<T> | InsertMethods<T> | UpsertMethods<T> | DeleteMethods<T>;
 // | SyncMethods<T>
 
 export type DBHandler<S = void> =

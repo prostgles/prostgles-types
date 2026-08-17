@@ -1,13 +1,14 @@
 {
   "name": "prostgles-types",
-  "version": "4.0.273",
+  "version": "4.0.274",
   "description": "",
   "main": "dist/index_umd.js",
   "types": "dist/index.d.ts",
   "directories": {},
   "scripts": {
     "start": "tsc --watch",
-    "test": "npm run build && node --test dist/*.spec.js dist/**/*.spec.js",
+    "test": "npm run build && npm run test:type-instantiations && node --test dist/*.spec.js dist/**/*.spec.js",
+    "test:type-instantiations": "node scripts/check-type-instantiations.mjs",
     "build": "npm i && rm -rf ./dist/* && tsc && webpack --config webpack.prod.js",
     "prebuild": "tsc --noEmit -p tsconfig.browser.json",
     "perf": "tsc --extendedDiagnostics 2>&1 | grep -E \"Instantiations|Check time\"",

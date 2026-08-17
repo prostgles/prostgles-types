@@ -1,5 +1,5 @@
 import type { JSONSchema7, JSONSchema7Definition, JSONSchema7TypeName } from "json-schema";
-import type { JSONB, PrimitiveTypes } from "./JSONBSchema";
+import type { JSONB } from "./JSONBSchema";
 import { getObjectEntries, isObject } from "../util";
 import { safeGetKeys } from "./utils";
 
@@ -7,8 +7,7 @@ const getJSONSchemaType = (
   rawType: JSONB.BasicType["type"] | JSONB.Lookup["type"] | undefined,
 ): { type: JSONSchema7TypeName | undefined; isArray: boolean } | undefined => {
   if (!rawType) return;
-  const type: (typeof PrimitiveTypes)[number] | "Lookup" =
-    rawType.endsWith("[]") ? (rawType.slice(0, -2) as any) : rawType;
+  const type = rawType.endsWith("[]") ? rawType.slice(0, -2) : rawType;
 
   return {
     type:
@@ -17,7 +16,8 @@ const getJSONSchemaType = (
       : type === "number" ? "number"
       : type === "any" ? undefined
       : type === "unknown" ? undefined
-      : type === "Lookup" ? undefined
+      : type.endsWith("Lookup") ? undefined
+      : type === "Uint8Array" ? undefined
       : type === "Blob" ? undefined
       : type === "FileLike" ? undefined
       : "string",

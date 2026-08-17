@@ -13,7 +13,7 @@ export const getFieldTypeObj = (rawFieldType: JSONB.FieldType): JSONB.FieldTypeO
   return rawFieldType;
 };
 
-const isBlob = (val: unknown): val is Blob => {
+const isUint8ArrayOrBuffer = (val: unknown): val is Uint8Array => {
   return (
     val instanceof Blob ||
     //@ts-ignore
@@ -23,7 +23,7 @@ const isBlob = (val: unknown): val is Blob => {
   );
 };
 
-type DataType = JSONB.FieldTypeObj["type"];
+type DataType = JSONB.BasicType["type"];
 type ElementType<T extends DataType> = T extends `${infer E}[]` ? E : never;
 type ArrayTypes = Extract<DataType, `${string}[]`>;
 type NonArrayTypes = Extract<Exclude<DataType, ArrayTypes>, string>;
@@ -47,10 +47,8 @@ const PRIMITIVE_VALIDATORS: {
   any: (val): val is any => typeof val !== "function" && typeof val !== "symbol",
   unknown: (val): val is unknown => typeof val !== "function" && typeof val !== "symbol",
   Date: (val) => typeof val === "string",
-  Lookup: (val): val is unknown => {
-    throw new Error("Lookup type is not supported for validation");
-  },
-  Blob: isBlob,
+  Uint8Array: isUint8ArrayOrBuffer,
+  Blob: isUint8ArrayOrBuffer,
   FileLike: (val, s): val is PrimitiveTypeMap["FileLike"] => {
     if (s.type !== "FileLike") {
       throw new Error("FileLike type must have type 'FileLike'");
@@ -59,7 +57,7 @@ const PRIMITIVE_VALIDATORS: {
       isObject(val) &&
       typeof val.name === "string" &&
       typeof val.type === "string" &&
-      isBlob(val.data);
+      isUint8ArrayOrBuffer(val.data);
     if (validStructure && s.mimeTypes) {
       const validMime = Object.keys(s.mimeTypes).some((mime) => val.type === mime);
       if (!validMime) {
@@ -166,7 +164,10 @@ const getPropertyValidationError = (
       return;
     }
 
-    const { validator } = getValidator(type, fieldDefinition);
+    if (type.includes("Lookup")) {
+      throw new Error("Lookup types are not supported for validation");
+    }
+    const { validator } = getValidator(type as DataType, fieldDefinition);
     const isValid = validator(value, fieldDefinition);
     if (!isValid) {
       return err;

@@ -24,6 +24,33 @@ const valueToString = (v: any): string => {
   return String(v);
 };
 
+const getLookupTSType = (tables: TableSchema[], fieldType: JSONB.Lookup): string => {
+  const nullType = fieldType.nullable ? "null | " : "";
+  const arrayType = fieldType.type.endsWith("[]") ? "[]" : "";
+
+  if (fieldType.type === "TableLookup" || fieldType.type === "TableLookup[]") {
+    return `${nullType}string${arrayType}`;
+  }
+
+  if (fieldType.type === "ColumnLookup" || fieldType.type === "ColumnLookup[]") {
+    return `${nullType}{ "table": string; "column": string; }${arrayType}`;
+  }
+
+  const dataLookup = fieldType as JSONB.RowLookup | JSONB.ValueLookup;
+  const cols = tables.find((table) => table.name === dataLookup.table)?.columns;
+  if (fieldType.type === "ValueLookup" || fieldType.type === "ValueLookup[]") {
+    const valueLookup = fieldType as JSONB.ValueLookup;
+    const udtName = cols?.find((column) => column.name === valueLookup.column)?.udt_name;
+    return `${nullType}${postgresToTsType(udtName ?? "text")}${arrayType}`;
+  }
+
+  const rowType =
+    !cols ? "any" : (
+      `{ ${cols.map((column) => `${JSON.stringify(column.name)}: ${column.is_nullable ? "null | " : ""} ${postgresToTsType(column.udt_name)}; `).join(" ")} }`
+    );
+  return `${nullType}${rowType}${arrayType}`;
+};
+
 export const getJSONBTSTypes = (
   tables: TableSchema[],
   rawFieldType: JSONB.FieldType,
@@ -33,51 +60,9 @@ export const getJSONBTSTypes = (
 ): string => {
   const fieldType = getFieldTypeObj(rawFieldType);
   const nullType = fieldType.nullable ? `null | ` : "";
-  if (fieldType.lookup) {
-    const l = fieldType.lookup;
-    if (l.type === "data-def") {
-      return `${fieldType.nullable ? `null |` : ""} ${getJSONBTSTypes(tables, {
-        type: {
-          table: "string",
-          column: "string",
-          filter: { record: {}, optional: true },
-          isArray: { type: "boolean", optional: true },
-          searchColumns: { type: "string[]", optional: true },
-          isFullRow: {
-            optional: true,
-            type: {
-              displayColumns: { type: "string[]", optional: true },
-            },
-          },
-          showInRowCard: { optional: true, record: {} },
-        },
-      })}`;
-    }
-
-    const isSChema = l.type === "schema";
-    let type =
-      isSChema ?
-        l.object === "table" ?
-          "string"
-        : `{ "table": string; "column": string; }`
-      : "";
-    if (!isSChema) {
-      const cols = tables.find((t) => t.name === l.table)?.columns;
-      if (!l.isFullRow) {
-        type = postgresToTsType(cols?.find((c) => c.name === l.column)?.udt_name ?? "text");
-      } else {
-        type =
-          !cols ? "any" : (
-            `{ ${cols.map((c) => `${JSON.stringify(c.name)}: ${c.is_nullable ? "null | " : ""} ${postgresToTsType(c.udt_name)}; `).join(" ")} }`
-          );
-      }
-    }
-    return `${fieldType.nullable ? `null | ` : ""}${type}${l.isArray ? "[]" : ""}`;
+  if (typeof fieldType.type === "string" && fieldType.type.includes("Lookup")) {
+    return getLookupTSType(tables, fieldType as JSONB.Lookup);
   } else if (typeof fieldType.type === "string") {
-    if (fieldType.type.toLowerCase().includes("lookup")) {
-      throw new Error(`getJSONBTSTypes: Lookup type not handled correctly`);
-    }
-
     /** Primitives */
     const correctType = fieldType.type
       .replace("integer", "number")

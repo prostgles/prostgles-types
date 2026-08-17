@@ -11,11 +11,13 @@ export type PrimitiveTypeMap = {
   boolean: boolean;
   any: any;
   unknown: unknown;
+  Uint8Array: Uint8Array;
   Blob: Blob;
   FileLike: {
     name: string;
     type: string;
-    data: Blob;
+    lastModified?: number;
+    data: Uint8Array | Blob;
   };
 };
 
@@ -55,6 +57,7 @@ export const PrimitiveTypesObj = {
   Date: 1,
   time: 1,
   timestamp: 1,
+  Uint8Array: 1,
   Blob: 1,
   FileLike: 1,
   any: 1,
@@ -85,50 +88,7 @@ export namespace JSONB {
     title?: string;
   };
 
-  export type Lookup = BaseOptions & {
-    type?: "Lookup" | "Lookup[]";
-    lookup:
-      | {
-          type:
-            | "data"
-            /**
-             * This is used as edit-mode (to generate lookup of type data)
-             */
-            | "data-def";
-          table: string;
-          column: string;
-          filter?: AnyObject;
-          isArray?: boolean;
-          isFullRow?: {
-            /**
-             * Columns used to display the selected row in the dropdown
-             */
-            displayColumns?: string[];
-          };
-          /**
-           * Columns used to search
-           */
-          searchColumns?: string[];
-          /**
-           * If true then a button will be shown
-           *  in the row card footer to access this action
-           */
-          showInRowCard?: {
-            /**
-             * Action button text. Defaults to the method name
-             */
-            actionLabel?: string;
-            actionColor?: "danger" | "warn" | "action";
-            actionStyle?: AnyObject;
-            actionClass?: string;
-          };
-        }
-      | {
-          type: "schema";
-          isArray?: boolean;
-          object: "column" | "table";
-          filter?: { table?: string; tsDataType?: string; udt_name?: string };
-        };
+  type LookupBase = BaseOptions & {
     allowedValues?: undefined;
     oneOf?: undefined;
     oneOfType?: undefined;
@@ -138,6 +98,67 @@ export namespace JSONB {
     tuple?: undefined;
     record?: undefined;
   };
+
+  type ShowInRowCardOptions = {
+    /**
+     * Action button text. Defaults to the method name
+     */
+    actionLabel?: string;
+    actionColor?: "danger" | "warn" | "action";
+    actionStyle?: AnyObject;
+    actionClass?: string;
+  };
+
+  type DataLookupOptions = {
+    table: string;
+    filter?: AnyObject;
+    /**
+     * Columns used to search
+     */
+    searchColumns?: string[];
+    /**
+     * If defined then a button will be shown
+     * in the row card footer to access this action
+     */
+    showInRowCard?: ShowInRowCardOptions;
+  };
+
+  type RowLookupOptions = {
+    type: "RowLookup" | "RowLookup[]";
+    /**
+     * Columns used to display the selected row in the dropdown
+     */
+    displayColumns?: string[];
+  };
+
+  type ValueLookupOptions = {
+    type: "ValueLookup" | "ValueLookup[]";
+    column: string;
+  };
+
+  type TableLookupOptions = {
+    type: "TableLookup" | "TableLookup[]";
+  };
+
+  type ColumnLookupOptions = {
+    type: "ColumnLookup" | "ColumnLookup[]";
+    filter?: {
+      table?: string;
+      tsDataType?: string;
+      udt_name?: string;
+    };
+  };
+
+  export type RowLookup = LookupBase & DataLookupOptions & RowLookupOptions;
+  export type ValueLookup = LookupBase & DataLookupOptions & ValueLookupOptions;
+  export type TableLookup = LookupBase & TableLookupOptions;
+  export type ColumnLookup = LookupBase & ColumnLookupOptions;
+  export type Lookup = LookupBase &
+    (
+      | (DataLookupOptions & (RowLookupOptions | ValueLookupOptions))
+      | TableLookupOptions
+      | ColumnLookupOptions
+    );
 
   export type BasicType = BaseOptions &
     PrimitiveOptions & {
@@ -254,47 +275,45 @@ export namespace JSONB {
   };
 
   export type FieldTypeObj =
-    | BasicType
-    | ObjectType
-    | EnumType
-    | TupleType
-    | OneOf
-    | ArrayOf
-    | RecordType
-    | Lookup;
+    BasicType | ObjectType | EnumType | TupleType | OneOf | ArrayOf | RecordType | Lookup;
 
   export type FieldType = DataType | FieldTypeObj;
   type ObjectSchema = Record<string, FieldType>;
-
-  type NormalizeField<T extends FieldType | Omit<FieldTypeObj, "optional">> =
-    T extends DataType ? { type: T } : T;
 
   type AllowedValueFromItem<I> = I extends { value: infer V } ? V : I;
 
   type AllowedValuesUnion<A extends readonly any[]> = AllowedValueFromItem<A[number]>;
 
   type ApplyAllowedToType<Allowed, TType> =
-    TType extends readonly any[] ? Allowed[]
-    : TType extends any[] ? Allowed[]
-    : Allowed;
+    TType extends readonly any[] ? Allowed[] : Allowed;
 
-  type GetAllowedValues<T extends FieldTypeObj | Omit<FieldTypeObj, "optional">, TType> =
+  type GetAllowedValues<T, TType> =
     T extends { allowedValues: readonly any[] } ?
       ApplyAllowedToType<AllowedValuesUnion<T["allowedValues"]>, TType>
     : TType;
 
   type PrimitiveValue<U extends DataType> =
-    U extends `${infer P}[]` ?
+    U extends keyof PrimitiveTypeMap ? PrimitiveTypeMap[U]
+    : U extends `${infer P}[]` ?
       P extends keyof PrimitiveTypeMap ?
         PrimitiveTypeMap[P][]
       : never
-    : U extends keyof PrimitiveTypeMap ? PrimitiveTypeMap[U]
     : never;
 
-  type GetPrimitiveType<
-    T extends FieldTypeObj | Omit<FieldTypeObj, "optional">,
-    U extends DataType,
-  > = GetAllowedValues<T, PrimitiveValue<U>>;
+  type GetPrimitiveType<T, U extends DataType> = GetAllowedValues<T, PrimitiveValue<U>>;
+
+  type LookupType = Lookup["type"];
+  type ColumnReference = { table: string; column: string };
+  type LookupValue<U extends LookupType> =
+    U extends "RowLookup" ? AnyObject
+    : U extends "RowLookup[]" ? AnyObject[]
+    : U extends "ValueLookup" ? any
+    : U extends "ValueLookup[]" ? any[]
+    : U extends "TableLookup" ? string
+    : U extends "TableLookup[]" ? string[]
+    : U extends "ColumnLookup" ? ColumnReference
+    : U extends "ColumnLookup[]" ? ColumnReference[]
+    : never;
 
   type ResolveRecord<R extends RecordType["record"]> = Record<
     R extends { keysEnum: readonly string[] } ? R["keysEnum"][number] : string,
@@ -307,9 +326,10 @@ export namespace JSONB {
   type ResolveTuple<T extends readonly FieldType[]> = {
     -readonly [K in keyof T]: T[K] extends FieldType ? GetType<T[K]> : never;
   };
-  type ResolveField<T extends FieldTypeObj | Omit<FieldTypeObj, "optional">> =
+  type ResolveField<T> =
     T extends { type: infer U } ?
       U extends DataType ? GetPrimitiveType<T, U>
+      : U extends LookupType ? LookupValue<U>
       : U extends ObjectSchema ? GetObjectType<U>
       : never
     : T extends { enum: readonly any[] } ? T["enum"][number]
@@ -339,17 +359,13 @@ export namespace JSONB {
       : never
     : any;
 
-  type GetWNullType<T extends FieldTypeObj | Omit<FieldTypeObj, "optional">> =
+  type GetWNullType<T> =
     T extends { nullable: true } ? null | ResolveField<T> : ResolveField<T>;
 
-  export type GetType<T extends FieldType | Omit<FieldTypeObj, "optional">> = GetWNullType<
-    NormalizeField<T>
-  >;
+  export type GetType<T extends FieldType | Omit<FieldTypeObj, "optional">> =
+    T extends DataType ? PrimitiveValue<T> : GetWNullType<T>;
 
-  type IsOptional<F extends FieldType> =
-    F extends DataType ? false
-    : F extends { optional: true } ? true
-    : false;
+  type IsOptional<F extends FieldType> = F extends { optional: true } ? true : false;
 
   type OptionalKeys<S extends ObjectSchema> = {
     [K in keyof S]-?: IsOptional<S[K]> extends true ? K : never;
@@ -363,12 +379,19 @@ export namespace JSONB {
     [K in OptionalKeys<S>]?: GetType<S[K]>;
   };
 
-  export type JSONBSchema = Omit<FieldTypeObj, "optional"> & {
-    defaultValue?: unknown;
+  type RootLookupOptions = {
+    table?: string;
+    filter?: AnyObject;
+    searchColumns?: string[];
+    showInRowCard?: ShowInRowCardOptions;
+    column?: string;
+    displayColumns?: string[];
   };
 
-  export type GetSchemaType<S extends JSONBSchema> =
-    S["nullable"] extends true ? null | GetType<S> : GetType<S>;
+  export type JSONBSchema = Omit<FieldTypeObj, "optional"> &
+    RootLookupOptions & { defaultValue?: unknown };
+
+  export type GetSchemaType<S extends JSONBSchema> = GetType<S>;
 
   export type GetTypeIfDefined<Schema extends FieldType | undefined> =
     Schema extends FieldType ? GetType<Schema> : never;

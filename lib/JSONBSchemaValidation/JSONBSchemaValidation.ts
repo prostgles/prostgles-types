@@ -1,4 +1,4 @@
-import type { TableHandler } from "lib";
+import type { TableHandler } from "../index";
 import { getKeys, isDefined, isEmpty, isObject } from "../util";
 import { includes } from "../utilFuncs/includes";
 import type { JSONB, PrimitiveTypeMap } from "./JSONBSchema";

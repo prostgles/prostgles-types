@@ -1,4 +1,4 @@
-import type { DBHandler } from "lib";
+import type { TableHandler } from "lib";
 import { getKeys, isDefined, isEmpty, isObject } from "../util";
 import { includes } from "../utilFuncs/includes";
 import type { JSONB, PrimitiveTypeMap } from "./JSONBSchema";
@@ -13,6 +13,8 @@ type PendingLookupValidation = {
   value: unknown;
   path: string[];
 };
+
+type DBHandler = Map<string, TableHandler>;
 
 export const getFieldTypeObj = (rawFieldType: JSONB.FieldType): JSONB.FieldTypeObj => {
   if (typeof rawFieldType === "string") return { type: rawFieldType };
@@ -414,12 +416,6 @@ const getLookupValuePath = (path: string[], index?: number): string => {
   return result || "value";
 };
 
-const getLookupTableHandler = (db: DBHandler, table: string): DBHandler[string] | undefined => {
-  if (!safeHasOwn(db, table)) return;
-  const handler = safeGetProperty(db, table);
-  return isObject(handler) ? (handler as DBHandler[string]) : undefined;
-};
-
 const getLookupValidationError = async (
   lookup: PendingLookupValidation,
   db: DBHandler,
@@ -432,7 +428,7 @@ const getLookupValidationError = async (
     const valuePath = getLookupValuePath(path, isArray ? index : undefined);
 
     if (schema.type === "TableLookup" || schema.type === "TableLookup[]") {
-      if (!getLookupTableHandler(db, value as string)) {
+      if (!db.has(value as string)) {
         return `${valuePath} references an unknown table ${JSON.stringify(value)}`;
       }
       continue;
@@ -444,7 +440,7 @@ const getLookupValidationError = async (
         return `${valuePath} references a column that does not match the lookup filter`;
       }
 
-      const tableHandler = getLookupTableHandler(db, reference.table);
+      const tableHandler = db.get(reference.table);
       if (!tableHandler) {
         return `${valuePath} references an unknown table ${JSON.stringify(reference.table)}`;
       }
@@ -466,7 +462,7 @@ const getLookupValidationError = async (
     }
 
     const dataLookup = schema as JSONB.RowLookup | JSONB.ValueLookup;
-    const tableHandler = getLookupTableHandler(db, dataLookup.table);
+    const tableHandler = db.get(dataLookup.table);
 
     if (!tableHandler) {
       throw new Error(
@@ -495,7 +491,7 @@ const getLookupValidationError = async (
 export const getJSONBSchemaValidationErrorAsync = async <S extends JSONB.FieldType>(
   schema: S,
   obj: any,
-  source: DBHandler,
+  dbHandlerMap: DBHandler,
   opts?: ValidationOptions,
 ): Promise<{ error: string; data?: undefined } | { error?: undefined; data: JSONB.GetType<S> }> => {
   const pendingLookupValidations: PendingLookupValidation[] = [];
@@ -503,7 +499,7 @@ export const getJSONBSchemaValidationErrorAsync = async <S extends JSONB.FieldTy
   if (error) return { error };
 
   for (const lookup of pendingLookupValidations) {
-    const lookupError = await getLookupValidationError(lookup, source);
+    const lookupError = await getLookupValidationError(lookup, dbHandlerMap);
     if (lookupError) return { error: lookupError };
   }
   return { data: obj as JSONB.GetType<S> };

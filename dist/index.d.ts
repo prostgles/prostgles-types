@@ -282,7 +282,7 @@ export type TableInfo<CustomMetadata = Record<string, unknown>> = {
         delete?: {};
     };
 } & CustomMetadata;
-export declare const getAllowedTableMethods: ({ publishInfo }: Pick<TableInfo, "publishInfo">) => ("insert" | "update" | "delete" | "find" | "getInfo" | "getColumns" | "findOne" | "subscribe" | "subscribeOne" | "count" | "size" | "updateBatch" | "insertMany" | "upsert" | "sync" | "remove")[];
+export declare const getAllowedTableMethods: ({ publishInfo }: Pick<TableInfo, "publishInfo">) => ("insert" | "update" | "delete" | "find" | "getColumns" | "sync" | "getInfo" | "insertMany" | "upsert" | "updateBatch" | "findOne" | "count" | "size" | "subscribe" | "subscribeOne" | "remove")[];
 export type RequiredNestedInsert = {
     ftable: string;
     minRows?: number;

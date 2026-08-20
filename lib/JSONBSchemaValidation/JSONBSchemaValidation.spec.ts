@@ -1,6 +1,6 @@
 import { strict as assert } from "assert";
 import { describe, test } from "node:test";
-import type { DBHandler } from "../index";
+import type { TableHandler } from "../index";
 import type { JSONB } from "./JSONBSchema";
 import {
   getJSONBObjectSchemaValidationError,
@@ -10,20 +10,15 @@ import {
 
 void describe("JSONBValidation", async () => {
   await test("async lookup validation with a db handler", async () => {
-    const acceptsDBHandler = (handler: import("../index").DBHandler) =>
-      getJSONBSchemaValidationErrorAsync(
-        { type: "ValueLookup", table: "users", column: "id" },
-        1,
-        handler,
-      );
-    void acceptsDBHandler;
-
-    const db = {
-      users: {
-        findOne: async (filter?: any) => (filter.id === 1 ? { id: 1 } : undefined),
-        getColumns: async () => [{ name: "id", tsDataType: "number", udt_name: "int4" }],
-      },
-    } as unknown as DBHandler;
+    const db = new Map([
+      [
+        "users",
+        {
+          findOne: async (filter?: any) => (filter.id === 1 ? { id: 1 } : undefined),
+          getColumns: async () => [{ name: "id", tsDataType: "number", udt_name: "int4" }],
+        } as unknown as TableHandler,
+      ],
+    ]);
 
     assert.deepStrictEqual(
       await getJSONBSchemaValidationErrorAsync(

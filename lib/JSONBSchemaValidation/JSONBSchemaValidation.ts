@@ -443,7 +443,6 @@ const getLookupValidationError = async (
       if (schema.filter?.table && reference.table !== schema.filter.table) {
         return `${valuePath} references a column that does not match the lookup filter`;
       }
-      if (!db) continue;
 
       const tableHandler = getLookupTableHandler(db, reference.table);
       if (!tableHandler) {

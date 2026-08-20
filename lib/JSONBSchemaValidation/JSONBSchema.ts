@@ -284,8 +284,7 @@ export namespace JSONB {
 
   type AllowedValuesUnion<A extends readonly any[]> = AllowedValueFromItem<A[number]>;
 
-  type ApplyAllowedToType<Allowed, TType> =
-    TType extends readonly any[] ? Allowed[] : Allowed;
+  type ApplyAllowedToType<Allowed, TType> = TType extends readonly any[] ? Allowed[] : Allowed;
 
   type GetAllowedValues<T, TType> =
     T extends { allowedValues: readonly any[] } ?
@@ -359,8 +358,7 @@ export namespace JSONB {
       : never
     : any;
 
-  type GetWNullType<T> =
-    T extends { nullable: true } ? null | ResolveField<T> : ResolveField<T>;
+  type GetWNullType<T> = T extends { nullable: true } ? null | ResolveField<T> : ResolveField<T>;
 
   export type GetType<T extends FieldType | Omit<FieldTypeObj, "optional">> =
     T extends DataType ? PrimitiveValue<T> : GetWNullType<T>;

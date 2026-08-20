@@ -16,6 +16,15 @@ type PendingLookupValidation = {
 
 type DBHandler = Map<string, TableHandler>;
 
+type LookupPrimitive = null | number | string | boolean | undefined;
+const isLookupPrimitive = (value: unknown): value is LookupPrimitive =>
+  value == null || ["number", "string", "boolean"].includes(typeof value);
+const isPrimitiveLookupRow = (value: unknown): value is Record<string, LookupPrimitive> => {
+  if (!isObject(value)) return false;
+  const keys = safeGetKeys(value);
+  return !!keys.length && keys.every((key) => isLookupPrimitive(safeGetProperty(value, key)));
+};
+
 export const getFieldTypeObj = (rawFieldType: JSONB.FieldType): JSONB.FieldTypeObj => {
   if (typeof rawFieldType === "string") return { type: rawFieldType };
 
@@ -185,10 +194,8 @@ const getPropertyValidationError = (
       const lookupType = type.replace("[]", "");
       const values = isArray ? value : [value];
       const isValid = values.every((item: unknown) => {
-        if (lookupType === "RowLookup") return isObject(item);
-        if (lookupType === "ValueLookup") {
-          return typeof item !== "function" && typeof item !== "symbol";
-        }
+        if (lookupType === "RowLookup") return isPrimitiveLookupRow(item);
+        if (lookupType === "ValueLookup") return isLookupPrimitive(item);
         if (lookupType === "TableLookup") return typeof item === "string";
         return (
           isObject(item) &&
@@ -470,13 +477,20 @@ const getLookupValidationError = async (
       );
     }
 
-    const valueFilter =
-      dataLookup.type === "RowLookup" || dataLookup.type === "RowLookup[]" ?
-        (value as Record<string, unknown>)
-      : { [(dataLookup as JSONB.ValueLookup).column]: value };
+    const isRowLookup = dataLookup.type === "RowLookup" || dataLookup.type === "RowLookup[]";
+    if (
+      (isRowLookup && !isPrimitiveLookupRow(value)) ||
+      (!isRowLookup && !isLookupPrimitive(value))
+    ) {
+      return `${valuePath} contains a non-primitive lookup value`;
+    }
+    const valueFilter: Record<string, LookupPrimitive> =
+      isRowLookup ?
+        (value as Record<string, LookupPrimitive>)
+      : { [(dataLookup as JSONB.ValueLookup).column]: value as LookupPrimitive };
     const filter = dataLookup.filter ? { $and: [dataLookup.filter, valueFilter] } : valueFilter;
     const row = await tableHandler?.findOne?.(filter);
-    if (row === undefined) {
+    if (!row) {
       return `${valuePath} does not reference an existing row in ${JSON.stringify(dataLookup.table)}`;
     }
   }

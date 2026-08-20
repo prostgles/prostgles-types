@@ -42,6 +42,66 @@ void describe("JSONBValidation", async () => {
     );
   });
 
+  await test("lookup filters reject non-primitive values", async () => {
+    const filters: unknown[] = [];
+    const db = new Map([
+      [
+        "users",
+        {
+          findOne: async (filter?: any) => {
+            filters.push(filter);
+            return { id: 1 };
+          },
+        } as unknown as TableHandler,
+      ],
+    ]);
+
+    const row = {
+      id: 1,
+      name: "John",
+      active: true,
+      deleted: null,
+      optional: undefined,
+    };
+    assert.deepStrictEqual(
+      await getJSONBSchemaValidationErrorAsync({ type: "RowLookup", table: "users" }, row, db),
+      { data: row },
+    );
+    assert.deepStrictEqual(filters, [
+      { id: 1, name: "John", active: true, deleted: null, optional: undefined },
+    ]);
+
+    assert.deepStrictEqual(
+      await getJSONBSchemaValidationErrorAsync(
+        { type: "RowLookup", table: "users" },
+        { id: 1, unsafe: { $ne: null } },
+        db,
+      ),
+      { error: " is of invalid type. Expecting RowLookup" },
+    );
+    assert.equal(filters.length, 1);
+
+    assert.deepStrictEqual(
+      await getJSONBSchemaValidationErrorAsync(
+        { type: "RowLookup", table: "users" },
+        { id: { $ne: null } },
+        db,
+      ),
+      { error: " is of invalid type. Expecting RowLookup" },
+    );
+    assert.equal(filters.length, 1);
+
+    assert.deepStrictEqual(
+      await getJSONBSchemaValidationErrorAsync(
+        { type: "ValueLookup", table: "users", column: "id" },
+        { $ne: null },
+        db,
+      ),
+      { error: " is of invalid type. Expecting ValueLookup" },
+    );
+    assert.equal(filters.length, 1);
+  });
+
   await test("sync lookup validation remains unsupported", () => {
     assert.throws(
       () => getJSONBSchemaValidationError({ type: "ValueLookup", table: "users", column: "id" }, 1),

@@ -1,9 +1,59 @@
 import { strict as assert } from "assert";
 import { describe, test } from "node:test";
+import type { DBHandler } from "../index";
 import type { JSONB } from "./JSONBSchema";
-import { getJSONBObjectSchemaValidationError } from "./JSONBSchemaValidation";
+import {
+  getJSONBObjectSchemaValidationError,
+  getJSONBSchemaValidationError,
+  getJSONBSchemaValidationErrorAsync,
+} from "./JSONBSchemaValidation";
 
 void describe("JSONBValidation", async () => {
+  await test("async lookup validation with a db handler", async () => {
+    const acceptsDBHandler = (handler: import("../index").DBHandler) =>
+      getJSONBSchemaValidationErrorAsync(
+        { type: "ValueLookup", table: "users", column: "id" },
+        1,
+        handler,
+      );
+    void acceptsDBHandler;
+
+    const db = {
+      users: {
+        findOne: async (filter?: any) => (filter.id === 1 ? { id: 1 } : undefined),
+        getColumns: async () => [{ name: "id", tsDataType: "number", udt_name: "int4" }],
+      },
+    } as unknown as DBHandler;
+
+    assert.deepStrictEqual(
+      await getJSONBSchemaValidationErrorAsync(
+        { type: "ValueLookup", table: "users", column: "id" },
+        1,
+        db,
+      ),
+      { data: 1 },
+    );
+    assert.deepStrictEqual(
+      await getJSONBSchemaValidationErrorAsync({ type: "TableLookup" }, "missing", db),
+      { error: 'value references an unknown table "missing"' },
+    );
+    assert.deepStrictEqual(
+      await getJSONBSchemaValidationErrorAsync(
+        { type: "ColumnLookup", filter: { udt_name: "text" } },
+        { table: "users", column: "id" },
+        db,
+      ),
+      { error: 'value references an unknown or disallowed column "users.id"' },
+    );
+  });
+
+  await test("sync lookup validation remains unsupported", () => {
+    assert.throws(
+      () => getJSONBSchemaValidationError({ type: "ValueLookup", table: "users", column: "id" }, 1),
+      /Lookup types are not supported for validation/,
+    );
+  });
+
   await test("getJSONBObjectSchemaValidationError", () => {
     const schema: JSONB.ObjectType = {
       type: {

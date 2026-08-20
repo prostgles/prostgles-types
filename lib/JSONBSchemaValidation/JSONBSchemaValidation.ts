@@ -1,10 +1,17 @@
-import type { JSONB, PrimitiveTypeMap } from "./JSONBSchema";
+import type { DBHandler } from "lib";
 import { getKeys, isDefined, isEmpty, isObject } from "../util";
-import { safeGetKeys, safeGetProperty, safeHasOwn } from "./utils";
 import { includes } from "../utilFuncs/includes";
+import type { JSONB, PrimitiveTypeMap } from "./JSONBSchema";
+import { safeGetKeys, safeGetProperty, safeHasOwn } from "./utils";
 
 type ValidationOptions = {
   allowExtraProperties?: boolean;
+};
+
+type PendingLookupValidation = {
+  schema: JSONB.Lookup;
+  value: unknown;
+  path: string[];
 };
 
 export const getFieldTypeObj = (rawFieldType: JSONB.FieldType): JSONB.FieldTypeObj => {
@@ -105,6 +112,7 @@ const getPropertyValidationError = (
   rawFieldType: JSONB.FieldType,
   path: string[] = [],
   opts: ValidationOptions | undefined,
+  pendingLookupValidations?: PendingLookupValidation[],
 ): string | undefined => {
   const err = `${path.join(".")} is of invalid type. Expecting ${getTypeDescription(rawFieldType).replaceAll("\n", "")}`;
   const fieldDefinition = getFieldTypeObj(rawFieldType);
@@ -145,6 +153,7 @@ const getPropertyValidationError = (
           subSchema,
           [...path, subKey],
           opts,
+          pendingLookupValidations,
         );
         if (error !== undefined) {
           return error;
@@ -165,7 +174,35 @@ const getPropertyValidationError = (
     }
 
     if (type.includes("Lookup")) {
-      throw new Error("Lookup types are not supported for validation");
+      if (!pendingLookupValidations) {
+        throw new Error("Lookup types are not supported for validation");
+      }
+      const isArray = type.endsWith("[]");
+      if (isArray !== Array.isArray(value)) return err;
+
+      const lookupType = type.replace("[]", "");
+      const values = isArray ? value : [value];
+      const isValid = values.every((item: unknown) => {
+        if (lookupType === "RowLookup") return isObject(item);
+        if (lookupType === "ValueLookup") {
+          return typeof item !== "function" && typeof item !== "symbol";
+        }
+        if (lookupType === "TableLookup") return typeof item === "string";
+        return (
+          isObject(item) &&
+          typeof safeGetProperty(item, "table") === "string" &&
+          typeof safeGetProperty(item, "column") === "string" &&
+          safeGetKeys(item).every((key) => key === "table" || key === "column")
+        );
+      });
+      if (!isValid) return err;
+
+      pendingLookupValidations.push({
+        schema: fieldDefinition as JSONB.Lookup,
+        value,
+        path,
+      });
+      return;
     }
     const { validator } = getValidator(type as DataType, fieldDefinition);
     const isValid = validator(value, fieldDefinition);
@@ -193,6 +230,7 @@ const getPropertyValidationError = (
         tuple[index]!,
         [...path, `${index}`],
         opts,
+        pendingLookupValidations,
       );
 
       if (elementError !== undefined) {
@@ -222,7 +260,13 @@ const getPropertyValidationError = (
     }
     const error = value
       .map((element, i) => {
-        return getPropertyValidationError(element, arrayOf, [...path, `${i}`], opts);
+        return getPropertyValidationError(
+          element,
+          arrayOf,
+          [...path, `${i}`],
+          opts,
+          pendingLookupValidations,
+        );
       })
       .filter(isDefined)[0];
     if (error !== undefined) {
@@ -238,7 +282,11 @@ const getPropertyValidationError = (
     }
     let firstError: string | undefined;
     const validMember = oneOf.find((member) => {
-      const error = getPropertyValidationError(value, member, path, opts);
+      const pendingLookupCount = pendingLookupValidations?.length;
+      const error = getPropertyValidationError(value, member, path, opts, pendingLookupValidations);
+      if (error !== undefined && pendingLookupCount !== undefined) {
+        pendingLookupValidations!.length = pendingLookupCount;
+      }
       firstError ??= error;
       return error === undefined;
     });
@@ -272,6 +320,7 @@ const getPropertyValidationError = (
           valuesSchema,
           [...path, propKey],
           opts,
+          pendingLookupValidations,
         );
         if (valError !== undefined) {
           return `${valError}`;
@@ -359,6 +408,108 @@ export const getJSONBSchemaValidationError = <S extends JSONB.FieldType>(
   }
   return { data: obj as JSONB.GetType<S> };
 };
+
+const getLookupValuePath = (path: string[], index?: number): string => {
+  const result = [...path, ...(index === undefined ? [] : [String(index)])].join(".");
+  return result || "value";
+};
+
+const getLookupTableHandler = (db: DBHandler, table: string): DBHandler[string] | undefined => {
+  if (!safeHasOwn(db, table)) return;
+  const handler = safeGetProperty(db, table);
+  return isObject(handler) ? (handler as DBHandler[string]) : undefined;
+};
+
+const getLookupValidationError = async (
+  lookup: PendingLookupValidation,
+  db: DBHandler,
+): Promise<string | undefined> => {
+  const { schema, path } = lookup;
+  const isArray = schema.type.endsWith("[]");
+  const values = isArray ? (lookup.value as unknown[]) : [lookup.value];
+
+  for (const [index, value] of values.entries()) {
+    const valuePath = getLookupValuePath(path, isArray ? index : undefined);
+
+    if (schema.type === "TableLookup" || schema.type === "TableLookup[]") {
+      if (!getLookupTableHandler(db, value as string)) {
+        return `${valuePath} references an unknown table ${JSON.stringify(value)}`;
+      }
+      continue;
+    }
+
+    if (schema.type === "ColumnLookup" || schema.type === "ColumnLookup[]") {
+      const reference = value as { table: string; column: string };
+      if (schema.filter?.table && reference.table !== schema.filter.table) {
+        return `${valuePath} references a column that does not match the lookup filter`;
+      }
+      if (!db) continue;
+
+      const tableHandler = getLookupTableHandler(db, reference.table);
+      if (!tableHandler) {
+        return `${valuePath} references an unknown table ${JSON.stringify(reference.table)}`;
+      }
+      if (typeof tableHandler.getColumns !== "function") {
+        throw new Error(
+          `Cannot validate ColumnLookup: table ${JSON.stringify(reference.table)} does not expose getColumns`,
+        );
+      }
+      const columns = await tableHandler.getColumns();
+      const column = columns.find(({ name }) => name === reference.column);
+      if (
+        !column ||
+        (schema.filter?.tsDataType && column.tsDataType !== schema.filter.tsDataType) ||
+        (schema.filter?.udt_name && column.udt_name !== schema.filter.udt_name)
+      ) {
+        return `${valuePath} references an unknown or disallowed column ${JSON.stringify(`${reference.table}.${reference.column}`)}`;
+      }
+      continue;
+    }
+
+    const dataLookup = schema as JSONB.RowLookup | JSONB.ValueLookup;
+    const tableHandler = getLookupTableHandler(db, dataLookup.table);
+
+    if (!tableHandler) {
+      throw new Error(
+        `Cannot validate ${dataLookup.type}: table ${JSON.stringify(dataLookup.table)} does not expose findOne`,
+      );
+    }
+
+    const valueFilter =
+      dataLookup.type === "RowLookup" || dataLookup.type === "RowLookup[]" ?
+        (value as Record<string, unknown>)
+      : { [(dataLookup as JSONB.ValueLookup).column]: value };
+    const filter = dataLookup.filter ? { $and: [dataLookup.filter, valueFilter] } : valueFilter;
+    const row = await tableHandler?.findOne?.(filter);
+    if (row === undefined) {
+      return `${valuePath} does not reference an existing row in ${JSON.stringify(dataLookup.table)}`;
+    }
+  }
+};
+
+/**
+ * Validates lookup values as well as the synchronous JSONB schema rules.
+ * A prostgles DB handler validates every lookup kind. A fetch-row callback
+ * validates RowLookup and ValueLookup records, while table/column lookups are
+ * structurally validated.
+ */
+export const getJSONBSchemaValidationErrorAsync = async <S extends JSONB.FieldType>(
+  schema: S,
+  obj: any,
+  source: DBHandler,
+  opts?: ValidationOptions,
+): Promise<{ error: string; data?: undefined } | { error?: undefined; data: JSONB.GetType<S> }> => {
+  const pendingLookupValidations: PendingLookupValidation[] = [];
+  const error = getPropertyValidationError(obj, schema, undefined, opts, pendingLookupValidations);
+  if (error) return { error };
+
+  for (const lookup of pendingLookupValidations) {
+    const lookupError = await getLookupValidationError(lookup, source);
+    if (lookupError) return { error: lookupError };
+  }
+  return { data: obj as JSONB.GetType<S> };
+};
+
 export const validateJSONBObjectAgainstSchema = <S extends JSONB.ObjectType["type"]>(
   schema: S,
   obj: any,

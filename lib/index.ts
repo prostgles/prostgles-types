@@ -5,6 +5,7 @@ import { JSONB } from "./JSONBSchemaValidation/JSONBSchema";
 import { getKeys, isDefined } from "./util";
 import { includes } from "./utilFuncs/includes";
 import type { SyncTableInfo } from "./WAL";
+import type { InsertColumnsWithReferences } from "./insertTypes";
 export const _PG_strings = [
   "bpchar",
   "char",
@@ -899,12 +900,13 @@ export type DeleteParams<T extends AnyObject | void = void, S extends DBSchema |
 export type InsertDataWithNested<
   TD extends AnyObject,
   S extends DBSchema | void,
-> = UpsertDataToPGCast<TD> &
+  TName extends PropertyKey = never,
+> = InsertColumnsWithReferences<TD, S, TName> &
   (S extends DBSchema ?
     string extends keyof S ?
       {} // collapse to void-like behavior for untyped/dynamic schema
     : {
-        [TableName in keyof S]?: Partial<InsertDataWithNested<S[TableName]["columns"], S>>[];
+        [TableName in keyof S]?: Partial<InsertDataWithNested<S[TableName]["columns"], S, TableName>>[];
       }
   : {});
 
@@ -915,7 +917,7 @@ export type InsertDataWithNested<
 export type TableHandler<
   TD extends AnyObject = AnyObject,
   S extends DBSchema | void = void,
-  TName extends (S extends DBSchema ? keyof S : never) = never,
+  TName extends PropertyKey = never,
 > = {
   /**
    * Retrieves the table/view info
@@ -1045,7 +1047,7 @@ export type TableHandler<
    * Inserts a new record into the table.
    */
   insert<P extends InsertParams<TD, S>>(
-    data: InsertDataWithNested<TD, S>,
+    data: InsertDataWithNested<TD, S, TName>,
     params?: P,
   ): Promise<GetReturningReturnType<P, TD, S>>;
 
@@ -1053,7 +1055,7 @@ export type TableHandler<
    * Inserts new records into the table.
    */
   insertMany<P extends InsertParams<TD, S>>(
-    data: InsertDataWithNested<TD, S>[],
+    data: InsertDataWithNested<TD, S, TName>[],
     params?: P,
   ): Promise<GetReturningReturnType<P, TD, S>[]>;
 
@@ -1213,7 +1215,7 @@ export type ValidatedMethods<T extends DBTableSchema> =
 export type DBHandler<S = void> =
   S extends DBSchema ?
     {
-      [k in keyof S]: Pick<TableHandler<S[k]["columns"], S>, ValidatedMethods<S[k]>>;
+      [k in keyof S]: Pick<TableHandler<S[k]["columns"], S, k>, ValidatedMethods<S[k]>>;
     }
   : {
       [key: string]: Partial<TableHandler>;

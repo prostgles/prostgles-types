@@ -7,6 +7,7 @@ export declare const CONTENT_TYPE_TO_EXT: {
     readonly "text/xml": readonly ["xml"];
     readonly "text/mathml": readonly ["mml"];
     readonly "text/plain": readonly ["txt"];
+    readonly "text/markdown": readonly ["md", "markdown"];
     readonly "text/vnd.sun.j2me.app-descriptor": readonly ["jad"];
     readonly "text/vnd.wap.wml": readonly ["wml"];
     readonly "text/x-component": readonly ["htc"];
@@ -21,6 +22,8 @@ export declare const CONTENT_TYPE_TO_EXT: {
     readonly "image/svg+xml": readonly ["svg"];
     readonly "image/webp": readonly ["webp"];
     readonly "application/sql": readonly ["sql"];
+    readonly "application/json": readonly ["json"];
+    readonly "application/geo+json": readonly ["geojson"];
     readonly "application/x-javascript": readonly ["js"];
     readonly "application/atom+xml": readonly ["atom"];
     readonly "application/rss+xml": readonly ["rss"];

@@ -14,6 +14,22 @@ import type {
 } from "./index";
 
 describe("type tests", () => {
+  test("forward nested inputs", () => {
+    type Schema = {
+      orders: { columns: { customer_id: number; unrelated_id: number } };
+      customers: {
+        columns: { name: string; phone?: string | null };
+        referencedBy: { orders: ["customer_id"] };
+      };
+    };
+    type Input = InsertDataWithNested<Schema["orders"]["columns"], Schema, "orders">;
+    const customer = { name: "Customer", phone: null };
+    const valid: Input = { customer_id: customer, unrelated_id: 1 };
+    // @ts-expect-error unrelated columns do not allow nested objects
+    const unrelated: Input = { customer_id: 1, unrelated_id: customer };
+    // @ts-expect-error nested required fields remain required
+    const missing: Input = { customer_id: { phone: null }, unrelated_id: 1 };
+  });
   test("TableHandler", () => {
     /**
      * Test select/return type inference

@@ -3,6 +3,7 @@ import { FileColumnConfig } from "./files";
 import { AnyObject, ComplexFilter, FullFilter, ValueOf } from "./filters";
 import { JSONB } from "./JSONBSchemaValidation/JSONBSchema";
 import type { SyncTableInfo } from "./WAL";
+import type { InsertColumnsWithReferences } from "./insertTypes";
 export declare const _PG_strings: readonly ["bpchar", "char", "varchar", "text", "citext", "uuid", "time", "timetz", "interval", "name", "cidr", "inet", "macaddr", "macaddr8", "int4range", "int8range", "numrange", "tsvector"];
 export declare const _PG_numbers_num: readonly ["int2", "int4", "float4", "float8", "oid"];
 export declare const _PG_numbers_str: readonly ["int8", "numeric", "money"];
@@ -19,7 +20,7 @@ export declare const TS_PG_Types: {
     readonly "number[]": ("_int2" | "_int4" | "_float4" | "_float8" | "_oid")[];
     readonly "boolean[]": "_bool"[];
     readonly "string[]": ("_text" | "_name" | "_time" | "_timestamp" | "_path" | "_bpchar" | "_char" | "_varchar" | "_citext" | "_uuid" | "_timetz" | "_interval" | "_cidr" | "_inet" | "_macaddr" | "_macaddr8" | "_int4range" | "_int8range" | "_numrange" | "_tsvector" | "_int8" | "_numeric" | "_money" | "_date" | "_timestamptz" | "_point" | "_line" | "_lseg" | "_box" | "_polygon" | "_circle" | "_geometry" | "_geography")[];
-    readonly "any[]": ("_interval" | "_jsonb" | "_json")[];
+    readonly "any[]": ("_interval" | "_json" | "_jsonb")[];
     readonly Uint8Array: readonly ["bytea"];
     readonly string: readonly ["bpchar", "char", "varchar", "text", "citext", "uuid", "time", "timetz", "interval", "name", "cidr", "inet", "macaddr", "macaddr8", "int4range", "int8range", "numrange", "tsvector", "int8", "numeric", "money", "date", "timestamp", "timestamptz", "point", "line", "lseg", "box", "path", "polygon", "circle", "geometry", "geography", "lseg"];
     readonly number: readonly ["int2", "int4", "float4", "float8", "oid"];
@@ -641,14 +642,14 @@ export type DeleteParams<T extends AnyObject | void = void, S extends DBSchema |
 /**
  * TODO: pick only joined tables from schema AND exclude parent fkey columns from the nested data
  */
-export type InsertDataWithNested<TD extends AnyObject, S extends DBSchema | void> = UpsertDataToPGCast<TD> & (S extends DBSchema ? string extends keyof S ? {} : {
-    [TableName in keyof S]?: Partial<InsertDataWithNested<S[TableName]["columns"], S>>[];
+export type InsertDataWithNested<TD extends AnyObject, S extends DBSchema | void, TName extends PropertyKey = never> = InsertColumnsWithReferences<TD, S, TName> & (S extends DBSchema ? string extends keyof S ? {} : {
+    [TableName in keyof S]?: Partial<InsertDataWithNested<S[TableName]["columns"], S, TableName>>[];
 } : {});
 /**
  * Methods for interacting with a table/view
  * - On client-side some methods are restricted (and undefined) based on publish rules on the server
  */
-export type TableHandler<TD extends AnyObject = AnyObject, S extends DBSchema | void = void, TName extends (S extends DBSchema ? keyof S : never) = never> = {
+export type TableHandler<TD extends AnyObject = AnyObject, S extends DBSchema | void = void, TName extends PropertyKey = never> = {
     /**
      * Retrieves the table/view info
      */
@@ -738,11 +739,11 @@ export type TableHandler<TD extends AnyObject = AnyObject, S extends DBSchema | 
     /**
      * Inserts a new record into the table.
      */
-    insert<P extends InsertParams<TD, S>>(data: InsertDataWithNested<TD, S>, params?: P): Promise<GetReturningReturnType<P, TD, S>>;
+    insert<P extends InsertParams<TD, S>>(data: InsertDataWithNested<TD, S, TName>, params?: P): Promise<GetReturningReturnType<P, TD, S>>;
     /**
      * Inserts new records into the table.
      */
-    insertMany<P extends InsertParams<TD, S>>(data: InsertDataWithNested<TD, S>[], params?: P): Promise<GetReturningReturnType<P, TD, S>[]>;
+    insertMany<P extends InsertParams<TD, S>>(data: InsertDataWithNested<TD, S, TName>[], params?: P): Promise<GetReturningReturnType<P, TD, S>[]>;
     /**
      * Inserts or updates a record in the table.
      * - If a record matching the `filter` exists, it updates the record.
@@ -825,7 +826,7 @@ type UpsertMethods<T extends DBTableSchema> = T["insert"] extends true ? T["upda
 type DeleteMethods<T extends DBTableSchema> = T["delete"] extends true ? keyof Pick<TableHandler, "delete"> : never;
 export type ValidatedMethods<T extends DBTableSchema> = SelectMethods<T> | UpdateMethods<T> | InsertMethods<T> | UpsertMethods<T> | DeleteMethods<T>;
 export type DBHandler<S = void> = S extends DBSchema ? {
-    [k in keyof S]: Pick<TableHandler<S[k]["columns"], S>, ValidatedMethods<S[k]>>;
+    [k in keyof S]: Pick<TableHandler<S[k]["columns"], S, k>, ValidatedMethods<S[k]>>;
 } : {
     [key: string]: Partial<TableHandler>;
 };

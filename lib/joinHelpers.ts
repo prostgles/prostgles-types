@@ -1,5 +1,8 @@
-import type { AnyObject, JoinMaker } from "./index";
+import type { AnyObject, DetailedJoinSelect, JoinMaker } from "./index";
 import { omitKeys } from "./util";
+
+/** Preserve literal table names and selections for joined return type inference. */
+export const defineJoin = <const J extends DetailedJoinSelect>(join: J): J => join;
 
 const getJoinFunc = (joinType: "$leftJoin" | "$innerJoin" = "$leftJoin") => {
   const joinMaker: JoinMaker = (

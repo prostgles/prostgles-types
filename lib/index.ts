@@ -582,7 +582,7 @@ type InclusiveSelect = true | 1 | FunctionSelect | JoinSelect;
 type SelectWithFunctions<T extends AnyObject = AnyObject, IsTyped = false> =
   | ({ [K in keyof Partial<T>]: InclusiveSelect } & Record<
       string,
-      IsTyped extends true ? FunctionFull : InclusiveSelect
+      IsTyped extends true ? FunctionFull | DetailedJoinSelect : InclusiveSelect
     >)
   | FunctionAliasedSelect
   | { [K in keyof Partial<T>]: true | 1 | string }
@@ -757,31 +757,61 @@ export type NormalizedRow<T extends Record<string, unknown>> = Required<{
   [K in keyof T]: CollapseNumberIfStringPresent<T[K]>;
 }>;
 
+type JoinTarget<P> =
+  P extends string ? P
+  : P extends readonly [...unknown[], infer Last] ?
+    Last extends string ? Last
+    : Last extends { table: infer T } ? T
+    : never
+  : never;
+
+type ExplicitJoinResult<J, S extends DBSchema | void, P> =
+  [JoinTarget<P>] extends [never] ? any[]
+  : S extends DBSchema ?
+    JoinTarget<P> extends infer T extends keyof S ?
+      J extends { select: infer Sel extends Select } ?
+        SelectDataType<S, { select: Sel }, S[T]["columns"]>[]
+      : any[]
+    : any[]
+  : any[];
+
 type JoinedSelect = Record<string, Select>;
 export type SelectFunction = Record<string, any[]>;
 type ParseSelect<
   Select extends SelectParams<TD>["select"],
   TD extends AnyObject,
+  S extends DBSchema | void,
 > = (Select extends { "*": 1 } ? NormalizedRow<TD> : {}) & {
-  [Key in keyof Omit<Select, "*"> & string]: Select[Key] extends 1 ? NormalizedRow<TD>[Key]
+  [Key in keyof Omit<Select, "*"> & string]: Select[Key] extends 1 | true ? NormalizedRow<TD>[Key]
+  : Select[Key] extends (
+    {
+      $leftJoin: infer P extends RawJoinPath;
+      select: unknown;
+    }
+  ) ?
+    ExplicitJoinResult<Select[Key], S, P>
+  : Select[Key] extends (
+    {
+      $innerJoin: infer P extends RawJoinPath;
+      select: unknown;
+    }
+  ) ?
+    ExplicitJoinResult<Select[Key], S, P>
   : Select[Key] extends SelectFunction ? any
   : Select[Key] extends JoinedSelect ? any[]
   : any;
 };
 
-type SelectDataType<
-  S extends DBSchema | void,
-  O extends SelectParams<TD, S>,
-  TD extends AnyObject,
-> =
+type SelectDataType<S extends DBSchema | void, O, TD extends AnyObject> =
   O extends { returnType: "value" } ? any
   : O extends { returnType: "values"; select: Record<string, 1> } ?
     ValueOf<Pick<NormalizedRow<TD>, keyof O["select"]>>
   : O extends { returnType: "values" } ? any
   : O extends { select: "*" } ? NormalizedRow<TD>
   : O extends { select: "" } ? Record<string, never>
-  : O extends { select: Record<string, 0> } ? Omit<NormalizedRow<TD>, keyof O["select"]>
-  : O extends { select: Record<string, any> } ? ParseSelect<O["select"], NormalizedRow<TD>>
+  : O extends { select: readonly (keyof TD)[] } ? Pick<NormalizedRow<TD>, O["select"][number]>
+  : O extends { select: Record<string, 0 | false> } ? Omit<NormalizedRow<TD>, keyof O["select"]>
+  : O extends { select: Record<string, any> } ? ParseSelect<O["select"], NormalizedRow<TD>, S>
   : NormalizedRow<TD>;
 
 export type SelectReturnType<

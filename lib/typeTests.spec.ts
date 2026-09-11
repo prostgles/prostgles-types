@@ -1,4 +1,5 @@
 import { describe, test } from "node:test";
+import { defineJoin } from "./joinHelpers";
 import type {
   AnyObject,
   DBHandler,
@@ -14,6 +15,119 @@ import type {
 } from "./index";
 
 describe("type tests", () => {
+  test("explicit joined select inference", () => {
+    type Schema = {
+      orders: { select: true; columns: { id: number } };
+      customers: {
+        select: true;
+        columns: { id: number; name: string; phone?: string | null };
+      };
+    };
+    const db = {} as DBHandler<Schema>;
+    async () => {
+      const customerJoinDef = defineJoin({
+        $leftJoin: "customers",
+        select: { name: 1, phone: 1 },
+      });
+      const rows = await db.orders.find(
+        {},
+        {
+          select: {
+            id: 1,
+            customer: customerJoinDef,
+            total: { $count: ["id"] },
+          },
+        },
+      );
+      rows[0]!.customer[0]!.name satisfies string;
+      rows[0]!.customer[0]!.phone satisfies string | null;
+      // @ts-expect-error selected fields must retain their types (and cannot be any)
+      rows[0]!.customer[0]!.name satisfies number;
+      // @ts-expect-error unselected fields must be absent
+      rows[0]!.customer[0]!.id;
+      // @ts-expect-error joins return arrays
+      rows[0]!.customer.name;
+      rows[0]!.total satisfies number; // Existing function behavior stays any.
+
+      const row = await db.orders.findOne(
+        {},
+        {
+          select: {
+            customer: defineJoin({
+              $innerJoin: ["orders", { table: "customers" }],
+              select: { phone: 0 },
+            }),
+          },
+        },
+      );
+      row?.customer[0]!.name satisfies string | undefined;
+      // @ts-expect-error excluded fields must be absent
+      row?.customer[0]!.phone;
+
+      const nested = await db.orders.find(
+        {},
+        {
+          select: {
+            customer: defineJoin({
+              $leftJoin: "customers",
+              select: {
+                name: 1,
+                orders: defineJoin({ $innerJoin: "orders", select: "*" }),
+              },
+            }),
+          },
+        },
+      );
+      nested[0]!.customer[0]!.orders[0]!.id satisfies number;
+      // @ts-expect-error nested column cannot become any
+      nested[0]!.customer[0]!.orders[0]!.id satisfies string;
+      const arrays = await db.orders.find(
+        {},
+        {
+          select: {
+            customer: defineJoin({ $leftJoin: "customers", select: ["name"] }),
+          },
+        },
+      );
+      arrays[0]!.customer[0]!.name satisfies string;
+      // @ts-expect-error array selections exclude other columns
+      arrays[0]!.customer[0]!.id;
+
+      const booleans = await db.orders.find(
+        {},
+        {
+          select: {
+            customer: defineJoin({
+              $leftJoin: "customers",
+              select: { name: true },
+            }),
+            withoutPhone: defineJoin({
+              $leftJoin: "customers",
+              select: { phone: false },
+            }),
+          },
+        },
+      );
+      booleans[0]!.customer[0]!.name satisfies string;
+      // @ts-expect-error boolean selections retain column types
+      booleans[0]!.customer[0]!.name satisfies number;
+      // @ts-expect-error boolean exclusions remove columns
+      booleans[0]!.withoutPhone[0]!.phone;
+
+      const dynamicPath: string[] = ["customers"];
+      const fallback = await db.orders.find(
+        {},
+        {
+          select: {
+            customer: defineJoin({ $leftJoin: dynamicPath, select: "*" }),
+          },
+        },
+      );
+      // Dynamic paths still return usable arrays, not never.
+      fallback[0]!.customer.push({ name: "Customer" });
+    };
+  });
+
   test("forward nested inputs", () => {
     type Schema = {
       orders: { columns: { customer_id: number; unrelated_id: number } };

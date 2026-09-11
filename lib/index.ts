@@ -117,6 +117,8 @@ export type DBTableSchema = {
    * fields that are nullable or with a default value are be optional
    */
   columns: AnyObject;
+  /** Client insert input; omitted on schemas that use the database column defaults. */
+  insertColumns?: AnyObject;
   /**
    * TODO: extract references and update InsertDataWithNested type to allow nested inserts based on the references
    * Table names and their columns that reference the current table through foreign keys.
@@ -931,7 +933,7 @@ export type InsertDataWithNested<
   TD extends AnyObject,
   S extends DBSchema | void,
   TName extends PropertyKey = never,
-> = InsertColumnsWithReferences<TD, S, TName> &
+> = InsertColumnsWithReferences<GetInsertColumns<TD, S, TName>, S, TName> &
   (S extends DBSchema ?
     string extends keyof S ?
       {} // collapse to void-like behavior for untyped/dynamic schema
@@ -939,6 +941,11 @@ export type InsertDataWithNested<
         [TableName in keyof S]?: Partial<InsertDataWithNested<S[TableName]["columns"], S, TableName>>[];
       }
   : {});
+
+type GetInsertColumns<TD extends AnyObject, S, TName extends PropertyKey> =
+  [TName] extends [never] ? TD
+  : S extends Record<TName, { insertColumns: infer Columns extends AnyObject }> ? Columns
+  : TD;
 
 /**
  * Methods for interacting with a table/view

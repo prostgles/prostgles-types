@@ -119,6 +119,10 @@ export type DBTableSchema = {
   columns: AnyObject;
   /** Client insert input; omitted on schemas that use the database column defaults. */
   insertColumns?: AnyObject;
+  /** Client update input, including PostgreSQL casts and excluded fields. */
+  updateColumns?: AnyObject;
+  /** The table is absent from at least one publish profile. */
+  optional?: boolean;
   /**
    * TODO: extract references and update InsertDataWithNested type to allow nested inserts based on the references
    * Table names and their columns that reference the current table through foreign keys.
@@ -755,9 +759,18 @@ export type InsertParams<T extends AnyObject | void = void, S extends DBSchema |
 type CollapseNumberIfStringPresent<T> =
   [Extract<T, string>] extends [never] ? T : Exclude<T, number>;
 
+/**
+ * Numeric columns that serialize to strings keep the numeric type as well to allow:
+ * - inserting numeric values as either numbers or strings
+ * - reading numeric values as strings
+ */
 export type NormalizedRow<T extends Record<string, unknown>> = Required<{
   [K in keyof T]: CollapseNumberIfStringPresent<T[K]>;
 }>;
+
+export type DBSchemaNormalized<S extends DBSchema> = {
+  [K in keyof S]: NormalizedRow<S[K]["columns"]>;
+};
 
 type JoinTarget<P> =
   P extends string ? P
@@ -938,7 +951,9 @@ export type InsertDataWithNested<
     string extends keyof S ?
       {} // collapse to void-like behavior for untyped/dynamic schema
     : {
-        [TableName in keyof S]?: Partial<InsertDataWithNested<S[TableName]["columns"], S, TableName>>[];
+        [TableName in keyof S]?: Partial<
+          InsertDataWithNested<S[TableName]["columns"], S, TableName>
+        >[];
       }
   : {});
 
@@ -946,6 +961,11 @@ type GetInsertColumns<TD extends AnyObject, S, TName extends PropertyKey> =
   [TName] extends [never] ? TD
   : S extends Record<TName, { insertColumns: infer Columns extends AnyObject }> ? Columns
   : TD;
+
+type GetUpdateData<TD extends AnyObject, S, TName extends PropertyKey> =
+  [TName] extends [never] ? UpsertDataToPGCastLax<TD>
+  : S extends Record<TName, { updateColumns: infer Columns extends AnyObject }> ? Columns
+  : UpsertDataToPGCastLax<TD>;
 
 /**
  * Methods for interacting with a table/view
@@ -1067,7 +1087,7 @@ export type TableHandler<
    */
   update<P extends UpdateParams<TD, S>>(
     filter: FullFilter<TD, S>,
-    newData: UpsertDataToPGCastLax<TD>,
+    newData: GetUpdateData<TD, S, TName>,
     params?: P,
   ): Promise<UpdateReturnType<P, TD, S> | undefined>;
 
@@ -1076,7 +1096,7 @@ export type TableHandler<
    * - Each item in the `data` array contains a filter and the corresponding data to update.
    */
   updateBatch<P extends UpdateParams<TD, S>>(
-    data: [FullFilter<TD, S>, UpsertDataToPGCastLax<TD>][],
+    data: [FullFilter<TD, S>, GetUpdateData<TD, S, TName>][],
     params?: P,
   ): Promise<null>;
 

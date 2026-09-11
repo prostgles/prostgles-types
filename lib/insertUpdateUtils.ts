@@ -20,12 +20,15 @@ const basic: UpsertDataToPGCast<Schema> = {
 };
 
 const funcs: UpsertDataToPGCast<Schema> = {
+  // @ts-expect-error scalar columns do not support JSON merge
   col1: { $merge: [] },
+  // @ts-expect-error scalar columns do not support JSON merge
   col2: { $merge: [] },
 };
 
 const mixed: UpsertDataToPGCast<Schema> = {
   col1: 2,
+  // @ts-expect-error scalar columns do not support JSON merge
   col2: { $merge: [] },
 };
 
@@ -36,5 +39,5 @@ const badKey: UpsertDataToPGCast<Schema> = {
 
 //@ts-expect-error
 const wrong: UpsertDataToPGCast<Schema> = {
-  col2: { $merge: [] },
+  col2: "2",
 };

@@ -185,17 +185,20 @@ describe("util func tests", () => {
       manyRows?.col1;
       manyRows?.at(0)?.col1;
 
+      // @ts-expect-error scalar columns do not support JSON merge
       const noIRow = await dbo.tbl1.insert({ col1: "", col2: { $merge: [] } });
       //@ts-expect-error
       noIRow.length;
       //@ts-expect-error
       noIRow.col1;
 
+      // @ts-expect-error scalar columns do not support JSON merge
       const irow = await dbo.tbl1.insert({ col1: "", col2: funcData }, { returning: "*" });
       //@ts-expect-error
       irow.length;
       irow.col1;
 
+      // @ts-expect-error scalar columns do not support JSON merge
       const irowFunc = await dbo.tbl1.insert({ col1: funcData, col2: "" }, { returning: "*" });
 
       const irows = await dbo.tbl1.insertMany([{ col1: "", col2: "" }], { returning: "*" });
@@ -227,17 +230,22 @@ describe("util func tests", () => {
        * Upsert data funcs
        */
       const gdw: UpsertDataToPGCast<{ a: number; z: number }> = {
+        // @ts-expect-error scalar columns do not support JSON merge
         a: { $merge: [] },
+        // @ts-expect-error scalar columns do not support JSON merge
         z: { $merge: [] },
       };
       const gdwn: UpsertDataToPGCast<{ a: number; z: number }> = {
         a: 2,
+        // @ts-expect-error scalar columns do not support JSON merge
         z: { $merge: [] },
       };
       const gdw1: UpsertDataToPGCast<{ a: number; z: number }> = { a: 1, z: 2 };
       const gdw1Opt: UpsertDataToPGCast<{ a: number; z?: number }> = { a: 1, z: 2 };
       const gdw2: UpsertDataToPGCast<{ a: number; z: number }> = {
+        // @ts-expect-error scalar columns do not support JSON merge
         a: { $merge: [] },
+        // @ts-expect-error scalar columns do not support JSON merge
         z: { $merge: [] },
       };
       //@ts-expect-error

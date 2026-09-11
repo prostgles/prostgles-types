@@ -929,8 +929,10 @@ export type CastFromTSToPG<T extends AllowedTSType> =
   : T;
 
 export type UpsertDataToPGCast<TD extends AnyObject> = {
-  [K in keyof TD]: CastFromTSToPG<TD[K]> | Record<"$merge", unknown[]>;
+  [K in keyof TD]: CastFromTSToPG<TD[K]> | JSONMerge<TD[K]>;
 };
+
+type JSONMerge<T> = T extends Record<string, unknown> ? Record<"$merge", unknown[]> : never;
 
 export type PartialLax<T = AnyObject> = Partial<T>;
 type UpsertDataToPGCastLax<T extends AnyObject> = PartialLax<UpsertDataToPGCast<T>>;

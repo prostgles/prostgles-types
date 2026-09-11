@@ -144,6 +144,46 @@ describe("type tests", () => {
     // @ts-expect-error nested required fields remain required
     const missing: Input = { customer_id: { phone: null }, unrelated_id: 1 };
   });
+  test("JSON merge input types", () => {
+    type Input = InsertDataWithNested<
+      {
+        json: { name: string };
+        nullable?: { name: string } | null;
+        mixed: string | { name: string };
+        numeric: number;
+        text: string;
+        boolean: boolean;
+        date: Date;
+        untyped: unknown;
+      },
+      void
+    >;
+    const merge = { $merge: [{ name: "Updated" }] };
+    const input: Input = {
+      json: merge,
+      nullable: merge,
+      mixed: merge,
+      numeric: "1",
+      text: 1,
+      boolean: "true",
+      date: "2026-01-01",
+      untyped: merge,
+    };
+    input.json = { name: "Original" };
+    input.nullable = null;
+    input.nullable = undefined;
+    input.mixed = "text";
+    // @ts-expect-error numeric columns do not support JSON merge
+    input.numeric = merge;
+    // @ts-expect-error text columns do not support JSON merge
+    input.text = merge;
+    // @ts-expect-error boolean columns do not support JSON merge
+    input.boolean = merge;
+    // @ts-expect-error dates do not support JSON merge
+    input.date = merge;
+    // @ts-expect-error ordinary JSON values still require their declared fields
+    input.json = { other: "value" };
+  });
   test("TableHandler", () => {
     /**
      * Test select/return type inference

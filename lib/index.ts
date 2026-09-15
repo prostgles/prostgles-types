@@ -563,25 +563,25 @@ export type SimpleJoinSelect =
 
 export type JoinSelect = SimpleJoinSelect | DetailedJoinSelect;
 
+export type FunctionName = `$${string}`;
+
 /**
  * Functions that take one column argument can be applied to the selected field by specifying the function name.
  * Example: { field: { funcName: ["field"] } }
  * Can be written as { field: "funcName" } if the field is the same as the argument
  */
-type FunctionShorthand = string;
+type FunctionShorthand = FunctionName;
+
 /**
  * Common functions:
  *  - Aggregation functions: $count, $sum, $avg, $min, $max
  *  - String functions: $upper, $lower
  *  - Date functions: $age, $date_part
  *  - JSON functions: $merge
+ * Aggregate functions also accept $filter and $orderBy options.
  */
-type FunctionFull = Record<string, any[] | readonly any[] | FunctionShorthand>;
+type FunctionFull = Record<FunctionName, any[] | readonly any[]>;
 type FunctionSelect = FunctionShorthand | FunctionFull;
-/**
- * { computed_field: { funcName: [args] } }
- */
-type FunctionAliasedSelect = Record<string, FunctionFull>;
 
 type InclusiveSelect = true | 1 | FunctionSelect | JoinSelect;
 
@@ -590,7 +590,6 @@ type SelectWithFunctions<T extends AnyObject = AnyObject, IsTyped = false> =
       string,
       IsTyped extends true ? FunctionFull | DetailedJoinSelect : InclusiveSelect
     >)
-  | FunctionAliasedSelect
   | { [K in keyof Partial<T>]: true | 1 | string }
   | { [K in keyof Partial<T>]: 0 | false }
   | CommonSelect
@@ -791,7 +790,7 @@ type ExplicitJoinResult<J, S extends DBSchema | void, P> =
   : any[];
 
 type JoinedSelect = Record<string, Select>;
-export type SelectFunction = Record<string, any[]>;
+export type SelectFunction = FunctionFull;
 type ParseSelect<
   Select extends SelectParams<TD>["select"],
   TD extends AnyObject,

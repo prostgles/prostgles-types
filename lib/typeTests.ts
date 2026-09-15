@@ -21,11 +21,11 @@ async () => {
     name: 1,
     public: 1,
     $rowhash: 1,
-    dsds: { d: [] },
+    dsds: { $d: [] },
   };
   const sel3: Select<{ id: number; name: number; public: number }> = "";
   const sel4: Select<{ id: number; name: number; public: number }> = "*";
-  const sel12: Select = { id: 1, name: 1, public: 1, $rowhash: 1, dsds: { d: [] } };
+  const sel12: Select = { id: 1, name: 1, public: 1, $rowhash: 1, dsds: { $d: [] } };
   const sel13: Select = "";
   const sel14: Select = "*";
 
@@ -72,15 +72,15 @@ async () => {
   const sds3: Select<{ a: number }> = {
     // "*": 1,
     // a: "$funcName",
-    a: { dwda: [] },
-    $rowhashD: { dwda: [] },
+    a: { $dwda: [] },
+    $rowhashD: { $dwda: [] },
     // dwadwa: 1, //{ dwa: []}
   };
 
   const sel1d: Select = {
     dwada: 1,
     $rowhash: 1,
-    dwawd: { funcName: [12] },
+    dwawd: { $funcName: [12] },
   };
 
   const sel1d2: Select<AnyObject> = ["a"];

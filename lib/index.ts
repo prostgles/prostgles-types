@@ -508,12 +508,10 @@ export const JOIN_KEYS = ["$innerJoin", "$leftJoin"] as const;
 export const JOIN_PARAMS = [
   "select",
   "filter",
-  "$path",
-  "$condition",
   "offset",
   "limit",
   "orderBy",
-] as const;
+] as const satisfies (keyof DetailedJoinSelect)[];
 
 export type JoinCondition =
   | {
@@ -543,17 +541,7 @@ export type DetailedJoinSelect = Partial<Record<(typeof JOIN_KEYS)[number], RawJ
   offset?: number;
   limit?: number;
   orderBy?: OrderBy;
-} & (
-    | {
-        $condition?: undefined;
-      }
-    | {
-        /**
-         * If present then will overwrite $path and any inferred joins
-         */
-        $condition?: JoinCondition[];
-      }
-  );
+};
 
 export type SimpleJoinSelect =
   | "*"
@@ -580,20 +568,43 @@ type FunctionShorthand = FunctionName;
  *  - JSON functions: $merge
  * Aggregate functions also accept $filter and $orderBy options.
  */
-type FunctionFull = Record<FunctionName, any[] | readonly any[]>;
+type FunctionFull<T extends AnyObject = AnyObject> = Record<
+  FunctionName,
+  any[] | readonly any[]
+> & {
+  $filter?: FullFilter<void, void>;
+  $orderBy?: OrderBy<T>;
+};
 type FunctionSelect = FunctionShorthand | FunctionFull;
 
 type InclusiveSelect = true | 1 | FunctionSelect | JoinSelect;
 
-type SelectWithFunctions<T extends AnyObject = AnyObject, IsTyped = false> =
-  | ({ [K in keyof Partial<T>]: InclusiveSelect } & Record<
-      string,
-      IsTyped extends true ? FunctionFull | DetailedJoinSelect : InclusiveSelect
-    >)
-  | { [K in keyof Partial<T>]: true | 1 | string }
-  | { [K in keyof Partial<T>]: 0 | false }
+type TypedShorthandJoinSelect<T extends AnyObject> =
+  "*" | { [K in keyof T]?: 0 | false | 1 | true | FunctionSelect };
+
+type SchemaJoinSelect<T extends AnyObject, S extends DBSchema | void> =
+  S extends DBSchema ?
+    string extends keyof S ?
+      {}
+    : {
+        [K in keyof S]?: K extends keyof T ? InclusiveSelect
+        : TypedShorthandJoinSelect<S[K]["columns"]> | FunctionFull | DetailedJoinSelect;
+      }
+  : {};
+
+type SelectWithFunctions<
+  T extends AnyObject = AnyObject,
+  IsTyped = false,
+  S extends DBSchema | void = void,
+> =
+  | (IsTyped extends true ?
+      { [K in keyof T]?: InclusiveSelect } & SchemaJoinSelect<T, S> &
+        Record<string, FunctionFull | JoinSelect>
+    : Record<string, InclusiveSelect>)
+  | { [K in keyof T]?: true | 1 | FunctionShorthand }
+  | { [K in keyof T]?: 0 | false }
   | CommonSelect
-  | (keyof Partial<T>)[];
+  | (keyof T)[];
 
 /** S param is needed to ensure the non typed select works fine */
 export type Select<T extends AnyObject | void = void, S extends DBSchema | void = void> =
@@ -601,7 +612,7 @@ export type Select<T extends AnyObject | void = void, S extends DBSchema | void 
     t: T;
     s: S;
   } extends { t: AnyObject; s: DBSchema } ?
-    SelectWithFunctions<T & { $rowhash: string }, true>
+    SelectWithFunctions<T & { $rowhash: string }, true, S>
   : SelectWithFunctions<AnyObject & { $rowhash: string }, false>;
 
 export type SelectBasic = { [key: string]: any } | {} | undefined | "" | "*";
@@ -789,7 +800,18 @@ type ExplicitJoinResult<J, S extends DBSchema | void, P> =
     : any[]
   : any[];
 
-type JoinedSelect = Record<string, Select>;
+type ShorthandJoinResult<J, S extends DBSchema | void, TableName extends PropertyKey> =
+  S extends DBSchema ?
+    TableName extends keyof S ?
+      J extends "*" ? NormalizedRow<S[TableName]["columns"]>[]
+      : J extends Record<string, 0 | false> ?
+        Omit<NormalizedRow<S[TableName]["columns"]>, keyof J>[]
+      : J extends Record<string, any> ? ParseSelect<J, NormalizedRow<S[TableName]["columns"]>, S>[]
+      : any[]
+    : any[]
+  : any[];
+
+/** ParseSelect must check joins first because FunctionFull structurally matches objects without `$` keys. */
 export type SelectFunction = FunctionFull;
 type ParseSelect<
   Select extends SelectParams<TD>["select"],
@@ -811,8 +833,8 @@ type ParseSelect<
     }
   ) ?
     ExplicitJoinResult<Select[Key], S, P>
+  : Select[Key] extends JoinSelect ? ShorthandJoinResult<Select[Key], S, Key>
   : Select[Key] extends SelectFunction ? any
-  : Select[Key] extends JoinedSelect ? any[]
   : any;
 };
 

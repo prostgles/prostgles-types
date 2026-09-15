@@ -2,9 +2,9 @@ import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
 // Previous baselines: 105_000, 107,408.
-// Baseline: 110,198, including JSON-only merge inputs and coverage (+0.22%).
+// Baseline: 110,723, including schema-aware shorthand join autocomplete.
 // The small margin avoids hiding meaningful inference regressions.
-const MAX_INSTANTIATIONS = 110_331;
+const MAX_INSTANTIATIONS = 110_732;
 const tscPath = fileURLToPath(new URL("../node_modules/typescript/bin/tsc", import.meta.url));
 const result = spawnSync(
   process.execPath,

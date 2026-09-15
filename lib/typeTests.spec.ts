@@ -39,6 +39,22 @@ describe("type tests", () => {
           },
         },
       );
+      const shorthandRows = await db.orders.find({}, { select: { customers: { name: 1 } } });
+      const shorthandSelect = {
+        customers: { name: 1, phone: 1 },
+      } satisfies Select<Schema["orders"]["columns"], Schema>;
+      shorthandSelect.customers.name satisfies 1;
+      const invalidShorthandSelect = {
+        customers: {
+          // @ts-expect-error shorthand join columns must exist in the joined table
+          missing: 1,
+        },
+      } satisfies Select<Schema["orders"]["columns"], Schema>;
+      shorthandRows[0]?.customers[0]?.name satisfies string | undefined;
+      // @ts-expect-error shorthand joins retain their selected schema column types
+      shorthandRows[0]?.customers[0]?.name satisfies number | undefined;
+      // @ts-expect-error unselected shorthand join fields must be absent
+      shorthandRows[0]?.customers[0]?.id;
       rows[0]!.customer[0]!.name satisfies string;
       rows[0]!.customer[0]!.phone satisfies string | null;
       // @ts-expect-error selected fields must retain their types (and cannot be any)
@@ -384,13 +400,17 @@ describe("type tests", () => {
       // @ts-expect-error
       const s3: Select<{ a: number; c: string }, {}> = { a: 1, cc: "2" };
 
+      // @ts-expect-error Function shorthand must start with a dollar sign
+      const invalidFunctionName: Select<{ a: number; c: string }, {}> = { c: "max" };
+
       const s33: Select<{ a: number; c: string }, {}> = { a: 1, c: "$max" };
 
       db.view1.find({}, { select: { c1: 1, c2: 1, table1: "*" } }).then((data) => {
         data[0]?.c1 satisfies string | undefined;
         data[0]?.c2 satisfies number | undefined;
+        data[0]?.table1[0]?.c2 satisfies number | undefined;
       });
-      db.table1.insert({ c1: "2" }, { returning: { c1: 1, c2: "func", dwad: { dwada: [] } } });
+      db.table1.insert({ c1: "2" }, { returning: { c1: 1, c2: "$func", dwad: { $dwada: [] } } });
 
       //@ts-expect-error
       db.table1.update;
@@ -400,10 +420,10 @@ describe("type tests", () => {
 
       db.table1.find;
 
-      const data = await db.view1.findOne({}, { select: { c1: 1, view1: { id: 1 } } });
+      const data = await db.view1.findOne({}, { select: { c1: 1, view1: { c2: 1 } } });
 
       data?.c1 satisfies string | undefined;
-      data?.view1 satisfies { c1: string; c2: number } | undefined;
+      data?.view1 satisfies { c2: number }[] | undefined;
 
       const result = await db.table2.update({}, { c1: "" }, { returning: "*" });
       result?.at(0)?.c2 ?? 0 + 2;

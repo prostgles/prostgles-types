@@ -1,4 +1,6 @@
-type ColumnNull<T> = 0 extends 1 & T ? never : Extract<T, null | undefined>;
+type ColumnNull<T> = 0 extends 1 & T
+  ? null | undefined
+  : Extract<T, null | undefined>;
 type DateTruncFunctionName = "$date_trunc";
 
 type StringFunctionName =

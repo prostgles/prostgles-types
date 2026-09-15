@@ -266,6 +266,17 @@ describe("type tests", () => {
       let tblGeneric = {} as TableHandler;
       tblGeneric = tblTyped;
 
+      const dynamicTable = {} as TableHandler<AnyObject>;
+      const dynamicRow = await dynamicTable.findOne(
+        {},
+        { select: { l: { $ST_AsGeoJSON: ["geom"] } } },
+      );
+      if (dynamicRow) {
+        dynamicRow.l satisfies Record<string, unknown> | null | undefined;
+        // @ts-expect-error untyped function results can be nullish
+        dynamicRow.l satisfies Record<string, unknown>;
+      }
+
       const dbTyped = {} as DBHandler<GSchema>;
       let dbGeneric = {} as DBHandler;
       dbGeneric = dbTyped;

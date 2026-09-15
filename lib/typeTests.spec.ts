@@ -39,6 +39,18 @@ describe("type tests", () => {
           },
         },
       );
+      rows[0]!.customer[0]!.name satisfies string;
+      rows[0]!.customer[0]!.phone satisfies string | null;
+      // @ts-expect-error selected fields must retain their types (and cannot be any)
+      rows[0]!.customer[0]!.name satisfies number;
+      // @ts-expect-error unselected fields must be absent
+      rows[0]!.customer[0]!.id;
+      // @ts-expect-error joins return arrays
+      rows[0]!.customer.name;
+      rows[0]!.total satisfies string;
+      // @ts-expect-error count returns a bigint string
+      rows[0]!.total satisfies number;
+
       const shorthandRows = await db.orders.find({}, { select: { customers: { name: 1 } } });
       const shorthandSelect = {
         customers: { name: 1, phone: 1 },
@@ -55,15 +67,38 @@ describe("type tests", () => {
       shorthandRows[0]?.customers[0]?.name satisfies number | undefined;
       // @ts-expect-error unselected shorthand join fields must be absent
       shorthandRows[0]?.customers[0]?.id;
-      rows[0]!.customer[0]!.name satisfies string;
-      rows[0]!.customer[0]!.phone satisfies string | null;
-      // @ts-expect-error selected fields must retain their types (and cannot be any)
-      rows[0]!.customer[0]!.name satisfies number;
-      // @ts-expect-error unselected fields must be absent
-      rows[0]!.customer[0]!.id;
-      // @ts-expect-error joins return arrays
-      rows[0]!.customer.name;
-      rows[0]!.total satisfies number; // Existing function behavior stays any.
+
+      const functionRows = await db.orders.find(
+        {},
+        {
+          select: {
+            upper: { $upper: ["id"] },
+            max: { $max: ["id"] },
+            ids: { $array_agg: ["id"] },
+            filteredCount: {
+              $count: [],
+              $filter: { id: { $gt: 0 } },
+              $orderBy: { id: -1 },
+            },
+          },
+        },
+      );
+      functionRows[0]!.upper satisfies string;
+      functionRows[0]!.max satisfies number;
+      functionRows[0]!.ids satisfies number[];
+      functionRows[0]!.filteredCount satisfies string;
+      // @ts-expect-error function results cannot fall back to any
+      functionRows[0]!.upper satisfies number;
+      // @ts-expect-error max preserves its source column type
+      functionRows[0]!.max satisfies string;
+      const invalidFunctionArgs = {
+        total: { $count: "id" },
+        // @ts-expect-error function arguments must be an array
+      } satisfies Select<Schema["orders"]["columns"], Schema>;
+      const invalidFullFunctionName = {
+        total: { $unknown: [] },
+        // @ts-expect-error full function names must be known
+      } satisfies Select<Schema["orders"]["columns"], Schema>;
 
       const row = await db.orders.findOne(
         {},
@@ -410,7 +445,7 @@ describe("type tests", () => {
         data[0]?.c2 satisfies number | undefined;
         data[0]?.table1[0]?.c2 satisfies number | undefined;
       });
-      db.table1.insert({ c1: "2" }, { returning: { c1: 1, c2: "$func", dwad: { $dwada: [] } } });
+      db.table1.insert({ c1: "2" }, { returning: { c1: 1, c2: "$max", dwad: { $countAll: [] } } });
 
       //@ts-expect-error
       db.table1.update;

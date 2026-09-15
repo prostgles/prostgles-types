@@ -10,15 +10,17 @@ type JoinSelectResult<S extends DBSchema, K extends keyof S, V> =
 
 export type ParseSelectObject<Sel, TD extends AnyObject, S extends DBSchema> = Expand<
   (Sel extends { "*": 1 } ? Required<TD> : {}) & {
-    [K in keyof Sel as K extends "*" ? never
-    : K extends keyof TD ?
-      Sel[K] extends 1 | SelectFunction ?
-        K
+    [
+      K in keyof Sel as K extends "*" ? never
+      : K extends keyof TD ?
+        Sel[K] extends 1 | SelectFunction ?
+          K
+        : never
+      : K extends keyof S ? K
+      : Sel[K] extends SelectFunction ?
+        K // <-- computed alias like "bd"
       : never
-    : K extends keyof S ? K
-    : Sel[K] extends SelectFunction ?
-      K // <-- computed alias like "bd"
-    : never]: K extends keyof TD ?
+    ]: K extends keyof TD ?
       Sel[K] extends SelectFunction ?
         any
       : Required<TD>[K]
@@ -72,15 +74,19 @@ export type SelectV2ReturnType<S extends DBSchema, K extends keyof S, Sel extend
     } & {
       [C in keyof Sel as Sel[C] extends ShorthandFunction ? C : never]: number;
     } & {
-      [C in keyof Sel as Sel[C] extends [infer ColName] ?
-        ColName extends keyof S[K]["columns"] ?
-          C
+      [
+        C in keyof Sel as Sel[C] extends [infer ColName] ?
+          ColName extends keyof S[K]["columns"] ?
+            C
+          : never
         : never
-      : never]: number;
+      ]: number;
     } & {
-      [C in keyof Sel as C extends keyof S ? never
-      : Sel[C] extends { [F in FunctionName]: any } ? C
-      : never]: number;
+      [
+        C in keyof Sel as C extends keyof S ? never
+        : Sel[C] extends { [F in FunctionName]: any } ? C
+        : never
+      ]: number;
     }
   : never;
 
@@ -113,7 +119,7 @@ const joinedResult = {
 } satisfies SelectV2<S, "table1">;
 
 const result: ParseSelectObject<
-  { "*": 1; hehe: { $func: [] }; table2: { c1: 1; c2: 1 } },
+  { "*": 1; hehe: { $countAll: [] }; table2: { c1: 1; c2: 1 } },
   S["table1"]["columns"],
   S
 > = {

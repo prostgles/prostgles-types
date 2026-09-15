@@ -57,11 +57,11 @@ describe("util func tests", () => {
         name: 1,
         public: 1,
         $rowhash: 1,
-        dsds: { $d: [] },
+        dsds: { $countAll: [] },
       };
       const sel3: Select<{ id: number; name: number; public: number }> = "";
       const sel4: Select<{ id: number; name: number; public: number }> = "*";
-      const sel12: Select = { id: 1, name: 1, public: 1, $rowhash: 1, dsds: { $d: [] } };
+      const sel12: Select = { id: 1, name: 1, public: 1, $rowhash: 1, dsds: { $countAll: [] } };
       const sel13: Select = "";
       const sel14: Select = "*";
 
@@ -77,7 +77,7 @@ describe("util func tests", () => {
       const sel = {
         a: 1,
         $rowhash: 1,
-        dwadwA: { $dwdwa: [5] },
+        dwadwA: { $round: [5] },
       } as const;
 
       const sds: Select = sel;
@@ -89,8 +89,8 @@ describe("util func tests", () => {
       const s001: Select = {
         h: { $ts_headline_simple: ["name", { plainto_tsquery: "abc81" }] },
         hh: { $ts_headline: ["name", "abc81"] },
-        added: "$date_trunc_2hour",
-        addedY: { $date_trunc_5minute: ["added"] },
+        added: "$date_trunc",
+        // addedY: { $date_trunc: ["added"] },
       };
 
       //@ts-expect-error
@@ -108,15 +108,15 @@ describe("util func tests", () => {
       const sds3: Select<{ a: number }> = {
         // "*": 1,
         // a: "$funcName",
-        a: { $dwda: [] },
-        $rowhashD: { $dwda: [] },
+        a: { $countAll: [] },
+        $rowhashD: { $countAll: [] },
         // dwadwa: 1, //{ dwa: []}
       };
 
       const sel1d: Select = {
         dwada: 1,
         $rowhash: 1,
-        dwawd: { $funcName: [12] },
+        dwawd: { $round: [12] },
       };
 
       const sel1d2: Select<AnyObject> = ["a"];

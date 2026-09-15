@@ -6,6 +6,8 @@ import { getKeys, isDefined } from "./util";
 import { includes } from "./utilFuncs/includes";
 import type { SyncTableInfo } from "./WAL";
 import type { InsertColumnsWithReferences } from "./insertTypes";
+import type { FunctionName, GetFunctionReturnType } from "./selectFunctions";
+export type { FunctionName, FunctionReturnTypes } from "./selectFunctions";
 export const _PG_strings = [
   "bpchar",
   "char",
@@ -511,6 +513,7 @@ export const JOIN_PARAMS = [
   "offset",
   "limit",
   "orderBy",
+  "having",
 ] as const satisfies (keyof DetailedJoinSelect)[];
 
 export type JoinCondition =
@@ -551,8 +554,6 @@ export type SimpleJoinSelect =
 
 export type JoinSelect = SimpleJoinSelect | DetailedJoinSelect;
 
-export type FunctionName = `$${string}`;
-
 /**
  * Functions that take one column argument can be applied to the selected field by specifying the function name.
  * Example: { field: { funcName: ["field"] } }
@@ -568,10 +569,9 @@ type FunctionShorthand = FunctionName;
  *  - JSON functions: $merge
  * Aggregate functions also accept $filter and $orderBy options.
  */
-type FunctionFull<T extends AnyObject = AnyObject> = Record<
-  FunctionName,
-  any[] | readonly any[]
-> & {
+type FunctionFull<T extends AnyObject = AnyObject> = {
+  [Name in FunctionName]: { [K in Name]: any[] | readonly any[] };
+}[FunctionName] & {
   $filter?: FullFilter<void, void>;
   $orderBy?: OrderBy<T>;
 };
@@ -834,7 +834,8 @@ type ParseSelect<
   ) ?
     ExplicitJoinResult<Select[Key], S, P>
   : Select[Key] extends JoinSelect ? ShorthandJoinResult<Select[Key], S, Key>
-  : Select[Key] extends SelectFunction ? any
+  : Select[Key] extends SelectFunction | FunctionShorthand ?
+    GetFunctionReturnType<Select[Key], TD, Key>
   : any;
 };
 
@@ -1023,7 +1024,7 @@ export type TableHandler<
   /**
    * Retrieves a list of matching records from the view/table
    */
-  find<P extends SelectParams<TD, S>>(
+  find<const P extends SelectParams<TD, S>>(
     /**
      * A filter for a table, defined as a MongoDB-like query object.
      * Supported operators:
@@ -1065,7 +1066,7 @@ export type TableHandler<
   /**
    * Retrieves a record from the view/table
    */
-  findOne<P extends SelectParams<TD, S>>(
+  findOne<const P extends SelectParams<TD, S>>(
     filter?: FullFilter<TD, S>,
     selectParams?: P,
   ): Promise<undefined | SelectReturnType<S, P, TD, false>>;
@@ -1073,7 +1074,7 @@ export type TableHandler<
   /**
    * Retrieves a list of matching records from the view/table and subscribes to changes
    */
-  subscribe<P extends SubscribeParams<TD, S>>(
+  subscribe<const P extends SubscribeParams<TD, S>>(
     filter: FullFilter<TD, S>,
     params: P,
     onData: SubscribeCallback<SelectReturnType<S, P, TD, true>>,
@@ -1082,7 +1083,7 @@ export type TableHandler<
   /**
    * Retrieves first matching record from the view/table and subscribes to changes
    */
-  subscribeOne<P extends SubscribeParams<TD, S>>(
+  subscribeOne<const P extends SubscribeParams<TD, S>>(
     filter: FullFilter<TD, S>,
     params: P,
     onData: SubscribeOneCallback<SelectReturnType<S, P, TD, false> | undefined>,

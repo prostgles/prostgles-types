@@ -6,6 +6,7 @@ import type {
   Select,
   SelectParams,
   TableHandler,
+  TableHandlerForColumns,
   UpsertDataToPGCast,
 } from ".";
 
@@ -121,13 +122,13 @@ async () => {
   };
 
   type TableDef = { h: number; b?: number; c?: number };
-  const tableHandler: TableHandler<TableDef> = undefined as any;
+  const tableHandler: TableHandlerForColumns<TableDef> = undefined as any;
   tableHandler.insert({ h: 1, c: 2 });
 
   type DBOFullyTyped<Schema = void> =
     Schema extends DBSchema ?
       {
-        [tov_name in keyof Schema]: TableHandler<Schema[tov_name]["columns"], Schema>;
+        [tov_name in keyof Schema]: TableHandler<Schema, tov_name>;
       }
     : Record<string, TableHandler>;
 
@@ -195,7 +196,7 @@ async () => {
 
   // const f = <A extends TableHandler["count"]>(a: A) => {};
   const f = (s: TableHandler) => {};
-  const th: TableHandler<GSchema["tbl1"]["columns"], GSchema> = {} as any;
+  const th: TableHandler<GSchema, "tbl1"> = {} as any;
   // f(th)
 
   const sp: SelectParams<GSchema["tbl1"]["columns"]> = { select: {} };

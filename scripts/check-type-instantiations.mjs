@@ -2,9 +2,9 @@ import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
 // Previous baselines: 105_000, 107,408.
-// Baseline: 111,716, including untyped select function nullability coverage.
+// Baseline: 95,570, with schema-based table handlers and a columns-only alias.
 // The small margin avoids hiding meaningful inference regressions.
-const MAX_INSTANTIATIONS = 111_727;
+const MAX_INSTANTIATIONS = 95_581;
 const tscPath = fileURLToPath(new URL("../node_modules/typescript/bin/tsc", import.meta.url));
 const result = spawnSync(
   process.execPath,

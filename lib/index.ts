@@ -121,7 +121,7 @@ export type DBTableSchema = {
   columns: AnyObject;
   /** Client insert input; omitted on schemas that use the database column defaults. */
   insertColumns?: AnyObject;
-  /** Client update input, including PostgreSQL casts and excluded fields. */
+  /** Client update columns; PostgreSQL casts are applied by TableHandler. */
   updateColumns?: AnyObject;
   /** The table is absent from at least one publish profile. */
   optional?: boolean;
@@ -957,7 +957,9 @@ export type UpsertDataToPGCast<TD extends AnyObject> = {
 type JSONMerge<T> = T extends Record<string, unknown> ? Record<"$merge", unknown[]> : never;
 
 export type PartialLax<T = AnyObject> = Partial<T>;
-type UpsertDataToPGCastLax<T extends AnyObject> = PartialLax<UpsertDataToPGCast<T>>;
+type UpsertDataToPGCastLax<T extends AnyObject> = {
+  [K in keyof T]?: CastFromTSToPG<T[K]> | JSONMerge<T[K]>;
+};
 
 export type DeleteParams<T extends AnyObject | void = void, S extends DBSchema | void = void> = {
   returning?: Select<T, S>;
@@ -987,18 +989,21 @@ type GetInsertColumns<TD extends AnyObject, S, TName extends PropertyKey> =
   : TD;
 
 type GetUpdateData<TD extends AnyObject, S, TName extends PropertyKey> =
-  [TName] extends [never] ? UpsertDataToPGCastLax<TD>
-  : S extends Record<TName, { updateColumns: infer Columns extends AnyObject }> ? Columns
+  S extends Record<TName, { updateColumns: infer Columns extends AnyObject }> ?
+    UpsertDataToPGCastLax<Columns>
   : UpsertDataToPGCastLax<TD>;
 
 /**
  * Methods for interacting with a table/view
  * - On client-side some methods are restricted (and undefined) based on publish rules on the server
  */
-export type TableHandler<
-  TD extends AnyObject = AnyObject,
-  S extends DBSchema | void = void,
-  TName extends PropertyKey = never,
+type TableHandlerBase<
+  /**
+   * TODO: check if: "deriving it directly throughout raised type instantiations from roughly 95.6k to 104k."
+   */
+  TD extends AnyObject,
+  S extends DBSchema | void,
+  TName extends PropertyKey,
 > = {
   /**
    * Retrieves the table/view info
@@ -1161,6 +1166,25 @@ export type TableHandler<
   ): Promise<GetReturningReturnType<P, TD, S>[]>;
 };
 
+type TableHandlerData<S, TName> =
+  S extends DBSchema ?
+    TName extends keyof S ?
+      S[TName]["columns"]
+    : never
+  : never;
+
+type TableHandlerSchema<S extends DBSchema> = DBSchema extends S ? void : S;
+
+export type TableHandler<
+  S extends DBSchema = DBSchema,
+  TName extends keyof S = keyof S,
+> = TableHandlerBase<TableHandlerData<S, TName>, TableHandlerSchema<S>, TName>;
+
+export type TableHandlerForColumns<T extends AnyObject = AnyObject> = TableHandler<
+  { _: { columns: T } },
+  "_"
+>;
+
 export type JoinMakerOptions<TT extends AnyObject = AnyObject> = SelectParams<TT> & {
   path?: RawJoinPath;
 };
@@ -1296,7 +1320,7 @@ export type ValidatedMethods<T extends DBTableSchema> =
 export type DBHandler<S = void> =
   S extends DBSchema ?
     {
-      [k in keyof S]: Pick<TableHandler<S[k]["columns"], S, k>, ValidatedMethods<S[k]>>;
+      [k in keyof S]: Pick<TableHandler<S, k>, ValidatedMethods<S[k]>>;
     }
   : {
       [key: string]: Partial<TableHandler>;

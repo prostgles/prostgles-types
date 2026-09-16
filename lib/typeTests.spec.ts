@@ -12,6 +12,7 @@ import type {
   SelectTyped,
   SQLHandler,
   TableHandler,
+  TableHandlerForColumns,
 } from "./index";
 
 describe("type tests", () => {
@@ -243,7 +244,7 @@ describe("type tests", () => {
       type DBOFullyTyped<Schema = void> =
         Schema extends DBSchema ?
           {
-            [tov_name in keyof Schema]: TableHandler<Schema[tov_name]["columns"], Schema>;
+            [tov_name in keyof Schema]: TableHandler<Schema, tov_name>;
           }
         : Record<string, TableHandler>;
 
@@ -262,11 +263,13 @@ describe("type tests", () => {
         };
       };
 
-      const tblTyped = {} as TableHandler<GSchema["tbl1"]["columns"], GSchema>;
+      const tblTyped = {} as TableHandler<GSchema, "tbl1">;
+      // @ts-expect-error table name must exist in the schema
+      type InvalidTableHandler = TableHandler<GSchema, "missing">;
       let tblGeneric = {} as TableHandler;
       tblGeneric = tblTyped;
 
-      const dynamicTable = {} as TableHandler<AnyObject>;
+      const dynamicTable = {} as TableHandlerForColumns;
       const dynamicRow = await dynamicTable.findOne(
         {},
         { select: { l: { $ST_AsGeoJSON: ["geom"] } } },

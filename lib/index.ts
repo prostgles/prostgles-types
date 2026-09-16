@@ -1583,6 +1583,7 @@ export * from "./replication";
 export * from "./util";
 export * from "./WAL";
 export * from "./utilFuncs/index";
+export * from "./publishUtils";
 
 export const ABORTABLE_METHODS = [
   "find",

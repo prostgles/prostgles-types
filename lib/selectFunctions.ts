@@ -100,6 +100,7 @@ export type FunctionName =
   | "$min"
   | "$jsonb_set"
   | "$jsonb_strip_nulls"
+  | "$array_element"
   | "$array_agg"
   | "$json_agg"
   | "$jsonb_agg";
@@ -113,6 +114,9 @@ export type FunctionReturnTypes<ColumnType = any> = {
   : Name extends "$ST_DWithin" ? boolean | ColumnNull<ColumnType>
   : Name extends "$ST_AsEWKB" | "$ST_AsBinary" | "$ST_AsMVT" ? Uint8Array | ColumnNull<ColumnType>
   : Name extends JsonFunctionName ? Record<string, unknown> | ColumnNull<ColumnType>
+  : Name extends "$array_element" ?
+    ColumnType extends readonly (infer ElementType)[] ? ElementType | null
+    : null
   : Name extends "$column" | "$max" | "$min" | "$jsonb_set" | "$jsonb_strip_nulls" ? ColumnType
   : Name extends "$array_agg" | "$json_agg" | "$jsonb_agg" ? ColumnType[]
   : any;

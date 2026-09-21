@@ -575,7 +575,13 @@ type FunctionFull<T extends AnyObject = AnyObject> = {
   $filter?: FullFilter<void, void>;
   $orderBy?: OrderBy<T>;
 };
-type FunctionSelect = FunctionShorthand | FunctionFull;
+
+type CaseSelect = {
+  $case: readonly (readonly [condition: AnyObject, result: unknown])[];
+  $else?: unknown;
+};
+
+type FunctionSelect = FunctionShorthand | FunctionFull | CaseSelect;
 
 type InclusiveSelect = true | 1 | FunctionSelect | JoinSelect;
 
@@ -588,7 +594,7 @@ type SchemaJoinSelect<T extends AnyObject, S extends DBSchema | void> =
       {}
     : {
         [K in keyof S]?: K extends keyof T ? InclusiveSelect
-        : TypedShorthandJoinSelect<S[K]["columns"]> | FunctionFull | DetailedJoinSelect;
+        : TypedShorthandJoinSelect<S[K]["columns"]> | FunctionFull | CaseSelect | DetailedJoinSelect;
       }
   : {};
 
@@ -599,7 +605,7 @@ type SelectWithFunctions<
 > =
   | (IsTyped extends true ?
       { [K in keyof T]?: InclusiveSelect } & SchemaJoinSelect<T, S> &
-        Record<string, FunctionFull | JoinSelect>
+        Record<string, FunctionFull | CaseSelect | JoinSelect>
     : Record<string, InclusiveSelect>)
   | { [K in keyof T]?: true | 1 | FunctionShorthand }
   | { [K in keyof T]?: 0 | false }
@@ -812,13 +818,22 @@ type ShorthandJoinResult<J, S extends DBSchema | void, TableName extends Propert
   : any[];
 
 /** ParseSelect must check joins first because FunctionFull structurally matches objects without `$` keys. */
-export type SelectFunction = FunctionFull;
+export type SelectFunction = FunctionFull | CaseSelect;
+type CaseResult<F> =
+  F extends (
+    {
+      $case: readonly (readonly [unknown, infer Result])[];
+    }
+  ) ?
+    Result | (F extends { $else: infer ElseResult } ? ElseResult : null)
+  : never;
 type ParseSelect<
   Select extends SelectParams<TD>["select"],
   TD extends AnyObject,
   S extends DBSchema | void,
 > = (Select extends { "*": 1 } ? NormalizedRow<TD> : {}) & {
   [Key in keyof Omit<Select, "*"> & string]: Select[Key] extends 1 | true ? NormalizedRow<TD>[Key]
+  : Select[Key] extends CaseSelect ? CaseResult<Select[Key]>
   : Select[Key] extends (
     {
       $leftJoin: infer P extends RawJoinPath;

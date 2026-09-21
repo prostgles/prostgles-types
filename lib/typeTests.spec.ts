@@ -81,6 +81,13 @@ describe("type tests", () => {
               $filter: { id: { $gt: 0 } },
               $orderBy: { id: -1 },
             },
+            caseLabel: {
+              $case: [
+                [{ id: 1 }, "one"],
+                [{ id: 2 }, "two"],
+              ],
+              $else: null,
+            },
           },
         },
       );
@@ -88,10 +95,14 @@ describe("type tests", () => {
       functionRows[0]!.max satisfies number;
       functionRows[0]!.ids satisfies number[];
       functionRows[0]!.filteredCount satisfies string;
+      functionRows[0]!.caseLabel satisfies string | null;
       // @ts-expect-error function results cannot fall back to any
       functionRows[0]!.upper satisfies number;
       // @ts-expect-error max preserves its source column type
       functionRows[0]!.max satisfies string;
+      // @ts-expect-error CASE result types must not fall back to any
+      functionRows[0]!.caseLabel satisfies Date;
+
       const invalidFunctionArgs = {
         total: { $count: "id" },
         // @ts-expect-error function arguments must be an array

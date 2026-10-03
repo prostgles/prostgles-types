@@ -14,18 +14,28 @@ type PendingLookupValidation = {
   path: string[];
 };
 
-type DBHandler = Map<string, TableHandler>;
+type DBHandler = Map<
+  string,
+  Partial<Pick<TableHandler, "findOne" | "getColumns">>
+>;
 
 type LookupPrimitive = null | number | string | boolean | undefined;
 const isLookupPrimitive = (value: unknown): value is LookupPrimitive =>
   value == null || ["number", "string", "boolean"].includes(typeof value);
-const isPrimitiveLookupRow = (value: unknown): value is Record<string, LookupPrimitive> => {
+const isPrimitiveLookupRow = (
+  value: unknown,
+): value is Record<string, LookupPrimitive> => {
   if (!isObject(value)) return false;
   const keys = safeGetKeys(value);
-  return !!keys.length && keys.every((key) => isLookupPrimitive(safeGetProperty(value, key)));
+  return (
+    !!keys.length &&
+    keys.every((key) => isLookupPrimitive(safeGetProperty(value, key)))
+  );
 };
 
-export const getFieldTypeObj = (rawFieldType: JSONB.FieldType): JSONB.FieldTypeObj => {
+export const getFieldTypeObj = (
+  rawFieldType: JSONB.FieldType,
+): JSONB.FieldTypeObj => {
   if (typeof rawFieldType === "string") return { type: rawFieldType };
 
   return rawFieldType;
@@ -57,13 +67,17 @@ const PRIMITIVE_VALIDATORS: {
   // ) => val is K extends keyof PrimitiveTypeMap ? PrimitiveTypeMap[K] : unknown;
 } = {
   string: (val) => typeof val === "string",
-  number: (val): val is number => typeof val === "number" && Number.isFinite(val),
-  integer: (val): val is number => typeof val === "number" && Number.isInteger(val),
+  number: (val): val is number =>
+    typeof val === "number" && Number.isFinite(val),
+  integer: (val): val is number =>
+    typeof val === "number" && Number.isInteger(val),
   boolean: (val): val is boolean => typeof val === "boolean",
   time: (val) => typeof val === "string",
   timestamp: (val) => typeof val === "string",
-  any: (val): val is any => typeof val !== "function" && typeof val !== "symbol",
-  unknown: (val): val is unknown => typeof val !== "function" && typeof val !== "symbol",
+  any: (val): val is any =>
+    typeof val !== "function" && typeof val !== "symbol",
+  unknown: (val): val is unknown =>
+    typeof val !== "function" && typeof val !== "symbol",
   Date: (val) => typeof val === "string",
   Uint8Array: isUint8ArrayOrBuffer,
   Blob: isUint8ArrayOrBuffer,
@@ -77,7 +91,9 @@ const PRIMITIVE_VALIDATORS: {
       typeof val.type === "string" &&
       isUint8ArrayOrBuffer(val.data);
     if (validStructure && s.mimeTypes) {
-      const validMime = Object.keys(s.mimeTypes).some((mime) => val.type === mime);
+      const validMime = Object.keys(s.mimeTypes).some(
+        (mime) => val.type === mime,
+      );
       if (!validMime) {
         throw new Error(
           `Invalid FileLike type. Expected one of: ${Object.keys(s.mimeTypes).join(", ")}`,
@@ -89,7 +105,9 @@ const PRIMITIVE_VALIDATORS: {
   },
 };
 const PRIMITIVE_VALIDATORS_KEYS = getKeys(PRIMITIVE_VALIDATORS);
-const getElementType = <T extends DataType>(type: T): undefined | ElementType<T> => {
+const getElementType = <T extends DataType>(
+  type: T,
+): undefined | ElementType<T> => {
   if (typeof type === "string" && type.endsWith("[]")) {
     const elementType = type.slice(0, -2);
     if (!includes(PRIMITIVE_VALIDATORS_KEYS, elementType)) {
@@ -108,7 +126,8 @@ const getValidator = (
     const validator = PRIMITIVE_VALIDATORS[elem];
     return {
       isArray: true,
-      validator: (v: any) => Array.isArray(v) && v.every((v) => validator(v, fieldType)),
+      validator: (v: any) =>
+        Array.isArray(v) && v.every((v) => validator(v, fieldType)),
     };
   }
   const validator = PRIMITIVE_VALIDATORS[type as NonArrayTypes];
@@ -138,10 +157,13 @@ const getPropertyValidationError = (
 
     const isArrayType = type.endsWith("[]");
     const valuesToTest = isArrayType && Array.isArray(value) ? value : [value];
-    const normalisedAllowedValues = allowedValues.map((v) => (isObject(v) ? v.value : v));
+    const normalisedAllowedValues = allowedValues.map((v) =>
+      isObject(v) ? v.value : v,
+    );
     for (const [index, val] of valuesToTest.entries()) {
       if (!normalisedAllowedValues.includes(val)) {
-        const pathInfo = isArrayType ? `${path.join(".")}[${index}]` : path.join(".");
+        const pathInfo =
+          isArrayType ? `${path.join(".")}[${index}]` : path.join(".");
         return `${pathInfo} is of invalid type. Expecting ${normalisedAllowedValues
           .map((v) => (typeof v === "string" ? JSON.stringify(v) : String(v)))
           .join(" | ")} But got ${JSON.stringify(val)}`;
@@ -225,7 +247,9 @@ const getPropertyValidationError = (
     const tuple = fieldDefinition.tuple;
 
     if (!Array.isArray(value)) {
-      return err + `[${tuple.map((item) => getTypeDescription(item)).join(", ")}]`;
+      return (
+        err + `[${tuple.map((item) => getTypeDescription(item)).join(", ")}]`
+      );
     }
 
     if (value.length !== tuple.length) {
@@ -262,7 +286,9 @@ const getPropertyValidationError = (
 
   const arrayOf =
     fieldDefinition.arrayOf ??
-    (fieldDefinition.arrayOfType ? { type: fieldDefinition.arrayOfType } : undefined);
+    (fieldDefinition.arrayOfType ?
+      { type: fieldDefinition.arrayOfType }
+    : undefined);
   if (arrayOf) {
     if (!Array.isArray(value)) {
       return err + " an array";
@@ -284,7 +310,9 @@ const getPropertyValidationError = (
     return;
   }
 
-  const oneOf = fieldDefinition.oneOf ?? fieldDefinition.oneOfType?.map((type) => ({ type }));
+  const oneOf =
+    fieldDefinition.oneOf ??
+    fieldDefinition.oneOfType?.map((type) => ({ type }));
   if (oneOf) {
     if (!oneOf.length) {
       return err + "to not be empty";
@@ -292,7 +320,13 @@ const getPropertyValidationError = (
     let firstError: string | undefined;
     const validMember = oneOf.find((member) => {
       const pendingLookupCount = pendingLookupValidations?.length;
-      const error = getPropertyValidationError(value, member, path, opts, pendingLookupValidations);
+      const error = getPropertyValidationError(
+        value,
+        member,
+        path,
+        opts,
+        pendingLookupValidations,
+      );
       if (error !== undefined && pendingLookupCount !== undefined) {
         pendingLookupValidations!.length = pendingLookupCount;
       }
@@ -313,11 +347,13 @@ const getPropertyValidationError = (
       return;
     }
     const valueKeys = getKeys(value);
-    const missingKey = partial ? undefined : keysEnum?.find((key) => !valueKeys.includes(key));
+    const missingKey =
+      partial ? undefined : keysEnum?.find((key) => !valueKeys.includes(key));
     if (missingKey !== undefined) {
       return `${err} to have key ${missingKey}`;
     }
-    const extraKeys = keysEnum && valueKeys.filter((key) => !keysEnum.includes(key));
+    const extraKeys =
+      keysEnum && valueKeys.filter((key) => !keysEnum.includes(key));
     if (extraKeys?.length) {
       return `${err} has extra keys: ${extraKeys}`;
     }
@@ -344,7 +380,8 @@ const getPropertyValidationError = (
 const getTypeDescription = (schema: JSONB.FieldType): string => {
   const schemaObj = getFieldTypeObj(schema);
   const { type, nullable, optional, record } = schemaObj;
-  const oneOf = schemaObj.oneOf ?? schemaObj.oneOfType?.map((type) => ({ type }));
+  const oneOf =
+    schemaObj.oneOf ?? schemaObj.oneOfType?.map((type) => ({ type }));
   const allowedTypes: any[] = [];
   if (nullable) allowedTypes.push("null");
   if (optional) allowedTypes.push("undefined");
@@ -379,7 +416,9 @@ const getTypeDescription = (schema: JSONB.FieldType): string => {
     const optional = partial ? "?" : "";
     const valueType = !values ? "any" : getTypeDescription(values);
     if (keysEnum) {
-      allowedTypes.push(`{ [${keysEnum.join(" | ")}]${optional}: ${valueType} }`);
+      allowedTypes.push(
+        `{ [${keysEnum.join(" | ")}]${optional}: ${valueType} }`,
+      );
     } else {
       allowedTypes.push(`{ [key: string]${optional}: ${valueType} }`);
     }
@@ -388,14 +427,19 @@ const getTypeDescription = (schema: JSONB.FieldType): string => {
   return allowedTypes.join(" | ");
 };
 
-export const getJSONBObjectSchemaValidationError = <S extends JSONB.ObjectType["type"]>(
+export const getJSONBObjectSchemaValidationError = <
+  S extends JSONB.ObjectType["type"],
+>(
   schema: S,
   obj: any,
   objName = "input",
   optional = false,
   opts?: ValidationOptions,
-): { error: string; data?: undefined } | { error?: undefined; data: JSONB.GetObjectType<S> } => {
-  if (obj === undefined && !optional) return { error: `Expecting ${objName} to be defined` };
+):
+  | { error: string; data?: undefined }
+  | { error?: undefined; data: JSONB.GetObjectType<S> } => {
+  if (obj === undefined && !optional)
+    return { error: `Expecting ${objName} to be defined` };
   if (!isObject(obj)) {
     return { error: `Expecting ${objName} to be an object` };
   }
@@ -410,7 +454,9 @@ export const getJSONBSchemaValidationError = <S extends JSONB.FieldType>(
   schema: S,
   obj: any,
   opts?: ValidationOptions,
-): { error: string; data?: undefined } | { error?: undefined; data: JSONB.GetType<S> } => {
+):
+  | { error: string; data?: undefined }
+  | { error?: undefined; data: JSONB.GetType<S> } => {
   const error = getPropertyValidationError(obj, schema, undefined, opts);
   if (error) {
     return { error };
@@ -419,7 +465,10 @@ export const getJSONBSchemaValidationError = <S extends JSONB.FieldType>(
 };
 
 const getLookupValuePath = (path: string[], index?: number): string => {
-  const result = [...path, ...(index === undefined ? [] : [String(index)])].join(".");
+  const result = [
+    ...path,
+    ...(index === undefined ? [] : [String(index)]),
+  ].join(".");
   return result || "value";
 };
 
@@ -460,7 +509,8 @@ const getLookupValidationError = async (
       const column = columns.find(({ name }) => name === reference.column);
       if (
         !column ||
-        (schema.filter?.tsDataType && column.tsDataType !== schema.filter.tsDataType) ||
+        (schema.filter?.tsDataType &&
+          column.tsDataType !== schema.filter.tsDataType) ||
         (schema.filter?.udt_name && column.udt_name !== schema.filter.udt_name)
       ) {
         return `${valuePath} references an unknown or disallowed column ${JSON.stringify(`${reference.table}.${reference.column}`)}`;
@@ -477,7 +527,8 @@ const getLookupValidationError = async (
       );
     }
 
-    const isRowLookup = dataLookup.type === "RowLookup" || dataLookup.type === "RowLookup[]";
+    const isRowLookup =
+      dataLookup.type === "RowLookup" || dataLookup.type === "RowLookup[]";
     if (
       (isRowLookup && !isPrimitiveLookupRow(value)) ||
       (!isRowLookup && !isLookupPrimitive(value))
@@ -487,8 +538,13 @@ const getLookupValidationError = async (
     const valueFilter: Record<string, LookupPrimitive> =
       isRowLookup ?
         (value as Record<string, LookupPrimitive>)
-      : { [(dataLookup as JSONB.ValueLookup).column]: value as LookupPrimitive };
-    const filter = dataLookup.filter ? { $and: [dataLookup.filter, valueFilter] } : valueFilter;
+      : {
+          [(dataLookup as JSONB.ValueLookup).column]: value as LookupPrimitive,
+        };
+    const filter =
+      dataLookup.filter ?
+        { $and: [dataLookup.filter, valueFilter] }
+      : valueFilter;
     const row = await tableHandler?.findOne?.(filter);
     if (!row) {
       return `${valuePath} does not reference an existing row in ${JSON.stringify(dataLookup.table)}`;
@@ -502,14 +558,25 @@ const getLookupValidationError = async (
  * validates RowLookup and ValueLookup records, while table/column lookups are
  * structurally validated.
  */
-export const getJSONBSchemaValidationErrorAsync = async <S extends JSONB.FieldType>(
+export const getJSONBSchemaValidationErrorAsync = async <
+  S extends JSONB.FieldType,
+>(
   schema: S,
   obj: any,
   dbHandlerMap: DBHandler,
   opts?: ValidationOptions,
-): Promise<{ error: string; data?: undefined } | { error?: undefined; data: JSONB.GetType<S> }> => {
+): Promise<
+  | { error: string; data?: undefined }
+  | { error?: undefined; data: JSONB.GetType<S> }
+> => {
   const pendingLookupValidations: PendingLookupValidation[] = [];
-  const error = getPropertyValidationError(obj, schema, undefined, opts, pendingLookupValidations);
+  const error = getPropertyValidationError(
+    obj,
+    schema,
+    undefined,
+    opts,
+    pendingLookupValidations,
+  );
   if (error) return { error };
 
   for (const lookup of pendingLookupValidations) {
@@ -519,22 +586,36 @@ export const getJSONBSchemaValidationErrorAsync = async <S extends JSONB.FieldTy
   return { data: obj as JSONB.GetType<S> };
 };
 
-export const validateJSONBObjectAgainstSchema = <S extends JSONB.ObjectType["type"]>(
+export const validateJSONBObjectAgainstSchema = <
+  S extends JSONB.ObjectType["type"],
+>(
   schema: S,
   obj: any,
   objName: string,
   optional = false,
 ): obj is JSONB.GetObjectType<S> => {
-  const { error } = getJSONBObjectSchemaValidationError(schema, obj, objName, optional);
+  const { error } = getJSONBObjectSchemaValidationError(
+    schema,
+    obj,
+    objName,
+    optional,
+  );
   return error === undefined;
 };
-export const assertJSONBObjectAgainstSchema = <S extends JSONB.ObjectType["type"]>(
+export const assertJSONBObjectAgainstSchema = <
+  S extends JSONB.ObjectType["type"],
+>(
   schema: S,
   obj: any,
   objName: string,
   optional = false,
 ): asserts obj is JSONB.GetObjectType<S> => {
-  const { error } = getJSONBObjectSchemaValidationError(schema, obj, objName, optional);
+  const { error } = getJSONBObjectSchemaValidationError(
+    schema,
+    obj,
+    objName,
+    optional,
+  );
   if (error) {
     throw new Error(error);
   }

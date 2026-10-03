@@ -2,10 +2,12 @@ import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
 // Previous baselines: 105_000, 107,408.
-// Baseline: 95,841, with CASE select result inference.
+// Baseline: 96,141, with permission-checked lookup validation handlers.
 // The small margin avoids hiding meaningful inference regressions.
-const MAX_INSTANTIATIONS = 95_852;
-const tscPath = fileURLToPath(new URL("../node_modules/typescript/bin/tsc", import.meta.url));
+const MAX_INSTANTIATIONS = 96_152;
+const tscPath = fileURLToPath(
+  new URL("../node_modules/typescript/bin/tsc", import.meta.url),
+);
 const result = spawnSync(
   process.execPath,
   [tscPath, "--noEmit", "--extendedDiagnostics", "--pretty", "false"],
@@ -24,11 +26,15 @@ if (result.status !== 0) {
 
 const output = result.stdout + result.stderr;
 const label = "Instantiations:";
-const line = output.split("\n").find((outputLine) => outputLine.startsWith(label));
+const line = output
+  .split("\n")
+  .find((outputLine) => outputLine.startsWith(label));
 const instantiations = Number(line?.slice(label.length).trim());
 
 if (!Number.isFinite(instantiations)) {
-  throw new Error(`Could not read type instantiations from tsc output:\n${output}`);
+  throw new Error(
+    `Could not read type instantiations from tsc output:\n${output}`,
+  );
 }
 
 if (instantiations > MAX_INSTANTIATIONS) {

@@ -855,11 +855,8 @@ type ShorthandJoinResult<
 > =
   S extends DBSchema ?
     TableName extends keyof S ?
-      J extends "*" ? NormalizedRow<S[TableName]["columns"]>[]
-      : J extends Record<string, 0 | false> ?
-        Omit<NormalizedRow<S[TableName]["columns"]>, keyof J>[]
-      : J extends Record<string, any> ?
-        ParseSelect<J, NormalizedRow<S[TableName]["columns"]>, S>[]
+      J extends "*" | Record<string, any> ?
+        SelectDataType<S, { select: J }, S[TableName]["columns"]>[]
       : any[]
     : any[]
   : any[];
@@ -902,6 +899,7 @@ type ParseSelect<
   : any;
 };
 
+// Distribute only projections over row variants to keep instantiation costs low.
 type SelectDataType<S extends DBSchema | void, O, TD extends AnyObject> =
   O extends { returnType: "value" } ? any
   : O extends { returnType: "values"; select: Record<string, 1> } ?
@@ -910,11 +908,11 @@ type SelectDataType<S extends DBSchema | void, O, TD extends AnyObject> =
   : O extends { select: "*" } ? NormalizedRow<TD>
   : O extends { select: "" } ? Record<string, never>
   : O extends { select: readonly (keyof TD)[] } ?
-    Pick<NormalizedRow<TD>, O["select"][number]>
+    (TD extends unknown ? Pick<NormalizedRow<TD>, O["select"][number]> : never)
   : O extends { select: Record<string, 0 | false> } ?
-    Omit<NormalizedRow<TD>, keyof O["select"]>
+    (TD extends unknown ? Omit<NormalizedRow<TD>, keyof O["select"]> : never)
   : O extends { select: Record<string, any> } ?
-    ParseSelect<O["select"], NormalizedRow<TD>, S>
+    (TD extends unknown ? ParseSelect<O["select"], NormalizedRow<TD>, S> : never)
   : NormalizedRow<TD>;
 
 export type SelectReturnType<
@@ -956,9 +954,9 @@ type GetReturningReturnType<
   O extends { returning: "*" } ? NormalizedRow<TD>
   : O extends { returning: "" } ? Record<string, never>
   : O extends { returning: Record<string, 1> } ?
-    Pick<NormalizedRow<TD>, keyof O["returning"]>
+    (TD extends unknown ? Pick<NormalizedRow<TD>, keyof O["returning"]> : never)
   : O extends { returning: Record<string, 0> } ?
-    Omit<NormalizedRow<TD>, keyof O["returning"]>
+    (TD extends unknown ? Omit<NormalizedRow<TD>, keyof O["returning"]> : never)
   : void;
 
 /**

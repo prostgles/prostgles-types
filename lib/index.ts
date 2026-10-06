@@ -630,6 +630,10 @@ type SchemaJoinSelect<T extends AnyObject, S extends DBSchema | void> =
       }
   : {};
 
+export const ROW_ACTIONS_COLUMN = "$prostgles_actions";
+
+type RowActionsColumn = { [ROW_ACTIONS_COLUMN]: string[] };
+
 type SelectWithFunctions<
   T extends AnyObject = AnyObject,
   IsTyped = false,
@@ -653,8 +657,8 @@ export type Select<
     t: T;
     s: S;
   } extends { t: AnyObject; s: DBSchema } ?
-    SelectWithFunctions<T & { $rowhash: string }, true, S>
-  : SelectWithFunctions<AnyObject & { $rowhash: string }, false>;
+    SelectWithFunctions<T & { $rowhash: string } & RowActionsColumn, true, S>
+  : SelectWithFunctions<AnyObject & { $rowhash: string } & RowActionsColumn, false>;
 
 export type SelectBasic = { [key: string]: any } | {} | undefined | "" | "*";
 
@@ -877,7 +881,7 @@ type ParseSelect<
   S extends DBSchema | void,
 > = (Select extends { "*": 1 } ? NormalizedRow<TD> : {}) & {
   [Key in keyof Omit<Select, "*"> & string]: Select[Key] extends 1 | true ?
-    NormalizedRow<TD>[Key]
+    Key extends keyof RowActionsColumn ? RowActionsColumn[Key] : NormalizedRow<TD>[Key]
   : Select[Key] extends CaseSelect ? CaseResult<Select[Key]>
   : Select[Key] extends (
     {
@@ -903,12 +907,12 @@ type ParseSelect<
 type SelectDataType<S extends DBSchema | void, O, TD extends AnyObject> =
   O extends { returnType: "value" } ? any
   : O extends { returnType: "values"; select: Record<string, 1> } ?
-    ValueOf<Pick<NormalizedRow<TD>, keyof O["select"]>>
+    ValueOf<Pick<NormalizedRow<TD> & RowActionsColumn, keyof O["select"]>>
   : O extends { returnType: "values" } ? any
   : O extends { select: "*" } ? NormalizedRow<TD>
   : O extends { select: "" } ? Record<string, never>
-  : O extends { select: readonly (keyof TD)[] } ?
-    (TD extends unknown ? Pick<NormalizedRow<TD>, O["select"][number]> : never)
+  : O extends { select: readonly (keyof TD | keyof RowActionsColumn)[] } ?
+    (TD extends unknown ? Pick<NormalizedRow<TD> & RowActionsColumn, O["select"][number]> : never)
   : O extends { select: Record<string, 0 | false> } ?
     (TD extends unknown ? Omit<NormalizedRow<TD>, keyof O["select"]> : never)
   : O extends { select: Record<string, any> } ?

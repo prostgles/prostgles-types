@@ -1,10 +1,7 @@
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
-// Previous baselines: 105_000, 107,408.
-// Baseline: 96,041, including the selectable row actions column.
-// The small margin avoids hiding meaningful inference regressions.
-const MAX_INSTANTIATIONS = 96_052;
+const MAX_INSTANTIATIONS = 94_026;
 const tscPath = fileURLToPath(
   new URL("../node_modules/typescript/bin/tsc", import.meta.url),
 );

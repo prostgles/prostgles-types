@@ -658,7 +658,10 @@ export type Select<
     s: S;
   } extends { t: AnyObject; s: DBSchema } ?
     SelectWithFunctions<T & { $rowhash: string } & RowActionsColumn, true, S>
-  : SelectWithFunctions<AnyObject & { $rowhash: string } & RowActionsColumn, false>;
+  : SelectWithFunctions<
+      AnyObject & { $rowhash: string } & RowActionsColumn,
+      false
+    >;
 
 export type SelectBasic = { [key: string]: any } | {} | undefined | "" | "*";
 
@@ -881,7 +884,9 @@ type ParseSelect<
   S extends DBSchema | void,
 > = (Select extends { "*": 1 } ? NormalizedRow<TD> : {}) & {
   [Key in keyof Omit<Select, "*"> & string]: Select[Key] extends 1 | true ?
-    Key extends keyof RowActionsColumn ? RowActionsColumn[Key] : NormalizedRow<TD>[Key]
+    Key extends keyof RowActionsColumn ?
+      RowActionsColumn[Key]
+    : NormalizedRow<TD>[Key]
   : Select[Key] extends CaseSelect ? CaseResult<Select[Key]>
   : Select[Key] extends (
     {
@@ -912,11 +917,17 @@ type SelectDataType<S extends DBSchema | void, O, TD extends AnyObject> =
   : O extends { select: "*" } ? NormalizedRow<TD>
   : O extends { select: "" } ? Record<string, never>
   : O extends { select: readonly (keyof TD | keyof RowActionsColumn)[] } ?
-    (TD extends unknown ? Pick<NormalizedRow<TD> & RowActionsColumn, O["select"][number]> : never)
+    TD extends unknown ?
+      Pick<NormalizedRow<TD> & RowActionsColumn, O["select"][number]>
+    : never
   : O extends { select: Record<string, 0 | false> } ?
-    (TD extends unknown ? Omit<NormalizedRow<TD>, keyof O["select"]> : never)
+    TD extends unknown ?
+      Omit<NormalizedRow<TD>, keyof O["select"]>
+    : never
   : O extends { select: Record<string, any> } ?
-    (TD extends unknown ? ParseSelect<O["select"], NormalizedRow<TD>, S> : never)
+    TD extends unknown ?
+      ParseSelect<O["select"], NormalizedRow<TD>, S>
+    : never
   : NormalizedRow<TD>;
 
 export type SelectReturnType<
@@ -958,9 +969,13 @@ type GetReturningReturnType<
   O extends { returning: "*" } ? NormalizedRow<TD>
   : O extends { returning: "" } ? Record<string, never>
   : O extends { returning: Record<string, 1> } ?
-    (TD extends unknown ? Pick<NormalizedRow<TD>, keyof O["returning"]> : never)
+    TD extends unknown ?
+      Pick<NormalizedRow<TD>, keyof O["returning"]>
+    : never
   : O extends { returning: Record<string, 0> } ?
-    (TD extends unknown ? Omit<NormalizedRow<TD>, keyof O["returning"]> : never)
+    TD extends unknown ?
+      Omit<NormalizedRow<TD>, keyof O["returning"]>
+    : never
   : void;
 
 /**
@@ -1698,6 +1713,7 @@ export * from "./util";
 export * from "./WAL";
 export * from "./utilFuncs/index";
 export * from "./publishUtils";
+export * from "./getActionFunctions";
 
 export const ABORTABLE_METHODS = [
   "find",

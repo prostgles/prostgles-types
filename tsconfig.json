@@ -3,9 +3,7 @@
   "compilerOptions": {
     "baseUrl": ".",
     "target": "es2020",
-    "lib": [
-      "es2022", "DOM"
-    ],
+    "lib": ["es2022", "DOM"],
     "strict": true,
     "strictNullChecks": true,
     "module": "commonjs",
@@ -20,11 +18,9 @@
     "declaration": true,
     "declarationMap": true,
     "isolatedModules": true,
-    "ignoreDeprecations": "5.0", 
-    "skipDefaultLibCheck": true, 
+    "ignoreDeprecations": "5.0",
+    "skipDefaultLibCheck": true,
     "noUncheckedIndexedAccess": true
   },
-  "exclude": [
-    "node_modules"
-  ],
+  "exclude": ["node_modules"]
 }

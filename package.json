@@ -18,7 +18,7 @@
     "prebuild": "tsc --noEmit -p tsconfig.browser.json",
     "prepack": "npm run build",
     "perf": "tsc --extendedDiagnostics 2>&1 | grep -E \"Instantiations|Check time\"",
-    "pushpublish": "npm version patch --git-tag-version false && git push && npm publish"
+    "release": "npm version patch && git push --follow-tags && npm publish"
   },
   "repository": {
     "type": "git",

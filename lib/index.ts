@@ -7,6 +7,13 @@ import { includes } from "./utilFuncs/includes";
 import type { SyncTableInfo } from "./WAL";
 import type { InsertColumnsWithReferences } from "./insertTypes";
 import type { FunctionName, GetFunctionReturnType } from "./selectFunctions";
+import type { JobControlBinding } from "./jobControl";
+export type {
+  JobStatus,
+  JobControlOperation,
+  JobControlFunctionMetadata,
+  JobControlBinding,
+} from "./jobControl";
 export type { FunctionName, FunctionReturnTypes } from "./selectFunctions";
 export const _PG_strings = [
   "bpchar",
@@ -1602,10 +1609,12 @@ type ClientServerFunctionMetadata = {
   input?: Record<string, JSONB.FieldType>;
   output?: JSONB.FieldType;
   description?: string;
+  jobControl?: JobControlBinding;
 };
 
-export type ClientServerFunctionSchema<CustomMetadata = Record<string, unknown>> =
-  ClientServerFunctionMetadata & { name: string } & CustomMetadata;
+export type ClientServerFunctionSchema<
+  CustomMetadata = Record<string, unknown>,
+> = ClientServerFunctionMetadata & { name: string } & CustomMetadata;
 
 export type ClientServerFunction<CustomMetadata = Record<string, unknown>> =
   ClientServerFunctionMetadata & {

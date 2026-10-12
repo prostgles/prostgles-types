@@ -1598,12 +1598,19 @@ export type JSONBObjectTypeIfDefined<
   T extends Record<string, JSONB.FieldType> | undefined,
 > = T extends Record<string, JSONB.FieldType> ? JSONB.GetObjectType<T> : never;
 
-export type ClientServerFunction = {
+type ClientServerFunctionMetadata = {
   input?: Record<string, JSONB.FieldType>;
   output?: JSONB.FieldType;
   description?: string;
-  run: (args?: Record<string, unknown>) => Promise<unknown>;
 };
+
+export type ClientServerFunctionSchema<CustomMetadata = Record<string, unknown>> =
+  ClientServerFunctionMetadata & { name: string } & CustomMetadata;
+
+export type ClientServerFunction<CustomMetadata = Record<string, unknown>> =
+  ClientServerFunctionMetadata & {
+    run: (args?: Record<string, unknown>) => Promise<unknown>;
+  } & CustomMetadata;
 
 export type ServerFunctionHandler = {
   [name: string]: ClientServerFunction;
@@ -1630,12 +1637,7 @@ export type ClientSchema = {
   err?: string;
   tableSchemaErrors: TableSchemaErrors;
   tableSchema: DBSchemaTable[];
-  methods: {
-    name: string;
-    description?: string;
-    input?: Record<string, JSONB.FieldType> | undefined;
-    output?: JSONB.FieldType | undefined;
-  }[];
+  methods: ClientServerFunctionSchema[];
 };
 
 export type ProstglesError = {

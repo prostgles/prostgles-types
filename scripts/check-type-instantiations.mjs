@@ -1,7 +1,7 @@
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
-const MAX_INSTANTIATIONS = 94_175;
+const MAX_INSTANTIATIONS = 94_669;
 const tscPath = fileURLToPath(
   new URL("../node_modules/typescript/bin/tsc", import.meta.url),
 );

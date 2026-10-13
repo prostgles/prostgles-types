@@ -76,6 +76,7 @@ describe("type tests", () => {
             upper: { $upper: ["id"] },
             max: { $max: ["id"] },
             ids: { $array_agg: ["id"] },
+            matches: { $array_search: ["id", "example"] },
             filteredCount: {
               $count: [],
               $filter: { id: { $gt: 0 } },
@@ -94,6 +95,11 @@ describe("type tests", () => {
       functionRows[0]!.upper satisfies string;
       functionRows[0]!.max satisfies number;
       functionRows[0]!.ids satisfies number[];
+      functionRows[0]!.matches satisfies {
+        index: number; offset: number; match: string; snippet: string;
+      }[];
+      // @ts-expect-error search offsets are numbers
+      functionRows[0]!.matches[0]!.offset satisfies string;
       functionRows[0]!.filteredCount satisfies string;
       functionRows[0]!.caseLabel satisfies string | null;
       // @ts-expect-error function results cannot fall back to any

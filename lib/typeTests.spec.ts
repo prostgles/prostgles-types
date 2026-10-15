@@ -27,7 +27,9 @@ describe("type tests", () => {
     const db = {} as DBHandler<Schema>;
     async () => {
       const customerJoinDef = defineJoin({
-        $leftJoin: "customers",
+        $leftJoin: [
+          { table: "customers", on: "default", params: { distance: 100 } },
+        ],
         select: { name: 1, phone: 1 },
       });
       const rows = await db.orders.find(
@@ -52,7 +54,10 @@ describe("type tests", () => {
       // @ts-expect-error count returns a bigint string
       rows[0]!.total satisfies number;
 
-      const shorthandRows = await db.orders.find({}, { select: { customers: { name: 1 } } });
+      const shorthandRows = await db.orders.find(
+        {},
+        { select: { customers: { name: 1 } } },
+      );
       const shorthandSelect = {
         customers: { name: 1, phone: 1 },
       } satisfies Select<Schema["orders"]["columns"], Schema>;
@@ -96,7 +101,10 @@ describe("type tests", () => {
       functionRows[0]!.max satisfies number;
       functionRows[0]!.ids satisfies number[];
       functionRows[0]!.matches satisfies {
-        index: number; offset: number; match: string; snippet: string;
+        index: number;
+        offset: number;
+        match: string;
+        snippet: string;
       }[];
       // @ts-expect-error search offsets are numbers
       functionRows[0]!.matches[0]!.offset satisfies string;
@@ -205,7 +213,11 @@ describe("type tests", () => {
         referencedBy: { orders: ["customer_id"] };
       };
     };
-    type Input = InsertDataWithNested<Schema["orders"]["columns"], Schema, "orders">;
+    type Input = InsertDataWithNested<
+      Schema["orders"]["columns"],
+      Schema,
+      "orders"
+    >;
     const customer = { name: "Customer", phone: null };
     const valid: Input = { customer_id: customer, unrelated_id: 1 };
     // @ts-expect-error unrelated columns do not allow nested objects
@@ -317,7 +329,10 @@ describe("type tests", () => {
       };
 
       if (tableHandler) {
-        const newRow = await tableHandler.insert?.({ h: 2, c: 1 }, { returning: { b: 1, c: 1 } });
+        const newRow = await tableHandler.insert?.(
+          { h: 2, c: 1 },
+          { returning: { b: 1, c: 1 } },
+        );
         newRow.b;
         newRow.c;
 
@@ -325,11 +340,17 @@ describe("type tests", () => {
         newRow.h;
 
         // const f: FullFilter<Partial<{ a: number; s: string}>> = {  }
-        const row = await tableHandler.findOne?.({ c: { $nin: [""] } }, { select: { b: 0 } });
+        const row = await tableHandler.findOne?.(
+          { c: { $nin: [""] } },
+          { select: { b: 0 } },
+        );
         row?.c;
         row?.h;
 
-        const query = await tableHandler.find?.({ h: 2 }, { returnType: "statement" });
+        const query = await tableHandler.find?.(
+          { h: 2 },
+          { returnType: "statement" },
+        );
         query.toUpperCase();
 
         // /** TODO: Sort by computed funnc */
@@ -344,7 +365,10 @@ describe("type tests", () => {
         //@ts-expect-error
         row.b;
 
-        const vals = await tableHandler.find?.({ c: { $nin: ["2"] } }, { returnType: "values" });
+        const vals = await tableHandler.find?.(
+          { c: { $nin: ["2"] } },
+          { returnType: "values" },
+        );
         const vals2 = await tableHandler.find?.(
           { c: { $nin: ["2"] } },
           { select: { h: 1 }, returnType: "values" },
@@ -380,15 +404,19 @@ describe("type tests", () => {
           row.c;
         });
 
-        tableHandler.subscribeOne({ h: 2 }, { select: { b: 0 } }, async (row) => {
-          //@ts-expect-error
-          row.b;
+        tableHandler.subscribeOne(
+          { h: 2 },
+          { select: { b: 0 } },
+          async (row) => {
+            //@ts-expect-error
+            row.b;
 
-          //@ts-expect-error
-          row.c;
+            //@ts-expect-error
+            row.c;
 
-          row?.c;
-        });
+            row?.c;
+          },
+        );
       }
       const s1: Select<AnyObject> = {
         val: { $template_string: ["$template_string"] },
@@ -403,7 +431,11 @@ describe("type tests", () => {
         const value = await sqlHandler("SELECT 1", {}, { returnType: "value" });
         value;
 
-        const values = await sqlHandler("SELECT 1", {}, { returnType: "values" });
+        const values = await sqlHandler(
+          "SELECT 1",
+          {},
+          { returnType: "values" },
+        );
         values.flatMap;
 
         const row = await sqlHandler("SELECT 1", {}, { returnType: "row" });
@@ -416,12 +448,20 @@ describe("type tests", () => {
         const rows = await sqlHandler("SELECT 1", {}, { returnType: "rows" });
         rows.flatMap;
 
-        const handles = await sqlHandler("SELECT 1", {}, { returnType: "noticeSubscription" });
+        const handles = await sqlHandler(
+          "SELECT 1",
+          {},
+          { returnType: "noticeSubscription" },
+        );
         <Function>handles.addListener;
         <string>handles.socketChannel;
         <string>handles.socketUnsubChannel;
 
-        const listenHandlesOrData = await sqlHandler("SELECT 1", {}, { allowListen: true });
+        const listenHandlesOrData = await sqlHandler(
+          "SELECT 1",
+          {},
+          { allowListen: true },
+        );
 
         if ("command" in listenHandlesOrData) {
           <string>listenHandlesOrData.command;
@@ -460,23 +500,33 @@ describe("type tests", () => {
       const s2: Select<{ a: number; c: string }, {}> = { a: 1, zz: 1 };
 
       // Correct function
-      const s22: Select<{ a: number; c: string }, {}> = { a: 1, zz: { $max: ["c"] } };
+      const s22: Select<{ a: number; c: string }, {}> = {
+        a: 1,
+        zz: { $max: ["c"] },
+      };
 
       // Quick string func notation can only be used against existing column names
       // @ts-expect-error
       const s3: Select<{ a: number; c: string }, {}> = { a: 1, cc: "2" };
 
       // @ts-expect-error Function shorthand must start with a dollar sign
-      const invalidFunctionName: Select<{ a: number; c: string }, {}> = { c: "max" };
+      const invalidFunctionName: Select<{ a: number; c: string }, {}> = {
+        c: "max",
+      };
 
       const s33: Select<{ a: number; c: string }, {}> = { a: 1, c: "$max" };
 
-      db.view1.find({}, { select: { c1: 1, c2: 1, table1: "*" } }).then((data) => {
-        data[0]?.c1 satisfies string | undefined;
-        data[0]?.c2 satisfies number | undefined;
-        data[0]?.table1[0]?.c2 satisfies number | undefined;
-      });
-      db.table1.insert({ c1: "2" }, { returning: { c1: 1, c2: "$max", dwad: { $countAll: [] } } });
+      db.view1
+        .find({}, { select: { c1: 1, c2: 1, table1: "*" } })
+        .then((data) => {
+          data[0]?.c1 satisfies string | undefined;
+          data[0]?.c2 satisfies number | undefined;
+          data[0]?.table1[0]?.c2 satisfies number | undefined;
+        });
+      db.table1.insert(
+        { c1: "2" },
+        { returning: { c1: 1, c2: "$max", dwad: { $countAll: [] } } },
+      );
 
       //@ts-expect-error
       db.table1.update;
@@ -486,7 +536,10 @@ describe("type tests", () => {
 
       db.table1.find;
 
-      const data = await db.view1.findOne({}, { select: { c1: 1, view1: { c2: 1 } } });
+      const data = await db.view1.findOne(
+        {},
+        { select: { c1: 1, view1: { c2: 1 } } },
+      );
 
       data?.c1 satisfies string | undefined;
       data?.view1 satisfies { c2: number }[] | undefined;
@@ -539,10 +592,17 @@ describe("type tests", () => {
             col21: "2",
           },
         ],
-      } satisfies InsertDataWithNested<SampleSchema["tbl1"]["columns"], SampleSchema>;
+      } satisfies InsertDataWithNested<
+        SampleSchema["tbl1"]["columns"],
+        SampleSchema
+      >;
 
       /** Untyped DBSchema works */
-      const dUntyped = { named: "John", email: "", dwada: [] } satisfies InsertDataWithNested<
+      const dUntyped = {
+        named: "John",
+        email: "",
+        dwada: [],
+      } satisfies InsertDataWithNested<
         Record<string, any>,
         {
           [x: string]: {

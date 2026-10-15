@@ -46,7 +46,9 @@ export function filter<T extends AnyObject, ArrFilter extends Partial<T>>(
   array: T[],
   arrFilter: ArrFilter,
 ): T[] {
-  return array.filter((d) => Object.entries(arrFilter).every(([k, v]) => d[k] === v));
+  return array.filter((d) =>
+    Object.entries(arrFilter).every(([k, v]) => d[k] === v),
+  );
 }
 export function find<T extends AnyObject, ArrFilter extends Partial<T>>(
   array: T[],
@@ -125,9 +127,13 @@ export type TextPatch = {
   md5: string;
 };
 
-export function getTextPatch(oldStr: string, newStr: string): TextPatch | string {
+export function getTextPatch(
+  oldStr: string,
+  newStr: string,
+): TextPatch | string {
   /* Big change, no point getting diff */
-  if (!oldStr || !newStr || !oldStr.trim().length || !newStr.trim().length) return newStr;
+  if (!oldStr || !newStr || !oldStr.trim().length || !newStr.trim().length)
+    return newStr;
 
   /* Return no change if matching */
   if (oldStr === newStr)
@@ -172,7 +178,10 @@ export function unpatchText(original: string | null, patch: TextPatch): string {
   let res = original.slice(0, from) + text + original.slice(to);
   if (md5Hash && md5(res) !== md5Hash)
     throw (
-      "Patch text error: Could not match md5 hash: (original/result) \n" + original + "\n" + res
+      "Patch text error: Could not match md5 hash: (original/result) \n" +
+      original +
+      "\n" +
+      res
     );
   return res;
 }
@@ -211,11 +220,15 @@ export const getObjectEntries = <T extends Record<string, any>>(
 export function isObject(obj: any | undefined): obj is Record<string, any> {
   return Boolean(obj && typeof obj === "object" && !Array.isArray(obj));
 }
-export function isDefined<T>(v: T | undefined | void | null): v is NonNullable<T> {
+export function isDefined<T>(
+  v: T | undefined | void | null,
+): v is NonNullable<T> {
   return v !== undefined && v !== null;
 }
 
-export function getKeys<T extends Record<string, any>>(o: T): (keyof T & string)[] {
+export function getKeys<T extends Record<string, any>>(
+  o: T,
+): (keyof T & string)[] {
   return Object.keys(o) as unknown as (keyof T & string)[];
 }
 
@@ -226,15 +239,18 @@ export type Explode<T> =
     : never
   : never;
 export type AtMostOne<T> = Explode<Partial<T>>;
-export type AtLeastOne<T, U = { [K in keyof T]: Pick<T, K> }> = Partial<T> & U[keyof U];
+export type AtLeastOne<T, U = { [K in keyof T]: Pick<T, K> }> = Partial<T> &
+  U[keyof U];
 export type ExactlyOne<T> = AtMostOne<T> & AtLeastOne<T>;
 
 type UnionKeys<T> = T extends T ? keyof T : never;
 type StrictUnionHelper<T, TAll> =
-  T extends any ? T & Partial<Record<Exclude<UnionKeys<TAll>, keyof T>, never>> : never;
+  T extends any ? T & Partial<Record<Exclude<UnionKeys<TAll>, keyof T>, never>>
+  : never;
 export type StrictUnion<T> = StrictUnionHelper<T, T>;
 
-export type PartialByKeys<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
+export type PartialByKeys<T, K extends keyof T> = Omit<T, K> &
+  Partial<Pick<T, K>>;
 export type Simplify<T> = { [K in keyof T]: T[K] } & {};
 
 /**
@@ -245,7 +261,11 @@ export const tryCatch = async <T extends AnyObject>(
   func: () => T | Promise<T>,
 ): Promise<
   | (T & { hasError?: false; error?: undefined; duration: number })
-  | (Partial<Record<keyof T, undefined>> & { hasError: true; error: unknown; duration: number })
+  | (Partial<Record<keyof T, undefined>> & {
+      hasError: true;
+      error: unknown;
+      duration: number;
+    })
 > => {
   const startTime = Date.now();
   try {
@@ -263,31 +283,36 @@ export const tryCatch = async <T extends AnyObject>(
   }
 };
 
-export type ParsedJoinPath = Required<JoinPath>;
-export const reverseJoinOn = (on: ParsedJoinPath["on"]) => {
+export type ParsedJoinPath = JoinPath & { on: NonNullable<JoinPath["on"]> };
+export const reverseJoinOn = (on: Record<string, string>[]) => {
   return on.map((constraint) =>
-    Object.fromEntries(Object.entries(constraint).map(([left, right]) => [right, left])),
+    Object.fromEntries(
+      Object.entries(constraint).map(([left, right]) => [right, left]),
+    ),
   );
 };
 
-/**
- * result = [
- *  { table, on: parsedPath[0] }
- *  ...parsedPath.map(p => ({ table: p.table, on: reversedOn(parsedPath[i+1].on) }))
- * ]
- */
-export const reverseParsedPath = (parsedPath: ParsedJoinPath[], table: string) => {
-  const newPPath: ParsedJoinPath[] = [{ table, on: [{}] }, ...(parsedPath ?? [])];
-  return newPPath
-    .map((pp, i) => {
-      const nextPath = newPPath[i + 1];
-      if (!nextPath) return undefined;
+/** Reverse each join toward its source table, then reverse the path order. */
+export const reverseParsedPath = (
+  parsedPath: ParsedJoinPath[],
+  table: string,
+) => {
+  return (parsedPath ?? [])
+    .map(({ table: targetTable, on, params, reversed }, index) => {
+      const sourceTable = parsedPath[index - 1]?.table ?? table;
+      if (typeof on === "string") {
+        return {
+          table: sourceTable,
+          on,
+          ...(params && { params }),
+          ...(targetTable === sourceTable && { reversed: !reversed }),
+        };
+      }
       return {
-        table: pp.table,
-        on: reverseJoinOn(nextPath.on),
+        table: sourceTable,
+        on: reverseJoinOn(on),
       };
     })
-    .filter(isDefined)
     .reverse();
 };
 
@@ -368,7 +393,8 @@ export const getProperty = <T extends object, K extends string>(
 ): K extends keyof T ? T[K]
 : K extends string ? T[keyof T] | undefined
 : undefined => {
-  if (!Object.keys(obj).includes(key)) return undefined as K extends keyof T ? T[K] : undefined;
+  if (!Object.keys(obj).includes(key))
+    return undefined as K extends keyof T ? T[K] : undefined;
   return obj[key as keyof T] as K extends keyof T ? T[K] : undefined;
 };
 
@@ -380,7 +406,10 @@ export const withTimeout = <T>(promise: Promise<T>, ms: number): Promise<T> => {
 };
 
 export const createPromiseWithTimeout = <T>(
-  executor: (resolve: (value: T | PromiseLike<T>) => void, reject: (reason?: any) => void) => void,
+  executor: (
+    resolve: (value: T | PromiseLike<T>) => void,
+    reject: (reason?: any) => void,
+  ) => void,
   ms: number,
 ): Promise<T> => {
   const timeout = new Promise<never>((_, reject) =>

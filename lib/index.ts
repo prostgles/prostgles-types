@@ -563,9 +563,30 @@ export type JoinPath = {
    * {
    *    leftColumn: "rightColumn"
    * }
+   * A string selects a named, server-defined computed join.
    */
-  on?: Record<string, string>[];
+  on?: Record<string, string>[] | string;
+  /** Parameters validated against the server-defined computed join schema. */
+  params?: Record<string, unknown>;
+  /** Reverse a computed self-join; omitted for the declared direction. */
+  reversed?: boolean;
 };
+
+/** Published direct relationships. SQL implementations remain on the server. */
+export type ClientJoin = {
+  tables: [string, string];
+} & (
+  | {
+      on: Record<string, string>[];
+      supportsMultiHop: boolean;
+      paramsSchema?: never;
+    }
+  | {
+      on: string;
+      supportsMultiHop: boolean;
+      paramsSchema?: JSONB.ObjectType["type"];
+    }
+);
 /**
  * Can be either the target table name, or the sequence of tables to join through with the target table at the end.
  */
@@ -1641,6 +1662,7 @@ export type TableSchemaErrors = {
 export type ClientSchema = {
   rawSQL: boolean;
   joinTables: string[][];
+  joins: ClientJoin[];
   auth: AuthTypes.AuthSocketSchema | undefined;
   version: any;
   err?: string;

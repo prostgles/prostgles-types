@@ -1,7 +1,8 @@
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
-const MAX_INSTANTIATIONS = 94_669;
+// Includes named paths, params and self-join direction in the join-inference fixture.
+const MAX_INSTANTIATIONS = 94_840;
 const tscPath = fileURLToPath(
   new URL("../node_modules/typescript/bin/tsc", import.meta.url),
 );

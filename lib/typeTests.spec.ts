@@ -582,6 +582,24 @@ describe("type tests", () => {
         },
       };
 
+      const joinedExists: ExistsFilter<SampleSchema> = {
+        $existsJoined: {
+          path: ["tbl1", "tbl11"],
+          filter: { col11: 1 },
+        },
+        $notExistsJoined: {
+          path: [{ table: "tbl11", on: [{ col1: "col11" }] }],
+          filter: { col21: null },
+        },
+      };
+      const unjoinedExists: ExistsFilter<SampleSchema> = {
+        $exists: {
+          // @ts-expect-error Explicit paths require a joined exists filter.
+          path: ["tbl11"],
+          filter: {},
+        },
+      };
+
       /** Typed DBSchema works */
       const dTyped = {
         col1: 1,

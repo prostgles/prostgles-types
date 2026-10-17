@@ -1,4 +1,9 @@
-import { DBSchema, RawJoinPath, type AllowedTSType, type CastFromTSToPG } from ".";
+import {
+  DBSchema,
+  RawJoinPath,
+  type AllowedTSType,
+  type CastFromTSToPG,
+} from ".";
 import { ExactlyOne, getKeys } from "./util";
 
 export const CompareFilterKeys = [
@@ -38,7 +43,8 @@ export const JsonbOperands = {
   "?": {
     Operator: "?",
     "Right Operand Type": "text",
-    Description: "Does the string exist as a top-level key within the JSON value?",
+    Description:
+      "Does the string exist as a top-level key within the JSON value?",
     Example: "'{\"a\":1, \"b\":2}'::jsonb ? 'b'",
   },
   "?|": {
@@ -92,7 +98,13 @@ export const JsonbFilterKeys = getKeys(JsonbOperands);
 
 export const TextFilterKeys = ["$ilike", "$like", "$nilike", "$nlike"] as const;
 
-export const TextFilterFTSKeys = ["@@", "@>", "<@", "$contains", "$containedBy"] as const;
+export const TextFilterFTSKeys = [
+  "@@",
+  "@>",
+  "<@",
+  "$contains",
+  "$containedBy",
+] as const;
 
 export const TextFilter_FullTextSearchFilterKeys = [
   "to_tsquery",
@@ -186,7 +198,12 @@ export const GeomFilter_Funcs = [
 
 export type AnyObject = Record<string, any>;
 
-export const EXISTS_KEYS = ["$exists", "$notExists", "$existsJoined", "$notExistsJoined"] as const;
+export const EXISTS_KEYS = [
+  "$exists",
+  "$notExists",
+  "$existsJoined",
+  "$notExistsJoined",
+] as const;
 export type EXISTS_KEY = (typeof EXISTS_KEYS)[number];
 
 export const ComplexFilterComparisonKeys = [
@@ -211,7 +228,11 @@ export const COMPLEX_FILTER_KEY = "$filter" as const;
  */
 export type ComplexFilter = Record<
   typeof COMPLEX_FILTER_KEY,
-  [{ [funcName: string]: any[] }, (typeof ComplexFilterComparisonKeys)[number]?, any?]
+  [
+    { [funcName: string]: any[] },
+    (typeof ComplexFilterComparisonKeys)[number]?,
+    any?,
+  ]
 >;
 
 export type KeyofString<T> = keyof T & string;
@@ -221,24 +242,41 @@ export type KeyofString<T> = keyof T & string;
  */
 type BasicFilter<Field extends string, DataType extends any> =
   | Partial<{
-      [K in Extract<
-        (typeof CompareFilterKeys)[number],
-        string
-      > as `${Field}.${K}`]: CastFromTSToPG<DataType>;
+      [
+        K in Extract<
+          (typeof CompareFilterKeys)[number],
+          string
+        > as `${Field}.${K}`
+      ]: CastFromTSToPG<DataType>;
     }>
   | Partial<{
-      [K in Extract<
-        (typeof CompareInFilterKeys)[number],
-        string
-      > as `${Field}.${K}`]: CastFromTSToPG<DataType>[];
+      [
+        K in Extract<
+          (typeof CompareInFilterKeys)[number],
+          string
+        > as `${Field}.${K}`
+      ]: CastFromTSToPG<DataType>[];
     }>;
-type StringFilter<Field extends string, DataType extends any> = BasicFilter<Field, DataType> &
+type StringFilter<Field extends string, DataType extends any> = BasicFilter<
+  Field,
+  DataType
+> &
   (
     | Partial<{
-        [K in Extract<(typeof TextFilterKeys)[number], string> as `${Field}.${K}`]: DataType;
+        [
+          K in Extract<
+            (typeof TextFilterKeys)[number],
+            string
+          > as `${Field}.${K}`
+        ]: DataType;
       }>
     | Partial<{
-        [K in Extract<(typeof TextFilterFTSKeys)[number], string> as `${Field}.${K}`]: any;
+        [
+          K in Extract<
+            (typeof TextFilterFTSKeys)[number],
+            string
+          > as `${Field}.${K}`
+        ]: any;
       }>
   );
 export type ValueOf<T> = T[keyof T];
@@ -269,11 +307,15 @@ export type CompareFilter<T extends AllowedTSType> =
 
 export type TextFilter =
   | ExactlyOne<Record<(typeof TextFilterKeys)[number], string>>
-  | ExactlyOne<Record<(typeof TextFilterFTSKeys)[number], FullTextSearchFilter>>;
+  | ExactlyOne<
+      Record<(typeof TextFilterFTSKeys)[number], FullTextSearchFilter>
+    >;
 
 type Primitive = string | number | boolean | Date | null;
 
-export type JSONBFilter<T extends Record<string, unknown> | readonly Record<string, unknown>[]> =
+export type JSONBFilter<
+  T extends Record<string, unknown> | readonly Record<string, unknown>[],
+> =
   | {
       /**
        * Does the left JSON value contain the right JSON path/value entries at the top level?
@@ -302,7 +344,8 @@ export type FilterDataType<T extends AllowedTSType> =
   : T extends boolean ? CompareFilter<CastFromTSToPG<T>>
   : T extends Date ? CompareFilter<CastFromTSToPG<T>>
   : T extends Primitive[] ? ArrayFilter<T>
-  : T extends Record<string, unknown> | Record<string, unknown>[] ? JSONBFilter<T>
+  : T extends Record<string, unknown> | Record<string, unknown>[] ?
+    JSONBFilter<T>
   : CompareFilter<T> | TextFilter | GeomFilter;
 
 /**
@@ -319,14 +362,15 @@ export type FilterForObject<T extends AnyObject = AnyObject> = NormalFilter<T>;
 
 export type ExistsFilter<S = void> = Partial<{
   [key in EXISTS_KEY]: S extends DBSchema ?
-    ExactlyOne<{
-      [tname in KeyofString<S>]:
-        | FullFilter<S[tname]["columns"], S>
-        | {
-            path: RawJoinPath[];
-            filter: FullFilter<S[tname]["columns"], S>;
-          };
-    }>
+    | ExactlyOne<{
+        [TableName in KeyofString<S>]: FullFilter<S[TableName]["columns"], S>;
+      }>
+    | (key extends "$existsJoined" | "$notExistsJoined" ?
+        {
+          path: Exclude<RawJoinPath, string>;
+          filter: FullFilter<AnyObject, S>;
+        }
+      : never)
   : any;
   /** ExactlyOne does not for any type. This produces error */
   // ExactlyOne<{
@@ -339,7 +383,8 @@ export type ExistsFilter<S = void> = Partial<{
  */
 export type FilterItem<T extends AnyObject = AnyObject> = FilterForObject<T>;
 
-export type AnyObjIfVoid<T extends AnyObject | void> = T extends AnyObject ? T : AnyObject;
+export type AnyObjIfVoid<T extends AnyObject | void> =
+  T extends AnyObject ? T : AnyObject;
 
 /**
  * Data filter

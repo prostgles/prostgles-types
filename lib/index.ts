@@ -437,12 +437,11 @@ export const getAllowedTableMethods = ({
       SQL_COMMAND_TABLE_METHODS.schema
     : []),
     ...SQL_COMMAND_TABLE_METHODS.select.filter((cmd) => {
-      if (cmd === "sync") {
-        return publishInfo.select?.syncConfig !== undefined;
-      }
+      if (!publishInfo.select) return false;
+      const disabledMethod = cmd === "subscribeOne" ? "subscribe" : cmd;
       return (
-        publishInfo.select &&
-        !Object.keys(publishInfo.select.disabledMethods ?? {}).includes(cmd)
+        !Object.keys(publishInfo.select.disabledMethods ?? {}).includes(disabledMethod) &&
+        (cmd !== "sync" || publishInfo.select.syncConfig !== undefined)
       );
     }),
     ...SQL_COMMAND_TABLE_METHODS.update.filter((cmd) => {

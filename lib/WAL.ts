@@ -187,6 +187,12 @@ export class WAL {
     return this.sendItems();
   };
 
+  /* Replay the in-flight batch before newer queued edits to the same row. */
+  getPendingItems = (): WALItem[] => [
+    ...Object.values(this.sending),
+    ...Object.values(this.changed),
+  ];
+
   isOnSending = false;
   isSendingTimeout?: ReturnType<typeof setTimeout> = undefined;
   willDeleteHistory?: ReturnType<typeof setTimeout> = undefined;

@@ -1,8 +1,8 @@
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
-// Includes named paths, params and self-join direction in the join-inference fixture.
-const MAX_INSTANTIATIONS = 94_840;
+/* Includes the schema-derived auth contracts and their request/result type tests. */
+const MAX_INSTANTIATIONS = 100_500;
 const tscPath = fileURLToPath(
   new URL("../node_modules/typescript/bin/tsc", import.meta.url),
 );

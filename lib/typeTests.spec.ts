@@ -1,6 +1,8 @@
 import { describe, test } from "node:test";
 import { defineJoin } from "./joinHelpers";
 import type {
+  AuthCalls,
+  AuthOutput,
   AnyObject,
   DBHandler,
   DBSchema,
@@ -16,6 +18,36 @@ import type {
 } from "./index";
 
 describe("type tests", () => {
+  test("auth calls preserve operation-specific inputs and results", () => {
+    const calls = {} as AuthCalls;
+    const checkCalls = async () => {
+      await calls.login({
+        username: "user",
+        password: "password",
+        totp_token: "123456",
+      });
+      /* @ts-expect-error Login requires a username. */
+      await calls.login({ password: "password" });
+      /* @ts-expect-error OTP codes are strings. */
+      await calls.magicLinkOrOTP({ email: "user@example.com", code: 123456 });
+      const verified = await calls.magicLinkOrOTP({
+        email: "user@example.com",
+        code: "123456",
+      });
+      if (verified.success && verified.code === "email-verified") {
+        const confirmationCode: "email-verified" = verified.code;
+        void confirmationCode;
+      }
+    };
+    void checkCalls;
+    const invalidRegistration = {
+      success: true,
+      code: "email-verified",
+    } as const;
+    /* @ts-expect-error Email confirmation is not a registration result. */
+    void (invalidRegistration satisfies AuthOutput<"register">);
+  });
+
   test("explicit joined select inference", () => {
     type Schema = {
       orders: { select: true; columns: { id: number } };

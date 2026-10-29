@@ -1,4 +1,9 @@
 import { AnyObject, type EqualityFilter } from "./filters";
+import type {
+  RequestResponseCall,
+  RequestResponseHandler,
+  RequestResponseSchema,
+} from "./requestResponse";
 import {
   CHANNEL_PREFIX,
   createPromiseWithTimeout,
@@ -106,13 +111,17 @@ export type ClientSyncHandles = {
    * Used by client to notify server that data has changed (and send express data if necessary)
    * Also used by server to request client ClientSyncInfo
    */
-  onSyncRequest: (params: SyncBatchParams) => MaybePromise<ClientSyncInfo | ClientExpressData>;
+  onSyncRequest: (
+    params: SyncBatchParams,
+  ) => MaybePromise<ClientSyncInfo | ClientExpressData>;
 
   /**
    * Used to respond to server with the requested data
    * @description: server will send { onPullRequest: { from_synced, limit, ...etc } }
    */
-  onPullRequest: (params: SyncBatchParams) => MaybePromise<ClientSyncPullResponse>;
+  onPullRequest: (
+    params: SyncBatchParams,
+  ) => MaybePromise<ClientSyncPullResponse>;
 
   /**
    * Used to set the data sent by server.
@@ -146,11 +155,9 @@ export const getSyncChannelName = ({
 
 export type SocketCallback = (err?: unknown, res?: unknown) => void;
 
-type RequestBase = {
+type RequestBase = RequestResponseSchema & {
   name: string;
   source: "client" | "server";
-  request: Omit<JSONB.FieldTypeObj, "optional">;
-  response: Omit<JSONB.FieldTypeObj, "optional">;
 };
 export namespace ReplicationProtocol {
   const TIMEOUT = 10_000;
@@ -181,7 +188,9 @@ export namespace ReplicationProtocol {
   } as const satisfies RequestBase;
 
   export type CreateSchemaRequest = JSONB.GetType<typeof CreateSchema.request>;
-  export type CreateSchemaResponse = JSONB.GetType<typeof CreateSchema.response>;
+  export type CreateSchemaResponse = JSONB.GetType<
+    typeof CreateSchema.response
+  >;
 
   const ClientSyncInfoSchema = {
     state: { enum: ["syncing"] },
@@ -235,7 +244,10 @@ export namespace ReplicationProtocol {
       oneOfType: [ClientSyncInfoSchema, ClientExpressDataSchema],
     },
     response: {
-      oneOfType: [{ success: { enum: [true] } }, { success: { enum: [false] }, err: "unknown" }],
+      oneOfType: [
+        { success: { enum: [true] } },
+        { success: { enum: [false] }, err: "unknown" },
+      ],
     },
   } as const satisfies RequestBase;
 
@@ -295,20 +307,27 @@ export namespace ReplicationProtocol {
     },
   } as const satisfies RequestBase;
 
-  const Schemas = { ClientSyncRequest, ServerSyncRequest, PullRequest, UpdateRequest } as const;
+  const Schemas = {
+    ClientSyncRequest,
+    ServerSyncRequest,
+    PullRequest,
+    UpdateRequest,
+  } as const;
   type SchemasType = typeof Schemas;
   const SchemasList = Object.values(Schemas);
 
   export type IncomingHandlers<Side extends RequestBase["source"]> = {
-    [K in keyof SchemasType as SchemasType[K]["source"] extends Side ? never : K]: (
-      params: JSONB.GetType<SchemasType[K]["request"]>,
-    ) => MaybePromise<JSONB.GetType<SchemasType[K]["response"]>>;
+    [
+      K in keyof SchemasType as SchemasType[K]["source"] extends Side ? never
+      : K
+    ]: RequestResponseHandler<SchemasType[K]>;
   };
 
   export type OutgoingHandlers<Side extends RequestBase["source"]> = {
-    [K in keyof SchemasType as SchemasType[K]["source"] extends Side ? K : never]: (
-      params: JSONB.GetType<SchemasType[K]["request"]>,
-    ) => Promise<JSONB.GetType<SchemasType[K]["response"]>>;
+    [
+      K in keyof SchemasType as SchemasType[K]["source"] extends Side ? K
+      : never
+    ]: RequestResponseCall<SchemasType[K]>;
   };
 
   const getHandlers = <Side extends RequestBase["source"]>(
@@ -336,7 +355,9 @@ export namespace ReplicationProtocol {
         return;
       }
 
-      const schema = SchemasList.find((s) => s.name === type && s.source !== side);
+      const schema = SchemasList.find(
+        (s) => s.name === type && s.source !== side,
+      );
       if (!schema) {
         cb("Invalid data.type");
         return;
@@ -349,9 +370,16 @@ export namespace ReplicationProtocol {
 
       /** Must validate incoming data */
       if (side === "server") {
-        const validationResult = getJSONBSchemaValidationError(schema.request, request);
+        const validationResult = getJSONBSchemaValidationError(
+          schema.request,
+          request,
+        );
         if (validationResult.error !== undefined) {
-          console.error("Invalid request from client", validationResult.error, request);
+          console.error(
+            "Invalid request from client",
+            validationResult.error,
+            request,
+          );
           cb(validationResult.error);
           return;
         }
@@ -378,24 +406,28 @@ export namespace ReplicationProtocol {
             key,
             (request: unknown) => {
               return createPromiseWithTimeout((resolve, reject) => {
-                socket.emit(channelName, { type: schema.name, request }, (response: unknown) => {
-                  if (side === "server") {
-                    const validationResult = getJSONBSchemaValidationError(
-                      schema.response,
-                      response,
-                    );
-                    if (validationResult.error !== undefined) {
-                      console.error(
-                        "Invalid response from client for " + schema.name,
-                        validationResult.error,
+                socket.emit(
+                  channelName,
+                  { type: schema.name, request },
+                  (response: unknown) => {
+                    if (side === "server") {
+                      const validationResult = getJSONBSchemaValidationError(
+                        schema.response,
                         response,
                       );
-                      reject(validationResult.error);
-                      return;
+                      if (validationResult.error !== undefined) {
+                        console.error(
+                          "Invalid response from client for " + schema.name,
+                          validationResult.error,
+                          response,
+                        );
+                        reject(validationResult.error);
+                        return;
+                      }
                     }
-                  }
-                  resolve(response);
-                });
+                    resolve(response);
+                  },
+                );
               }, TIMEOUT);
             },
           ] as const;

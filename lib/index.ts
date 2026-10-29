@@ -440,7 +440,9 @@ export const getAllowedTableMethods = ({
       if (!publishInfo.select) return false;
       const disabledMethod = cmd === "subscribeOne" ? "subscribe" : cmd;
       return (
-        !Object.keys(publishInfo.select.disabledMethods ?? {}).includes(disabledMethod) &&
+        !Object.keys(publishInfo.select.disabledMethods ?? {}).includes(
+          disabledMethod,
+        ) &&
         (cmd !== "sync" || publishInfo.select.syncConfig !== undefined)
       );
     }),
@@ -1727,6 +1729,8 @@ export const getPossibleNestedInsert = (
 };
 
 export * from "./auth";
+export * from "./authContract";
+export * from "./requestResponse";
 export { CONTENT_TYPE_TO_EXT } from "./files";
 export type {
   ALLOWED_CONTENT_TYPE,

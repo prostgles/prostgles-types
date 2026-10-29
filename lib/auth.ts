@@ -1,3 +1,7 @@
+import type { AuthInput } from "./authContract";
+import type { authResponseSchemas } from "./authResponseSchemas";
+import type { JSONB } from "./JSONBSchemaValidation/JSONBSchema";
+
 export type IdentityProvider =
   | "google"
   | "microsoft"
@@ -34,14 +38,19 @@ export type AuthSocketSchema<U extends UserLike = UserLike> = {
    */
   providers:
     | Partial<
-        Record<IdentityProvider, { url: string; displayName?: string; displayIconPath?: string }>
+        Record<
+          IdentityProvider,
+          { url: string; displayName?: string; displayIconPath?: string }
+        >
       >
     | undefined;
 
   /**
    * Email login methods enabled on the server
    */
-  login: { mode: LocalLoginMode; loginRoute: string; logoutRoute: string } | undefined;
+  login:
+    | { mode: LocalLoginMode; loginRoute: string; logoutRoute: string }
+    | undefined;
 
   /**
    * Email registration methods enabled on the server
@@ -62,95 +71,37 @@ export type AuthSocketSchema<U extends UserLike = UserLike> = {
   preferredLogin: LocalLoginMode | IdentityProvider | undefined;
 };
 
-type Failure<Code extends string> = { success: false; code: Code; message?: string };
-type Success<Code extends string> = { success: true; code: Code; message?: string };
-
 export declare namespace AuthRequest {
-  export type LoginData = {
-    /**
-     * Email or username
-     */
-    username: string;
-    /**
-     * Undefined if loginType must be withMagicLink
-     */
-    password?: string;
-    remember_me?: boolean;
-    totp_token?: string;
-    totp_recovery_code?: string;
-  };
-
-  export type RegisterData = Pick<LoginData, "username" | "password">;
-
-  export type ConfirmEmailData = { email: string; code: string };
+  export type LoginData = AuthInput<"login">;
+  export type RegisterData = AuthInput<"register">;
+  export type ConfirmEmailData = Pick<
+    Extract<AuthInput<"magicLinkOrOTP">, { email: string }>,
+    "email" | "code"
+  >;
 }
 
-export type CommonAuthFailure = Failure<
-  "server-error" | "rate-limit-exceeded" | "something-went-wrong"
->;
+type ResponseSchemaType<Name extends keyof typeof authResponseSchemas> =
+  JSONB.GetType<(typeof authResponseSchemas)[Name]>;
+
+export type CommonAuthFailure = ResponseSchemaType<"commonFailure">;
 
 export declare namespace AuthResponse {
-  export type AuthSuccess = {
-    success: true;
-    code?: undefined;
-    message?: string;
-    /**
-     * If returnToken=true was in the request, the token is returned
-     */
-    token?: string;
-  };
-
-  export type AuthFailure =
-    | CommonAuthFailure
-    | { success: false; code: "no-match"; message?: string }
-    | { success: false; code: "inactive-account"; message?: string };
-
-  export type MagicLinkAuthSuccess = {
-    success: true;
-    code: "email-verification-code-sent" | "magic-link-sent";
-    message?: string;
-  };
-  export type MagicLinkAuthFailure =
-    | AuthFailure
-    | Failure<"expired-magic-link" | "invalid-magic-link" | "used-magic-link">;
-
+  export type AuthSuccess = ResponseSchemaType<"authSuccess">;
+  export type AuthFailure = ResponseSchemaType<"authFailure">;
+  export type MagicLinkAuthSuccess = ResponseSchemaType<"magicLinkAuthSuccess">;
+  export type MagicLinkAuthFailure = ResponseSchemaType<"magicLinkAuthFailure">;
   export type OAuthRegisterSuccess = AuthSuccess;
-  export type OAuthRegisterFailure = CommonAuthFailure | Failure<"provider-issue">;
-
+  export type OAuthRegisterFailure = ResponseSchemaType<"oauthRegisterFailure">;
   export type PasswordLoginSuccess = AuthSuccess;
-  export type PasswordLoginFailure =
-    | AuthFailure
-    | Failure<
-        | "totp-token-missing"
-        | "invalid-username"
-        | "username-missing"
-        | "invalid-email"
-        | "password-missing"
-        | "invalid-password"
-        | "is-from-OAuth"
-        | "is-from-magic-link"
-        | "invalid-totp-recovery-code"
-        | "invalid-totp-code"
-        | "email-not-confirmed"
-      >;
-
+  export type PasswordLoginFailure = ResponseSchemaType<"passwordLoginFailure">;
   export type PasswordRegisterFailure =
-    | CommonAuthFailure
-    | Failure<
-        | "weak-password"
-        | "user-already-registered"
-        | "username-missing"
-        | "password-missing"
-        | "invalid-email-confirmation-code"
-        | "expired-email-confirmation-code"
-        | "inactive-account"
-      >;
-  export type PasswordRegisterSuccess = Success<
-    "email-verification-code-sent" | "already-registered-but-did-not-confirm-email"
-  >;
+    ResponseSchemaType<"passwordRegisterFailure">;
+  export type PasswordRegisterSuccess =
+    ResponseSchemaType<"passwordRegisterSuccess">;
   export type CodeVerificationFailure =
-    | AuthFailure
-    | Failure<"invalid-otp-code" | "expired-otp-code">;
-  export type PasswordRegisterEmailConfirmationFailure = CodeVerificationFailure;
-  export type PasswordRegisterEmailConfirmationSuccess = Success<"email-verified">;
+    ResponseSchemaType<"codeVerificationFailure">;
+  export type PasswordRegisterEmailConfirmationFailure =
+    CodeVerificationFailure;
+  export type PasswordRegisterEmailConfirmationSuccess =
+    ResponseSchemaType<"emailConfirmationSuccess">;
 }

@@ -55,6 +55,17 @@ export type AuthSocketSchema<U extends UserLike = UserLike> = {
   /**
    * Email registration methods enabled on the server
    */
+  signupWithEmail:
+    | {
+        minPasswordLength: number;
+        requirePassword: boolean;
+        requireInvitation: boolean;
+        url: string;
+        emailConfirmationRoute: string;
+      }
+    | undefined;
+
+  /** @deprecated Use signupWithEmail and its requireInvitation flag. */
   signupWithEmailAndPassword:
     | { minPasswordLength: number; url: string; emailConfirmationRoute: string }
     | undefined;

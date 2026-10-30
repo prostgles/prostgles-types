@@ -33,7 +33,13 @@ export const authContract = {
     },
   },
   register: {
-    request: { type: credentials },
+    request: {
+      type: {
+        ...credentials,
+        invitationToken: { type: "string", optional: true },
+        totpTokenConfirmation: { type: "string", optional: true },
+      },
+    },
     response: {
       oneOf: [
         authResponseSchemas.passwordRegisterSuccess,

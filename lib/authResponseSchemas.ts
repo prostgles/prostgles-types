@@ -94,6 +94,7 @@ export const authResponseSchemas = {
         enum: [
           "email-verification-code-sent",
           "already-registered-but-did-not-confirm-email",
+          "email-verified",
         ],
       },
     },

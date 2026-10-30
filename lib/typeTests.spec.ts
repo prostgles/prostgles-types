@@ -42,9 +42,9 @@ describe("type tests", () => {
     void checkCalls;
     const invalidRegistration = {
       success: true,
-      code: "email-verified",
+      code: "magic-link-sent",
     } as const;
-    /* @ts-expect-error Email confirmation is not a registration result. */
+    /* @ts-expect-error Sending a login link is not a registration result. */
     void (invalidRegistration satisfies AuthOutput<"register">);
   });
 

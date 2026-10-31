@@ -290,7 +290,7 @@ describe("jsonb to json schema conversion", async () => {
         type: "RowLookup",
         table: "users",
       }),
-      '{ "id":  number;  "name": null |  string;  }',
+      '{ "id"?:  number;  "name"?: null |  string;  }',
     );
     assert.equal(
       getJSONBTSTypes(tables, {

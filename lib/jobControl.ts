@@ -1,5 +1,6 @@
-export type JobStatus =
-  "pending" | "running" | "succeeded" | "failed" | "cancelled";
+import type { JobRecord } from "./jobTable";
+
+export type JobStatus = JobRecord["status"];
 
 /** Start new work or retry failed/cancelled work; rerun succeeded work; cancel pending/running work. */
 export type JobControlOperation = "startOrRetry" | "rerun" | "cancel";

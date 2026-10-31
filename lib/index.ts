@@ -1731,7 +1731,11 @@ export const getPossibleNestedInsert = (
 export * from "./auth";
 export * from "./authContract";
 export * from "./requestResponse";
+export * from "./auditTable";
+export * from "./jobTable";
+export * from "./tableRowFromColumnDefinitions";
 export { CONTENT_TYPE_TO_EXT } from "./files";
+export * from "./fileTable";
 export type {
   ALLOWED_CONTENT_TYPE,
   ALLOWED_EXTENSION,

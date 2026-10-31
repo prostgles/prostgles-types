@@ -44,9 +44,10 @@ const getLookupTSType = (tables: TableSchema[], fieldType: JSONB.Lookup): string
     return `${nullType}${postgresToTsType(udtName ?? "text")}${arrayType}`;
   }
 
+  /* Row lookups filter by supplied columns; a primary key alone is sufficient. */
   const rowType =
     !cols ? "any" : (
-      `{ ${cols.map((column) => `${JSON.stringify(column.name)}: ${column.is_nullable ? "null | " : ""} ${postgresToTsType(column.udt_name)}; `).join(" ")} }`
+      `{ ${cols.map((column) => `${JSON.stringify(column.name)}?: ${column.is_nullable ? "null | " : ""} ${postgresToTsType(column.udt_name)}; `).join(" ")} }`
     );
   return `${nullType}${rowType}${arrayType}`;
 };

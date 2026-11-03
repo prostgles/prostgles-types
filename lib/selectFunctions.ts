@@ -102,7 +102,7 @@ export type FunctionName =
   | "$jsonb_strip_nulls"
   | "$array_element"
   | "$array_search"
-  | "$jsonb_diff_text"
+  | "$jsonb_diff"
   | "$array_agg"
   | "$json_agg"
   | "$jsonb_agg";
@@ -120,7 +120,8 @@ export type FunctionReturnTypes<ColumnType = any> = {
     ColumnType extends readonly (infer ElementType)[] ? ElementType | null
     : null
   : Name extends "$array_search" ? { index: number; offset: number; match: string; snippet: string }[]
-  : Name extends "$jsonb_diff_text" ? string
+  : Name extends "$jsonb_diff" ?
+    Record<string, [oldValue: string | null, newValue: string | null]>
   : Name extends "$column" | "$max" | "$min" | "$jsonb_set" | "$jsonb_strip_nulls" ? ColumnType
   : Name extends "$array_agg" | "$json_agg" | "$jsonb_agg" ? ColumnType[]
   : any;

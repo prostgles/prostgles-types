@@ -44,6 +44,7 @@ export const jobTableSchema = {
       jsonbSchema: { type: { done: "number", total: "number" } },
     },
     error: "JSONB",
+    output: "JSONB",
     run_at: "TIMESTAMPTZ NOT NULL DEFAULT clock_timestamp()",
     lease_token: "UUID",
     locked_until: "TIMESTAMPTZ",
@@ -60,7 +61,12 @@ export const jobTableSchema = {
         lease_token: { $ne: null },
         locked_until: { $ne: null },
       },
-      { ...shared, status: "succeeded", finished_at: { $ne: null } },
+      {
+        ...shared,
+        status: "succeeded",
+        output: {},
+        finished_at: { $ne: null },
+      },
       {
         ...shared,
         status: "failed",
@@ -84,6 +90,7 @@ type JobValues = {
   params: Record<string, JobValue>;
   checkpoint: JobValue | null;
   error: JobValue;
+  output: JobValue;
 };
 export type JobRecord = TableRowFromTableConfig<
   typeof jobTableSchema,

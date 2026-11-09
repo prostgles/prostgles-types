@@ -31,8 +31,12 @@ export const jobTableSchema = {
     occurrence: "TIMESTAMPTZ",
     reason: "TEXT NOT NULL DEFAULT 'trigger'",
     status: "TEXT NOT NULL DEFAULT 'pending'",
+    /** Executions excluding attempts released during graceful shutdown. */
     attempts: "INTEGER NOT NULL DEFAULT 0",
+    /** Stalled executions are excluded from the failure retry budget. */
+    stalled_count: "INTEGER NOT NULL DEFAULT 0",
     max_attempts: "INTEGER NOT NULL",
+    max_stalled_count: "INTEGER NOT NULL DEFAULT 3",
     delay_ms: "DOUBLE PRECISION NOT NULL",
     backoff: "TEXT NOT NULL",
     cancel_requested: "BOOLEAN NOT NULL DEFAULT FALSE",

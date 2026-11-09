@@ -103,6 +103,7 @@ export type FunctionName =
   | "$array_element"
   | "$array_search"
   | "$jsonb_diff"
+  | "$jsonb_extract_path_text"
   | "$array_agg"
   | "$json_agg"
   | "$jsonb_agg";
@@ -122,6 +123,7 @@ export type FunctionReturnTypes<ColumnType = any> = {
   : Name extends "$array_search" ? { index: number; offset: number; match: string; snippet: string }[]
   : Name extends "$jsonb_diff" ?
     Record<string, [oldValue: string | null, newValue: string | null]>
+  : Name extends "$jsonb_extract_path_text" ? string | null
   : Name extends "$column" | "$max" | "$min" | "$jsonb_set" | "$jsonb_strip_nulls" ? ColumnType
   : Name extends "$array_agg" | "$json_agg" | "$jsonb_agg" ? ColumnType[]
   : any;

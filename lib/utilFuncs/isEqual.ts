@@ -41,6 +41,17 @@ const isEqualWithSeen = (
   }
   ySet.add(y);
 
+  const areObjectValuesEqual = compareObjectValues(x, y, seen, circularMode);
+  ySet.delete(y);
+  return areObjectValuesEqual;
+};
+
+const compareObjectValues = (
+  x: any,
+  y: any,
+  seen: WeakMap<object, WeakSet<object>>,
+  circularMode: CircularMode,
+): boolean => {
   if (x instanceof Date && y instanceof Date) {
     return x.getTime() === y.getTime();
   }

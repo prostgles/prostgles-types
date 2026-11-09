@@ -2,8 +2,8 @@ import { strict as assert } from "assert";
 import { describe, test } from "node:test";
 import { isEqual } from "./isEqual";
 
-describe("isEqual tests", () => {
-  test("isEqual cirular object", () => {
+void describe("isEqual tests", () => {
+  void test("isEqual cirular object", () => {
     const a = { a: 1, b: 2 };
     const d = { a: 1, b: 2 };
     //@ts-expect-error
@@ -12,31 +12,25 @@ describe("isEqual tests", () => {
     d.b = { a: d };
     assert.equal(isEqual([a], [d]), false);
     assert.equal(isEqual(a, d), false);
+    assert.throws(() => isEqual(a, d, "error"), {
+      message: "Circular reference detected in isEqual",
+      name: "Error",
+    });
   });
 
-  test("circular false positive on duplicated sibling properties", () => {
-    const x = { a: {} };
-    //@ts-expect-error
-    x.b = x.a;
-
-    const y = { a: {} };
-    //@ts-expect-error
-    y.b = y.a;
-    assert.equal(isEqual(x, y), false); // false due to circular reference, not just shared reference
-    assert.throws(
-      () => {
-        assert.equal(isEqual(x, y, "error"), false);
-      },
-      {
-        message: "Circular reference detected in isEqual",
-        name: "Error",
-      },
-    );
+  void test("shared sibling references are not circular references", () => {
+    const firstSharedValue = {};
+    const secondSharedValue = {};
+    const firstObject = { a: firstSharedValue, b: firstSharedValue };
+    const secondObject = { a: secondSharedValue, b: secondSharedValue };
+    assert.equal(isEqual(firstObject, secondObject), true);
+    assert.equal(isEqual(firstObject, secondObject, "error"), true);
+    assert.equal(isEqual(firstObject, { a: {}, b: { changed: true } }), false);
 
     assert.equal(isEqual({}, {}), true);
   });
 
-  test("circular arrays - different instances", () => {
+  void test("circular arrays - different instances", () => {
     const a: any[] = [];
     a.push(a);
 
@@ -47,7 +41,7 @@ describe("isEqual tests", () => {
     assert.equal(isEqual(a, b), false);
   });
 
-  test("isEqual", () => {
+  void test("isEqual", () => {
     const a = { a: 1, b: 2 };
     const b = { a: 1, b: 2 };
     const c = { a: 1, b: 3 };
@@ -83,7 +77,7 @@ describe("isEqual tests", () => {
     assert.equal(isEqual([1, 2], { 0: 1, 1: 2, length: 2 }), false);
   });
 
-  test("isEqual special types", () => {
+  void test("isEqual special types", () => {
     assert.equal(isEqual(new Date("2024-01-01"), new Date("2024-01-01")), true);
     assert.equal(isEqual(new Date("2024-01-01"), new Date("2024-01-02")), false);
 

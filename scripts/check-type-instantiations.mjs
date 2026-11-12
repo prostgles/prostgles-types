@@ -2,7 +2,7 @@ import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
 /* Includes auth contracts, managed table row inference and their type tests. */
-const MAX_INSTANTIATIONS = 121_000;
+const MAX_INSTANTIATIONS = 121_500;
 const tscPath = fileURLToPath(
   new URL("../node_modules/typescript/bin/tsc", import.meta.url),
 );

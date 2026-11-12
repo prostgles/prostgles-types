@@ -11,6 +11,7 @@ const shared = {
   checkpoint: {},
   progress_message: {},
   progress_numeric: {},
+  started_at: {},
   backoff: { enum: ["fixed", "exponential"] },
   reason: { enum: ["trigger", "rerun"] },
 } as const;
@@ -53,6 +54,8 @@ export const jobTableSchema = {
     lease_token: "UUID",
     locked_until: "TIMESTAMPTZ",
     created_at: "TIMESTAMPTZ NOT NULL DEFAULT clock_timestamp()",
+    /** Latest attempt start; null while queued or for jobs predating this column. */
+    started_at: "TIMESTAMPTZ",
     finished_at: "TIMESTAMPTZ",
   },
   check: {

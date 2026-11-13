@@ -229,7 +229,7 @@ export const COMPLEX_FILTER_KEY = "$filter" as const;
 export type ComplexFilter = Record<
   typeof COMPLEX_FILTER_KEY,
   [
-    { [funcName: string]: any[] },
+    { [funcName: string]: any[] } | { $column: string },
     (typeof ComplexFilterComparisonKeys)[number]?,
     any?,
   ]

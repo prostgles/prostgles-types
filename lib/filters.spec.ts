@@ -40,6 +40,11 @@ describe("filters", async () => {
     const _f2: FilterItem<RR> = {
       $filter: [{ $funcName: ["colname", "opts"] }, ">", 2],
     };
+    /* Column references use strings in complex filters, as accepted by the server. */
+    const columnComparison: FullFilter<RR, {}> = {
+      $filter: [{ $column: "name" }, "=", { $column: "z" }],
+    };
+    void columnComparison;
 
     const _d: EqualityFilter<{ a: number; b: string }> = {
       a: 2,

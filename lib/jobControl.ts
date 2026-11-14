@@ -8,12 +8,27 @@ export type JobControlOperation = "startOrRetry" | "rerun" | "cancel";
 export type JobControlFunctionMetadata = {
   jobName: string;
   rowArg: "row";
-  operation: JobControlOperation;
-};
+} & (
+  | { operation: JobControlOperation; operations?: never }
+  | { operations: readonly JobControlOperation[]; operation?: never }
+);
 
 /** Server-resolved row-job binding used to render a published function's controls. */
-export type JobControlBinding = JobControlFunctionMetadata & {
+export type JobControlBinding = Pick<
+  JobControlFunctionMetadata,
+  "jobName" | "rowArg"
+> & {
   tableName: string;
   columnName: string;
-  allowedStatuses: readonly JobStatus[];
-};
+} & (
+    | {
+        operation: JobControlOperation;
+        allowedStatuses: readonly JobStatus[];
+        operations?: never;
+      }
+    | {
+        operations: Partial<Record<JobControlOperation, readonly JobStatus[]>>;
+        operation?: never;
+        allowedStatuses?: never;
+      }
+  );

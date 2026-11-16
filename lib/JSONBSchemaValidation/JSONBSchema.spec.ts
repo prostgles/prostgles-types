@@ -274,6 +274,174 @@ describe("jsonb to json schema conversion", async () => {
     const _rootLookupValue: JSONB.GetSchemaType<typeof rootLookupSchema> = 1;
   });
 
+  await test("DBSchema lookup inference preserves nested types and legacy defaults", () => {
+    type Schema = {
+      users: { columns: { id: number; name: string | null } };
+      teams: { columns: { slug: string } };
+    };
+    const valueLookup = {
+      type: "ValueLookup",
+      table: "users",
+      column: "id",
+    } as const;
+    const rowLookup = { type: "RowLookup", table: "users" } as const;
+    const _lookupSchema = {
+      type: {
+        row: rowLookup,
+        rows: { ...rowLookup, type: "RowLookup[]" },
+        value: valueLookup,
+        values: { ...valueLookup, type: "ValueLookup[]", nullable: true },
+        optional: { ...rowLookup, optional: true },
+        nullableColumn: { ...valueLookup, column: "name" },
+        table: { type: "TableLookup" },
+        tables: { type: "TableLookup[]" },
+        column: { type: "ColumnLookup" },
+        columns: { type: "ColumnLookup[]", filter: { table: "users" } },
+        unfilteredColumn: {
+          type: "ColumnLookup",
+          filter: { table: undefined },
+        },
+        nested: { type: { id: valueLookup } },
+        array: { arrayOf: valueLookup },
+        objects: { arrayOfType: { id: valueLookup } },
+        tuple: { tuple: [valueLookup, rowLookup] },
+        union: { oneOf: [valueLookup, { enum: ["none"] }] },
+        objectUnion: { oneOfType: [{ id: valueLookup }, { name: "string" }] },
+        record: { record: { keysEnum: ["selected"], values: rowLookup } },
+      },
+    } as const satisfies JSONB.JSONBSchema;
+    type Lookups = JSONB.GetSchemaTypeWithDBSchema<
+      typeof _lookupSchema,
+      Schema
+    >;
+    const value: Lookups = {
+      row: { id: 1 },
+      rows: [{ name: null }],
+      value: 1,
+      values: [1, 2],
+      nullableColumn: null,
+      table: "users",
+      tables: ["users", "teams"],
+      column: { table: "teams", column: "slug" },
+      columns: [{ table: "users", column: "id" }],
+      unfilteredColumn: { table: "teams", column: "slug" },
+      nested: { id: 1 },
+      array: [1],
+      objects: [{ id: 1 }],
+      tuple: [1, { id: 1 }],
+      union: "none",
+      objectUnion: { id: 1 },
+      record: { selected: { id: 1 } },
+    };
+    void (null satisfies Lookups["values"]);
+    void (undefined satisfies Lookups["optional"]);
+    void (1 satisfies Lookups["union"]);
+    void (1 satisfies JSONB.GetSchemaTypeWithDBSchema<
+      typeof valueLookup,
+      Schema
+    >);
+    void (value satisfies JSONB.GetTypeIfDefinedWithDBSchema<
+      typeof _lookupSchema | undefined,
+      Schema
+    >);
+    void (1 satisfies JSONB.GetTypeIfDefinedWithDBSchema<
+      "integer" | undefined,
+      Schema
+    >);
+
+    const widenedValueLookup = {
+      type: "ValueLookup",
+      table: "users",
+      column: "id",
+    } satisfies JSONB.ValueLookup;
+    const widenedRowLookup = {
+      type: "RowLookup",
+      table: "users",
+    } satisfies JSONB.RowLookup;
+    const widenedColumnLookup = {
+      ...valueLookup,
+      column: "id",
+    } satisfies JSONB.ValueLookup;
+    void (1 satisfies JSONB.GetSchemaTypeWithDBSchema<
+      typeof widenedValueLookup,
+      Schema
+    >);
+    void ({ id: 1 } satisfies JSONB.GetSchemaTypeWithDBSchema<
+      typeof widenedRowLookup,
+      Schema
+    >);
+    void (1 satisfies JSONB.GetTypeIfDefinedWithDBSchema<
+      typeof widenedColumnLookup,
+      Schema
+    >);
+
+    /* @ts-expect-error Row lookups retain column types. */
+    void ({ id: "invalid" } satisfies Lookups["row"]);
+    /* @ts-expect-error Row lookups reject unknown columns. */
+    void ({ missing: 1 } satisfies Lookups["row"]);
+    /* @ts-expect-error Row lookup arrays retain column types. */
+    void ([{ name: 1 }] satisfies Lookups["rows"]);
+    /* @ts-expect-error Value lookups retain the column type. */
+    void ("invalid" satisfies Lookups["value"]);
+    /* @ts-expect-error A nullable array does not make its elements nullable. */
+    void ([null] satisfies Lookups["values"]);
+    /* @ts-expect-error Nullable database columns retain their non-null type. */
+    void (1 satisfies Lookups["nullableColumn"]);
+    /* @ts-expect-error Table lookups only accept schema tables. */
+    void ("missing" satisfies Lookups["table"]);
+    /* @ts-expect-error Table lookup arrays only accept schema tables. */
+    void (["missing"] satisfies Lookups["tables"]);
+    const mismatchedColumnReference = { table: "teams", column: "id" } as const;
+    /* @ts-expect-error Column references must match their table. */
+    void (mismatchedColumnReference satisfies Lookups["column"]);
+    /* @ts-expect-error Column lookups respect the table filter. */
+    void ([{ table: "teams", column: "slug" }] satisfies Lookups["columns"]);
+    /* @ts-expect-error An undefined filter still checks table-column pairs. */
+    void (mismatchedColumnReference satisfies Lookups["unfilteredColumn"]);
+    /* @ts-expect-error Unknown literal tables do not use the widened fallback. */
+    void (1 satisfies JSONB.GetSchemaTypeWithDBSchema<
+      { type: "ValueLookup"; table: "missing"; column: "id" },
+      Schema
+    >);
+    /* @ts-expect-error Unknown literal columns do not use the widened fallback. */
+    void (1 satisfies JSONB.GetSchemaTypeWithDBSchema<
+      { type: "ValueLookup"; table: "users"; column: "missing" },
+      Schema
+    >);
+    /* @ts-expect-error Nested objects retain lookup types. */
+    void ({ id: "invalid" } satisfies Lookups["nested"]);
+    /* @ts-expect-error arrayOf retains lookup types. */
+    void (["invalid"] satisfies Lookups["array"]);
+    /* @ts-expect-error arrayOfType retains lookup types. */
+    void ([{ id: "invalid" }] satisfies Lookups["objects"]);
+    /* @ts-expect-error Tuples retain lookup types. */
+    void (["invalid", {}] satisfies Lookups["tuple"]);
+    /* @ts-expect-error oneOf retains lookup and enum types. */
+    void ("invalid" satisfies Lookups["union"]);
+    /* @ts-expect-error oneOfType retains lookup types. */
+    void ({ id: "invalid" } satisfies Lookups["objectUnion"]);
+    /* @ts-expect-error Records retain lookup types. */
+    void ({ selected: { id: "invalid" } } satisfies Lookups["record"]);
+    /* @ts-expect-error An undefined schema resolves to never. */
+    void (undefined satisfies JSONB.GetTypeIfDefinedWithDBSchema<
+      undefined,
+      Schema
+    >);
+
+    const legacyValue: JSONB.GetSchemaType<typeof _lookupSchema> = {
+      ...value,
+      row: { unknownColumn: true },
+      value: "any value",
+      table: "unknownTable",
+      column: { table: "unknownTable", column: "unknownColumn" },
+    };
+    void (legacyValue satisfies JSONB.GetSchemaTypeWithDBSchema<
+      typeof _lookupSchema,
+      void
+    >);
+    void ("any value" satisfies JSONB.GetTypeIfDefined<typeof valueLookup>);
+  });
+
   test("lookup generated types", () => {
     const tables = [
       {

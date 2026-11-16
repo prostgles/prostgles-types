@@ -1,4 +1,5 @@
-import { AnyObject, type ValueOf } from "../filters";
+import type { AnyObject } from "../filters";
+import type { DBSchema } from "../index";
 import { getKeys } from "../util";
 
 export type PrimitiveTypeMap = {
@@ -86,6 +87,7 @@ export namespace JSONB {
     nullable?: boolean;
     description?: string;
     title?: string;
+    defaultValue?: unknown;
   };
 
   type LookupBase = BaseOptions & {
@@ -314,54 +316,101 @@ export namespace JSONB {
     : U extends "ColumnLookup[]" ? ColumnReference[]
     : never;
 
-  type ResolveRecord<R extends RecordType["record"]> = Record<
+  type LookupTables<T, Schema extends DBSchema> = keyof Schema &
+    string &
+    (T extends { filter: { table: infer Table extends string } } ? Table
+    : string);
+
+  type LookupValueWithDBSchema<
+    T,
+    U extends LookupType,
+    Schema extends DBSchema,
+  > =
+    U extends `${infer ItemType extends LookupType}[]` ?
+      LookupValueWithDBSchema<T, ItemType, Schema>[]
+    : U extends "TableLookup" ? keyof Schema & string
+    : U extends "ColumnLookup" ?
+      {
+        [Table in LookupTables<T, Schema>]: {
+          table: Table;
+          column: keyof Schema[Table]["columns"] & string;
+        };
+      }[LookupTables<T, Schema>]
+    : T extends { table: infer Table extends string } ?
+      string extends Table ? LookupValue<U>
+      : Table extends keyof Schema ?
+        U extends "RowLookup" ? Partial<Schema[Table]["columns"]>
+        : T extends { column: infer Column extends string } ?
+          string extends Column ? LookupValue<U>
+          : Column extends keyof Schema[Table]["columns"] ?
+            Schema[Table]["columns"][Column]
+          : never
+        : never
+      : never
+    : never;
+
+  type ResolveRecord<
+    R extends RecordType["record"],
+    Schema extends DBSchema | void,
+  > = Record<
     R extends { keysEnum: readonly string[] } ? R["keysEnum"][number] : string,
     R extends { values: infer V } ?
       V extends FieldType ?
-        GetType<V>
+        GetType<V, Schema>
       : any
     : any
   >;
-  type ResolveTuple<T extends readonly FieldType[]> = {
-    -readonly [K in keyof T]: T[K] extends FieldType ? GetType<T[K]> : never;
+  type ResolveTuple<
+    T extends readonly FieldType[],
+    Schema extends DBSchema | void,
+  > = {
+    -readonly [K in keyof T]: T[K] extends FieldType ? GetType<T[K], Schema>
+    : never;
   };
-  type ResolveField<T> =
+  type ResolveField<T, Schema extends DBSchema | void> =
     T extends { type: infer U } ?
       U extends DataType ? GetPrimitiveType<T, U>
-      : U extends LookupType ? LookupValue<U>
-      : U extends ObjectSchema ? GetObjectType<U>
+      : U extends LookupType ?
+        Schema extends DBSchema ?
+          LookupValueWithDBSchema<T, U, Schema>
+        : LookupValue<U>
+      : U extends ObjectSchema ? GetObjectType<U, Schema>
       : never
     : T extends { enum: readonly any[] } ? T["enum"][number]
     : T extends { tuple: infer U } ?
       U extends readonly FieldType[] ?
-        ResolveTuple<U>
+        ResolveTuple<U, Schema>
       : never
     : T extends { arrayOfType: infer U } ?
       U extends ObjectSchema ?
-        GetObjectType<U>[]
+        GetObjectType<U, Schema>[]
       : never
     : T extends { arrayOf: infer U } ?
       U extends FieldType ?
-        GetType<U>[]
+        GetType<U, Schema>[]
       : never
     : T extends { oneOf: readonly (infer U)[] } ?
       U extends FieldType ?
-        GetType<U>
+        GetType<U, Schema>
       : never
     : T extends { oneOfType: readonly (infer U)[] } ?
       U extends ObjectSchema ?
-        GetObjectType<U>
+        GetObjectType<U, Schema>
       : never
     : T extends { record: infer R } ?
       R extends RecordType["record"] ?
-        ResolveRecord<R>
+        ResolveRecord<R, Schema>
       : never
     : any;
 
-  type GetWNullType<T> = T extends { nullable: true } ? null | ResolveField<T> : ResolveField<T>;
+  type GetWNullType<T, Schema extends DBSchema | void> =
+    T extends { nullable: true } ? null | ResolveField<T, Schema>
+    : ResolveField<T, Schema>;
 
-  export type GetType<T extends FieldType | Omit<FieldTypeObj, "optional">> =
-    T extends DataType ? PrimitiveValue<T> : GetWNullType<T>;
+  export type GetType<
+    T extends FieldType | Omit<FieldTypeObj, "optional">,
+    Schema extends DBSchema | void = void,
+  > = T extends DataType ? PrimitiveValue<T> : GetWNullType<T, Schema>;
 
   type IsOptional<F extends FieldType> = F extends { optional: true } ? true : false;
 
@@ -371,10 +420,13 @@ export namespace JSONB {
 
   type RequiredKeys<S extends ObjectSchema> = Exclude<keyof S, OptionalKeys<S>>;
 
-  export type GetObjectType<S extends ObjectSchema> = {
-    [K in RequiredKeys<S>]: GetType<S[K]>;
+  export type GetObjectType<
+    S extends ObjectSchema,
+    Schema extends DBSchema | void = void,
+  > = {
+    [K in RequiredKeys<S>]: GetType<S[K], Schema>;
   } & {
-    [K in OptionalKeys<S>]?: GetType<S[K]>;
+    [K in OptionalKeys<S>]?: GetType<S[K], Schema>;
   };
 
   type RootLookupOptions = {
@@ -386,11 +438,21 @@ export namespace JSONB {
     displayColumns?: string[];
   };
 
-  export type JSONBSchema = Omit<FieldTypeObj, "optional"> &
-    RootLookupOptions & { defaultValue?: unknown };
+  export type JSONBSchema = Omit<FieldTypeObj, "optional"> & RootLookupOptions;
 
   export type GetSchemaType<S extends JSONBSchema> = GetType<S>;
 
   export type GetTypeIfDefined<Schema extends FieldType | undefined> =
     Schema extends FieldType ? GetType<Schema> : never;
+
+  /** Resolves lookups using database columns; row lookups accept partial rows. */
+  export type GetSchemaTypeWithDBSchema<
+    S extends JSONBSchema,
+    Schema extends DBSchema | void,
+  > = GetType<S, Schema>;
+
+  export type GetTypeIfDefinedWithDBSchema<
+    Field extends FieldType | undefined,
+    Schema extends DBSchema | void,
+  > = Field extends FieldType ? GetType<Field, Schema> : never;
 }

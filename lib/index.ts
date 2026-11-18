@@ -607,7 +607,7 @@ export type DetailedJoinSelect = Partial<
 export type SimpleJoinSelect =
   | "*"
   /** Aliased Shorthand join: table_name: { ...select } */
-  | Record<string, 1 | "*" | true | FunctionSelect>
+  | { [key: string]: InclusiveSelect }
   | Record<string, 0 | false>;
 
 export type JoinSelect = SimpleJoinSelect | DetailedJoinSelect;
@@ -643,8 +643,12 @@ type FunctionSelect = FunctionShorthand | FunctionFull | CaseSelect;
 
 type InclusiveSelect = true | 1 | FunctionSelect | JoinSelect;
 
-type TypedShorthandJoinSelect<T extends AnyObject> =
-  "*" | { [K in keyof T]?: 0 | false | 1 | true | FunctionSelect };
+type TypedShorthandJoinSelect<T extends AnyObject, S extends DBSchema> =
+  | "*"
+  | Record<string, DetailedJoinSelect>
+  | ({
+      [K in keyof T]?: 0 | false | 1 | true | FunctionSelect;
+    } & SchemaJoinSelect<T, S>);
 
 type SchemaJoinSelect<T extends AnyObject, S extends DBSchema | void> =
   S extends DBSchema ?
@@ -652,7 +656,7 @@ type SchemaJoinSelect<T extends AnyObject, S extends DBSchema | void> =
       {}
     : {
         [K in keyof S]?: K extends keyof T ? InclusiveSelect
-        : | TypedShorthandJoinSelect<S[K]["columns"]>
+        : | TypedShorthandJoinSelect<S[K]["columns"], S>
           | FunctionFull
           | CaseSelect
           | DetailedJoinSelect;

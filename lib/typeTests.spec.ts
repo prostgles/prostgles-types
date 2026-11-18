@@ -88,19 +88,27 @@ describe("type tests", () => {
 
       const shorthandRows = await db.orders.find(
         {},
-        { select: { customers: { name: 1 } } },
+        { select: { customers: { name: 1, orders: { id: 1 } } } },
       );
       const shorthandSelect = {
-        customers: { name: 1, phone: 1 },
-      } satisfies Select<Schema["orders"]["columns"], Schema>;
-      shorthandSelect.customers.name satisfies 1;
-      const invalidShorthandSelect = {
         customers: {
-          // @ts-expect-error shorthand join columns must exist in the joined table
-          missing: 1,
+          name: 1,
+          phone: 1,
+          purchases: { $leftJoin: "orders", select: { id: 1 } },
         },
       } satisfies Select<Schema["orders"]["columns"], Schema>;
+      shorthandSelect.customers.name satisfies 1;
+      const invalidShorthandSelect = { customers: { missing: 1 } } as const;
+      /* @ts-expect-error Shorthand join columns must exist in the joined table. */
+      invalidShorthandSelect satisfies Select<
+        Schema["orders"]["columns"],
+        Schema
+      >;
       shorthandRows[0]?.customers[0]?.name satisfies string | undefined;
+      shorthandRows[0]?.customers[0]?.orders[0]?.id satisfies
+        number | undefined;
+      /* @ts-expect-error Unselected fields must be absent at every depth. */
+      shorthandRows[0]?.customers[0]?.orders[0]?.name;
       // @ts-expect-error shorthand joins retain their selected schema column types
       shorthandRows[0]?.customers[0]?.name satisfies number | undefined;
       // @ts-expect-error unselected shorthand join fields must be absent

@@ -1,4 +1,5 @@
 import type { TableRowFromColumnDefinitions } from "./tableRowFromColumnDefinitions";
+import { JOB_CONTROL_OPERATIONS } from "./jobControl";
 
 export const AUDIT_TABLE_COLUMN_DEFINITIONS = {
   id: "BIGSERIAL PRIMARY KEY",
@@ -11,6 +12,37 @@ export const AUDIT_TABLE_COLUMN_DEFINITIONS = {
   old_row: "JSONB",
   new_row: "JSONB",
   actor: "JSONB",
+  execution_context: {
+    nullable: true,
+    jsonbSchema: {
+      type: {
+        runId: "string",
+        invocations: {
+          arrayOf: {
+            oneOfType: [
+              {
+                type: { enum: ["function"] },
+                id: "string",
+                functionName: "string",
+              },
+              {
+                type: { enum: ["trigger"] },
+                id: "string",
+                tableName: "string",
+              },
+              {
+                type: { enum: ["jobControl"] },
+                id: "string",
+                jobName: "string",
+                operation: { enum: JOB_CONTROL_OPERATIONS },
+                tableName: "string",
+              },
+            ],
+          },
+        },
+      },
+    },
+  },
   db_context: {
     jsonbSchema: {
       type: {

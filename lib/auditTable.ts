@@ -17,6 +17,7 @@ export const AUDIT_TABLE_COLUMN_DEFINITIONS = {
     jsonbSchema: {
       type: {
         runId: "string",
+        jobId: { type: "string", optional: true },
         invocations: {
           arrayOf: {
             oneOfType: [

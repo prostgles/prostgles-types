@@ -42,6 +42,7 @@ type StringFunctionName =
   | "$string_agg";
 
 type NumberFunctionName =
+  | "$ts_rank_cd"
   | "$jsonb_array_length"
   | "$<->"
   | "$ST_Distance"

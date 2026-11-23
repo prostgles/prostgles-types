@@ -122,6 +122,7 @@ describe("type tests", () => {
             max: { $max: ["id"] },
             ids: { $array_agg: ["id"] },
             matches: { $array_search: ["id", "example"] },
+            rank: { $ts_rank_cd: ["id", "example"] },
             filteredCount: {
               $count: [],
               $filter: { id: { $gt: 0 } },
@@ -148,6 +149,9 @@ describe("type tests", () => {
       }[];
       // @ts-expect-error search offsets are numbers
       functionRows[0]!.matches[0]!.offset satisfies string;
+      functionRows[0]!.rank satisfies number;
+      /* @ts-expect-error Scalar ranks must not fall back to any. */
+      functionRows[0]!.rank satisfies string;
       functionRows[0]!.filteredCount satisfies string;
       functionRows[0]!.caseLabel satisfies string | null;
       // @ts-expect-error function results cannot fall back to any

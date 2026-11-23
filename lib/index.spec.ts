@@ -50,9 +50,21 @@ describe("util func tests", () => {
      * Type tests
      */
     () => {
-      type Fields = { id: number; name: number; public: number; $rowhash: string; added_day: any };
+      type Fields = {
+        id: number;
+        name: number;
+        public: number;
+        $rowhash: string;
+        added_day: any;
+      };
       const r: Fields = 1 as any;
-      const sel1: Select = { id: 1, name: 1, public: 1, $rowhash: 1, added_day: { $day: [] } };
+      const sel1: Select = {
+        id: 1,
+        name: 1,
+        public: 1,
+        $rowhash: 1,
+        added_day: { $day: [] },
+      };
       const sel2: Select<{ id: number; name: number; public: number }> = {
         id: 1,
         name: 1,
@@ -62,7 +74,13 @@ describe("util func tests", () => {
       };
       const sel3: Select<{ id: number; name: number; public: number }> = "";
       const sel4: Select<{ id: number; name: number; public: number }> = "*";
-      const sel12: Select = { id: 1, name: 1, public: 1, $rowhash: 1, dsds: { $countAll: [] } };
+      const sel12: Select = {
+        id: 1,
+        name: 1,
+        public: 1,
+        $rowhash: 1,
+        dsds: { $countAll: [] },
+      };
       const sel13: Select = "";
       const sel14: Select = "*";
 
@@ -88,7 +106,7 @@ describe("util func tests", () => {
       const sds2: Select<{ a: number }> = sel;
 
       const s001: Select = {
-        h: { $ts_headline_simple: ["name", { plainto_tsquery: "abc81" }] },
+        h: { $ts_headline: ["name", "abc81", { lang: "simple" }] },
         hh: { $ts_headline: ["name", "abc81"] },
         added: "$date_trunc",
         // addedY: { $date_trunc: ["added"] },
@@ -123,7 +141,13 @@ describe("util func tests", () => {
       const sel1d2: Select<AnyObject> = ["a"];
 
       const deletePar: DeleteParams = {
-        returning: { id: 1, name: 1, public: 1, $rowhash: 1, added_day: { $day: ["added"] } },
+        returning: {
+          id: 1,
+          name: 1,
+          public: 1,
+          $rowhash: 1,
+          added_day: { $day: ["added"] },
+        },
       };
     };
   });
@@ -170,18 +194,29 @@ describe("util func tests", () => {
       //@ts-expect-error
       noRow.col1;
 
-      const someData = await dbo.tbl1.find({}, { select: { col1: 1 }, orderBy: { col1: -1 } });
+      const someData = await dbo.tbl1.find(
+        {},
+        { select: { col1: 1 }, orderBy: { col1: -1 } },
+      );
 
       const noRowFunc = await dbo.tbl1.update({}, { col1: "" });
 
-      const oneRow = await dbo.tbl1.update({}, { col1: "" }, { returning: "*", multi: false });
+      const oneRow = await dbo.tbl1.update(
+        {},
+        { col1: "" },
+        { returning: "*", multi: false },
+      );
       //@ts-expect-error
       oneRow?.length;
       //@ts-expect-error
       oneRow.col1;
       oneRow?.col1;
 
-      const manyRows = await dbo.tbl1.update({}, { col1: "" }, { returning: "*" });
+      const manyRows = await dbo.tbl1.update(
+        {},
+        { col1: "" },
+        { returning: "*" },
+      );
       //@ts-expect-error
       manyRows?.col1;
       manyRows?.at(0)?.col1;
@@ -193,23 +228,33 @@ describe("util func tests", () => {
       //@ts-expect-error
       noIRow.col1;
 
-      // @ts-expect-error scalar columns do not support JSON merge
-      const irow = await dbo.tbl1.insert({ col1: "", col2: funcData }, { returning: "*" });
+      const irow = await dbo.tbl1.insert(
+        // @ts-expect-error scalar columns do not support JSON merge
+        { col1: "", col2: funcData },
+        { returning: "*" },
+      );
       //@ts-expect-error
       irow.length;
       irow.col1;
 
-      // @ts-expect-error scalar columns do not support JSON merge
-      const irowFunc = await dbo.tbl1.insert({ col1: funcData, col2: "" }, { returning: "*" });
+      const irowFunc = await dbo.tbl1.insert(
+        // @ts-expect-error scalar columns do not support JSON merge
+        { col1: funcData, col2: "" },
+        { returning: "*" },
+      );
 
-      const irows = await dbo.tbl1.insertMany([{ col1: "", col2: "" }], { returning: "*" });
+      const irows = await dbo.tbl1.insertMany([{ col1: "", col2: "" }], {
+        returning: "*",
+      });
       //@ts-expect-error
       irows.col1;
       irows.length;
 
       const filter: FullFilter<GSchema["tbl1"]["columns"], GSchema> = {};
 
-      const filterCheck = <F extends FullFilter<void, void> | undefined>(f: F) => {};
+      const filterCheck = <F extends FullFilter<void, void> | undefined>(
+        f: F,
+      ) => {};
       filterCheck(filter);
 
       const t: UpsertDataToPGCast<GSchema["tbl1"]["columns"]> = {} as any;
@@ -242,17 +287,26 @@ describe("util func tests", () => {
         z: { $merge: [] },
       };
       const gdw1: UpsertDataToPGCast<{ a: number; z: number }> = { a: 1, z: 2 };
-      const gdw1Opt: UpsertDataToPGCast<{ a: number; z?: number }> = { a: 1, z: 2 };
+      const gdw1Opt: UpsertDataToPGCast<{ a: number; z?: number }> = {
+        a: 1,
+        z: 2,
+      };
       const gdw2: UpsertDataToPGCast<{ a: number; z: number }> = {
         // @ts-expect-error scalar columns do not support JSON merge
         a: { $merge: [] },
         // @ts-expect-error scalar columns do not support JSON merge
         z: { $merge: [] },
       };
+      const missingKey: UpsertDataToPGCast<{ a: number; z: number }> = {
+        //@ts-expect-error
+        z: 1,
+        //@ts-expect-error
+        z: { dwa: [] },
+      };
       //@ts-expect-error
-      const missingKey: UpsertDataToPGCast<{ a: number; z: number }> = { z: 1, z: { dwa: [] } };
-      //@ts-expect-error
-      const missingKey2: UpsertDataToPGCast<{ a: number; z: number }> = { z: 1 };
+      const missingKey2: UpsertDataToPGCast<{ a: number; z: number }> = {
+        z: 1,
+      };
       // ra(schema);
 
       const dboFullyTyped = {} as DBOFullyTyped<{

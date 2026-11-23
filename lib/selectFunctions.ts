@@ -1,6 +1,5 @@
-type ColumnNull<T> = 0 extends 1 & T
-  ? null | undefined
-  : Extract<T, null | undefined>;
+type ColumnNull<T> =
+  0 extends 1 & T ? null | undefined : Extract<T, null | undefined>;
 type DateTruncFunctionName = "$date_trunc";
 
 type StringFunctionName =
@@ -11,8 +10,6 @@ type StringFunctionName =
   | "$sha512_multi"
   | "$sha512_multi_agg"
   | "$ts_headline"
-  | "$ts_headline_simple"
-  | "$ts_headline_english"
   | "$jsonb_each_text"
   | "$jsonb_object_keys"
   | "$jsonb_pretty"
@@ -110,27 +107,37 @@ export type FunctionName =
   | "$jsonb_agg";
 
 export type FunctionReturnTypes<ColumnType = any> = {
-  [Name in FunctionName]: Name extends StringFunctionName | DateTruncFunctionName ?
+  [Name in FunctionName]: Name extends (
+    StringFunctionName | DateTruncFunctionName
+  ) ?
     string | ColumnNull<ColumnType>
   : Name extends NumberFunctionName ? number | ColumnNull<ColumnType>
   : Name extends "$avg" | "$sum" ? number | string | ColumnNull<ColumnType>
   : Name extends "$count" | "$countAll" | "$diff_perc" ? string
   : Name extends "$ST_DWithin" ? boolean | ColumnNull<ColumnType>
-  : Name extends "$ST_AsEWKB" | "$ST_AsBinary" | "$ST_AsMVT" ? Uint8Array | ColumnNull<ColumnType>
-  : Name extends JsonFunctionName ? Record<string, unknown> | ColumnNull<ColumnType>
+  : Name extends "$ST_AsEWKB" | "$ST_AsBinary" | "$ST_AsMVT" ?
+    Uint8Array | ColumnNull<ColumnType>
+  : Name extends JsonFunctionName ?
+    Record<string, unknown> | ColumnNull<ColumnType>
   : Name extends "$array_element" ?
-    ColumnType extends readonly (infer ElementType)[] ? ElementType | null
+    ColumnType extends readonly (infer ElementType)[] ?
+      ElementType | null
     : null
-  : Name extends "$array_search" ? { index: number; offset: number; match: string; snippet: string }[]
+  : Name extends "$array_search" ?
+    { index: number; offset: number; match: string; snippet: string }[]
   : Name extends "$jsonb_diff" ?
     Record<string, [oldValue: string | null, newValue: string | null]>
   : Name extends "$jsonb_extract_path_text" ? string | null
-  : Name extends "$column" | "$max" | "$min" | "$jsonb_set" | "$jsonb_strip_nulls" ? ColumnType
+  : Name extends (
+    "$column" | "$max" | "$min" | "$jsonb_set" | "$jsonb_strip_nulls"
+  ) ?
+    ColumnType
   : Name extends "$array_agg" | "$json_agg" | "$jsonb_agg" ? ColumnType[]
   : any;
 };
 
-type SelectedFunctionName<F> = F extends FunctionName ? F : Extract<keyof F, FunctionName>;
+type SelectedFunctionName<F> =
+  F extends FunctionName ? F : Extract<keyof F, FunctionName>;
 type SelectedFunctionArgs<F> = F[Extract<keyof F, FunctionName>];
 type SelectedColumnType<F, TD, SelectedKey> =
   F extends FunctionName ?

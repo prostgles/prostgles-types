@@ -1,6 +1,6 @@
 {
   "name": "prostgles-types",
-  "version": "4.0.330",
+  "version": "4.0.331",
   "description": "",
   "main": "dist/index_umd.js",
   "types": "dist/index.d.ts",

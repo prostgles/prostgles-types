@@ -1,3 +1,4 @@
+import { getCommonFunctionInputFields } from "./functionInput";
 import type { ClientServerFunction, ValidatedColumnInfo } from "./index";
 import type { JSONB } from "./JSONBSchemaValidation/JSONBSchema";
 
@@ -10,7 +11,7 @@ export const getActionFunctions = (
   },
 ): ActionFunction[] =>
   Object.entries(methods).flatMap(([methodName, method]) =>
-    Object.entries(method.input ?? {}).flatMap(([argName, lookup]) => {
+    Object.entries(getCommonFunctionInputFields(method.input ?? {})).flatMap(([argName, lookup]) => {
       if (
         typeof lookup === "string" ||
         (lookup.type !== "RowLookup" && lookup.type !== "ValueLookup") ||

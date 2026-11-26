@@ -1,4 +1,4 @@
-import { getObjectEntries, isObject, postgresToTsType, type JSONB, type TableSchema } from "..";
+import { getKeys, getObjectEntries, isObject, postgresToTsType, type JSONB, type TableSchema } from "..";
 import { getFieldTypeObj } from "./JSONBSchemaValidation";
 
 type ColOpts = { nullable?: boolean };
@@ -55,10 +55,12 @@ const getLookupTSType = (tables: TableSchema[], fieldType: JSONB.Lookup): string
 export const getJSONBTSTypes = (
   tables: TableSchema[],
   rawFieldType: JSONB.FieldType,
-  isOneOf = false,
+  options: boolean | { isOneOf?: boolean; strictUnions?: boolean } = {},
   innerLeading = "",
-  depth = 0,
 ): string => {
+  const { isOneOf, strictUnions } = typeof options === "boolean" ? { isOneOf: options } : options;
+  const nestedType = (field: JSONB.FieldType) =>
+    getJSONBTSTypes(tables, field, { isOneOf: true, strictUnions });
   const fieldType = getFieldTypeObj(rawFieldType);
   const nullType = fieldType.nullable ? `null | ` : "";
   if (typeof fieldType.type === "string" && fieldType.type.includes("Lookup")) {
@@ -94,7 +96,7 @@ export const getJSONBTSTypes = (
           const escapedKey = isValidIdentifier(key) ? key : JSON.stringify(key);
           return (
             `${spacing}${escapedKey}${fieldType.optional ? "?" : ""}: ` +
-            addSemicolonIfMissing(getJSONBTSTypes(tables, fieldType, true, undefined, depth + 1))
+            addSemicolonIfMissing(nestedType(fieldType))
           );
         })
         .join(" ") +
@@ -111,27 +113,41 @@ export const getJSONBTSTypes = (
   } else if (fieldType.enum) {
     return nullType + fieldType.enum.map((v) => valueToString(v)).join(" | ");
   } else if (fieldType.tuple) {
-    const tupleItems = fieldType.tuple
-      .map((item) => getJSONBTSTypes(tables, item, true, undefined, depth + 1))
-      .join(", ");
+    const tupleItems = fieldType.tuple.map(nestedType).join(", ");
 
     return `${nullType}[${tupleItems}]`;
   } else if (fieldType.oneOf || fieldType.oneOfType) {
-    const oneOf = fieldType.oneOf || fieldType.oneOfType.map((type) => ({ type }));
+    const members = fieldType.oneOf || fieldType.oneOfType.map((type) => ({ type }));
+    const keys = new Set<string>();
+    if (strictUnions) {
+      for (const member of members) {
+        const { type } = getFieldTypeObj(member);
+        if (isObject(type)) getKeys(type).forEach((key) => keys.add(key));
+      }
+    }
     return (
       (fieldType.nullable ? `\n${innerLeading} | null` : "") +
-      oneOf
-        .map((v) => `\n${innerLeading} | ` + getJSONBTSTypes(tables, v, true, undefined, depth + 1))
+      members
+        .map((member) => {
+          const memberType = `\n${innerLeading} | ${nestedType(member)}`;
+          if (!keys.size) return memberType;
+          const { type } = getFieldTypeObj(member);
+          if (!isObject(type)) return memberType;
+          const excluded = [...keys].filter((key) => !Object.hasOwn(type, key));
+          return excluded.length ?
+              `${memberType} & { ${excluded.map((key) => `${JSON.stringify(key)}?: never`).join("; ")} }`
+            : memberType;
+        })
         .join("")
     );
   } else if (fieldType.arrayOf || fieldType.arrayOfType) {
     const arrayOf = fieldType.arrayOf || { type: fieldType.arrayOfType };
-    return `${fieldType.nullable ? `null | ` : ""} ( ${getJSONBTSTypes(tables, arrayOf, true, undefined, depth + 1)} )[]`;
+    return `${fieldType.nullable ? `null | ` : ""} ( ${nestedType(arrayOf)} )[]`;
   } else if (fieldType.record) {
     const { keysEnum, values, partial } = fieldType.record;
     // TODO: ensure props with undefined values are not allowed in the TS type (strict union)
     const getRecord = (v: string) => (partial ? `Partial<Record<${v}>>` : `Record<${v}>`);
-    return `${fieldType.nullable ? `null |` : ""} ${getRecord(`${keysEnum?.map((v) => valueToString(v)).join(" | ") ?? "string"}, ${!values ? "any" : getJSONBTSTypes(tables, values, true, undefined, depth + 1)}`)}`;
+    return `${fieldType.nullable ? `null |` : ""} ${getRecord(`${keysEnum?.map((v) => valueToString(v)).join(" | ") ?? "string"}, ${!values ? "any" : nestedType(values)}`)}`;
   } else throw "Unexpected getSchemaTSTypes: " + JSON.stringify({ fieldType }, null, 2);
 };
 

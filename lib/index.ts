@@ -7,7 +7,10 @@ import { includes } from "./utilFuncs/includes";
 import type { SyncTableInfo } from "./WAL";
 import type { InsertColumnsWithReferences } from "./insertTypes";
 import type { FunctionName, GetFunctionReturnType } from "./selectFunctions";
+import type { FunctionInput } from "./functionInput";
+export * from "./functionInput";
 import type { JobControlBinding } from "./jobControl";
+export { getJobControlInputOperations } from "./jobControl";
 export type {
   JobStatus,
   JobControlOperation,
@@ -1627,12 +1630,8 @@ export type TableSchema = {
   };
 };
 export type MaybePromise<T> = T | Promise<T>;
-export type JSONBObjectTypeIfDefined<
-  T extends Record<string, JSONB.FieldType> | undefined,
-> = T extends Record<string, JSONB.FieldType> ? JSONB.GetObjectType<T> : never;
-
 type ClientServerFunctionMetadata = {
-  input?: Record<string, JSONB.FieldType>;
+  input?: FunctionInput;
   output?: JSONB.FieldType;
   description?: string;
   jobControl?: JobControlBinding;

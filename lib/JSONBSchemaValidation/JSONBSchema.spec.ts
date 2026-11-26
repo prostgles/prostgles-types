@@ -475,6 +475,17 @@ describe("jsonb to json schema conversion", async () => {
     );
   });
 
+  void test("strict union rendering is opt-in and applies to nested object alternatives", () => {
+    const schema: JSONB.FieldType = {
+      arrayOf: { oneOf: ["boolean", { type: { id: "number" } }, { type: { slug: "string" } }] },
+    };
+    assert(!getJSONBTSTypes([], schema).includes("?: never"));
+    const strict = getJSONBTSTypes([], schema, { strictUnions: true });
+    assert(strict.includes('"slug"?: never'));
+    assert(strict.includes('"id"?: never'));
+    assert(strict.includes("| boolean"));
+  });
+
   test("instantiation limits", () => {
     const deeplyNestedSchema = {
       type: {

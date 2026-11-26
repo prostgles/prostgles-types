@@ -403,14 +403,13 @@ export namespace JSONB {
       : never
     : any;
 
-  type GetWNullType<T, Schema extends DBSchema | void> =
-    T extends { nullable: true } ? null | ResolveField<T, Schema>
-    : ResolveField<T, Schema>;
-
   export type GetType<
     T extends FieldType | Omit<FieldTypeObj, "optional">,
     Schema extends DBSchema | void = void,
-  > = T extends DataType ? PrimitiveValue<T> : GetWNullType<T, Schema>;
+  > =
+    T extends DataType ? PrimitiveValue<T>
+    : T extends { nullable: true } ? null | ResolveField<T, Schema>
+    : ResolveField<T, Schema>;
 
   type IsOptional<F extends FieldType> = F extends { optional: true } ? true : false;
 

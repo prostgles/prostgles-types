@@ -1,3 +1,4 @@
+import type { JSONB } from "./JSONBSchemaValidation/JSONBSchema";
 import type { JobRecord } from "./jobTable";
 
 export type JobStatus = JobRecord["status"];
@@ -19,7 +20,9 @@ type ManualJobControl = {
 export type JobControlFunctionMetadata = (RowJobControl | ManualJobControl) & {
   jobName: string;
   /** A string fixes the operation. An array requires the caller to select one. */
-  operation: JobControlOperation | readonly JobControlOperation[];
+  operation:
+    | JobControlOperation
+    | readonly [JobControlOperation, ...JobControlOperation[]];
 };
 
 /** Row controls follow a job ID column. Manual controls target a run directly. */
@@ -31,3 +34,12 @@ export type JobControlBinding = {
   | (RowJobControl & { rowJobIdColumn: string })
   | (ManualJobControl & { rowJobIdColumn?: never })
 );
+
+export const getJobControlInputOperations = (
+  fields: JSONB.ObjectType["type"],
+): readonly unknown[] | undefined => {
+  const operation = fields.operation;
+  return operation && typeof operation !== "string" && !operation.optional ?
+      operation.enum
+    : undefined;
+};

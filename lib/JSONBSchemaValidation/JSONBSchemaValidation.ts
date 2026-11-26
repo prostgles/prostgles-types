@@ -1,4 +1,5 @@
 import type { TableHandler } from "../index";
+import { getFunctionInputVariants, type FunctionInput } from "../functionInput";
 import { getKeys, isDefined, isEmpty, isObject } from "../util";
 import { includes } from "../utilFuncs/includes";
 import type { JSONB, PrimitiveTypeMap } from "./JSONBSchema";
@@ -257,10 +258,10 @@ const getPropertyValidationError = (
       return `${tuplePath} is of invalid tuple length. Expecting ${tuple.length} elements but got ${value.length}`;
     }
 
-    for (let index = 0; index < tuple.length; index++) {
+    for (const [index, elementSchema] of tuple.entries()) {
       const elementError = getPropertyValidationError(
         value[index],
-        tuple[index]!,
+        elementSchema,
         [...path, `${index}`],
         opts,
         pendingLookupValidations,
@@ -319,7 +320,7 @@ const getPropertyValidationError = (
     }
     let firstError: string | undefined;
     const validMember = oneOf.find((member) => {
-      const pendingLookupCount = pendingLookupValidations?.length;
+      const pendingLookupCount = pendingLookupValidations?.length ?? 0;
       const error = getPropertyValidationError(
         value,
         member,
@@ -327,8 +328,8 @@ const getPropertyValidationError = (
         opts,
         pendingLookupValidations,
       );
-      if (error !== undefined && pendingLookupCount !== undefined) {
-        pendingLookupValidations!.length = pendingLookupCount;
+      if (error !== undefined && pendingLookupValidations) {
+        pendingLookupValidations.length = pendingLookupCount;
       }
       firstError ??= error;
       return error === undefined;
@@ -500,11 +501,8 @@ const getLookupValidationError = async (
       if (!tableHandler) {
         return `${valuePath} references an unknown table ${JSON.stringify(reference.table)}`;
       }
-      if (typeof tableHandler.getColumns !== "function") {
-        throw new Error(
-          `Cannot validate ColumnLookup: table ${JSON.stringify(reference.table)} does not expose getColumns`,
-        );
-      }
+      if (!tableHandler.getColumns)
+        return `${valuePath} cannot read columns of ${JSON.stringify(reference.table)}`;
       const columns = await tableHandler.getColumns();
       const column = columns.find(({ name }) => name === reference.column);
       if (
@@ -521,11 +519,8 @@ const getLookupValidationError = async (
     const dataLookup = schema as JSONB.RowLookup | JSONB.ValueLookup;
     const tableHandler = db.get(dataLookup.table);
 
-    if (!tableHandler) {
-      throw new Error(
-        `Cannot validate ${dataLookup.type}: table ${JSON.stringify(dataLookup.table)} does not expose findOne`,
-      );
-    }
+    if (!tableHandler?.findOne)
+      return `${valuePath} cannot read rows of ${JSON.stringify(dataLookup.table)}`;
 
     const isRowLookup =
       dataLookup.type === "RowLookup" || dataLookup.type === "RowLookup[]";
@@ -545,7 +540,7 @@ const getLookupValidationError = async (
       dataLookup.filter ?
         { $and: [dataLookup.filter, valueFilter] }
       : valueFilter;
-    const row = await tableHandler?.findOne?.(filter);
+    const row = await tableHandler.findOne(filter);
     if (!row) {
       return `${valuePath} does not reference an existing row in ${JSON.stringify(dataLookup.table)}`;
     }
@@ -569,21 +564,71 @@ export const getJSONBSchemaValidationErrorAsync = async <
   | { error: string; data?: undefined }
   | { error?: undefined; data: JSONB.GetType<S> }
 > => {
+  const error = await getValidationErrorWithLookups(
+    schema,
+    obj,
+    dbHandlerMap,
+    opts,
+  );
+  if (error) return { error };
+  return { data: obj as JSONB.GetType<S> };
+};
+
+/** Return the fields of the first variant whose structure and lookups both match. */
+export const getValidatedFunctionInputFields = async (
+  input: FunctionInput,
+  value: unknown,
+  db: DBHandler,
+  resolveFields: (
+    fields: JSONB.ObjectType["type"],
+  ) => JSONB.ObjectType["type"] = (fields) => fields,
+) => {
+  const errors: string[] = [];
+  let firstVariantFailure: unknown;
+  for (const fields of getFunctionInputVariants(input)) {
+    try {
+      const error = await getValidationErrorWithLookups(
+        { type: resolveFields(fields) },
+        value,
+        db,
+      );
+      if (!error) return fields;
+      errors.push(error.startsWith(" ") ? "input" + error : error);
+    } catch (cause) {
+      firstVariantFailure ??= cause;
+    }
+  }
+  throw (
+    firstVariantFailure ??
+    (errors.join(" or ") || "Function input has no variants")
+  );
+};
+
+const getValidationErrorWithLookups = (
+  schema: JSONB.FieldType,
+  value: unknown,
+  db: DBHandler,
+  opts?: ValidationOptions,
+) => {
   const pendingLookupValidations: PendingLookupValidation[] = [];
   const error = getPropertyValidationError(
-    obj,
+    value,
     schema,
     undefined,
     opts,
     pendingLookupValidations,
   );
-  if (error) return { error };
+  return error ?? validateLookups(pendingLookupValidations, db);
+};
 
-  for (const lookup of pendingLookupValidations) {
-    const lookupError = await getLookupValidationError(lookup, dbHandlerMap);
-    if (lookupError) return { error: lookupError };
+const validateLookups = async (
+  lookups: PendingLookupValidation[],
+  db: DBHandler,
+) => {
+  for (const lookup of lookups) {
+    const error = await getLookupValidationError(lookup, db);
+    if (error) return error;
   }
-  return { data: obj as JSONB.GetType<S> };
 };
 
 export const validateJSONBObjectAgainstSchema = <
